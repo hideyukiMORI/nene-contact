@@ -20,6 +20,9 @@ use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
 use NeneContact\Organization\OrganizationRouteRegistrar;
 use NeneContact\Organization\OrganizationServiceProvider;
 use NeneContact\Organization\OrganizationSlugConflictExceptionHandler;
+use NeneContact\Submission\SubmissionNotFoundExceptionHandler;
+use NeneContact\Submission\SubmissionRouteRegistrar;
+use NeneContact\Submission\SubmissionServiceProvider;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -50,6 +53,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
         $builder->addProvider(new AuthServiceProvider());
         $builder->addProvider(new OrganizationServiceProvider());
         $builder->addProvider(new ContactFormServiceProvider());
+        $builder->addProvider(new SubmissionServiceProvider());
 
         $builder
             ->set(
@@ -58,6 +62,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $auth = $container->get(AuthRouteRegistrar::class);
                     $organization = $container->get(OrganizationRouteRegistrar::class);
                     $contactForm = $container->get(ContactFormRouteRegistrar::class);
+                    $submission = $container->get(SubmissionRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
                         throw new LogicException('Auth route registrar service is invalid.');
@@ -71,10 +76,15 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Contact form route registrar service is invalid.');
                     }
 
+                    if (!$submission instanceof SubmissionRouteRegistrar) {
+                        throw new LogicException('Submission route registrar service is invalid.');
+                    }
+
                     return [
                         $auth,
                         $organization,
                         $contactForm,
+                        $submission,
                     ];
                 },
             )
@@ -85,8 +95,9 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $organizationNotFound = $container->get(OrganizationNotFoundExceptionHandler::class);
                     $organizationSlugConflict = $container->get(OrganizationSlugConflictExceptionHandler::class);
                     $contactFormNotFound = $container->get(ContactFormNotFoundExceptionHandler::class);
+                    $submissionNotFound = $container->get(SubmissionNotFoundExceptionHandler::class);
 
-                    foreach ([$invalidCredentials, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound] as $handler) {
+                    foreach ([$invalidCredentials, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
@@ -97,6 +108,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $organizationNotFound,
                         $organizationSlugConflict,
                         $contactFormNotFound,
+                        $submissionNotFound,
                     ];
                 },
             );
