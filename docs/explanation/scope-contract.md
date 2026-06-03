@@ -16,6 +16,10 @@ Read first: [ADR 0009](../adr/0009-separate-from-nene-concierge.md),
 > qualified leads to sibling apps — without sharing databases or becoming a CRM,
 > chatbot, or billing system.**
 
+**Compliance precedence.** Everything in GOAL/DO is delivered **within** the binding
+[`data-protection-compliance.md`](./data-protection-compliance.md) charter (APPI / Japan
+law only). Where any goal conflicts with the charter, **compliance wins** (ADR 0012).
+
 Concretely:
 
 1. Operator builds a **contact form** from field parts in admin.
@@ -47,6 +51,9 @@ Concretely:
 ---
 
 ## DON'T — Contact must never do these
+
+These are **permanent product boundaries, not a deferred backlog.** A DON'T row never
+becomes a feature; the capability lives in the named sibling and is reached over HTTP only.
 
 | # | Contact must NOT | Belongs to |
 | --- | --- | --- |
@@ -94,10 +101,32 @@ Details: [`../integrations/sibling-products.md`](../integrations/sibling-product
 
 ---
 
+## Definition of Done & Professional Acceptance Standard
+
+NeNe Contact is "done right" — at the bar a privacy/legal professional (士業) would
+accept — when **all** of the following hold. This is the standing acceptance contract.
+
+| # | Standard |
+| --- | --- |
+| A1 | A privacy/legal professional reviewing the system finds **zero deviations** from [`data-protection-compliance.md`](./data-protection-compliance.md). |
+| A2 | Every DON'T row above is structurally impossible in Contact, not merely unimplemented. |
+| A3 | Every public endpoint meets the security boundary in [ADR 0010](../adr/0010-embed-public-api-security.md) (allowed-origins, rate limit, honeypot, body cap, no PII in URLs, CORS not `*`). |
+| A4 | Prohibited fields (My Number, raw card numbers) cannot be configured; 要配慮個人情報 is never a silent default (charter §8). |
+| A5 | Admin mutations and PII view/export are audit-logged ([ADR 0013](../adr/0013-audit-logging.md)); deletion leaves an audit trail. |
+| A6 | Locales are `ja` / `en` only ([ADR 0011](../adr/0011-bilingual-japanese-english-scope.md)); no general i18n. |
+| A7 | Siblings are reached over HTTP only; no shared database ([ADR 0002](../adr/0002-separate-from-sibling-products.md)). |
+| A8 | Any deviation from a binding rule is recorded in an **ADR** — and, because Contact handles **no money**, requires **no tax/accounting/legal sign-off gate** to proceed ([ADR 0012](../adr/0012-data-protection-compliance-binding.md)). |
+
+A8 is the deliberate difference from NeNe Invoice: same professional-review-ready bar,
+but no blocking external sign-off, because there is no money and no statutory tax duty.
+
+---
+
 ## Related
 
 - [`privacy-and-spam-compliance.md`](./privacy-and-spam-compliance.md)
 - [`embed-widget-spec.md`](./embed-widget-spec.md)
-- ADR 0002, ADR 0006, ADR 0009, ADR 0010, ADR 0011
+- [`data-protection-compliance.md`](./data-protection-compliance.md) (binding charter)
+- ADR 0002, ADR 0006, ADR 0009, ADR 0010, ADR 0011, ADR 0012, ADR 0013
 
 Last updated: 2026-06-04

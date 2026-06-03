@@ -36,6 +36,7 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 - **Notifications** — email, Slack, Chatwork; signed outbound webhooks
 - **Sibling handoff** — HTTP only to Deal / Invoice / Vault (Phase 3+); no shared DB
 - **OpenAPI + MCP** — documented HTTP boundaries for humans and AI agents
+- **Compliant by design** — binding APPI/Japan-law charter, professional-review-ready; no money means no sign-off gate ([compliance charter](./docs/explanation/data-protection-compliance.md), [ADR 0012](./docs/adr/0012-data-protection-compliance-binding.md))
 
 ## Documentation (read first)
 
