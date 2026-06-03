@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace NeneContact\Http;
 
 use LogicException;
+use Nene2\Auth\LocalBearerTokenVerifier;
+use Nene2\Auth\TokenIssuerInterface;
+use Nene2\Auth\TokenVerifierInterface;
 use Nene2\Config\AppConfig;
 use Nene2\Config\ConfigLoader;
 use Nene2\Database\DatabaseConnectionFactoryInterface;
@@ -24,6 +27,8 @@ use Nene2\Http\RuntimeApplicationFactory;
 use Nene2\Log\MonologLoggerFactory;
 use Nene2\Log\RequestIdHolder;
 use NeneContact\ApplicationServiceProvider;
+use NeneContact\Auth\AdminApiAuthMiddleware;
+use NeneContact\Auth\CapabilityMiddleware;
 use NeneContact\Organization\OrganizationRepositoryInterface;
 use NeneContact\Organization\Resolution\CustomDomainResolutionStrategy;
 use NeneContact\Organization\Resolution\EnvResolutionStrategy;
@@ -177,6 +182,42 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
             )
             ->set(RequestIdHolder::class, static fn (ContainerInterface $container): RequestIdHolder => new RequestIdHolder())
             ->set(
+                LocalBearerTokenVerifier::class,
+                static function (ContainerInterface $container): LocalBearerTokenVerifier {
+                    $config = $container->get(AppConfig::class);
+
+                    if (!$config instanceof AppConfig) {
+                        throw new LogicException('Application config service is invalid.');
+                    }
+
+                    return new LocalBearerTokenVerifier($config->localJwtSecret ?? 'nene-contact-dev-secret');
+                },
+            )
+            ->set(
+                TokenVerifierInterface::class,
+                static function (ContainerInterface $container): TokenVerifierInterface {
+                    $verifier = $container->get(LocalBearerTokenVerifier::class);
+
+                    if (!$verifier instanceof TokenVerifierInterface) {
+                        throw new LogicException('Local bearer token verifier service is invalid.');
+                    }
+
+                    return $verifier;
+                },
+            )
+            ->set(
+                TokenIssuerInterface::class,
+                static function (ContainerInterface $container): TokenIssuerInterface {
+                    $issuer = $container->get(LocalBearerTokenVerifier::class);
+
+                    if (!$issuer instanceof TokenIssuerInterface) {
+                        throw new LogicException('Local bearer token issuer service is invalid.');
+                    }
+
+                    return $issuer;
+                },
+            )
+            ->set(
                 LoggerInterface::class,
                 static function (ContainerInterface $container): LoggerInterface {
                     $config = $container->get(AppConfig::class);
@@ -266,6 +307,15 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
 
                     $orgResolver = new OrgResolverMiddleware($orgIdHolder, $orgRepo, $problemDetails, $strategy);
 
+                    $tokenVerifier = $container->get(TokenVerifierInterface::class);
+
+                    if (!$tokenVerifier instanceof TokenVerifierInterface) {
+                        throw new LogicException('Token verifier service is invalid.');
+                    }
+
+                    $adminAuth = new AdminApiAuthMiddleware($problemDetails, $tokenVerifier);
+                    $capability = new CapabilityMiddleware($problemDetails);
+
                     return new RuntimeApplicationFactory(
                         responseFactory: $responseFactory,
                         streamFactory: $streamFactory,
@@ -273,7 +323,7 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         domainExceptionHandlers: $exceptionHandlers,
                         requestIdHolder: $requestIdHolder,
                         routeRegistrars: $routeRegistrars,
-                        authMiddleware: [$orgResolver],
+                        authMiddleware: [$orgResolver, $adminAuth, $capability],
                         debug: $config->debug,
                         requestMaxBodyBytes: 64 * 1024,
                         problemDetailsBaseUrl: $config->problemDetailsBaseUrl,
