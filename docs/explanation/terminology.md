@@ -230,6 +230,19 @@ Validation `errors[].field` = snake_case path / JSON pointer; `errors[].code` = 
 Localized strings (labels, `select` options, `consent_label`, notification templates) are
 objects keyed by `ja` / `en` only. No other locale code is a valid identifier.
 
+### Message catalog (UI strings — [`../development/i18n-message-catalog.md`](../development/i18n-message-catalog.md))
+
+| Term | Spelling | Notes |
+| --- | --- | --- |
+| Module | `shared/i18n` | `locales.ts`, `messages/{ja,en}.ts`, `translate.ts`, `i18n-context.tsx` |
+| Type | `SupportedLocale` | `'ja' \| 'en'`; `DEFAULT_LOCALE = 'ja'` (authoritative) |
+| Hook / fn | `useTranslation()` → `t`, `MessageKey` | `t('admin.submissions.title')` |
+| Storage key | `nene-locale` | persisted active locale |
+| Key namespaces | `common.*`, `admin.nav.*`, `admin.{feature}.*`, `embed.*` | stable; never rename a shipped key |
+
+UI chrome strings live in the catalog (`t(key)`); operator-authored content (labels,
+options, `consent_label`, templates) is per-locale **data**, not catalog.
+
 ---
 
 ## 14. Environment variables

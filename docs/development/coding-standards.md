@@ -18,6 +18,7 @@ and adds product-specific rules. **Compliance is mandatory.**
 | **Multi-tenancy (resolution, scoping, RBAC)** | [`multi-tenancy.md`](./multi-tenancy.md) |
 | **Audit logging (before/after, every op)** | [`audit-logging.md`](./audit-logging.md) |
 | **Frontend (admin SPA + embed widget)** | [`frontend-standards.md`](./frontend-standards.md) |
+| **i18n message catalog (all UI strings)** | [`i18n-message-catalog.md`](./i18n-message-catalog.md) |
 | **Reuse NENE2 framework objects** | [`nene2-compliance.md`](./nene2-compliance.md) |
 | **Terminology registry (canonical strings)** | [`../explanation/terminology.md`](../explanation/terminology.md) |
 | **Scope (DO/DON'T)** | [`../explanation/scope-contract.md`](../explanation/scope-contract.md) |

@@ -234,8 +234,15 @@ logged dev-only) · **Success**.
 
 ## H. i18n (ja + en only — ADR 0011)
 
-- `shared/i18n` with `SupportedLocale = 'ja' | 'en'`; **`ja` authoritative**, `en` partial
-  fallback. No hardcoded user-facing strings → `t('admin.submissions.title')`.
+Full spec: **[`i18n-message-catalog.md`](./i18n-message-catalog.md)** (binding).
+
+- `shared/i18n` with `SupportedLocale = 'ja' | 'en'`; **`ja` authoritative** (defines the
+  `MessageCatalog`), `en` is `Partial` and falls back to `ja`.
+- **Every** user-facing string comes from a per-locale catalog via `t('admin.submissions.title')`
+  — no hardcoded strings. Switching locale is instant (catalogs are in-bundle; `setLocale`
+  re-renders, persists `nene-locale`, sets `<html lang>` — no reload).
+- The embed widget resolves locale from `data-lang ∩ form.locales → default_locale` (not the
+  browser); chrome strings use `embed.*` keys.
 - Do not add a third locale without superseding ADR 0011.
 
 ---
