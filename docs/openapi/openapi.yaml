@@ -1,0 +1,634 @@
+openapi: 3.1.0
+info:
+  title: NeNe Contact API
+  version: 0.1.0
+  description: >
+    Embeddable contact forms, submission inbox, and notifications on NENE2.
+    Admin routes require a bearer JWT and are organization-scoped (ADR 0006/0014).
+    Public embed routes resolve the organization via public_form_key (ADR 0010).
+    Errors use RFC 9457 Problem Details (https://nene-contact.dev/problems/).
+servers:
+  - url: http://127.0.0.1:8900
+    description: Local development
+
+tags:
+  - name: System
+  - name: Auth
+  - name: Organization
+  - name: ContactForm
+  - name: NotificationChannel
+  - name: Submission
+  - name: Public
+
+security:
+  - bearerAuth: []
+
+paths:
+  /health:
+    get:
+      tags: [System]
+      operationId: getHealth
+      summary: Liveness probe
+      security: []
+      responses:
+        '200':
+          description: Service healthy
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Health' }
+
+  /admin/auth/login:
+    post:
+      tags: [Auth]
+      operationId: login
+      summary: Authenticate and receive a bearer JWT
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Authenticated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/organizations:
+    get:
+      tags: [Organization]
+      operationId: listOrganizations
+      summary: List organizations (superadmin)
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: Organization list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrganizationListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Organization]
+      operationId: createOrganization
+      summary: Create an organization (superadmin)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateOrganizationRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrganizationResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/organizations/{id}:
+    get:
+      tags: [Organization]
+      operationId: getOrganizationById
+      summary: Get an organization by id (superadmin)
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Organization
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrganizationResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /admin/contact-forms:
+    get:
+      tags: [ContactForm]
+      operationId: listContactForms
+      summary: List contact forms in the organization
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: Contact form list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactFormListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [ContactForm]
+      operationId: createContactForm
+      summary: Create a contact form
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateContactFormRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactFormResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/contact-forms/{id}:
+    get:
+      tags: [ContactForm]
+      operationId: getContactFormById
+      summary: Get a contact form by id
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Contact form
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactFormResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /admin/notification-channels:
+    get:
+      tags: [NotificationChannel]
+      operationId: listNotificationChannels
+      summary: List notification channels for a form
+      parameters:
+        - name: contact_form_id
+          in: query
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Channel list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationChannelListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+    post:
+      tags: [NotificationChannel]
+      operationId: createNotificationChannel
+      summary: Create a notification channel for a form
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateNotificationChannelRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationChannelResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/submissions:
+    get:
+      tags: [Submission]
+      operationId: listSubmissions
+      summary: List submissions in the organization
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: Submission list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /admin/submissions/export:
+    get:
+      tags: [Submission]
+      operationId: exportSubmissions
+      summary: Export submissions as CSV
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /admin/submissions/{id}:
+    get:
+      tags: [Submission]
+      operationId: getSubmissionById
+      summary: Get a submission by id
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Submission
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [Submission]
+      operationId: updateSubmissionStatus
+      summary: Update a submission's status
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateSubmissionStatusRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/submissions/{id}/notes:
+    get:
+      tags: [Submission]
+      operationId: listSubmissionNotes
+      summary: List notes on a submission
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Note list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionNoteListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Submission]
+      operationId: addSubmissionNote
+      summary: Add an operator note to a submission
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddSubmissionNoteRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionNoteResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /public/forms/{public_form_key}/schema:
+    get:
+      tags: [Public]
+      operationId: getPublicFormSchema
+      summary: Public form schema for the embed widget
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/PublicFormKeyPath' }
+      responses:
+        '200':
+          description: Form schema
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicFormSchema' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /public/forms/{public_form_key}/submissions:
+    post:
+      tags: [Public]
+      operationId: submitPublicForm
+      summary: Submit a contact form (embed widget)
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/PublicFormKeyPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              additionalProperties: true
+              description: Field name/value pairs matching the form schema.
+      responses:
+        '201':
+          description: Stored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmitAccepted' }
+        '204':
+          description: Accepted silently (honeypot tripped)
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  parameters:
+    IdPath:
+      name: id
+      in: path
+      required: true
+      schema: { type: integer }
+    PublicFormKeyPath:
+      name: public_form_key
+      in: path
+      required: true
+      schema: { type: string }
+    Limit:
+      name: limit
+      in: query
+      required: false
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    Offset:
+      name: offset
+      in: query
+      required: false
+      schema: { type: integer, minimum: 0, default: 0 }
+
+  responses:
+    Problem:
+      description: RFC 9457 Problem Details
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ProblemDetails' }
+    ValidationProblem:
+      description: Validation failed
+      content:
+        application/problem+json:
+          schema: { $ref: '#/components/schemas/ValidationProblemDetails' }
+
+  schemas:
+    Health:
+      type: object
+      properties:
+        status: { type: string, examples: [ok] }
+        service: { type: string }
+      required: [status]
+
+    ProblemDetails:
+      type: object
+      properties:
+        type: { type: string, format: uri }
+        title: { type: string }
+        status: { type: integer }
+        detail: { type: string }
+        instance: { type: string }
+      required: [type, title, status]
+
+    ValidationError:
+      type: object
+      properties:
+        field: { type: string }
+        message: { type: string }
+        code: { type: string }
+      required: [field, message, code]
+
+    ValidationProblemDetails:
+      allOf:
+        - { $ref: '#/components/schemas/ProblemDetails' }
+        - type: object
+          properties:
+            errors:
+              type: array
+              items: { $ref: '#/components/schemas/ValidationError' }
+
+    LocaleMap:
+      type: object
+      additionalProperties: { type: string }
+      description: Per-locale strings keyed by ja / en only (ADR 0011).
+
+    LoginRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string }
+      required: [email, password]
+
+    LoginResponse:
+      type: object
+      properties:
+        token: { type: string }
+        expires_at: { type: string, format: date-time }
+        email: { type: string }
+        role: { type: string, enum: [superadmin, admin, editor] }
+        org_id: { type: [integer, 'null'] }
+      required: [token, role]
+
+    OrganizationResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        slug: { type: string }
+        external_id: { type: [string, 'null'] }
+        custom_domain: { type: [string, 'null'] }
+        plan: { type: string }
+        is_active: { type: boolean }
+      required: [id, name, slug]
+
+    OrganizationListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/OrganizationResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
+
+    CreateOrganizationRequest:
+      type: object
+      properties:
+        name: { type: string }
+        slug: { type: string }
+        plan: { type: string, enum: [free, starter, pro, enterprise] }
+        external_id: { type: string }
+        custom_domain: { type: string }
+      required: [name, slug]
+
+    FormField:
+      type: object
+      properties:
+        id: { type: integer }
+        field_type: { type: string, enum: [text, email, textarea, select, checkbox, file, honeypot] }
+        name: { type: string }
+        label: { $ref: '#/components/schemas/LocaleMap' }
+        required: { type: boolean }
+        options: { type: [array, 'null'], items: { type: object, additionalProperties: true } }
+        sort_order: { type: integer }
+      required: [field_type, name, label]
+
+    ContactFormResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        public_form_key: { type: string }
+        default_locale: { type: string, enum: [ja, en] }
+        locales: { type: array, items: { type: string, enum: [ja, en] } }
+        allowed_origins: { type: array, items: { type: string } }
+        status: { type: string }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/FormField' }
+      required: [id, name, public_form_key, default_locale, locales, fields]
+
+    ContactFormListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ContactFormResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
+
+    CreateContactFormRequest:
+      type: object
+      properties:
+        name: { type: string }
+        default_locale: { type: string, enum: [ja, en] }
+        locales: { type: array, items: { type: string, enum: [ja, en] } }
+        allowed_origins: { type: array, items: { type: string } }
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              field_type: { type: string, enum: [text, email, textarea, select, checkbox, file, honeypot] }
+              name: { type: string }
+              label: { $ref: '#/components/schemas/LocaleMap' }
+              required: { type: boolean }
+              options: { type: array, items: { type: object, additionalProperties: true } }
+            required: [field_type, name, label]
+      required: [name, default_locale, locales, fields]
+
+    PublicFormSchema:
+      type: object
+      properties:
+        public_form_key: { type: string }
+        name: { type: string }
+        default_locale: { type: string, enum: [ja, en] }
+        locales: { type: array, items: { type: string, enum: [ja, en] } }
+        fields:
+          type: array
+          items: { $ref: '#/components/schemas/FormField' }
+      required: [public_form_key, name, default_locale, locales, fields]
+
+    SubmitAccepted:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { type: string }
+      required: [id, status]
+
+    SubmissionResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        contact_form_id: { type: integer }
+        status: { type: string, enum: [open, in_progress, resolved, spam] }
+        field_values: { type: object, additionalProperties: true }
+        submitted_at: { type: [string, 'null'] }
+      required: [id, contact_form_id, status]
+
+    SubmissionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubmissionResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
+
+    UpdateSubmissionStatusRequest:
+      type: object
+      properties:
+        status: { type: string, enum: [open, in_progress, resolved, spam] }
+      required: [status]
+
+    SubmissionNoteResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        submission_id: { type: integer }
+        author_user_id: { type: [integer, 'null'] }
+        body: { type: string }
+        created_at: { type: [string, 'null'] }
+      required: [id, submission_id, body]
+
+    SubmissionNoteListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubmissionNoteResponse' }
+
+    AddSubmissionNoteRequest:
+      type: object
+      properties:
+        body: { type: string }
+      required: [body]
+
+    NotificationChannelResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        contact_form_id: { type: integer }
+        channel_type: { type: string, enum: [email, slack, chatwork] }
+        is_enabled: { type: boolean }
+      required: [id, contact_form_id, channel_type]
+
+    NotificationChannelListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/NotificationChannelResponse' }
+
+    CreateNotificationChannelRequest:
+      type: object
+      properties:
+        contact_form_id: { type: integer }
+        channel_type: { type: string, enum: [email, slack, chatwork] }
+        config: { type: object, additionalProperties: true }
+        is_enabled: { type: boolean }
+      required: [contact_form_id, channel_type, config]

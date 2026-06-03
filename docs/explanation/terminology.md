@@ -269,6 +269,17 @@ Pattern: **`{verb}Contact{Resource}`** — e.g. `listContactSubmissions`,
 
 ---
 
+## 16. OpenAPI operationIds (contract — `docs/openapi/openapi.yaml`)
+
+camelCase `{verb}{Resource}`, stable (never renamed after release). Registered:
+`getHealth`, `login`, `listOrganizations`, `createOrganization`, `getOrganizationById`,
+`listContactForms`, `createContactForm`, `getContactFormById`, `listNotificationChannels`,
+`createNotificationChannel`, `listSubmissions`, `exportSubmissions`, `getSubmissionById`,
+`updateSubmissionStatus`, `listSubmissionNotes`, `addSubmissionNote`, `getPublicFormSchema`,
+`submitPublicForm`. Validated by `composer openapi`.
+
+---
+
 ## Change procedure & enforcement
 
 - Adding/renaming any identifier **MUST** update this file in the same PR; product concepts

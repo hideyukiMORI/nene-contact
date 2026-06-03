@@ -49,6 +49,7 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 | **Terminology registry (binding)** | [`docs/explanation/terminology.md`](./docs/explanation/terminology.md) |
 | **Sibling integrations** | [`docs/integrations/sibling-products.md`](./docs/integrations/sibling-products.md) |
 | **Coding standards (binding)** | [`docs/development/coding-standards.md`](./docs/development/coding-standards.md) |
+| **API contract (OpenAPI 3.1)** | [`docs/openapi/openapi.yaml`](./docs/openapi/openapi.yaml) |
 | **Agents** | [`AGENTS.md`](./AGENTS.md) |
 | **Roadmap** | [`docs/roadmap.md`](./docs/roadmap.md) |
 
