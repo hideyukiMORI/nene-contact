@@ -3,6 +3,11 @@
 **Status: binding for engineering.** This is not legal advice. Operators remain
 responsible for privacy notices, lawful basis, and retention policies on their sites.
 
+> **Layering.** The legal source of truth is
+> [`data-protection-compliance.md`](./data-protection-compliance.md) (charter, ADR 0012).
+> This document is the **operational engineering layer** — the concrete DO/DON'T rows the
+> charter is enforced through. If the two ever conflict, the charter wins.
+
 ---
 
 ## Personal data Contact processes

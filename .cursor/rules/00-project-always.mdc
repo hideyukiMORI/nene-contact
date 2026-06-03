@@ -7,7 +7,7 @@ alwaysApply: true
 
 - Canonical docs: `README.md`, `AGENTS.md`, `docs/explanation/scope-contract.md`, `docs/explanation/embed-widget-spec.md`, `docs/explanation/privacy-and-spam-compliance.md`.
 - **NeNe Contact = embeddable contact forms only** (ADR 0009). No chat scenarios, billing, reconciliation, or CMS.
-- Privacy/spam/compliance changes: follow `docs/explanation/privacy-and-spam-compliance.md` and `docs/review/compliance.md`.
+- **Compliance is binding (non-negotiable):** `docs/explanation/data-protection-compliance.md` (charter, APPI / Japan law only). Operational layer: `docs/explanation/privacy-and-spam-compliance.md`; self-review: `docs/review/compliance.md`. Deviations require an ADR — no external 士業 sign-off gate (no money), self-authority per ADR 0012.
 - Issue-driven; **repository docs and commits in English only** (ADR 0008); no secrets in git.
 - **Product locales: `ja` / `en` only** (ADR 0011) — bilingual, not general multilingual; no third locale without a superseding ADR.
 - **Term registry (binding): `docs/explanation/terminology.md`** — verify every identifier before use. Typos block merge.
