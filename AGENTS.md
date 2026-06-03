@@ -26,7 +26,9 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 
 ## Operating Rules
 
-- Issue-driven; no direct commits to `main`
+- **One task = one Issue = one PR (MANDATORY)** — create a dedicated Issue before any edit; split multi-part work into separate Issues
+- **Auto-merge on completion (MANDATORY)** — ready PRs are merged automatically (`gh pr merge --merge --delete-branch`); no manual approval gate (standing maintainer policy)
+- Issue-driven; **never commit or push directly to `main`**
 - **Every identifier** must match `docs/explanation/terminology.md` before use
 - Do **not** add chat scenario engines — **`nene-concierge`**
 - Do **not** add quotes, invoices, reconciliation, bank CSV, or document archive

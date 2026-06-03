@@ -13,12 +13,14 @@ NeNe Contact is built through small, Issue-driven changes.
 | Workflow | [`docs/workflow.md`](workflow.md) |
 | Agents | [`AGENTS.md`](../AGENTS.md) |
 
-## Collaboration Policy
+## Collaboration Policy (binding)
 
-1. Create or reuse a GitHub Issue **before** editing.
-2. Branch from `main` as `type/issue-number-summary`.
+1. **One task = one Issue.** Create a dedicated GitHub Issue **before** editing; split
+   multi-part work into separate Issues. No Issue, no edit.
+2. Branch from `main` as `type/issue-number-summary`. **Never push directly to `main`.**
 3. Implement, verify (`composer check` when applicable), commit with `(#issue)`.
-4. Push, open PR with `Closes #number`, merge after checks — **do not push directly to `main`**.
+4. Push, open PR with `Closes #number`, then **merge automatically on completion**
+   (`gh pr merge --merge --delete-branch`) — standing maintainer policy, no manual gate.
 
 ## Secrets
 
