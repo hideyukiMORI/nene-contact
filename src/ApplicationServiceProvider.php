@@ -20,6 +20,7 @@ use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
 use NeneContact\Organization\OrganizationRouteRegistrar;
 use NeneContact\Organization\OrganizationServiceProvider;
 use NeneContact\Organization\OrganizationSlugConflictExceptionHandler;
+use NeneContact\RateLimit\RateLimitServiceProvider;
 use NeneContact\Submission\SubmissionNotFoundExceptionHandler;
 use NeneContact\Submission\SubmissionRouteRegistrar;
 use NeneContact\Submission\SubmissionServiceProvider;
@@ -49,6 +50,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
             },
         );
 
+        $builder->addProvider(new RateLimitServiceProvider());
         $builder->addProvider(new AuditServiceProvider());
         $builder->addProvider(new AuthServiceProvider());
         $builder->addProvider(new OrganizationServiceProvider());
