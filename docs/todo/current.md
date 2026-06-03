@@ -8,15 +8,16 @@
 - [x] Runtime scaffold — NENE2 app, `GET /health`, composer, tooling, Docker 89xx (#20 → #21)
 - [x] Multi-tenant **Organization** domain + DB + migrations (#22 → #23)
 - [x] Tenant **resolution** middleware + strategies (ADR 0014) (#24 → #25)
-- [ ] Auth: JWT login + `BearerTokenMiddleware` + `Role`/`Capability` RBAC (ADR 0006)
-- [ ] User domain + organization-scoped user management
+- [x] Auth: JWT login + `Role`/`Capability` RBAC + User domain (ADR 0006) (#28 → #29)
+- [ ] Organization-scoped user management (admin CRUD; bootstrap via `tools/create-user.php` for now)
 - [ ] ContactForm + FormField domain (admin CRUD)
 - [ ] Public embed: schema + submit endpoints (org via `public_form_key`, ADR 0010)
 - [ ] Submission inbox + AuditRecorder (ADR 0013)
 - [ ] OpenAPI 3.1 baseline + `composer openapi`
 
-Verified locally: `composer check` green; `GET /health` 200; `/admin/organizations`
-CRUD (201/409/422/200/404) on SQLite; resolution active on non-bypass routes.
+Verified locally: `composer check` green (16 tests); `GET /health` 200; `/admin/organizations`
+CRUD (201/409/422/200/404) on SQLite; tenant resolution active on non-bypass routes;
+JWT login + RBAC (401 no-token / 200 superadmin / 403 editor-forbidden).
 
 ## Phase 0 checklist
 
@@ -29,8 +30,8 @@ CRUD (201/409/422/200/404) on SQLite; resolution active on non-bypass routes.
 
 ## Next up
 
-- [ ] Auth (JWT) + Role/Capability RBAC — mirror nene-records `src/Auth/`
-- [ ] ContactForm/FormField + Submission domains
+- [ ] ContactForm/FormField + Submission domains (org-scoped; AuditRecorder)
+- [ ] Public embed: schema + submit endpoints (org via `public_form_key`)
 - [ ] OpenAPI 3.1 baseline
 
 ## Handoff notes
