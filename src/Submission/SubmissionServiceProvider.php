@@ -1,0 +1,217 @@
+<?php
+
+declare(strict_types=1);
+
+namespace NeneContact\Submission;
+
+use LogicException;
+use Nene2\Database\DatabaseQueryExecutorInterface;
+use Nene2\DependencyInjection\ContainerBuilder;
+use Nene2\DependencyInjection\ServiceProviderInterface;
+use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\JsonResponseFactory;
+use Nene2\Http\RequestScopedHolder;
+use NeneContact\ApplicationServiceProvider;
+use NeneContact\Audit\AuditRecorderInterface;
+use Psr\Container\ContainerInterface;
+
+final readonly class SubmissionServiceProvider implements ServiceProviderInterface
+{
+    public function register(ContainerBuilder $builder): void
+    {
+        $builder
+            ->set(
+                SubmissionRepositoryInterface::class,
+                static function (ContainerInterface $c): SubmissionRepositoryInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new PdoSubmissionRepository($query, $orgId);
+                },
+            )
+            ->set(
+                PublicFormReaderInterface::class,
+                static function (ContainerInterface $c): PublicFormReaderInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    return new PdoPublicFormReader($query);
+                },
+            )
+            ->set(
+                SubmitPublicFormUseCaseInterface::class,
+                static function (ContainerInterface $c): SubmitPublicFormUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new SubmitPublicFormUseCase($repo, $audit);
+                },
+            )
+            ->set(
+                ListSubmissionsUseCaseInterface::class,
+                static function (ContainerInterface $c): ListSubmissionsUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    return new ListSubmissionsUseCase($repo);
+                },
+            )
+            ->set(
+                GetSubmissionByIdUseCaseInterface::class,
+                static function (ContainerInterface $c): GetSubmissionByIdUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    return new GetSubmissionByIdUseCase($repo);
+                },
+            )
+            ->set(
+                GetPublicFormSchemaHandler::class,
+                static function (ContainerInterface $c): GetPublicFormSchemaHandler {
+                    $reader = $c->get(PublicFormReaderInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+                    $pd = $c->get(ProblemDetailsResponseFactory::class);
+
+                    if (!$reader instanceof PublicFormReaderInterface) {
+                        throw new LogicException('Public form reader service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    if (!$pd instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    return new GetPublicFormSchemaHandler($reader, $json, $pd);
+                },
+            )
+            ->set(
+                SubmitPublicFormHandler::class,
+                static function (ContainerInterface $c): SubmitPublicFormHandler {
+                    $reader = $c->get(PublicFormReaderInterface::class);
+                    $uc = $c->get(SubmitPublicFormUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+                    $pd = $c->get(ProblemDetailsResponseFactory::class);
+
+                    if (!$reader instanceof PublicFormReaderInterface) {
+                        throw new LogicException('Public form reader service is invalid.');
+                    }
+
+                    if (!$uc instanceof SubmitPublicFormUseCaseInterface) {
+                        throw new LogicException('Submit public form use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    if (!$pd instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    return new SubmitPublicFormHandler($reader, $uc, $json, $pd);
+                },
+            )
+            ->set(
+                ListSubmissionsHandler::class,
+                static function (ContainerInterface $c): ListSubmissionsHandler {
+                    $uc = $c->get(ListSubmissionsUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof ListSubmissionsUseCaseInterface) {
+                        throw new LogicException('ListSubmissions use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new ListSubmissionsHandler($uc, $json);
+                },
+            )
+            ->set(
+                GetSubmissionByIdHandler::class,
+                static function (ContainerInterface $c): GetSubmissionByIdHandler {
+                    $uc = $c->get(GetSubmissionByIdUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof GetSubmissionByIdUseCaseInterface) {
+                        throw new LogicException('GetSubmissionById use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new GetSubmissionByIdHandler($uc, $json);
+                },
+            )
+            ->set(
+                SubmissionNotFoundExceptionHandler::class,
+                static function (ContainerInterface $c): SubmissionNotFoundExceptionHandler {
+                    $pd = $c->get(ProblemDetailsResponseFactory::class);
+
+                    if (!$pd instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    return new SubmissionNotFoundExceptionHandler($pd);
+                },
+            )
+            ->set(
+                SubmissionRouteRegistrar::class,
+                static function (ContainerInterface $c): SubmissionRouteRegistrar {
+                    $schema = $c->get(GetPublicFormSchemaHandler::class);
+                    $submit = $c->get(SubmitPublicFormHandler::class);
+                    $list = $c->get(ListSubmissionsHandler::class);
+                    $get = $c->get(GetSubmissionByIdHandler::class);
+
+                    if (!$schema instanceof GetPublicFormSchemaHandler) {
+                        throw new LogicException('Schema handler service is invalid.');
+                    }
+
+                    if (!$submit instanceof SubmitPublicFormHandler) {
+                        throw new LogicException('Submit handler service is invalid.');
+                    }
+
+                    if (!$list instanceof ListSubmissionsHandler) {
+                        throw new LogicException('List submissions handler service is invalid.');
+                    }
+
+                    if (!$get instanceof GetSubmissionByIdHandler) {
+                        throw new LogicException('Get submission handler service is invalid.');
+                    }
+
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get);
+                },
+            );
+    }
+}
