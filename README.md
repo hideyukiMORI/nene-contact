@@ -29,6 +29,7 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 
 ## Goals
 
+- **Bilingual (ja / en)** — forms, admin, and notifications in Japanese and English only; Japan-tuned, not general multilingual ([ADR 0011](./docs/adr/0011-bilingual-japanese-english-scope.md))
 - **Composable forms** — text, email, select, textarea, file (bounded), honeypot
 - **Embed anywhere** — `<script src="…/embed.js" data-form="…">` with trigger modes
 - **Operator inbox** — list, status, notes, export; multi-tenant from day one

@@ -10,6 +10,7 @@ Functional requirements derived from the scope contract. Implementation tracking
 - [ ] Submission inbox (list, detail, status, operator notes)
 - [ ] Notification: email + one of Slack / Chatwork
 - [ ] Allowed origins per form; rate limiting on public POST
+- [ ] Bilingual `ja` / `en` only — per-form `locales[]` + `default_locale`, embed `data-lang` resolution (ADR 0011)
 - [ ] OpenAPI 3.1 + `composer openapi` gate
 - [ ] MCP catalog: read tools for forms and submissions
 - [ ] Audit log on admin mutations
@@ -29,10 +30,12 @@ Functional requirements derived from the scope contract. Implementation tracking
 - Invoice PDF, payment, reconciliation, bank import
 - Records entity authoring
 - Vault retention logic (only HTTP handoff of bytes)
+- Locales beyond `ja` / `en` or a general i18n framework (ADR 0011)
 
 ## Related
 
 - [`scope-contract.md`](./scope-contract.md)
 - [`../roadmap.md`](../roadmap.md)
+- ADR 0011 (bilingual ja/en scope)
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04

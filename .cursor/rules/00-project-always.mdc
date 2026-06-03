@@ -9,6 +9,7 @@ alwaysApply: true
 - **NeNe Contact = embeddable contact forms only** (ADR 0009). No chat scenarios, billing, reconciliation, or CMS.
 - Privacy/spam/compliance changes: follow `docs/explanation/privacy-and-spam-compliance.md` and `docs/review/compliance.md`.
 - Issue-driven; **repository docs and commits in English only** (ADR 0008); no secrets in git.
+- **Product locales: `ja` / `en` only** (ADR 0011) — bilingual, not general multilingual; no third locale without a superseding ADR.
 - **Term registry (binding): `docs/explanation/terminology.md`** — verify every identifier before use. Typos block merge.
 - Siblings integrate via HTTP only (ADR 0002). Never share databases with Concierge, Invoice, Deal, or Records.
 

@@ -21,6 +21,7 @@ Contact owns **forms + inbox + notifications**.
 ## Non-goals
 
 - Chat scenarios, billing, bank CSV, reconciliation, document archive, full CRM
+- Locales beyond `ja` / `en`; general multilingual / i18n framework (ADR 0011)
 
 ## Success criteria (MVP)
 
@@ -28,11 +29,13 @@ Contact owns **forms + inbox + notifications**.
 - Submission stored and listed in admin
 - One email notification + one Slack or Chatwork channel
 - Rate limit + honeypot + allowed origins
+- Bilingual `ja` / `en` form rendering (ADR 0011)
 - OpenAPI validated; MCP read tools for inbox
 
 ## Related
 
 - [`requirements.md`](./requirements.md)
 - [`scope-contract.md`](./scope-contract.md)
+- ADR 0011 (bilingual ja/en scope)
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04

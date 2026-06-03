@@ -33,6 +33,7 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 - **Follow NENE2 conventions** when runtime lands — `docs/development/nene2-compliance.md`
 - Namespace: `NeneContact\`
 - **Repository docs: English only** (ADR 0008)
+- **Product locales: `ja` / `en` only** (ADR 0011) — no third locale, no general i18n framework
 - Siblings integrate via **HTTP only** — never shared databases (ADR 0002)
 
 ## Framework

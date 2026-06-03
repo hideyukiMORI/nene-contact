@@ -63,6 +63,7 @@ Concretely:
 | X11 | Bypass **allowed-origin** or **rate limits** for public submit | Security boundary |
 | X12 | Store **raw card numbers** or government ID numbers in form fields | Out of scope — prohibit field types |
 | X13 | Embed **arbitrary JavaScript** from operators in the widget (XSS) | Config is declarative JSON only |
+| X14 | Support **locales beyond `ja` / `en`** or ship a general i18n framework | Out of scope — bilingual only (ADR 0011) |
 
 ---
 
@@ -97,6 +98,6 @@ Details: [`../integrations/sibling-products.md`](../integrations/sibling-product
 
 - [`privacy-and-spam-compliance.md`](./privacy-and-spam-compliance.md)
 - [`embed-widget-spec.md`](./embed-widget-spec.md)
-- ADR 0002, ADR 0006, ADR 0009, ADR 0010
+- ADR 0002, ADR 0006, ADR 0009, ADR 0010, ADR 0011
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
