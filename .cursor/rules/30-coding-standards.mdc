@@ -23,6 +23,7 @@ Before writing PHP, OpenAPI, SQL/migrations, or frontend code, read the relevant
 - camelCase in public JSON; renamed shipped `operationId`; unregistered identifier
 - Error responses leaking stack traces/SQL/secrets/PII; not RFC 9457 Problem Details
 - Tenant-scoped query not filtered by `organization_id` (multi-tenancy.md, ADR 0006/0014); cross-tenant access outside superadmin
+- Mutating use case without an `audit_event` recording actor + before + after (audit-logging.md, ADR 0013); secrets/full PII in audit snapshots
 
 ## Merge blockers (frontend)
 

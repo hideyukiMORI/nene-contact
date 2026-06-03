@@ -174,6 +174,9 @@ Full list and the "reuse-framework-objects" rule: [`nene2-compliance.md`](./nene
   `database/schema/` (naming §5). Framework core stays database-independent.
 - Soft-delete → hard-delete after grace for personal data; audit metadata survives
   (charter §5). Append-only `audit_events` (ADR 0013).
+- **Audit every mutation** (and PII view/export): each mutating use case records actor +
+  `before` + `after` sanitized snapshots via `AuditRecorder`. Full spec:
+  [`audit-logging.md`](./audit-logging.md). A mutation without an audit record blocks merge.
 
 ---
 

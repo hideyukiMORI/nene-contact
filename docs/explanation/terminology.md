@@ -147,13 +147,24 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 
 ---
 
-## 9. Audit actions (`audit_event.action`, ADR 0013)
+## 9. Audit (`audit_event`, ADR 0013, [`../development/audit-logging.md`](../development/audit-logging.md))
 
-Pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
+Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
 `deleted`, `viewed`, `exported`, `retried`.
 
 Examples: `submission.viewed`, `submission.exported`, `submission.deleted`,
 `contact_form.updated`, `notification_channel.created`, `handoff.retried`.
+
+| Term | Spelling | Notes |
+| --- | --- | --- |
+| Table | `audit_events` | append-only, org-scoped |
+| Actor | `actor_user_id` | who (null for system/public) |
+| Before snapshot | `before_json` | sanitized; null for create |
+| After snapshot | `after_json` | sanitized; null for delete |
+| Affected record | `entity_type` / `entity_id` | what |
+| Recorder | `AuditRecorder` / `AuditRecorderInterface` | called in the UseCase |
+| Repository | `PdoAuditEventRepository` | `append`, `findAll`, `count` |
+| Read route | `/admin/audit-events` | admin (own org) / superadmin |
 
 ---
 

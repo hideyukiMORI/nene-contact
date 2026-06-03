@@ -35,8 +35,11 @@ A dedicated `audit_event` table records one row per audited operation:
 - **Sanitized snapshots** reuse the same response presenters used for API output, so
   **secrets (channel config, tokens) and full PII payloads are never written** to the
   audit log. Field-level diffs are derivable from the two snapshots.
-- **Mutations audited:** all admin create / update / delete (soft delete records a
-  `*.deleted` action with the before snapshot).
+- **Every mutating use case MUST record** actor + `before` + `after` (full sanitized
+  snapshots) — create (`before=null`), update (both), delete (`after=null`). The
+  before→after pair **is** the record of *what changed and how*; this applies to every
+  mutation across `/admin/*`, `/api/*`, and future CLI/MCP write paths, not a subset.
+  Implementation spec: [`../development/audit-logging.md`](../development/audit-logging.md).
 - **PII access audited:** admin **view** and **export** of a submission containing
   personal data record `submission.viewed` / `submission.exported` (charter §4, §11).
   Ordinary list views and non-PII reads are not audited.
