@@ -107,6 +107,13 @@ ESLint `import/no-restricted-paths` enforces the matrix; placement drift is reje
 
 Alternate stack requires an ADR.
 
+**Admin form builder (ADR 0015):** a **custom UI** (field palette + ordered field list +
+config panel + live preview), **not** a node-graph/canvas library — `form_field` is an
+ordered list, and graph/scenario editing belongs to NeNe Concierge (ADR 0009). **dnd-kit**
+is the only approved-by-ADR addition, used **solely** for accessible drag-to-reorder; the
+preview reuses the embed schema renderer. See
+[ADR 0015](../adr/0015-form-builder-custom-ui-dnd-kit.md).
+
 ---
 
 ## D. Repository layout
