@@ -85,7 +85,13 @@ final class SubmitPublicFormUseCaseTest extends TestCase
             id: 3,
         );
 
-        $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($auditRepo));
+        $notifier = new class () implements \NeneContact\Notification\SubmissionNotifierInterface {
+            public function notify(\NeneContact\ContactForm\ContactForm $form, Submission $submission): void
+            {
+            }
+        };
+
+        $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($auditRepo), $notifier);
         $submission = $useCase->execute($form, ['email' => 'visitor@example.com'], '203.0.113.9', 'curl/8');
 
         self::assertCount(1, $repo->created);

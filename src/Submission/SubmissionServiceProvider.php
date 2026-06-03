@@ -13,6 +13,7 @@ use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
+use NeneContact\Notification\SubmissionNotifierInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 
@@ -56,6 +57,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 static function (ContainerInterface $c): SubmitPublicFormUseCaseInterface {
                     $repo = $c->get(SubmissionRepositoryInterface::class);
                     $audit = $c->get(AuditRecorderInterface::class);
+                    $notifier = $c->get(SubmissionNotifierInterface::class);
 
                     if (!$repo instanceof SubmissionRepositoryInterface) {
                         throw new LogicException('Submission repository service is invalid.');
@@ -65,7 +67,11 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Audit recorder service is invalid.');
                     }
 
-                    return new SubmitPublicFormUseCase($repo, $audit);
+                    if (!$notifier instanceof SubmissionNotifierInterface) {
+                        throw new LogicException('Submission notifier service is invalid.');
+                    }
+
+                    return new SubmitPublicFormUseCase($repo, $audit, $notifier);
                 },
             )
             ->set(

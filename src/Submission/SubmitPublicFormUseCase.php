@@ -7,12 +7,15 @@ namespace NeneContact\Submission;
 use LogicException;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactForm;
+use NeneContact\Notification\SubmissionNotifierInterface;
+use Throwable;
 
 final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseInterface
 {
     public function __construct(
         private SubmissionRepositoryInterface $submissions,
         private AuditRecorderInterface $audit,
+        private SubmissionNotifierInterface $notifier,
     ) {
     }
 
@@ -54,6 +57,13 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             null,
             SubmissionResponse::toAuditSnapshot($stored),
         );
+
+        // Notifications are best-effort: a delivery failure must never fail the submission.
+        try {
+            $this->notifier->notify($form, $stored);
+        } catch (Throwable) {
+            // Swallowed by design; delivery is retried/observed out of band (charter §7).
+        }
 
         return $stored;
     }

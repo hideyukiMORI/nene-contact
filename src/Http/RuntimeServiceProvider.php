@@ -42,6 +42,9 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Mailer\Mailer;
+use Symfony\Component\Mailer\MailerInterface;
+use Symfony\Component\Mailer\Transport;
 
 /**
  * Wires the NeNe Contact HTTP runtime on top of NENE2. Kept deliberately small:
@@ -182,6 +185,17 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(RequestIdHolder::class, static fn (ContainerInterface $container): RequestIdHolder => new RequestIdHolder())
+            ->set(
+                MailerInterface::class,
+                static function (ContainerInterface $container): MailerInterface {
+                    // MAIL_DSN drives the transport; default null transport is a no-op so
+                    // submissions never fail when SMTP is not configured (best-effort, charter §7).
+                    $dsn = $_SERVER['MAIL_DSN'] ?? $_ENV['MAIL_DSN'] ?? getenv('MAIL_DSN');
+                    $dsn = is_string($dsn) && $dsn !== '' ? $dsn : 'null://null';
+
+                    return new Mailer(Transport::fromDsn($dsn));
+                },
+            )
             ->set(
                 LocalBearerTokenVerifier::class,
                 static function (ContainerInterface $container): LocalBearerTokenVerifier {
