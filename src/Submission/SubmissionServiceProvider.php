@@ -175,6 +175,131 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                SubmissionNoteRepositoryInterface::class,
+                static function (ContainerInterface $c): SubmissionNoteRepositoryInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new PdoSubmissionNoteRepository($query, $orgId);
+                },
+            )
+            ->set(
+                UpdateSubmissionStatusUseCaseInterface::class,
+                static function (ContainerInterface $c): UpdateSubmissionStatusUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new UpdateSubmissionStatusUseCase($repo, $audit);
+                },
+            )
+            ->set(
+                AddSubmissionNoteUseCaseInterface::class,
+                static function (ContainerInterface $c): AddSubmissionNoteUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $notes = $c->get(SubmissionNoteRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$notes instanceof SubmissionNoteRepositoryInterface) {
+                        throw new LogicException('Submission note repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new AddSubmissionNoteUseCase($repo, $notes, $audit);
+                },
+            )
+            ->set(
+                ListSubmissionNotesUseCaseInterface::class,
+                static function (ContainerInterface $c): ListSubmissionNotesUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $notes = $c->get(SubmissionNoteRepositoryInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$notes instanceof SubmissionNoteRepositoryInterface) {
+                        throw new LogicException('Submission note repository service is invalid.');
+                    }
+
+                    return new ListSubmissionNotesUseCase($repo, $notes);
+                },
+            )
+            ->set(
+                UpdateSubmissionStatusHandler::class,
+                static function (ContainerInterface $c): UpdateSubmissionStatusHandler {
+                    $uc = $c->get(UpdateSubmissionStatusUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof UpdateSubmissionStatusUseCaseInterface) {
+                        throw new LogicException('UpdateSubmissionStatus use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new UpdateSubmissionStatusHandler($uc, $json);
+                },
+            )
+            ->set(
+                AddSubmissionNoteHandler::class,
+                static function (ContainerInterface $c): AddSubmissionNoteHandler {
+                    $uc = $c->get(AddSubmissionNoteUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof AddSubmissionNoteUseCaseInterface) {
+                        throw new LogicException('AddSubmissionNote use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new AddSubmissionNoteHandler($uc, $json);
+                },
+            )
+            ->set(
+                ListSubmissionNotesHandler::class,
+                static function (ContainerInterface $c): ListSubmissionNotesHandler {
+                    $uc = $c->get(ListSubmissionNotesUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof ListSubmissionNotesUseCaseInterface) {
+                        throw new LogicException('ListSubmissionNotes use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new ListSubmissionNotesHandler($uc, $json);
+                },
+            )
+            ->set(
                 SubmissionNotFoundExceptionHandler::class,
                 static function (ContainerInterface $c): SubmissionNotFoundExceptionHandler {
                     $pd = $c->get(ProblemDetailsResponseFactory::class);
@@ -193,6 +318,9 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $submit = $c->get(SubmitPublicFormHandler::class);
                     $list = $c->get(ListSubmissionsHandler::class);
                     $get = $c->get(GetSubmissionByIdHandler::class);
+                    $updateStatus = $c->get(UpdateSubmissionStatusHandler::class);
+                    $addNote = $c->get(AddSubmissionNoteHandler::class);
+                    $listNotes = $c->get(ListSubmissionNotesHandler::class);
 
                     if (!$schema instanceof GetPublicFormSchemaHandler) {
                         throw new LogicException('Schema handler service is invalid.');
@@ -210,7 +338,19 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Get submission handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get);
+                    if (!$updateStatus instanceof UpdateSubmissionStatusHandler) {
+                        throw new LogicException('Update submission status handler service is invalid.');
+                    }
+
+                    if (!$addNote instanceof AddSubmissionNoteHandler) {
+                        throw new LogicException('Add submission note handler service is invalid.');
+                    }
+
+                    if (!$listNotes instanceof ListSubmissionNotesHandler) {
+                        throw new LogicException('List submission notes handler service is invalid.');
+                    }
+
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $addNote, $listNotes);
                 },
             );
     }

@@ -14,6 +14,9 @@ final readonly class SubmissionRouteRegistrar
         private SubmitPublicFormHandler $submitHandler,
         private ListSubmissionsHandler $listHandler,
         private GetSubmissionByIdHandler $getHandler,
+        private UpdateSubmissionStatusHandler $updateStatusHandler,
+        private AddSubmissionNoteHandler $addNoteHandler,
+        private ListSubmissionNotesHandler $listNotesHandler,
     ) {
     }
 
@@ -23,13 +26,19 @@ final readonly class SubmissionRouteRegistrar
         $submit = $this->submitHandler;
         $list = $this->listHandler;
         $get = $this->getHandler;
+        $updateStatus = $this->updateStatusHandler;
+        $addNote = $this->addNoteHandler;
+        $listNotes = $this->listNotesHandler;
 
         // Public (no auth) — org resolved via public_form_key
         $router->get('/public/forms/{public_form_key}/schema', static fn (ServerRequestInterface $r) => $schema->handle($r));
         $router->post('/public/forms/{public_form_key}/submissions', static fn (ServerRequestInterface $r) => $submit->handle($r));
 
-        // Admin inbox (ViewSubmissions)
+        // Admin inbox
         $router->get('/admin/submissions', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->get('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
+        $router->patch('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $updateStatus->handle($r));
+        $router->get('/admin/submissions/{id}/notes', static fn (ServerRequestInterface $r) => $listNotes->handle($r));
+        $router->post('/admin/submissions/{id}/notes', static fn (ServerRequestInterface $r) => $addNote->handle($r));
     }
 }

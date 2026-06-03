@@ -58,6 +58,14 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
         return $row !== null ? $this->mapRow($row) : null;
     }
 
+    public function updateStatus(int $id, string $status): void
+    {
+        $this->query->execute(
+            'UPDATE submissions SET status = ?, updated_at = ? WHERE id = ? AND organization_id = ?',
+            [$status, date('Y-m-d H:i:s'), $id, $this->orgId->get()],
+        );
+    }
+
     /** @return list<Submission> */
     public function findAll(int $limit, int $offset): array
     {
