@@ -24,7 +24,8 @@ when genuinely not applicable; do not delete items to pass.
 - [ ] Identifiers match `terminology.md`; new identifiers added to the registry in this PR.
 - [ ] JSON snake_case; `operationId` matches OpenAPI + MCP catalog; no renamed shipped `operationId`.
 - [ ] Migrations named `YYYYMMDDHHMMSS_snake_*` in `database/migrations/`; schema snapshot updated.
-- [ ] Audit recorded for admin mutations + PII access (ADR 0013); secrets/PII not in audit snapshots.
+- [ ] **Every mutating use case records an `audit_event`** with actor + `before` + `after` sanitized snapshots (create: before=null; delete: after=null) — `audit-logging.md`. A mutation without a record blocks merge.
+- [ ] Audit snapshots reuse `*Response` presenters (no secrets / no full PII); PII view/export recorded (`submission.viewed`/`.exported`); trail append-only and survives deletion.
 - [ ] Sibling calls are HTTP-only via `Upstream/` clients; no shared DB (ADR 0002); handoff idempotent + failure non-destructive.
 - [ ] UseCase unit tests (no DB) + `Pdo*Repository` integration tests; Problem Details shape tested.
 - [ ] Compliance impact reviewed against the charter ([`compliance.md`](./compliance.md)).
