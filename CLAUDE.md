@@ -26,6 +26,7 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 - **Secrets**: never commit `.env`, tokens, or credentials.
 - **Framework**: NENE2 via Composer — `vendor/hideyukimori/nene2/docs/` for runtime patterns.
 - **Coding rules (MUST-comply)**: inherit NENE2 conventions; follow `docs/development/` (coding-standards, naming-conventions, backend-standards, frontend-standards, nene2-compliance). Handler→UseCase→Repository→Pdo*; domain-grouped folders; snake_case JSON; SQL only in `Pdo*Repository`; reuse NENE2 objects. Violations block merge.
+- **Multi-tenant by default**: every tenant-scoped query filters by resolved `organization_id` (`RequestScopedHolder<int>`); cross-tenant access is superadmin-only. Spec: `docs/development/multi-tenancy.md` (ADR 0006, ADR 0014, mirrors NeNe Records).
 - **MCP**: tools map to Contact OpenAPI only; no sibling DB access.
 
 ## Product Direction

@@ -55,7 +55,7 @@ comment overrides it.
 
 ---
 
-## 3. Tenancy & roles (ADR 0006)
+## 3. Tenancy & roles (ADR 0006, ADR 0014)
 
 | Term | Spelling | Notes |
 | --- | --- | --- |
@@ -64,8 +64,15 @@ comment overrides it.
 | Role — organization admin | `admin` | Manages one org's users, forms, channels, settings |
 | Role — operator | `editor` | Operates submissions inbox within one org |
 | Suite org federation | `NENE_SUITE_ORG_EXTERNAL_ID` | External org id (env) |
+| Resolution mode (env) | `TENANT_RESOLUTION` | values: `single`, `path`, `subdomain`, `custom_domain` |
+| Request attribute — org id | `nene2.org.id` | set by `OrgResolverMiddleware` |
+| Request attribute — org slug | `nene2.org.slug` | set by `OrgResolverMiddleware` |
 
-Public embed routes resolve organization via `public_form_key`, not a role.
+Capabilities (`Capability` enum cases): `ManageOrganizations`, `ManageUsers`,
+`ManageForms`, `ManageChannels`, `ManageSettings`, `ViewSubmissions`, `ManageSubmissions`.
+
+Public embed routes resolve organization via `public_form_key`; `/api/*` via the org-scoped
+service token (ADR 0014) — not a role.
 
 ---
 
@@ -188,6 +195,10 @@ Base URI `https://nene-contact.dev/problems/`. Slugs are kebab-case and **stable
 | `unauthorized` | 401 |
 | `forbidden` | 403 |
 | `origin-not-allowed` | 403 |
+| `org-not-found` | 404 |
+| `org-not-resolved` | 404 |
+| `org-inactive` | 403 |
+| `org-access-denied` | 403 |
 | `rate-limited` | 429 |
 | `internal-server-error` | 500 |
 

@@ -35,6 +35,7 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 - Do **not** add chat scenario engines — **`nene-concierge`**
 - Do **not** add quotes, invoices, reconciliation, bank CSV, or document archive
 - **Follow NENE2 coding conventions (MUST-comply)** — binding: `docs/development/coding-standards.md` (index), `naming-conventions.md`, `backend-standards.md`, `frontend-standards.md`, `nene2-compliance.md`. NENE2 `docs/development/` is upstream SSOT; reuse framework objects; violations block merge.
+- **Multi-tenant by default** — `docs/development/multi-tenancy.md` (ADR 0006, ADR 0014, mirrors NeNe Records). Every tenant-scoped query filters by resolved `organization_id`; cross-tenant access is superadmin-only.
 - Namespace: `NeneContact\`
 - **Repository docs: English only** (ADR 0008)
 - **Product locales: `ja` / `en` only** (ADR 0011) — no third locale, no general i18n framework

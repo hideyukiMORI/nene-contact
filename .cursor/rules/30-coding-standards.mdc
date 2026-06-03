@@ -22,7 +22,7 @@ Before writing PHP, OpenAPI, SQL/migrations, or frontend code, read the relevant
 - Reinventing a NENE2 object (responses, routing, pagination, auth, DB, validation)
 - camelCase in public JSON; renamed shipped `operationId`; unregistered identifier
 - Error responses leaking stack traces/SQL/secrets/PII; not RFC 9457 Problem Details
-- Tenant query not scoped by `organization_id`
+- Tenant-scoped query not filtered by `organization_id` (multi-tenancy.md, ADR 0006/0014); cross-tenant access outside superadmin
 
 ## Merge blockers (frontend)
 
