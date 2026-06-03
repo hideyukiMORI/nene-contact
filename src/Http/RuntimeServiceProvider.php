@@ -18,11 +18,18 @@ use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Http\JsonResponseFactory;
+use Nene2\Http\RequestScopedHolder;
 use Nene2\Http\ResponseEmitter;
 use Nene2\Http\RuntimeApplicationFactory;
 use Nene2\Log\MonologLoggerFactory;
 use Nene2\Log\RequestIdHolder;
 use NeneContact\ApplicationServiceProvider;
+use NeneContact\Organization\OrganizationRepositoryInterface;
+use NeneContact\Organization\Resolution\CustomDomainResolutionStrategy;
+use NeneContact\Organization\Resolution\EnvResolutionStrategy;
+use NeneContact\Organization\Resolution\OrgResolverMiddleware;
+use NeneContact\Organization\Resolution\PathPrefixResolutionStrategy;
+use NeneContact\Organization\Resolution\SubdomainResolutionStrategy;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -221,6 +228,44 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                     /** @var list<DomainExceptionHandlerInterface> $exceptionHandlers */
                     /** @var list<callable(\Nene2\Routing\Router): void> $routeRegistrars */
 
+                    $orgRepo = $container->get(OrganizationRepositoryInterface::class);
+                    $problemDetails = $container->get(ProblemDetailsResponseFactory::class);
+                    $orgIdHolder = $container->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$orgRepo instanceof OrganizationRepositoryInterface) {
+                        throw new LogicException('Organization repository service is invalid.');
+                    }
+
+                    if (!$problemDetails instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    if (!$orgIdHolder instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgIdHolder */
+
+                    // Read like NENE2 ConfigLoader: Dotenv populates $_SERVER/$_ENV (not getenv).
+                    $env = static function (string $key, string $default): string {
+                        $value = $_SERVER[$key] ?? $_ENV[$key] ?? getenv($key);
+
+                        return is_string($value) && $value !== '' ? $value : $default;
+                    };
+
+                    $mode = $env('TENANT_RESOLUTION', 'single');
+                    $orgSlug = $env('ORG_SLUG', '');
+                    $baseDomain = $env('BASE_DOMAIN', 'localhost');
+
+                    $strategy = match ($mode) {
+                        'path' => new PathPrefixResolutionStrategy(),
+                        'subdomain' => new SubdomainResolutionStrategy($baseDomain),
+                        'custom_domain' => new CustomDomainResolutionStrategy(),
+                        default => new EnvResolutionStrategy($orgSlug),
+                    };
+
+                    $orgResolver = new OrgResolverMiddleware($orgIdHolder, $orgRepo, $problemDetails, $strategy);
+
                     return new RuntimeApplicationFactory(
                         responseFactory: $responseFactory,
                         streamFactory: $streamFactory,
@@ -228,6 +273,7 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         domainExceptionHandlers: $exceptionHandlers,
                         requestIdHolder: $requestIdHolder,
                         routeRegistrars: $routeRegistrars,
+                        authMiddleware: [$orgResolver],
                         debug: $config->debug,
                         requestMaxBodyBytes: 64 * 1024,
                         problemDetailsBaseUrl: $config->problemDetailsBaseUrl,
