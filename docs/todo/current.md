@@ -1,6 +1,6 @@
 # Current TODO
 
-**Phase 0 — Governance** 🔄 in progress on branch `docs/1-governance-foundation`
+**Phase 0 — Governance** ✅ complete on `main` (2026-06-03)
 
 ## Phase 0 checklist
 
@@ -8,7 +8,7 @@
 - [x] Scope contract, embed spec, privacy compliance, terminology
 - [x] ADRs 0001, 0002, 0006, 0007, 0008, 0009, 0010
 - [x] Sibling integration map + draft handoff contracts
-- [ ] GitHub Issue #1 + PR merge to `main`
+- [x] GitHub Issue #1 — governance on `main` (https://github.com/hideyukiMORI/nene-contact)
 - [ ] Add NeNe Contact row to publication-strategy family copy (optional follow-up)
 
 ## Next (Phase 1)
