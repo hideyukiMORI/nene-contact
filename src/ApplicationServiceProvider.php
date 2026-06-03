@@ -9,6 +9,9 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Http\RequestScopedHolder;
+use NeneContact\Auth\AuthRouteRegistrar;
+use NeneContact\Auth\AuthServiceProvider;
+use NeneContact\Auth\InvalidCredentialsExceptionHandler;
 use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
 use NeneContact\Organization\OrganizationRouteRegistrar;
 use NeneContact\Organization\OrganizationServiceProvider;
@@ -39,19 +42,26 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
             },
         );
 
+        $builder->addProvider(new AuthServiceProvider());
         $builder->addProvider(new OrganizationServiceProvider());
 
         $builder
             ->set(
                 self::ROUTE_REGISTRARS,
                 static function (ContainerInterface $container): array {
+                    $auth = $container->get(AuthRouteRegistrar::class);
                     $organization = $container->get(OrganizationRouteRegistrar::class);
+
+                    if (!$auth instanceof AuthRouteRegistrar) {
+                        throw new LogicException('Auth route registrar service is invalid.');
+                    }
 
                     if (!$organization instanceof OrganizationRouteRegistrar) {
                         throw new LogicException('Organization route registrar service is invalid.');
                     }
 
                     return [
+                        $auth,
                         $organization,
                     ];
                 },
@@ -59,16 +69,18 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
             ->set(
                 self::EXCEPTION_HANDLERS,
                 static function (ContainerInterface $container): array {
+                    $invalidCredentials = $container->get(InvalidCredentialsExceptionHandler::class);
                     $organizationNotFound = $container->get(OrganizationNotFoundExceptionHandler::class);
                     $organizationSlugConflict = $container->get(OrganizationSlugConflictExceptionHandler::class);
 
-                    foreach ([$organizationNotFound, $organizationSlugConflict] as $handler) {
+                    foreach ([$invalidCredentials, $organizationNotFound, $organizationSlugConflict] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
                     }
 
                     return [
+                        $invalidCredentials,
                         $organizationNotFound,
                         $organizationSlugConflict,
                     ];
