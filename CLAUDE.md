@@ -15,8 +15,9 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 
 ## Quick Rules
 
-- **Issue-driven**: no Issue, no substantive edit (unless user limits scope).
-- **Branch**: `type/issue-number-summary` from `main`; never commit directly to `main`.
+- **One Issue per task (MANDATORY)**: every task MUST have its own GitHub Issue before any edit. No Issue, no edit. Split multi-part work into separate Issues — one task, one Issue, one PR.
+- **Auto-merge on completion (MANDATORY)**: when a task's PR is ready, it is **merged automatically** — this is standing maintainer policy, no manual approval gate. Then sync `main`.
+- **Branch**: `type/issue-number-summary` from `main`; **never commit or push directly to `main`.**
 - **Commits**: Conventional Commits; English type/scope and description/body (ADR 0008), `(#issue)` in subject.
 - **Secrets**: never commit `.env`, tokens, or credentials.
 - **Framework**: NENE2 via Composer — `vendor/hideyukimori/nene2/docs/` for runtime patterns.

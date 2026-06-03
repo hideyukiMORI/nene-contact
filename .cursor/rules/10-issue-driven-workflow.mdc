@@ -3,12 +3,16 @@ description: Issue-driven workflow
 alwaysApply: true
 ---
 
-# Issue Driven Workflow
+# Issue Driven Workflow — Zero Tolerance
 
-- All code, documentation, and configuration changes **require a GitHub Issue** first.
+- **One task = one Issue = one PR (MANDATORY).** Every task **MUST** have its own GitHub
+  Issue created **before** any edit. No Issue, no edit. Split multi-part work into separate Issues.
 - Before starting: read `docs/roadmap.md`, `docs/milestones/`, `docs/todo/current.md`, and related Issues/PRs.
 - **Never commit or push directly to `main`.** Branch name: `type/issue-number-summary`.
-- Standard completion: commit → push → PR (`Closes #number` + self-review checklist) → CI → **merge** → sync local `main`.
+- **Auto-merge on completion (MANDATORY).** Completion is: commit → push → PR
+  (`Closes #number` + self-review checklist) → **merge automatically**
+  (`gh pr merge --merge --delete-branch`, after CI when it exists) → sync local `main`.
+  There is no manual approval gate — this is standing maintainer policy.
 - Commits: Conventional Commits per `docs/development/commit-conventions.md` — **English** description/body, `(#issue)` in subject.
-- If the user limits scope (investigation only, no commit, PR only), follow that instruction.
+- If the user limits scope (investigation only, no commit, PR only), follow that instruction — it overrides auto-merge for that request only.
 - Canonical: `docs/workflow.md`, `docs/development/commit-conventions.md`.
