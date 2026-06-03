@@ -16,6 +16,8 @@ use NeneContact\Auth\InvalidCredentialsExceptionHandler;
 use NeneContact\ContactForm\ContactFormNotFoundExceptionHandler;
 use NeneContact\ContactForm\ContactFormRouteRegistrar;
 use NeneContact\ContactForm\ContactFormServiceProvider;
+use NeneContact\Notification\NotificationChannelRouteRegistrar;
+use NeneContact\Notification\NotificationChannelServiceProvider;
 use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
 use NeneContact\Organization\OrganizationRouteRegistrar;
 use NeneContact\Organization\OrganizationServiceProvider;
@@ -55,6 +57,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
         $builder->addProvider(new AuthServiceProvider());
         $builder->addProvider(new OrganizationServiceProvider());
         $builder->addProvider(new ContactFormServiceProvider());
+        $builder->addProvider(new NotificationChannelServiceProvider());
         $builder->addProvider(new SubmissionServiceProvider());
 
         $builder
@@ -65,6 +68,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $organization = $container->get(OrganizationRouteRegistrar::class);
                     $contactForm = $container->get(ContactFormRouteRegistrar::class);
                     $submission = $container->get(SubmissionRouteRegistrar::class);
+                    $notificationChannel = $container->get(NotificationChannelRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
                         throw new LogicException('Auth route registrar service is invalid.');
@@ -82,10 +86,15 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Submission route registrar service is invalid.');
                     }
 
+                    if (!$notificationChannel instanceof NotificationChannelRouteRegistrar) {
+                        throw new LogicException('Notification channel route registrar service is invalid.');
+                    }
+
                     return [
                         $auth,
                         $organization,
                         $contactForm,
+                        $notificationChannel,
                         $submission,
                     ];
                 },
