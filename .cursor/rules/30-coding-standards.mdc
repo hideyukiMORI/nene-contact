@@ -30,6 +30,7 @@ Before writing PHP, OpenAPI, SQL/migrations, or frontend code, read the relevant
 - Upward or cross-feature imports; placement-matrix violations; deep slice imports
 - `fetch` outside `shared/api/client.ts`; TanStack logic outside entity files
 - `any`; default exports; raw color/spacing/type literals outside `shared/ui/theme/`
+- Hardcoded user-facing string (not via `t(key)`); catalog key missing from `ja`/`en` (i18n-message-catalog.md, ADR 0011)
 - Embed widget holding an admin JWT, running operator JS, `eval`, or un-isolated styles
 - Locale beyond `ja`/`en`; hardcoded user-facing strings
 

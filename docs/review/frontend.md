@@ -15,7 +15,10 @@ only when genuinely not applicable; do not delete items to pass.
 - [ ] Four UI states handled (loading / empty / error / success); errors from Problem Details → `AppError`.
 - [ ] TypeScript strict; no `any`; branded IDs; no default exports.
 - [ ] No raw color/spacing/type literals outside `shared/ui/theme/`.
-- [ ] Locales `ja`/`en` only (ADR 0011); no hardcoded user-facing strings.
+- [ ] Locales `ja`/`en` only (ADR 0011). **No hardcoded user-facing string** — every label/button/heading/placeholder/empty/error/`aria-label` via `t(key)` (`i18n-message-catalog.md`).
+- [ ] New keys added to **both** `messages/ja.ts` and `en.ts` in this PR; `en` keys ⊆ `ja` (parity test); no shipped key renamed.
+- [ ] Locale switch is in-bundle/instant (no fetch/reload); `setLocale` persists `nene-locale` + sets `<html lang>`. Embed locale from `data-lang ∩ form.locales → default_locale`.
+- [ ] Server Problem Details (English) mapped to a catalog key for display.
 - [ ] Auth token in-memory (other storage needs ADR); fail-closed (401→login, 403→forbidden); RBAC gating is UX only.
 - [ ] API field names not renamed in transit; snake_case mapped in `mapper.ts`.
 - [ ] Entity mapper/query-key tests + ≥1 feature-hook test (MSW); regression test for bug fixes.

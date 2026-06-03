@@ -228,6 +228,10 @@ Catalog: `docs/mcp/tools.json`. Maps to Contact OpenAPI only — never a sibling
 | Admin SPA | React + TypeScript strict mode |
 | Embed widget | Isolated build; class prefix `nene-contact-` or shadow DOM |
 | Locales | `ja` / `en` only (ADR 0011) |
+| Message keys | `{scope}.{feature}.{element}` lowercase dotted, **stable** | `admin.submissions.title`, `common.actions.save`, `embed.submit` |
+
+Message-catalog keys are stable identifiers (like `operationId`): never rename a shipped
+key. Full i18n spec: [`i18n-message-catalog.md`](./i18n-message-catalog.md).
 
 Full frontend standards: **[`frontend-standards.md`](./frontend-standards.md)** (binding).
 

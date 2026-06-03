@@ -37,6 +37,7 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 - **Follow NENE2 coding conventions (MUST-comply)** — binding: `docs/development/coding-standards.md` (index), `naming-conventions.md`, `backend-standards.md`, `frontend-standards.md`, `nene2-compliance.md`. NENE2 `docs/development/` is upstream SSOT; reuse framework objects; violations block merge.
 - **Multi-tenant by default** — `docs/development/multi-tenancy.md` (ADR 0006, ADR 0014, mirrors NeNe Records). Every tenant-scoped query filters by resolved `organization_id`; cross-tenant access is superadmin-only.
 - **Audit every mutation (before/after)** — `docs/development/audit-logging.md` (ADR 0013, mirrors NeNe Invoice). Each mutating use case records actor + before + after; PII view/export audited; append-only.
+- **All UI strings in message catalogs** — `docs/development/i18n-message-catalog.md` (ADR 0011). Every user-facing string via `t(key)` from `shared/i18n/messages/{ja,en}.ts` (ja authoritative); no hardcoded strings; instant switching.
 - Namespace: `NeneContact\`
 - **Repository docs: English only** (ADR 0008)
 - **Product locales: `ja` / `en` only** (ADR 0011) — no third locale, no general i18n framework
