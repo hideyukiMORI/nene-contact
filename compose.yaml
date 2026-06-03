@@ -1,0 +1,70 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_NAME: ${APP_NAME:-NeNe Contact}
+      NENE2_MACHINE_API_KEY: ${NENE2_MACHINE_API_KEY:-}
+      NENE2_LOCAL_JWT_SECRET: ${NENE2_LOCAL_JWT_SECRET:-}
+      PROBLEM_DETAILS_BASE_URL: ${PROBLEM_DETAILS_BASE_URL:-https://nene-contact.dev/problems/}
+      TENANT_RESOLUTION: ${TENANT_RESOLUTION:-single}
+      ORG_SLUG: ${ORG_SLUG:-default}
+      BASE_DOMAIN: ${BASE_DOMAIN:-localhost}
+      DATABASE_URL: ${DATABASE_URL:-}
+      DB_ENV: ${DB_ENV:-local}
+      DB_ADAPTER: ${DB_ADAPTER:-mysql}
+      DB_HOST: ${DB_HOST:-mysql}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_NAME: ${DB_NAME:-nene_contact}
+      DB_USER: ${DB_USER:-nene_contact}
+      DB_PASSWORD: ${DB_PASSWORD:-nene_contact}
+      DB_CHARSET: ${DB_CHARSET:-utf8mb4}
+    ports:
+      - "${NENE_CONTACT_PORT:-8900}:80"
+    volumes:
+      - .:/var/www/html
+      - ../NENE2:/var/www/NENE2:ro
+      - composer-cache:/root/.composer/cache
+    command: ["/bin/sh", "/var/www/html/docker/app/entrypoint.sh"]
+
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_DATABASE: ${DB_NAME:-nene_contact}
+      MYSQL_USER: ${DB_USER:-nene_contact}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-nene_contact}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-nene_contact_root}
+    ports:
+      - "${NENE_CONTACT_MYSQL_PORT:-3391}:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "mysqladmin ping -h localhost -u$${MYSQL_USER} -p$${MYSQL_PASSWORD} --silent",
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  phpmyadmin:
+    image: phpmyadmin:5.2-apache
+    depends_on:
+      mysql:
+        condition: service_healthy
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+    ports:
+      - "${NENE_CONTACT_PHPMYADMIN_PORT:-8901}:80"
+
+volumes:
+  mysql-data:
+  composer-cache:

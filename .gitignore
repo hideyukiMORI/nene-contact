@@ -3,10 +3,10 @@
 /.env
 /.env.local
 /.env.*.local
-/.phpunit.result.cache/
+/.phpunit.result.cache
 /.phpunit.cache/
 /.phpstan.cache/
-/.php-cs-fixer.cache/
+/.php-cs-fixer.cache
 /var/
 /composer.lock
 /public_html/assets/
