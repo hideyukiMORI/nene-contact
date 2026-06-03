@@ -1,6 +1,22 @@
 # Current TODO
 
 **Phase 0 — Governance** ✅ complete on `main` (2026-06-03)
+**Phase 1 — Runtime foundation** 🚧 in progress (2026-06-04)
+
+## Phase 1 progress
+
+- [x] Runtime scaffold — NENE2 app, `GET /health`, composer, tooling, Docker 89xx (#20 → #21)
+- [x] Multi-tenant **Organization** domain + DB + migrations (#22 → #23)
+- [x] Tenant **resolution** middleware + strategies (ADR 0014) (#24 → #25)
+- [ ] Auth: JWT login + `BearerTokenMiddleware` + `Role`/`Capability` RBAC (ADR 0006)
+- [ ] User domain + organization-scoped user management
+- [ ] ContactForm + FormField domain (admin CRUD)
+- [ ] Public embed: schema + submit endpoints (org via `public_form_key`, ADR 0010)
+- [ ] Submission inbox + AuditRecorder (ADR 0013)
+- [ ] OpenAPI 3.1 baseline + `composer openapi`
+
+Verified locally: `composer check` green; `GET /health` 200; `/admin/organizations`
+CRUD (201/409/422/200/404) on SQLite; resolution active on non-bypass routes.
 
 ## Phase 0 checklist
 
@@ -11,11 +27,11 @@
 - [x] GitHub Issue #1 — governance on `main` (https://github.com/hideyukiMORI/nene-contact)
 - [ ] Add NeNe Contact row to publication-strategy family copy (optional follow-up)
 
-## Next (Phase 1)
+## Next up
 
-- [ ] #4 Runtime scaffold — NENE2 app, `GET /health`, composer, CI
-- [ ] #5 Multi-tenant organization + auth (ADR 0006)
-- [ ] #6 OpenAPI 3.1 baseline
+- [ ] Auth (JWT) + Role/Capability RBAC — mirror nene-records `src/Auth/`
+- [ ] ContactForm/FormField + Submission domains
+- [ ] OpenAPI 3.1 baseline
 
 ## Handoff notes
 
