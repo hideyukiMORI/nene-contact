@@ -54,7 +54,23 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 
 ## Status
 
-**Phase 0** — governance and product design. Runtime scaffold follows Issue #4+.
+**Phase 1** — runtime foundation. NENE2 app scaffold + `GET /health` landed; multi-tenant
+org/auth and the contact-form domain follow.
+
+## Quick Start
+
+```bash
+git clone https://github.com/hideyukiMORI/nene-contact.git
+cd nene-contact
+composer install
+composer check                                   # phpunit + phpstan(8) + php-cs-fixer
+php -S 127.0.0.1:8900 -t public_html public_html/index.php
+curl http://127.0.0.1:8900/health                # {"status":"ok","service":"NENE2"}
+# or the full stack (fixed 89xx lane): docker compose up
+```
+
+NENE2 is consumed via a Composer `path` repository (`../NENE2`). Copy `.env.example` to
+`.env` to override config (problem-details base URL, tenant resolution, database).
 
 ## Local ports (fixed — do not revert to defaults)
 
