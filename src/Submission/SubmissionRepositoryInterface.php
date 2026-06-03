@@ -12,6 +12,9 @@ interface SubmissionRepositoryInterface
     /** Organization-scoped (inbox). */
     public function findById(int $id): ?Submission;
 
+    /** Organization-scoped status update. */
+    public function updateStatus(int $id, string $status): void;
+
     /**
      * Organization-scoped (inbox).
      *

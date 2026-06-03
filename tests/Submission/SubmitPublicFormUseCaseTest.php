@@ -34,6 +34,10 @@ final class SubmitPublicFormUseCaseTest extends TestCase
                 return $this->created[0] ?? null;
             }
 
+            public function updateStatus(int $id, string $status): void
+            {
+            }
+
             /** @return list<Submission> */
             public function findAll(int $limit, int $offset): array
             {
