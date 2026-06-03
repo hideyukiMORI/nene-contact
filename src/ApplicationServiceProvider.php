@@ -9,6 +9,7 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Http\RequestScopedHolder;
+use NeneContact\Audit\AuditServiceProvider;
 use NeneContact\Auth\AuthRouteRegistrar;
 use NeneContact\Auth\AuthServiceProvider;
 use NeneContact\Auth\InvalidCredentialsExceptionHandler;
@@ -42,6 +43,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
             },
         );
 
+        $builder->addProvider(new AuditServiceProvider());
         $builder->addProvider(new AuthServiceProvider());
         $builder->addProvider(new OrganizationServiceProvider());
 
