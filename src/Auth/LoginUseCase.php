@@ -35,6 +35,7 @@ final readonly class LoginUseCase
 
         $token = $this->tokenIssuer->issue([
             'sub' => $user->email,
+            'uid' => $user->id,
             'role' => $role->value,
             'org_id' => $orgId,
             'iat' => time(),
