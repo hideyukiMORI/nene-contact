@@ -1,0 +1,42 @@
+---
+description: Coding standards — NENE2 conventions, MUST-comply
+alwaysApply: true
+---
+
+# Coding Standards — MUST-Comply
+
+**NeNe Contact inherits NENE2's coding conventions.** Binding docs in
+`docs/development/`: `coding-standards.md` (index), `naming-conventions.md`,
+`backend-standards.md`, `frontend-standards.md`, `nene2-compliance.md`. NENE2
+`docs/development/` is the upstream source of truth; the Contact doc wins where they
+differ, NENE2 applies where Contact is silent.
+
+Before writing PHP, OpenAPI, SQL/migrations, or frontend code, read the relevant doc.
+
+## Merge blockers (backend)
+
+- Missing `declare(strict_types=1);`; non-`final` app classes; mutable DTOs
+- Business logic in a Handler/middleware; SQL outside a `Pdo*Repository`
+- Layer-first folders (`src/Handlers/`, `src/Repositories/`, `src/UseCases/`)
+- Raw arrays/PSR-7 passed into a UseCase (must be typed readonly DTOs)
+- Reinventing a NENE2 object (responses, routing, pagination, auth, DB, validation)
+- camelCase in public JSON; renamed shipped `operationId`; unregistered identifier
+- Error responses leaking stack traces/SQL/secrets/PII; not RFC 9457 Problem Details
+- Tenant query not scoped by `organization_id`
+
+## Merge blockers (frontend)
+
+- Upward or cross-feature imports; placement-matrix violations; deep slice imports
+- `fetch` outside `shared/api/client.ts`; TanStack logic outside entity files
+- `any`; default exports; raw color/spacing/type literals outside `shared/ui/theme/`
+- Embed widget holding an admin JWT, running operator JS, `eval`, or un-isolated styles
+- Locale beyond `ja`/`en`; hardcoded user-facing strings
+
+## Layering (the spine)
+
+`HTTP handler (thin) → UseCase (execute, invariants) → RepositoryInterface → Pdo*Repository`.
+Group by domain concept. Frontend: `app → pages → features → entities → shared` — no
+arrow points upward.
+
+A justified deviation requires an **ADR** (self-authority, ADR 0012 model) — never a silent
+exception.

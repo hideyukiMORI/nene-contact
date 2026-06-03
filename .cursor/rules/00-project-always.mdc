@@ -11,6 +11,7 @@ alwaysApply: true
 - Issue-driven; **repository docs and commits in English only** (ADR 0008); no secrets in git.
 - **Product locales: `ja` / `en` only** (ADR 0011) — bilingual, not general multilingual; no third locale without a superseding ADR.
 - **Term registry (binding): `docs/explanation/terminology.md`** — verify every identifier before use. Typos block merge.
+- **Coding standards (MUST-comply):** inherit NENE2 conventions — `docs/development/coding-standards.md` (index), `naming-conventions.md`, `backend-standards.md`, `frontend-standards.md`, `nene2-compliance.md`. Handler→UseCase→Repository→Pdo*; snake_case JSON; SQL only in `Pdo*Repository`; reuse NENE2 objects. Violations block merge (deviations need an ADR).
 - Siblings integrate via HTTP only (ADR 0002). Never share databases with Concierge, Invoice, Deal, or Records.
 
 ## Local Port Registry

@@ -48,6 +48,7 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 | **Embed widget contract** | [`docs/explanation/embed-widget-spec.md`](./docs/explanation/embed-widget-spec.md) |
 | **Terminology registry (binding)** | [`docs/explanation/terminology.md`](./docs/explanation/terminology.md) |
 | **Sibling integrations** | [`docs/integrations/sibling-products.md`](./docs/integrations/sibling-products.md) |
+| **Coding standards (binding)** | [`docs/development/coding-standards.md`](./docs/development/coding-standards.md) |
 | **Agents** | [`AGENTS.md`](./AGENTS.md) |
 | **Roadmap** | [`docs/roadmap.md`](./docs/roadmap.md) |
 
