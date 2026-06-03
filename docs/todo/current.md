@@ -13,16 +13,18 @@
 - [x] ContactForm + FormField domain (admin CRUD, org-scoped, audited) (#36 → #37)
 - [x] Submission — public `schema`/`submit` (org via `public_form_key`) + inbox (ADR 0010) (#38 → #39)
 - [x] Form builder GUI decision — custom UI + dnd-kit (ADR 0015) (#32 → #33)
+- [x] Rate limiting on public submit — per IP + per form (ADR 0010) (#42 → #43)
+- [x] Submission status workflow + operator notes (audited) (#44 → #45)
+- [x] CSV export of the inbox (audited submission.exported) (#46 → #47)
+- [x] Email notification channels + dispatch on submit (#48 → #49)
+- [x] OpenAPI 3.1 baseline + `composer openapi` gate (#50 → #51)
 - [ ] Organization-scoped user management (admin CRUD; bootstrap via `tools/create-user.php` for now)
-- [ ] Submission status workflow (open→in_progress→resolved/spam) + operator notes
-- [ ] Public embed: schema + submit endpoints (org via `public_form_key`, ADR 0010)
-- [ ] Submission inbox + AuditRecorder (ADR 0013)
-- [ ] OpenAPI 3.1 baseline + `composer openapi`
 
-Verified locally: `composer check` green (19 tests); end-to-end on SQLite — login→JWT→RBAC
-(401/200/403); `/admin/organizations` + `/admin/contact-forms` CRUD; public
-`/public/forms/{key}/schema` 200 and `submit` 201 (allowed-origin 403, honeypot 204,
-required 422); admin inbox (ip/ua excluded); audit rows written with PII redacted.
+Verified locally: `composer check` green (25 tests + phpstan 8 + cs + openapi); end-to-end on
+SQLite — login→JWT→RBAC (401/200/403); organization/contact-form/notification-channel CRUD;
+public `schema` 200 + `submit` 201 (origin 403, honeypot 204, required 422, rate-limit 429);
+inbox list/detail/status/notes + CSV export (ip/ua excluded); all mutations + PII access
+audited with PII redacted.
 
 ## Phase 0 checklist
 
@@ -35,10 +37,10 @@ required 422); admin inbox (ip/ua excluded); audit rows written with PII redacte
 
 ## Next up
 
-- [ ] Rate limiting on public submit (ADR 0010 — NENE2 ThrottleMiddleware)
-- [ ] Submission status workflow + operator notes; CSV export
-- [ ] Email notification on new submission (Phase 2)
-- [ ] OpenAPI 3.1 baseline + `composer openapi`
+- [ ] Organization-scoped user management (admin CRUD)
+- [ ] Slack / Chatwork notification dispatch (channels stored; only email dispatched so far)
+- [ ] MCP tool catalog over the OpenAPI surface (read-first)
+- [ ] Sibling HTTP handoff (Deal / Vault) — Phase 3
 - [ ] Frontend: admin SPA + embed widget (Phase 2; builder per ADR 0015)
 
 ## Handoff notes
