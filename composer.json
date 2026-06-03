@@ -29,13 +29,15 @@
         "analyse": "phpstan analyse --memory-limit 512M",
         "cs": "php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php",
         "cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php",
+        "openapi": "php tools/validate-openapi.php",
         "migrations:status": "phinx status -c phinx.php",
         "migrations:migrate": "phinx migrate -c phinx.php",
         "migrations:rollback": "phinx rollback -c phinx.php",
         "check": [
             "@test",
             "@analyse",
-            "@cs"
+            "@cs",
+            "@openapi"
         ]
     },
     "config": {
