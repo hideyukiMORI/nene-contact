@@ -13,6 +13,7 @@ use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 
 final readonly class SubmissionServiceProvider implements ServiceProviderInterface
@@ -300,6 +301,46 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                ExportSubmissionsUseCaseInterface::class,
+                static function (ContainerInterface $c): ExportSubmissionsUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new ExportSubmissionsUseCase($repo, $audit, $orgId);
+                },
+            )
+            ->set(
+                ExportSubmissionsHandler::class,
+                static function (ContainerInterface $c): ExportSubmissionsHandler {
+                    $uc = $c->get(ExportSubmissionsUseCaseInterface::class);
+                    $psr17 = $c->get(Psr17Factory::class);
+
+                    if (!$uc instanceof ExportSubmissionsUseCaseInterface) {
+                        throw new LogicException('ExportSubmissions use case service is invalid.');
+                    }
+
+                    if (!$psr17 instanceof Psr17Factory) {
+                        throw new LogicException('PSR-17 factory service is invalid.');
+                    }
+
+                    return new ExportSubmissionsHandler($uc, $psr17);
+                },
+            )
+            ->set(
                 SubmissionNotFoundExceptionHandler::class,
                 static function (ContainerInterface $c): SubmissionNotFoundExceptionHandler {
                     $pd = $c->get(ProblemDetailsResponseFactory::class);
@@ -321,6 +362,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $updateStatus = $c->get(UpdateSubmissionStatusHandler::class);
                     $addNote = $c->get(AddSubmissionNoteHandler::class);
                     $listNotes = $c->get(ListSubmissionNotesHandler::class);
+                    $export = $c->get(ExportSubmissionsHandler::class);
 
                     if (!$schema instanceof GetPublicFormSchemaHandler) {
                         throw new LogicException('Schema handler service is invalid.');
@@ -350,7 +392,11 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('List submission notes handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $addNote, $listNotes);
+                    if (!$export instanceof ExportSubmissionsHandler) {
+                        throw new LogicException('Export submissions handler service is invalid.');
+                    }
+
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $addNote, $listNotes, $export);
                 },
             );
     }

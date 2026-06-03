@@ -17,6 +17,7 @@ final readonly class SubmissionRouteRegistrar
         private UpdateSubmissionStatusHandler $updateStatusHandler,
         private AddSubmissionNoteHandler $addNoteHandler,
         private ListSubmissionNotesHandler $listNotesHandler,
+        private ExportSubmissionsHandler $exportHandler,
     ) {
     }
 
@@ -35,6 +36,8 @@ final readonly class SubmissionRouteRegistrar
         $router->post('/public/forms/{public_form_key}/submissions', static fn (ServerRequestInterface $r) => $submit->handle($r));
 
         // Admin inbox
+        $export = $this->exportHandler;
+        $router->get('/admin/submissions/export', static fn (ServerRequestInterface $r) => $export->handle($r));
         $router->get('/admin/submissions', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->get('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
         $router->patch('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $updateStatus->handle($r));
