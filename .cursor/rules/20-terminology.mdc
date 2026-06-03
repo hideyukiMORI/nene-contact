@@ -1,26 +1,36 @@
 ---
-description: Terminology — zero tolerance
+description: Terminology — zero tolerance (厳守)
 alwaysApply: true
 ---
 
-# Terminology — Zero Tolerance
+# Terminology — Zero Tolerance (厳守)
 
-**`docs/explanation/terminology.md` is the single source of truth for all identifiers.**
+**`docs/explanation/terminology.md` is the single, canonical source of truth for every
+identifier.** No other doc or code comment overrides it.
 
-Before writing code, OpenAPI, DB schema, tests, or docs, read the registry.
+Before writing code, OpenAPI, DB schema, migrations, tests, MCP catalog, or docs, **read
+the registry** and use the exact registered spelling.
 
-## Merge blockers
+## Merge blockers (MUST)
 
 - Typos of registered terms
-- Spelling variants (camelCase in JSON where snake_case is registered, etc.)
-- New identifiers without a registry row in the same PR
+- Spelling / case / pluralization variants (e.g. `contactForm` in JSON where `contact_form`
+  is registered; `Repo`/`Service` suffix where `RepositoryInterface`/`UseCase` is registered)
+- Synonyms of a registered term (`inquiry` / `message` / `lead` for `submission`)
+- A new identifier (entity, field, status, slug, `operationId`, env var, role, class)
+  without a registry row **in the same PR**
+- Renaming a shipped `operationId` or Problem Details slug
 
 ## Common mistakes
 
 | Wrong | Correct (see terminology.md) |
 |---|---|
 | `contactForm` in JSON | `contact_form` |
-| `inquiry` | `submission` |
-| `Controller` suffix | `Handler` |
-| `Service` suffix | `UseCase` |
-| `message` (domain) | `submission` or `submission_note` |
+| `inquiry` / `message` / `lead` | `submission` or `submission_note` |
+| `Controller` / `Service` / `Manager` / `Repo` suffix | `Handler` / `UseCase` / `RepositoryInterface` |
+| locale key other than `ja` / `en` | `ja` / `en` only (ADR 0011) |
+| invented role string | `superadmin` / `admin` / `editor` (ADR 0006) |
+| ad-hoc problem URI | `https://nene-contact.dev/problems/{slug}` |
+
+When in doubt, match the registry exactly — do not guess, do not invent a variant. A
+deliberate rename requires an ADR (self-authority, ADR 0012 model).
