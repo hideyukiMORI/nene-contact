@@ -4,9 +4,15 @@ declare(strict_types=1);
 
 namespace NeneContact;
 
+use LogicException;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
+use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Http\RequestScopedHolder;
+use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
+use NeneContact\Organization\OrganizationRouteRegistrar;
+use NeneContact\Organization\OrganizationServiceProvider;
+use NeneContact\Organization\OrganizationSlugConflictExceptionHandler;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -33,17 +39,39 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
             },
         );
 
+        $builder->addProvider(new OrganizationServiceProvider());
+
         $builder
             ->set(
                 self::ROUTE_REGISTRARS,
                 static function (ContainerInterface $container): array {
-                    return [];
+                    $organization = $container->get(OrganizationRouteRegistrar::class);
+
+                    if (!$organization instanceof OrganizationRouteRegistrar) {
+                        throw new LogicException('Organization route registrar service is invalid.');
+                    }
+
+                    return [
+                        $organization,
+                    ];
                 },
             )
             ->set(
                 self::EXCEPTION_HANDLERS,
                 static function (ContainerInterface $container): array {
-                    return [];
+                    $organizationNotFound = $container->get(OrganizationNotFoundExceptionHandler::class);
+                    $organizationSlugConflict = $container->get(OrganizationSlugConflictExceptionHandler::class);
+
+                    foreach ([$organizationNotFound, $organizationSlugConflict] as $handler) {
+                        if (!$handler instanceof DomainExceptionHandlerInterface) {
+                            throw new LogicException('Exception handler service is invalid.');
+                        }
+                    }
+
+                    return [
+                        $organizationNotFound,
+                        $organizationSlugConflict,
+                    ];
                 },
             );
     }
