@@ -7,6 +7,7 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 | Purpose | Document |
 | --- | --- |
 | Scope contract | `docs/explanation/scope-contract.md` |
+| Compliance charter (binding) | `docs/explanation/data-protection-compliance.md` |
 | Agent entry | `AGENTS.md` |
 | Workflow | `docs/workflow.md` |
 | Commits | `docs/development/commit-conventions.md` |
@@ -19,6 +20,7 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 - **Auto-merge on completion (MANDATORY)**: when a task's PR is ready, it is **merged automatically** — this is standing maintainer policy, no manual approval gate. Then sync `main`.
 - **Branch**: `type/issue-number-summary` from `main`; **never commit or push directly to `main`.**
 - **Commits**: Conventional Commits; English type/scope and description/body (ADR 0008), `(#issue)` in subject.
+- **Compliance (binding)**: `data-protection-compliance.md` is non-negotiable (APPI, Japan law only). Deviations need an **ADR** — no external 士業 sign-off gate (no money), self-authority per ADR 0012.
 - **Secrets**: never commit `.env`, tokens, or credentials.
 - **Framework**: NENE2 via Composer — `vendor/hideyukimori/nene2/docs/` for runtime patterns.
 - **MCP**: tools map to Contact OpenAPI only; no sibling DB access.

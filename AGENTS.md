@@ -16,7 +16,8 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 ## Read First
 
 - **Scope contract (binding):** `docs/explanation/scope-contract.md`
-- **Privacy & spam (binding):** `docs/explanation/privacy-and-spam-compliance.md`
+- **Compliance charter (binding):** `docs/explanation/data-protection-compliance.md`
+- **Privacy & spam (operational):** `docs/explanation/privacy-and-spam-compliance.md`
 - **Terminology registry (binding):** `docs/explanation/terminology.md`
 - **Embed widget spec (binding):** `docs/explanation/embed-widget-spec.md`
 - **Sibling integrations:** `docs/integrations/sibling-products.md`
