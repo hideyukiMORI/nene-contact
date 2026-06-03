@@ -15,6 +15,7 @@ and adds product-specific rules. **Compliance is mandatory.**
 | --- | --- |
 | **Naming (identifiers, all surfaces)** | [`naming-conventions.md`](./naming-conventions.md) |
 | **Backend (architecture, DI, validation, errors)** | [`backend-standards.md`](./backend-standards.md) |
+| **Multi-tenancy (resolution, scoping, RBAC)** | [`multi-tenancy.md`](./multi-tenancy.md) |
 | **Frontend (admin SPA + embed widget)** | [`frontend-standards.md`](./frontend-standards.md) |
 | **Reuse NENE2 framework objects** | [`nene2-compliance.md`](./nene2-compliance.md) |
 | **Terminology registry (canonical strings)** | [`../explanation/terminology.md`](../explanation/terminology.md) |

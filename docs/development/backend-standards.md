@@ -106,8 +106,10 @@ final class CreateSubmissionHandler
 - **Middleware order is explicit and documented.** Baseline concerns: request id, CORS
   (reflect only allowed origins, never `*` in prod), security headers, request size limit,
   JSON parse, auth — follow NENE2 `middleware-security` and `http-runtime`.
-- **Multi-tenancy:** every tenant-scoped query is filtered by the resolved
-  `organization_id`; cross-tenant access is prohibited (ADR 0006).
+- **Multi-tenancy (build-time premise):** org resolved in middleware before authorization,
+  stored in `RequestScopedHolder<int>`; every tenant-scoped query filtered by
+  `organization_id`; cross-tenant access prohibited except `superadmin`. Full spec:
+  [`multi-tenancy.md`](./multi-tenancy.md) (ADR 0006, ADR 0014).
 
 ---
 
