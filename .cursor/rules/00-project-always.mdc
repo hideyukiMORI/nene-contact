@@ -1,0 +1,25 @@
+---
+description: NeNe Contact project rules
+alwaysApply: true
+---
+
+# Project Rules
+
+- Canonical docs: `README.md`, `AGENTS.md`, `docs/explanation/scope-contract.md`, `docs/explanation/embed-widget-spec.md`, `docs/explanation/privacy-and-spam-compliance.md`.
+- **NeNe Contact = embeddable contact forms only** (ADR 0009). No chat scenarios, billing, reconciliation, or CMS.
+- Privacy/spam/compliance changes: follow `docs/explanation/privacy-and-spam-compliance.md` and `docs/review/compliance.md`.
+- Issue-driven; **repository docs and commits in English only** (ADR 0008); no secrets in git.
+- **Term registry (binding): `docs/explanation/terminology.md`** — verify every identifier before use. Typos block merge.
+- Siblings integrate via HTTP only (ADR 0002). Never share databases with Concierge, Invoice, Deal, or Records.
+
+## Local Port Registry
+
+| Project | HTTP | phpMyAdmin | MySQL |
+|---|---|---|---|
+| NENE2 | 8200 | — | 3316 |
+| NeNe Clear | 83** | — | — |
+| NeNe Profile | 8490 | 8491 | 3409 |
+| nene-concierge | 8090 | 8091 | 3390 |
+| **NeNe Contact** | **8900** | **8901** | **3391** |
+
+Update `compose.yaml`, `.env.example`, and `frontend/vite.config.ts` together when ports change.

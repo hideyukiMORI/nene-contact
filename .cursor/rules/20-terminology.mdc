@@ -1,0 +1,26 @@
+---
+description: Terminology — zero tolerance
+alwaysApply: true
+---
+
+# Terminology — Zero Tolerance
+
+**`docs/explanation/terminology.md` is the single source of truth for all identifiers.**
+
+Before writing code, OpenAPI, DB schema, tests, or docs, read the registry.
+
+## Merge blockers
+
+- Typos of registered terms
+- Spelling variants (camelCase in JSON where snake_case is registered, etc.)
+- New identifiers without a registry row in the same PR
+
+## Common mistakes
+
+| Wrong | Correct (see terminology.md) |
+|---|---|
+| `contactForm` in JSON | `contact_form` |
+| `inquiry` | `submission` |
+| `Controller` suffix | `Handler` |
+| `Service` suffix | `UseCase` |
+| `message` (domain) | `submission` or `submission_note` |
