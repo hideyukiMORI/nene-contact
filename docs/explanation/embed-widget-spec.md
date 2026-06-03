@@ -20,7 +20,7 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 | --- | --- | --- |
 | `data-form` | yes | Public form key (not internal ULID) |
 | `data-trigger` | no | `floating` (default), `button`, `inline` |
-| `data-lang` | no | `ja`, `en` (must match form locales) |
+| `data-lang` | no | `ja` or `en` only (ADR 0011); must be one of the form's `locales` |
 | `data-button-label` | no | Label when `trigger=button` |
 
 ---
@@ -33,6 +33,7 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 4. Enforce **allowed_origins** (Origin / Referer check).
 5. Include **honeypot** field name in schema; reject non-empty honeypot silently with `204` or generic success (anti-enumeration — ADR 0010).
 6. Cap body size (e.g. 64 KiB JSON; attachment separate multipart endpoint).
+7. Resolve locale to `ja` or `en` only: use `data-lang` when it is one of the form's `locales`, otherwise fall back to the form's `default_locale` (ADR 0011).
 
 ---
 
@@ -64,6 +65,7 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 ## Related
 
 - ADR 0010
+- ADR 0011 (bilingual ja/en scope)
 - [`scope-contract.md`](./scope-contract.md)
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04

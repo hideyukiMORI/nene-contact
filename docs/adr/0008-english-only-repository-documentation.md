@@ -13,7 +13,7 @@ NeNe Contact targets international embed use cases and aligns with NeNe Clear an
 - All files under `docs/`, `README.md`, `AGENTS.md`, and `.cursor/rules/` are **English**.
 - GitHub Issues and PR bodies for this repo: **English** (recommended).
 - Conventional Commits: English `type`, `scope`, description, and body.
-- Admin UI may offer **ja + en** locales (separate ADR when UI starts).
+- Admin UI and product locales are **ja + en** only — see ADR 0011 (distinct concern: this ADR governs repository docs, ADR 0011 governs the product).
 
 ## Consequences
 
@@ -27,4 +27,5 @@ NeNe Contact targets international embed use cases and aligns with NeNe Clear an
 
 ## Related
 
+- ADR 0011 (bilingual ja/en product scope)
 - NeNe Vault ADR 0008 (precedent)

@@ -116,4 +116,18 @@ Pattern: `{verb}Contact{Resource}` — e.g. `listContactSubmissions`, `getContac
 
 ---
 
-Last updated: 2026-06-03
+## 11. Locales (bilingual — ADR 0011)
+
+| Term | Spelling | Notes |
+| --- | --- | --- |
+| Locale code | `ja`, `en` | The **only** supported product locales |
+| Form locale set | `locales` | Non-empty subset of `{ja, en}` on `contact_form` |
+| Form default | `default_locale` | Member of `locales`; embed fallback |
+| Embed attribute | `data-lang` | Values `ja` / `en` only; must be in form `locales` |
+
+Localized strings (labels, `select` options, `consent_label`, notification templates) are
+objects keyed by `ja` / `en` only. No other locale code is a valid identifier.
+
+---
+
+Last updated: 2026-06-04

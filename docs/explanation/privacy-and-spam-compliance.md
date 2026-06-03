@@ -20,7 +20,7 @@ responsible for privacy notices, lawful basis, and retention policies on their s
 | # | Rule |
 | --- | --- |
 | P1 | **Purpose limitation** — collect only fields defined on the form schema |
-| P2 | **Consent copy** — optional `consent_label` + `consent_required` per form (embed shows checkbox when set) |
+| P2 | **Consent copy** — optional `consent_label` (per-locale `ja`/`en`, ADR 0011) + `consent_required` per form (embed shows checkbox when set) |
 | P3 | **Retention** — configurable per-organization retention days; purge job deletes expired submissions (audit log retains metadata) |
 | P4 | **Export / delete** — operator can export CSV and delete submission (soft-delete → hard-delete after grace per ADR) |
 | P5 | **Rate limiting** on `POST /public/.../submissions` per IP + per form id |
@@ -62,6 +62,7 @@ responsible for privacy notices, lawful basis, and retention policies on their s
 
 - [`scope-contract.md`](./scope-contract.md)
 - ADR 0010 (embed security)
+- ADR 0011 (bilingual ja/en scope)
 - [`../review/compliance.md`](../review/compliance.md)
 
-Last updated: 2026-06-03
+Last updated: 2026-06-04
