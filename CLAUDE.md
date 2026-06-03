@@ -8,6 +8,7 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 | --- | --- |
 | Scope contract | `docs/explanation/scope-contract.md` |
 | Compliance charter (binding) | `docs/explanation/data-protection-compliance.md` |
+| Coding standards (binding) | `docs/development/coding-standards.md` |
 | Agent entry | `AGENTS.md` |
 | Workflow | `docs/workflow.md` |
 | Commits | `docs/development/commit-conventions.md` |
@@ -23,6 +24,7 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 - **Compliance (binding)**: `data-protection-compliance.md` is non-negotiable (APPI, Japan law only). Deviations need an **ADR** — no external 士業 sign-off gate (no money), self-authority per ADR 0012.
 - **Secrets**: never commit `.env`, tokens, or credentials.
 - **Framework**: NENE2 via Composer — `vendor/hideyukimori/nene2/docs/` for runtime patterns.
+- **Coding rules (MUST-comply)**: inherit NENE2 conventions; follow `docs/development/` (coding-standards, naming-conventions, backend-standards, frontend-standards, nene2-compliance). Handler→UseCase→Repository→Pdo*; domain-grouped folders; snake_case JSON; SQL only in `Pdo*Repository`; reuse NENE2 objects. Violations block merge.
 - **MCP**: tools map to Contact OpenAPI only; no sibling DB access.
 
 ## Product Direction

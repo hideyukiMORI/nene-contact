@@ -22,6 +22,7 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 - **Embed widget spec (binding):** `docs/explanation/embed-widget-spec.md`
 - **Sibling integrations:** `docs/integrations/sibling-products.md`
 - **NENE2 inheritance:** `docs/inheritance-from-nene2.md`
+- **Coding standards (binding):** `docs/development/coding-standards.md`
 - **Current work:** `docs/todo/current.md`
 - **Roadmap:** `docs/roadmap.md`
 
@@ -33,7 +34,7 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 - **Every identifier** must match `docs/explanation/terminology.md` before use
 - Do **not** add chat scenario engines — **`nene-concierge`**
 - Do **not** add quotes, invoices, reconciliation, bank CSV, or document archive
-- **Follow NENE2 conventions** when runtime lands — `docs/development/nene2-compliance.md`
+- **Follow NENE2 coding conventions (MUST-comply)** — binding: `docs/development/coding-standards.md` (index), `naming-conventions.md`, `backend-standards.md`, `frontend-standards.md`, `nene2-compliance.md`. NENE2 `docs/development/` is upstream SSOT; reuse framework objects; violations block merge.
 - Namespace: `NeneContact\`
 - **Repository docs: English only** (ADR 0008)
 - **Product locales: `ja` / `en` only** (ADR 0011) — no third locale, no general i18n framework
