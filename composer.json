@@ -32,6 +32,7 @@
         "cs": "php-cs-fixer fix --dry-run --diff --config=.php-cs-fixer.php",
         "cs:fix": "php-cs-fixer fix --config=.php-cs-fixer.php",
         "openapi": "php tools/validate-openapi.php",
+        "mcp": "php tools/validate-mcp-tools.php",
         "no-physical-delete": "php tools/check-no-physical-delete.php",
         "migrations:status": "phinx status -c phinx.php",
         "migrations:migrate": "phinx migrate -c phinx.php",
@@ -41,6 +42,7 @@
             "@analyse",
             "@cs",
             "@openapi",
+            "@mcp",
             "@no-physical-delete"
         ]
     },

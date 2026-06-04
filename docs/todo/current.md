@@ -7,7 +7,7 @@
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
 **M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
-**M6 — AI / MCP** 🚧 agent read surface `/api/*` landed (2026-06-04); MCP server + write tools next
+**M6 — AI / MCP** 🚧 agent read surface `/api/*` + local MCP stdio server landed (2026-06-04); write tools + deeper siblings next
 
 ## Phase 1 progress
 
@@ -104,7 +104,8 @@ RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (i
 - [x] Agent read surface `/api/*` (the OpenAPI MCP maps to) — `GET /api/forms`,
       `GET /api/submissions`, `GET /api/submissions/{id}`; machine-key auth (`X-NENE2-API-Key`);
       redacted by default, audited `include_pii=true`; org via tenant strategy (#118)
-- [ ] MCP stdio server (Node, NENE2 `mcp-tools` pattern) mapping read tools to `/api/*`
+- [x] MCP stdio server (PHP, `Nene2\Mcp\LocalMcpServer`) mapping read tools to `/api/*` —
+      `tools/local-mcp-server.php` + `docs/mcp/tools.json` + `composer mcp` gate (#120)
 - [ ] MCP write tools + confirmation token (no autonomous outbound on PII, §11)
 - [ ] Concierge → Contact ingest `POST /api/submissions` (service token + webhook secret)
 - [ ] Contact → Invoice draft client; Contact → Records read-only select options
@@ -113,7 +114,9 @@ Verified e2e (docker, MySQL, php -S with `NENE2_MACHINE_API_KEY`): `/api/*` requ
 `X-NENE2-API-Key` (missing/wrong → 401); `/api/forms` returns metadata only; submissions
 redacted by default (masked emails `c***@e***.com`, no IP/UA); `include_pii=true` → raw values
 + audit (`submission.viewed` single / `submission.exported` list, `via=agent_api`); redacted
-reads not audited; unknown submission 404.
+reads not audited; unknown submission 404. **MCP stdio** (#120) verified end-to-end: JSON-RPC
+`initialize` → `tools/list` (3 read-only tools) → `tools/call` proxies to `/api/*` with the
+machine key (redacted by default; `include_pii=true` returns raw + is audited).
 
 ## Next up
 
