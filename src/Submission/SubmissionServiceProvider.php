@@ -12,6 +12,7 @@ use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
+use NeneContact\Attachment\AttachmentRepositoryInterface;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
@@ -155,6 +156,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 static function (ContainerInterface $c): SubmitPublicFormHandler {
                     $reader = $c->get(PublicFormReaderInterface::class);
                     $uc = $c->get(SubmitPublicFormUseCaseInterface::class);
+                    $attachments = $c->get(AttachmentRepositoryInterface::class);
                     $json = $c->get(JsonResponseFactory::class);
                     $pd = $c->get(ProblemDetailsResponseFactory::class);
 
@@ -166,6 +168,10 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Submit public form use case service is invalid.');
                     }
 
+                    if (!$attachments instanceof AttachmentRepositoryInterface) {
+                        throw new LogicException('Attachment repository service is invalid.');
+                    }
+
                     if (!$json instanceof JsonResponseFactory) {
                         throw new LogicException('JSON response factory service is invalid.');
                     }
@@ -174,7 +180,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Problem details response factory service is invalid.');
                     }
 
-                    return new SubmitPublicFormHandler($reader, $uc, $json, $pd);
+                    return new SubmitPublicFormHandler($reader, $uc, $attachments, $json, $pd);
                 },
             )
             ->set(

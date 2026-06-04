@@ -10,6 +10,7 @@ use Nene2\Http\JsonResponseFactory;
 use Nene2\Routing\Router;
 use Nene2\Validation\ValidationError;
 use Nene2\Validation\ValidationException;
+use NeneContact\Attachment\AttachmentRepositoryInterface;
 use NeneContact\ContactForm\ContactForm;
 use NeneContact\ContactForm\FieldType;
 use Psr\Http\Message\ResponseInterface;
@@ -28,6 +29,7 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
     public function __construct(
         private PublicFormReaderInterface $forms,
         private SubmitPublicFormUseCaseInterface $useCase,
+        private AttachmentRepositoryInterface $attachments,
         private JsonResponseFactory $response,
         private ProblemDetailsResponseFactory $problemDetails,
     ) {
@@ -98,6 +100,21 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
         $userAgent = $request->getHeaderLine('User-Agent') !== '' ? $request->getHeaderLine('User-Agent') : null;
 
         $submission = $this->useCase->execute($form, $values, $ip, $userAgent);
+
+        // Link any attachments uploaded for this form to the new submission (D12). Invalid
+        // or already-linked ids are ignored — they never fail the submission.
+        if ($submission->id !== null && $form->id !== null && is_array($body['attachment_ids'] ?? null)) {
+            foreach ($body['attachment_ids'] as $rawId) {
+                $attachmentId = (int) $rawId;
+                if ($attachmentId <= 0) {
+                    continue;
+                }
+
+                if ($this->attachments->findPendingForLink($attachmentId, $form->organizationId, $form->id) !== null) {
+                    $this->attachments->linkToSubmission($attachmentId, $form->organizationId, $submission->id);
+                }
+            }
+        }
 
         return $this->response->create(['id' => $submission->id, 'status' => $submission->status], 201);
     }
