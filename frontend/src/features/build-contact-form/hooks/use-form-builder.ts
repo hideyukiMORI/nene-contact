@@ -84,7 +84,9 @@ export function useFormBuilder(): FormBuilder {
             return d;
           }
           const locales = d.locales.filter((l) => l !== locale);
-          const defaultLocale = d.defaultLocale === locale ? locales[0] : d.defaultLocale;
+          // locales is non-empty here (length was > 1 before the filter); fall back defensively.
+          const defaultLocale =
+            d.defaultLocale === locale ? (locales[0] ?? d.defaultLocale) : d.defaultLocale;
           return { ...d, locales, defaultLocale };
         }
         return { ...d, locales: [...d.locales, locale] };

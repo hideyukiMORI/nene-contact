@@ -1,0 +1,125 @@
+@import 'tailwindcss';
+
+/*
+ * NeNe Contact admin design tokens (Tailwind v4 `@theme`). Semantic colors/fonts so
+ * components use utilities (`bg-primary`, `text-muted`, `font-sans`) instead of raw hex.
+ * The contact spacing scale already equals Tailwind's default (1=4px … 6=24px), so the
+ * component classes below reuse the stock spacing utilities.
+ */
+@theme {
+  --color-bg: #f9fafb;
+  --color-surface: #ffffff;
+  --color-text: #111827;
+  --color-muted: #6b7280;
+  --color-border: #d1d5db;
+  --color-primary: #2563eb;
+  --color-primary-text: #ffffff;
+  --color-danger: #dc2626;
+  --color-danger-bg: #fef2f2;
+
+  --radius-md: 8px;
+
+  --font-sans: 'Inter', 'Noto Sans JP', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    margin: 0;
+    font-size: 14px;
+    @apply bg-bg text-text font-sans;
+  }
+}
+
+/*
+ * Component classes (records-style hybrid: utilities composed via @apply). Markup keeps
+ * stable `nc-*` class names; the styling is expressed through Tailwind tokens/utilities.
+ */
+@layer components {
+  .nc-button {
+    @apply cursor-pointer rounded-md border-0 bg-primary px-4 py-3 text-sm font-semibold text-primary-text;
+  }
+  .nc-button:disabled {
+    @apply cursor-default opacity-60;
+  }
+
+  .nc-field {
+    @apply mb-3 flex flex-col gap-1;
+  }
+  .nc-label {
+    @apply font-semibold;
+  }
+  .nc-input {
+    @apply w-full rounded-md border border-border px-3 py-2 text-sm;
+  }
+  .nc-field-error {
+    @apply text-xs text-danger;
+  }
+
+  .nc-alert {
+    @apply rounded-md px-3 py-2 text-sm;
+  }
+  .nc-alert-error {
+    @apply bg-danger-bg text-danger;
+  }
+
+  .nc-card {
+    @apply rounded-md border border-border bg-surface p-6;
+  }
+  .nc-center {
+    @apply flex min-h-screen items-center justify-center p-4;
+  }
+  .nc-stack {
+    @apply flex w-full max-w-sm flex-col gap-3;
+  }
+  .nc-muted {
+    @apply text-muted;
+  }
+
+  .nc-app {
+    @apply min-h-screen;
+  }
+  .nc-nav {
+    @apply flex items-center gap-4 border-b border-border bg-surface px-6 py-3;
+  }
+  .nc-nav a {
+    @apply font-semibold text-text no-underline;
+  }
+  .nc-nav-spacer {
+    @apply flex-1;
+  }
+  .nc-main {
+    @apply mx-auto max-w-4xl p-6;
+  }
+  .nc-section {
+    @apply flex flex-col gap-3;
+  }
+
+  .nc-table {
+    @apply w-full border-collapse;
+  }
+  .nc-table th,
+  .nc-table td {
+    @apply border-b border-border px-3 py-2 text-left;
+  }
+  .nc-table th {
+    @apply font-semibold text-muted;
+  }
+
+  .nc-palette {
+    @apply flex flex-wrap items-center gap-2;
+  }
+  .nc-fieldset {
+    @apply flex flex-col gap-2 rounded-md border border-border p-3;
+  }
+  .nc-consent-row {
+    @apply flex items-center gap-2;
+  }
+  .nc-list-reset {
+    @apply m-0 list-none p-0;
+  }
+}
