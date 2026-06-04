@@ -24,13 +24,22 @@ final class McpToolCatalogTest extends TestCase
         self::assertContains('contact_get_submission', $names);
     }
 
-    public function test_all_tools_are_read_only_and_map_to_openapi(): void
+    public function test_all_tools_map_to_the_api_surface_with_valid_safety(): void
     {
         foreach ($this->catalog()->tools() as $tool) {
-            self::assertSame('read', $tool['safety'], $tool['name'] . ' must be read-only for this slice');
+            self::assertContains($tool['safety'], ['read', 'write'], $tool['name'] . ' safety');
             self::assertSame('openapi', $tool['source']['type']);
             self::assertStringStartsWith('/api/', $tool['source']['path']);
         }
+    }
+
+    public function test_status_update_is_a_write_tool(): void
+    {
+        $tool = $this->catalog()->find('contact_update_submission_status');
+
+        self::assertNotNull($tool);
+        self::assertSame('write', $tool['safety']);
+        self::assertSame('PATCH', $tool['source']['method']);
     }
 
     public function test_find_returns_tool_by_name(): void

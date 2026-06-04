@@ -2,8 +2,8 @@
 
 **Phase 4** · expose Contact to AI agents via MCP over the OpenAPI surface, and complete
 the deeper sibling integrations. 🚧 **Agent read surface `/api/*` (#118), local MCP stdio
-server (#120), and Concierge ingest `POST /api/submissions` (#122) landed**; MCP write tools +
-Invoice/Records siblings remain.
+server (#120), Concierge ingest (#122), and MCP write tools + confirmation token (#124)
+landed**; deeper siblings (Invoice draft client, Records select options) remain.
 
 ## Goal
 
@@ -20,8 +20,10 @@ remaining sibling directions (Invoice, Records, Concierge ingest) come online.
 - [x] **MCP stdio server** (PHP, reusing `Nene2\Mcp\LocalMcpServer`) mapping read tools to the
       `/api/*` surface above: `tools/local-mcp-server.php` + catalog `docs/mcp/tools.json`
       (machine-key transport); `composer mcp` keeps the catalog honest with OpenAPI. (#120)
-- [ ] **MCP write tools** require an explicit **write tool + confirmation token** and are
+- [x] **MCP write tools** require an explicit **write tool + confirmation token** and are
       audited; **no autonomous outbound action** on personal data (charter §11, DON'T X9).
+      (#124 — `contact_update_submission_status` + two-step `confirmation_token` enforced on
+      `PATCH /api/submissions/{id}`; more write tools follow the same pattern.)
 - [ ] MCP maps to Contact OpenAPI only — no sibling DB access (ADR 0002).
 - [ ] **Contact → Invoice**: create draft `client` (+ optional quote) from a submission,
       idempotent, service token (Phase 4+).

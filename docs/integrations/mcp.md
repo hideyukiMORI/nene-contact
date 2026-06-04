@@ -5,18 +5,33 @@ inbox safely. It is a thin JSON-RPC 2.0 stdio process that maps each tool to a *
 OpenAPI operation only** — never a sibling database (ADR 0002). It reuses the framework's
 `Nene2\Mcp\LocalMcpServer` and the project tool catalog `docs/mcp/tools.json`.
 
-## Tools (read-only)
+## Tools
 
-| Tool | OpenAPI operation | Notes |
-| --- | --- | --- |
-| `contact_list_forms` | `GET /api/forms` | form structure/metadata only |
-| `contact_list_submissions` | `GET /api/submissions` | redacted by default; `include_pii=true` is audit-logged |
-| `contact_get_submission` | `GET /api/submissions/{id}` | redacted by default; `include_pii=true` is audit-logged |
+| Tool | Safety | OpenAPI operation | Notes |
+| --- | --- | --- | --- |
+| `contact_list_forms` | read | `GET /api/forms` | form structure/metadata only |
+| `contact_list_submissions` | read | `GET /api/submissions` | redacted by default; `include_pii=true` is audit-logged |
+| `contact_get_submission` | read | `GET /api/submissions/{id}` | redacted by default; `include_pii=true` is audit-logged |
+| `contact_update_submission_status` | write | `PATCH /api/submissions/{id}` | two-step confirmation token (below) |
 
-All tools are **redacted by default** (no IP/user-agent, masked field values, charter §11).
+Read tools are **redacted by default** (no IP/user-agent, masked field values, charter §11).
 `include_pii=true` returns raw values and is **audit-logged** server-side (`submission.exported`
-for the list, `submission.viewed` for one). There are no write tools yet (a later M6 slice adds
-them behind a confirmation token).
+for the list, `submission.viewed` for one).
+
+## Write tools — two-step confirmation (charter §11)
+
+Write tools never act in one shot — there is **no autonomous outbound action on personal data**.
+The flow is enforced on the endpoint itself, so it holds through MCP or any machine-key client:
+
+1. **Prepare** — call `contact_update_submission_status` with `id` + `status` and **no**
+   `confirmation_token`. The server changes nothing and returns `requires_confirmation: true`, a
+   `preview` (current → requested), and a short-lived `confirmation_token` bound to that exact
+   submission + status.
+2. **Commit** — call again with the same `id` + `status` **plus** the `confirmation_token`. The
+   server verifies it and applies the change (audited `submission.updated`).
+
+A token issued for one change cannot apply a different one (it is rejected and you get a fresh
+challenge). Tokens are signed server-side with `NENE2_LOCAL_JWT_SECRET` and expire quickly.
 
 ## Run
 

@@ -152,6 +152,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `last_error` | `submission_link` | failure reason for retry; never contains a service token (M5) |
 | `external_reference` | handoff payload | idempotency key sent to the sibling = the Contact `submission_id` (DO D11) |
 | `include_pii` | agent API query (`/api/*`) | `true` returns raw values + is audited; default false / redacted (charter §11) |
+| `confirmation_token` | agent write body (`/api/*`) | two-step write proof; phase 1 issues it, phase 2 echoes it to apply (charter §11) |
 | `deal_opportunity_id` | `submission_link` | sibling pointer (Deal) |
 | `invoice_client_id` | `submission_link` | sibling pointer (Invoice) |
 | `vault_document_id` | `submission_link` | sibling pointer (Vault) |
