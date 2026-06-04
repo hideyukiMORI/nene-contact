@@ -6,6 +6,7 @@ import { LoginPage } from '@/pages/login';
 import { HomePage } from '@/pages/home';
 import { ContactFormsPage, ContactFormBuilderPage, ChannelsPage } from '@/pages/contact-forms';
 import { SubmissionsPage, SubmissionDetailPage } from '@/pages/submissions';
+import { UsersPage } from '@/pages/users';
 
 function LoginRoute(): ReactNode {
   const { session, signIn } = useAuth();
@@ -27,6 +28,7 @@ const router = createBrowserRouter(
         { path: 'contact-forms/:id/channels', element: <ChannelsPage /> },
         { path: 'submissions', element: <SubmissionsPage /> },
         { path: 'submissions/:id', element: <SubmissionDetailPage /> },
+        { path: 'users', element: <UsersPage /> },
       ],
     },
   ],
