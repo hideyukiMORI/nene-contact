@@ -13,7 +13,10 @@ use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
+use Psr\Http\Client\ClientInterface;
+use Symfony\Component\HttpClient\Psr18Client;
 use Symfony\Component\Mailer\MailerInterface;
 
 final readonly class NotificationChannelServiceProvider implements ServiceProviderInterface
@@ -53,10 +56,16 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 },
             )
             ->set(
+                ClientInterface::class,
+                static fn (): ClientInterface => new Psr18Client(),
+            )
+            ->set(
                 SubmissionNotifierInterface::class,
                 static function (ContainerInterface $c): SubmissionNotifierInterface {
                     $channels = $c->get(NotificationChannelRepositoryInterface::class);
                     $mailer = $c->get(MailerInterface::class);
+                    $http = $c->get(ClientInterface::class);
+                    $psr17 = $c->get(Psr17Factory::class);
 
                     if (!$channels instanceof NotificationChannelRepositoryInterface) {
                         throw new LogicException('Notification channel repository service is invalid.');
@@ -66,10 +75,22 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         throw new LogicException('Mailer service is invalid.');
                     }
 
+                    if (!$http instanceof ClientInterface) {
+                        throw new LogicException('HTTP client service is invalid.');
+                    }
+
+                    if (!$psr17 instanceof Psr17Factory) {
+                        throw new LogicException('PSR-17 factory service is invalid.');
+                    }
+
                     $from = $_SERVER['MAIL_FROM'] ?? $_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM');
                     $fromAddress = is_string($from) && $from !== '' ? $from : 'noreply@nene-contact.local';
 
-                    return new EmailSubmissionNotifier($channels, $mailer, $fromAddress);
+                    return new CompositeSubmissionNotifier($channels, [
+                        new EmailChannelSender($mailer, $fromAddress),
+                        new SlackChannelSender($http, $psr17),
+                        new ChatworkChannelSender($http, $psr17),
+                    ]);
                 },
             )
             ->set(
