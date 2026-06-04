@@ -125,6 +125,22 @@ export const ja = {
   'builder.type.checkbox': 'チェックボックス',
   'builder.type.file': 'ファイル',
   'builder.type.honeypot': 'ハニーポット',
+  'builder.changeTemplate': 'テンプレート選択に戻る',
+  'preset.pick.title': 'テンプレートを選択',
+  'preset.pick.subtitle': '用途に近いテンプレートから始められます。あとから自由に編集できます。',
+  'preset.pick.use': 'このテンプレートを使う',
+  'preset.blank.name': '空から作成',
+  'preset.blank.desc': '白紙のフォームを 1 から作成します。',
+  'preset.contact.name': 'お問い合わせ',
+  'preset.contact.desc': 'お名前・メール・お問い合わせ内容の基本フォーム。',
+  'preset.documentRequest.name': '資料請求',
+  'preset.documentRequest.desc': '会社名・連絡先を含む資料請求フォーム。',
+  'preset.reservation.name': '予約・相談',
+  'preset.reservation.desc': '希望日や備考を含む予約・相談フォーム。',
+  'preset.recruitment.name': '採用応募',
+  'preset.recruitment.desc': '履歴書ファイルと志望動機を含む応募フォーム。',
+  'preset.support.name': 'サポート依頼',
+  'preset.support.desc': '件名・内容・優先度を含むサポート依頼フォーム。',
 } as const;
 
 export type MessageKey = keyof typeof ja;

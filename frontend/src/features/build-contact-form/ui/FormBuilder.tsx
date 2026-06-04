@@ -16,15 +16,22 @@ import { useState, type ReactNode } from 'react';
 import { SUPPORTED_LOCALES, type SupportedLocale } from '@/shared/i18n/locales';
 import { useI18n } from '@/shared/i18n';
 import { Alert, Button, TextField } from '@/shared/ui';
+import type { ContactFormDraft } from '@/entities/contact-form';
 import {
   PALETTE_FIELD_TYPES,
   useFormBuilder,
 } from '@/features/build-contact-form/hooks/use-form-builder';
 import { SortableFieldRow } from '@/features/build-contact-form/ui/SortableFieldRow';
 
-export function FormBuilder({ onCreated }: { onCreated: () => void }): ReactNode {
+export function FormBuilder({
+  onCreated,
+  initialDraft,
+}: {
+  onCreated: () => void;
+  initialDraft?: ContactFormDraft;
+}): ReactNode {
   const { t } = useI18n();
-  const builder = useFormBuilder();
+  const builder = useFormBuilder(initialDraft);
   const { draft } = builder;
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
 
