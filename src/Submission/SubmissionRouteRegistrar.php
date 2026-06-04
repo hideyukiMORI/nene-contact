@@ -16,6 +16,7 @@ final readonly class SubmissionRouteRegistrar
         private GetSubmissionByIdHandler $getHandler,
         private UpdateSubmissionStatusHandler $updateStatusHandler,
         private DeleteSubmissionHandler $deleteHandler,
+        private CorrectSubmissionHandler $correctHandler,
         private AddSubmissionNoteHandler $addNoteHandler,
         private ListSubmissionNotesHandler $listNotesHandler,
         private ExportSubmissionsHandler $exportHandler,
@@ -30,6 +31,7 @@ final readonly class SubmissionRouteRegistrar
         $get = $this->getHandler;
         $updateStatus = $this->updateStatusHandler;
         $delete = $this->deleteHandler;
+        $correct = $this->correctHandler;
         $addNote = $this->addNoteHandler;
         $listNotes = $this->listNotesHandler;
 
@@ -44,6 +46,7 @@ final readonly class SubmissionRouteRegistrar
         $router->get('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
         $router->patch('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $updateStatus->handle($r));
         $router->delete('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $delete->handle($r));
+        $router->patch('/admin/submissions/{id}/field-values', static fn (ServerRequestInterface $r) => $correct->handle($r));
         $router->get('/admin/submissions/{id}/notes', static fn (ServerRequestInterface $r) => $listNotes->handle($r));
         $router->post('/admin/submissions/{id}/notes', static fn (ServerRequestInterface $r) => $addNote->handle($r));
     }

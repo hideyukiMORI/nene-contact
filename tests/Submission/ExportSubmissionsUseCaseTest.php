@@ -36,6 +36,11 @@ final class ExportSubmissionsUseCaseTest extends TestCase
             {
             }
 
+            /** @param array<string, mixed> $values */
+            public function updateFieldValues(int $id, array $values): void
+            {
+            }
+
             /** @return list<Submission> */
             public function findAll(int $limit, int $offset): array
             {

@@ -357,6 +357,33 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /admin/submissions/{id}/field-values:
+    patch:
+      tags: [Submission]
+      operationId: correctSubmission
+      summary: Correct a submission's stored field values (data-subject correction right)
+      description: >
+        Merge-corrects the provided field values (charter §4). Only fields declared on the
+        form may be corrected (purpose limitation). The change is audited as
+        `submission.corrected` with the changed field names — never raw values.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CorrectSubmissionRequest' }
+      responses:
+        '200':
+          description: Corrected
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
   /admin/submissions/{id}/notes:
     get:
       tags: [Submission]
@@ -728,6 +755,16 @@ components:
       properties:
         status: { type: string, enum: [open, in_progress, resolved, spam] }
       required: [status]
+
+    CorrectSubmissionRequest:
+      type: object
+      properties:
+        field_values:
+          type: object
+          minProperties: 1
+          additionalProperties: true
+          description: Field name/value pairs to correct; keys must be fields declared on the form.
+      required: [field_values]
 
     SubmissionNoteResponse:
       type: object

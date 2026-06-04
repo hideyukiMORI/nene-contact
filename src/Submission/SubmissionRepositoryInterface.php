@@ -19,6 +19,13 @@ interface SubmissionRepositoryInterface
     public function softDelete(int $id): void;
 
     /**
+     * Organization-scoped correction of stored field values (charter §4).
+     *
+     * @param array<string, mixed> $values the full corrected field value map
+     */
+    public function updateFieldValues(int $id, array $values): void;
+
+    /**
      * Organization-scoped (inbox).
      *
      * @return list<Submission>
