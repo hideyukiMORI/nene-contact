@@ -62,7 +62,8 @@ Backend foundation and the compliance core are in place; the admin SPA and embed
 - ✅ **Notifications + webhooks + attachments (M4)** — email / Slack / Chatwork dispatch, signed outbound webhooks, file attachments.
 - ✅ **Embed widget** (`public_html/embed.js`) — floating / button / inline, schema-driven.
 - 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/admin/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
-- ⏳ Next: sibling HTTP handoff (Deal / Vault) and MCP tools.
+- 🚧 **Sibling handoff (M5)** — Contact → Deal opportunity handoff over HTTP (`src/Upstream/`, idempotent, retry, audited; [ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)); Contact → Vault archive next.
+- ⏳ Next: M5 Vault attachment archive and MCP tools.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).
 

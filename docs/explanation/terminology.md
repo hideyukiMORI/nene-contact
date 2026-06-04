@@ -145,7 +145,10 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
 | `options_json` | `form_field` | per-locale option labels |
 | `config_json` | `notification_channel` | encrypted at rest |
+| `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
 | `handoff_status` | `submission_link` | `pending` / `succeeded` / `failed` |
+| `last_error` | `submission_link` | failure reason for retry; never contains a service token (M5) |
+| `external_reference` | handoff payload | idempotency key sent to the sibling = the Contact `submission_id` (DO D11) |
 | `deal_opportunity_id` | `submission_link` | sibling pointer (Deal) |
 | `invoice_client_id` | `submission_link` | sibling pointer (Invoice) |
 | `vault_document_id` | `submission_link` | sibling pointer (Vault) |
@@ -160,7 +163,8 @@ Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`,
 Examples: `submission.viewed`, `submission.exported`, `submission.deleted` (soft-delete),
 `submission.corrected` (data-subject correction, §4), `submission.expired` (retention
 soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
-`contact_form.updated`, `notification_channel.created`, `handoff.retried`.
+`contact_form.updated`, `notification_channel.created`, `handoff.created` (first sibling
+handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`).
 
 | Term | Spelling | Notes |
 | --- | --- | --- |

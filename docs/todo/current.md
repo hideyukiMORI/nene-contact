@@ -6,7 +6,7 @@
 **No-physical-deletion policy (ADR 0016)** ✅ complete on `main` (2026-06-04)
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
-**Next: M5 — Sibling handoff** (Phase 3)
+**M5 — Sibling handoff** 🚧 Deal handoff landed (2026-06-04); Vault archive next
 
 ## Phase 1 progress
 
@@ -75,9 +75,25 @@ raw values).
 - [x] User management (list / create / role+status) (#108 → #109)
 - [ ] Follow-ups: form edit/delete, inbox delete/correct/CSV buttons, org-switch UI, `data-theme`
 
+## M5 — Sibling handoff 🚧 (Phase 3)
+
+- [x] Contact → Deal opportunity handoff — `src/Upstream/` Deal client, `submission_links`,
+      idempotent (`external_reference = submission_id`), retry, non-destructive failure, audited (#112)
+- [ ] Contact → Vault attachment archive (DO D12) — `src/Upstream/` Vault client, `vault_document_id`
+- [ ] Admin SPA: handoff status + "Send to Deal" / retry button on the submission detail (follow-up)
+
+Verified e2e (docker, MySQL): handoff trigger → outbound `POST /api/opportunities`
+(Bearer token + `Idempotency-Key` + `external_reference`); success stores `deal_opportunity_id`
++ `handoff_status=succeeded`; unconfigured/failed → `failed` + `last_error`, submission intact;
+retry is idempotent (single `submission_links` row, upsert — no DELETE, ADR 0016); RBAC 401
+without a token; audit `handoff.created` / `handoff.retried` (ids only, no PII). Note: the
+admin API is currently reached via the front controller directly — see the `.htaccess` follow-up.
+
 ## Next up
 
-- [ ] M5 Sibling HTTP handoff (Deal / Vault) — `src/Upstream/`, idempotent, SubmissionLink (Phase 3)
+- [ ] **`.htaccess` SPA shadow fix** — the `/admin/*` SPA rewrite shadows the `/admin/*` API
+      over apache (docker); decouple the SPA URL prefix from the API prefix (separate Issue)
+- [ ] M5 Vault attachment archive (above)
 - [ ] M6 MCP tool catalog over the OpenAPI surface (read-first)
 - [ ] M7 GA acceptance (A1–A8), operator docs, production `embed.js` build
 
