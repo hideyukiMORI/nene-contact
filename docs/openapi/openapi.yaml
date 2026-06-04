@@ -639,6 +639,7 @@ components:
         status: { type: string }
         consent_required: { type: boolean }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
+        retention_days: { type: [integer, 'null'], description: 'Per-form retention; null uses the documented default (charter §5).' }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
@@ -665,6 +666,7 @@ components:
         consent_label:
           allOf: [{ $ref: '#/components/schemas/LocaleMap' }]
           description: Per-locale consent copy (ja/en); required for the default locale when consent_required is true (charter §3).
+        retention_days: { type: integer, minimum: 1, description: 'Optional per-form retention in days; omit to use the documented default (charter §5).' }
         fields:
           type: array
           items:
