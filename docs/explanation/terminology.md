@@ -49,6 +49,7 @@ comment overrides it.
 | Field definition | `form_field` / `form_fields` | `FormField` |
 | Visitor submission | `submission` / `submissions` | `Submission` — **not** `inquiry`, `message`, `lead` |
 | Operator note | `submission_note` / `submission_notes` | `SubmissionNote` |
+| File attachment | `submission_attachment` / `submission_attachments` | `Attachment` (bytes off-DB; D12) |
 | Notification config | `notification_channel` / `notification_channels` | `NotificationChannel` |
 | Handoff record | `submission_link` / `submission_links` | `SubmissionLink` |
 | Audit record | `audit_event` / `audit_events` | `AuditEvent` (ADR 0013) |

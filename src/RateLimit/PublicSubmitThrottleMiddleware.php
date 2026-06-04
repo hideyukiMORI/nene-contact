@@ -59,7 +59,7 @@ final readonly class PublicSubmitThrottleMiddleware implements MiddlewareInterfa
             return null;
         }
 
-        if (preg_match('#^/public/forms/([^/]+)/submissions$#', $request->getUri()->getPath(), $m) === 1) {
+        if (preg_match('#^/public/forms/([^/]+)/(submissions|attachments)$#', $request->getUri()->getPath(), $m) === 1) {
             return $m[1];
         }
 

@@ -19,6 +19,7 @@ tags:
   - name: ContactForm
   - name: NotificationChannel
   - name: Submission
+  - name: Attachment
   - name: Public
 
 security:
@@ -422,6 +423,75 @@ paths:
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
 
+  /admin/submissions/{id}/attachments:
+    get:
+      tags: [Attachment]
+      operationId: listSubmissionAttachments
+      summary: List a submission's attachments (metadata)
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Attachment list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttachmentListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
+  /admin/submissions/{id}/attachments/{attachmentId}:
+    get:
+      tags: [Attachment]
+      operationId: downloadAttachment
+      summary: Download an attachment's bytes (audited PII access)
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+        - name: attachmentId
+          in: path
+          required: true
+          schema: { type: integer }
+      responses:
+        '200':
+          description: Attachment bytes
+          content:
+            application/octet-stream:
+              schema: { type: string, format: binary }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /public/forms/{public_form_key}/attachments:
+    post:
+      tags: [Attachment]
+      operationId: uploadAttachment
+      summary: Upload a file attachment for a form (embed widget)
+      description: >
+        Multipart upload (field `file`) for the form's file field (D12). Enforces size cap +
+        content-type allowlist + virus-scan hook. Returns an attachment_id to include as
+        `attachment_ids` on the subsequent submit.
+      security: []
+      parameters:
+        - { $ref: '#/components/parameters/PublicFormKeyPath' }
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+              required: [file]
+      responses:
+        '201':
+          description: Stored
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AttachmentUploadResponse' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+        '429': { $ref: '#/components/responses/Problem' }
+
   /public/forms/{public_form_key}/schema:
     get:
       tags: [Public]
@@ -459,6 +529,7 @@ paths:
                 rejected (422); the consent checkbox is never pre-checked (charter §3).
               properties:
                 consent: { type: boolean }
+                attachment_ids: { type: array, items: { type: integer }, description: 'Ids returned by the attachment upload endpoint (D12).' }
       responses:
         '201':
           description: Stored
@@ -739,6 +810,34 @@ components:
         consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
+
+    AttachmentResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        field_name: { type: string }
+        original_filename: { type: string }
+        content_type: { type: string }
+        size_bytes: { type: integer }
+        scan_status: { type: string, enum: [skipped, clean, infected] }
+        created_at: { type: [string, 'null'], format: date-time }
+      required: [id, field_name, original_filename, content_type, size_bytes, scan_status]
+
+    AttachmentListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AttachmentResponse' }
+
+    AttachmentUploadResponse:
+      type: object
+      properties:
+        attachment_id: { type: integer }
+        field_name: { type: string }
+        content_type: { type: string }
+        size_bytes: { type: integer }
+      required: [attachment_id]
 
     SubmissionListResponse:
       type: object
