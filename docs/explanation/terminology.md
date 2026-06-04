@@ -121,11 +121,11 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 
 ## 7. Notification channel types (`notification_channel.channel_type`)
 
-| Value | Transport |
-| --- | --- |
-| `email` | SMTP / mailer |
-| `slack` | Slack incoming webhook |
-| `chatwork` | Chatwork API |
+| Value | Transport | `config_json` keys (encrypted at rest, ADR 0016/§6) |
+| --- | --- | --- |
+| `email` | SMTP / mailer | `recipient` |
+| `slack` | Slack incoming webhook | `webhook_url` |
+| `chatwork` | Chatwork API | `api_token`, `room_id` |
 
 ---
 
