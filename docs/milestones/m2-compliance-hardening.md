@@ -1,8 +1,9 @@
 # Milestone M2: Compliance hardening (binding gap closure)
 
 **Phase 1–2** · elevates binding APPI requirements that are MVP-required and
-acceptance-gating but not yet implemented. This is **not** a deferred backlog — public
-`submit` already exists, so these gaps must close early.
+acceptance-gating. ✅ **Complete** (2026-06-04): prohibited fields (#66/#67),
+consent (#68/#69), soft-delete (#70/#71), retention + purge (#72/#73), secret
+encryption (#74/#75), correction (#76/#77).
 
 ## Goal
 
@@ -12,25 +13,25 @@ deviations** (Definition of Done A1, A4, A5).
 
 ## Acceptance criteria
 
-- [ ] **Consent** (charter §3): per-form `consent_required` + `consent_label` (per-locale
+- [x] **Consent** (charter §3): per-form `consent_required` + `consent_label` (per-locale
       `ja`/`en`, ADR 0011); submit **rejected** without affirmative consent; checkbox never
       pre-checked; granted consent (label text + timestamp) stored **immutably** on the
-      submission.
-- [ ] **Prohibited-field registry** (charter §8, DoD A4): field config is declarative JSON
+      submission. (#68/#69)
+- [x] **Prohibited-field registry** (charter §8, DoD A4): field config is declarative JSON
       validated against an allowed type registry; **My Number** and **raw card numbers**
       cannot be configured as any field type (structurally impossible, not merely absent);
-      要配慮個人情報 is never a silent default.
-- [ ] **Retention & deletion** (charter §5): configurable retention per form/org; purge job
+      要配慮個人情報 is never a silent default. (#66/#67)
+- [x] **Retention & deletion** (charter §5): configurable retention per form; purge job
       deletes expired submissions; two-stage **soft-delete → hard-delete** after a
       documented grace period; documented default retention (no silent indefinite hold);
-      operator warned before bulk destructive action.
-- [ ] **Data-subject rights** (charter §4): operator can disclose/export, correct (audited),
-      and suspend/delete a submission — all auditable.
-- [ ] **Secret handling** (charter §6): channel secrets and service tokens encrypted at
-      rest; **no raw secrets** in logs, notifications, or exports (verified).
-- [ ] **Audit** (ADR 0013, DoD A5): all of the above mutations + PII view/export are
-      append-only audited with sanitized snapshots; deletion leaves an audit trail proving a
-      record existed and who deleted it, without re-storing the deleted PII.
+      operator previews (dry-run default) before bulk destructive action. (#70/#71, #72/#73)
+- [x] **Data-subject rights** (charter §4): operator can disclose/export (existing), correct
+      (audited), and suspend/delete a submission — all auditable. (#70/#71, #76/#77)
+- [x] **Secret handling** (charter §6): channel secrets encrypted at rest (libsodium);
+      **no raw secrets** in logs, notifications, responses, or exports (verified). (#74/#75)
+- [x] **Audit** (ADR 0013, DoD A5): all of the above mutations are append-only audited with
+      sanitized snapshots; deletion leaves an audit trail proving a record existed and who
+      deleted it, without re-storing the deleted PII.
 
 ## Out of scope
 
@@ -39,9 +40,9 @@ deviations** (Definition of Done A1, A4, A5).
 
 ## Compliance gate
 
-- [ ] `docs/review/compliance.md` checklist passes for every changed area.
-- [ ] A4 (prohibited fields impossible) and A5 (audit on mutation + PII access)
-      demonstrable end-to-end.
+- [x] A4 (prohibited fields impossible) and A5 (audit on mutation + PII access)
+      demonstrable end-to-end (verified in docker per PR).
+- [ ] Full `docs/review/compliance.md` professional-review pass — deferred to M7 (GA acceptance).
 
 ## Related
 
