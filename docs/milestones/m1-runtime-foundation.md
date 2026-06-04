@@ -1,6 +1,6 @@
 # Milestone M1: Runtime foundation close-out
 
-**Phase 1** · closes the runtime foundation begun in #20–#51.
+**Phase 1** · closes the runtime foundation begun in #20–#51. ✅ **Complete** (#62 → #63, 2026-06-04).
 
 ## Goal
 
@@ -17,14 +17,14 @@ notes, CSV export, email notification, OpenAPI 3.1 + `composer openapi` gate.
 
 ## Acceptance criteria
 
-- [ ] Organization-scoped **user management** admin CRUD (create / list / update role /
+- [x] Organization-scoped **user management** admin CRUD (create / list / update role /
       deactivate), org-scoped and RBAC-gated.
-- [ ] Every mutation records an `audit_event` with actor + before/after sanitized
+- [x] Every mutation records an `audit_event` with actor + before/after sanitized
       snapshots (ADR 0013).
-- [ ] `tools/create-user.php` remains only as an initial bootstrap; routine user lifecycle
+- [x] `tools/create-user.php` remains only as an initial bootstrap; routine user lifecycle
       is API-driven.
-- [ ] OpenAPI updated for the new admin endpoints; `composer openapi` green.
-- [ ] `composer check` green (tests + phpstan lv8 + cs + openapi).
+- [x] OpenAPI updated for the new admin endpoints; `composer openapi` green.
+- [x] `composer check` green (tests + phpstan lv8 + cs + openapi).
 
 ## Out of scope
 
