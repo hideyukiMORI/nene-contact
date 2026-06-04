@@ -17,6 +17,7 @@ final readonly class PdoNotificationChannelRepository implements NotificationCha
     public function __construct(
         private DatabaseQueryExecutorInterface $query,
         private RequestScopedHolder $orgId,
+        private ConfigCipherInterface $cipher,
     ) {
     }
 
@@ -30,7 +31,7 @@ final readonly class PdoNotificationChannelRepository implements NotificationCha
                 $channel->organizationId,
                 $channel->contactFormId,
                 $channel->channelType,
-                json_encode($channel->config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+                $this->cipher->encrypt(json_encode($channel->config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)),
                 $channel->isEnabled ? 1 : 0,
                 $now,
                 $now,
@@ -65,7 +66,7 @@ final readonly class PdoNotificationChannelRepository implements NotificationCha
     /** @param array<string, mixed> $row */
     private function mapRow(array $row): NotificationChannel
     {
-        $config = json_decode((string) $row['config_json'], true, 512, JSON_THROW_ON_ERROR);
+        $config = json_decode($this->cipher->decrypt((string) $row['config_json']), true, 512, JSON_THROW_ON_ERROR);
 
         return new NotificationChannel(
             organizationId: (int) $row['organization_id'],

@@ -22,10 +22,19 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
     {
         $builder
             ->set(
+                ConfigCipherInterface::class,
+                static function (): ConfigCipherInterface {
+                    $key = $_SERVER['NENE_CONTACT_ENCRYPTION_KEY'] ?? $_ENV['NENE_CONTACT_ENCRYPTION_KEY'] ?? getenv('NENE_CONTACT_ENCRYPTION_KEY');
+
+                    return new SodiumConfigCipher(is_string($key) ? $key : '');
+                },
+            )
+            ->set(
                 NotificationChannelRepositoryInterface::class,
                 static function (ContainerInterface $c): NotificationChannelRepositoryInterface {
                     $query = $c->get(DatabaseQueryExecutorInterface::class);
                     $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+                    $cipher = $c->get(ConfigCipherInterface::class);
 
                     if (!$query instanceof DatabaseQueryExecutorInterface) {
                         throw new LogicException('Database query executor service is invalid.');
@@ -35,8 +44,12 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         throw new LogicException('Org id holder service is invalid.');
                     }
 
+                    if (!$cipher instanceof ConfigCipherInterface) {
+                        throw new LogicException('Config cipher service is invalid.');
+                    }
+
                     /** @var RequestScopedHolder<int> $orgId */
-                    return new PdoNotificationChannelRepository($query, $orgId);
+                    return new PdoNotificationChannelRepository($query, $orgId, $cipher);
                 },
             )
             ->set(
