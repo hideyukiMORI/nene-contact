@@ -2,7 +2,8 @@
 
 **Phase 0 — Governance** ✅ complete on `main` (2026-06-03)
 **Phase 1 — Runtime foundation** ✅ complete on `main` (2026-06-04)
-**Next: Phase 1–2 — M2 Compliance hardening** (see `docs/roadmap.md`, `docs/milestones/`)
+**M2 — Compliance hardening (binding gap closure)** ✅ complete on `main` (2026-06-04)
+**Next: M3 — Forms + embed MVP** (Phase 2; see `docs/roadmap.md`, `docs/milestones/`)
 
 ## Phase 1 progress
 
@@ -22,13 +23,25 @@
 - [x] Organization-scoped user management (admin CRUD, org-scoped, audited) (#62 → #63)
 - [x] Local docker runtime fixes — `.htaccess` rewrite, entrypoint migrations, org bootstrap CLI (#56–#58)
 
-Verified locally: `composer check` green (31 tests + phpstan 8 + cs + openapi); end-to-end on
+## M2 — Compliance hardening ✅ (binding gap closure)
+
+- [x] Prohibited-field registry — My Number/card structurally impossible (§8/A4) (#66 → #67)
+- [x] Consent — `consent_required`/`consent_label`, submit rejected without consent, immutable record (§3) (#68 → #69)
+- [x] Submission soft-delete — data-subject deletion right, audited, excluded from inbox (§4/§5) (#70 → #71)
+- [x] Retention + purge job — `retention_days`, soft→hard delete after grace, dry-run default (§5) (#72 → #73)
+- [x] Channel-secret encryption at rest — libsodium, fail-closed, no raw secrets exposed (§6) (#74 → #75)
+- [x] Submission correction — data-subject correction right, purpose-limited, audited (§4) (#76 → #77)
+
+Verified locally: `composer check` green (62 tests + phpstan 8 + cs + openapi); end-to-end on
 MySQL (docker, fresh `up`) — login→JWT→RBAC (401/200/403); organization/contact-form/
 notification-channel CRUD; **user admin CRUD** (create 201, duplicate 409, invalid 422,
 self-modify 422, editor 403); public `schema` 200 + `submit` 201 (origin 403, honeypot 204,
-required 422, rate-limit 429); inbox list/detail/status/notes + CSV export (ip/ua excluded);
-all mutations + PII access audited with PII/secrets redacted (`user.*` snapshots carry no
-`password_hash`).
+required 422, rate-limit 429, **consent 422/201**); inbox list/detail/status/notes + CSV
+export (ip/ua excluded); **soft-delete 204 + inbox exclusion**; **correction merge + 422**;
+**retention purge** (soft-delete on expiry → hard-delete after grace, dry-run default); all
+mutations + PII access audited with PII/secrets redacted (`user.*` carries no `password_hash`;
+channel `config_json` stored as `v1:` ciphertext; consent/correction/purge audits carry no
+raw values).
 
 ## Phase 0 checklist
 
@@ -41,10 +54,8 @@ all mutations + PII access audited with PII/secrets redacted (`user.*` snapshots
 
 ## Next up
 
-- [ ] **M2 Compliance hardening** (binding gap closure): consent, prohibited-field registry,
-  retention/purge, data-subject rights, channel-secret encryption — see
-  `docs/milestones/m2-compliance-hardening.md`
-- [ ] M3 Frontend: admin SPA + embed widget (Phase 2; builder per ADR 0015)
+- [ ] **M3 Forms + embed MVP** (Phase 2): admin SPA, form builder (dnd-kit, ADR 0015), inbox
+  UI, `embed.js` widget — see `docs/milestones/m3-forms-embed-mvp.md`
 - [ ] M4 Slack / Chatwork notification dispatch (channels stored; only email dispatched so far)
 - [ ] M5 Sibling HTTP handoff (Deal / Vault) — Phase 3
 - [ ] M6 MCP tool catalog over the OpenAPI surface (read-first)
