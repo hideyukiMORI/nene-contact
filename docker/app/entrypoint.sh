@@ -33,4 +33,9 @@ wait_for_mysql() {
 composer install --no-interaction --prefer-dist
 wait_for_mysql
 
+# Apply database migrations on every boot. Phinx records applied migrations in
+# `phinxlog`, so this is idempotent and safe to re-run; a fresh container comes
+# up fully migrated with no manual step. Works for both mysql and sqlite.
+php vendor/bin/phinx migrate -c phinx.php
+
 exec apache2-foreground
