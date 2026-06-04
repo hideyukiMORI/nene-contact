@@ -14,6 +14,7 @@ servers:
 tags:
   - name: System
   - name: Auth
+  - name: User
   - name: Organization
   - name: ContactForm
   - name: NotificationChannel
@@ -55,6 +56,77 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/LoginResponse' }
         '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/users:
+    get:
+      tags: [User]
+      operationId: listUsers
+      summary: List users in the organization
+      responses:
+        '200':
+          description: User list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [User]
+      operationId: createUser
+      summary: Create a user in the organization
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateUserRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/users/{id}:
+    get:
+      tags: [User]
+      operationId: getUserById
+      summary: Get a user by id
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [User]
+      operationId: updateUser
+      summary: Update a user's role and/or status
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateUserRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
 
   /admin/organizations:
@@ -450,6 +522,40 @@ components:
         role: { type: string, enum: [superadmin, admin, editor] }
         org_id: { type: [integer, 'null'] }
       required: [token, role]
+
+    UserResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        email: { type: string, format: email }
+        role: { type: string, enum: [superadmin, admin, editor] }
+        organization_id: { type: [integer, 'null'] }
+        status: { type: string, enum: [active, disabled] }
+        created_at: { type: [string, 'null'], format: date-time }
+        updated_at: { type: [string, 'null'], format: date-time }
+      required: [id, email, role, status]
+
+    UserListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/UserResponse' }
+
+    CreateUserRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        password: { type: string, minLength: 8 }
+        role: { type: string, enum: [admin, editor] }
+      required: [email, password, role]
+
+    UpdateUserRequest:
+      type: object
+      minProperties: 1
+      properties:
+        role: { type: string, enum: [admin, editor] }
+        status: { type: string, enum: [active, disabled] }
 
     OrganizationResponse:
       type: object
