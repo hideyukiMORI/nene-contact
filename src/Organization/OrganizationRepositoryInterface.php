@@ -22,7 +22,4 @@ interface OrganizationRepositoryInterface
 
     /** @throws OrganizationNotFoundException */
     public function update(Organization $organization): void;
-
-    /** @throws OrganizationNotFoundException */
-    public function delete(int $id): void;
 }

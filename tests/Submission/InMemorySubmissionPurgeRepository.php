@@ -12,7 +12,7 @@ final class InMemorySubmissionPurgeRepository implements SubmissionPurgeReposito
     public array $softDeletedIds = [];
 
     /** @var list<int> */
-    public array $hardDeletedIds = [];
+    public array $erasedIds = [];
 
     /**
      * @param list<array{id: int, organization_id: int, submitted_at: string, retention_days: int}> $active
@@ -41,8 +41,8 @@ final class InMemorySubmissionPurgeRepository implements SubmissionPurgeReposito
         $this->softDeletedIds[] = $id;
     }
 
-    public function hardDeleteById(int $id): void
+    public function erasePiiById(int $id): void
     {
-        $this->hardDeletedIds[] = $id;
+        $this->erasedIds[] = $id;
     }
 }

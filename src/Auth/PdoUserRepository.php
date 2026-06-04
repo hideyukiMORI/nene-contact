@@ -74,11 +74,6 @@ final readonly class PdoUserRepository implements UserRepositoryInterface
         );
     }
 
-    public function delete(int $id): void
-    {
-        $this->query->execute('DELETE FROM users WHERE id = ?', [$id]);
-    }
-
     /** @param array<string, mixed> $row */
     private function mapRow(array $row): User
     {

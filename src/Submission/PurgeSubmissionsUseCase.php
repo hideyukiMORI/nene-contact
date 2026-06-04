@@ -14,8 +14,8 @@ use NeneContact\Audit\AuditRecorderInterface;
  * soft-deleted and audited `submission.expired`.
  *
  * Stage 2 — grace expiry: a submission soft-deleted longer than
- * {@see RetentionPolicy::GRACE_DAYS} is hard-deleted (personal data removed) and
- * audited `submission.purged`.
+ * {@see RetentionPolicy::GRACE_DAYS} has its personal data erased in place (ADR 0016 —
+ * the row survives for the audit trail) and is audited `submission.purged`.
  *
  * Audit snapshots carry no PII; deletion stays provable. With $apply = false the use
  * case only counts candidates (dry-run), so operators can preview before destruction.
@@ -63,7 +63,7 @@ final readonly class PurgeSubmissionsUseCase implements PurgeSubmissionsUseCaseI
             }
 
             if ($apply) {
-                $this->repository->hardDeleteById($row['id']);
+                $this->repository->erasePiiById($row['id']);
                 $this->audit->record(
                     null,
                     $row['organization_id'],

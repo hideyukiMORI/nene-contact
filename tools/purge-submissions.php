@@ -6,8 +6,9 @@ declare(strict_types=1);
  * Retention purge job (charter §5). Two stages:
  *   1. retention expiry  → soft-delete submissions older than their form's retention
  *      (override, else RetentionPolicy::DEFAULT_RETENTION_DAYS).
- *   2. grace expiry      → hard-delete submissions soft-deleted longer than
- *      RetentionPolicy::GRACE_DAYS (personal data removed; deletion stays auditable).
+ *   2. grace expiry      → erase PII in place for submissions soft-deleted longer than
+ *      RetentionPolicy::GRACE_DAYS (ADR 0016: the row survives for the audit trail; field
+ *      values / ip / user_agent are cleared and purged_at is set).
  *
  * Usage:
  *   php tools/purge-submissions.php            # dry-run (default): reports counts only
@@ -31,8 +32,8 @@ assert($useCase instanceof PurgeSubmissionsUseCaseInterface);
 $result = $useCase->execute($apply);
 
 if ($result->applied) {
-    fwrite(STDOUT, "Purge applied: {$result->expired} expired (soft-deleted), {$result->purged} purged (hard-deleted).\n");
+    fwrite(STDOUT, "Purge applied: {$result->expired} expired (soft-deleted), {$result->purged} purged (PII erased in place).\n");
 } else {
-    fwrite(STDOUT, "Dry-run (no changes): {$result->expired} would be soft-deleted on retention expiry, {$result->purged} would be hard-deleted after grace.\n");
+    fwrite(STDOUT, "Dry-run (no changes): {$result->expired} would be soft-deleted on retention expiry, {$result->purged} would have PII erased after grace.\n");
     fwrite(STDOUT, "Re-run with --apply to perform the purge.\n");
 }

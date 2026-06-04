@@ -91,8 +91,4 @@ final class InMemoryUserRepository implements UserRepositoryInterface
         );
     }
 
-    public function delete(int $id): void
-    {
-        unset($this->users[$id]);
-    }
 }

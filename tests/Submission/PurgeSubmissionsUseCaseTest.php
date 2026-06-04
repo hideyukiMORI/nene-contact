@@ -52,7 +52,7 @@ final class PurgeSubmissionsUseCaseTest extends TestCase
         self::assertSame(1, $result->purged);
         self::assertTrue($result->applied);
         self::assertSame([1], $repo->softDeletedIds);
-        self::assertSame([3], $repo->hardDeletedIds);
+        self::assertSame([3], $repo->erasedIds);
 
         $actions = array_map(static fn (AuditEvent $e): string => $e->action, $audit->events);
         self::assertContains('submission.expired', $actions);
@@ -82,7 +82,7 @@ final class PurgeSubmissionsUseCaseTest extends TestCase
         self::assertFalse($result->applied);
         // Dry-run mutates nothing and writes no audit events.
         self::assertSame([], $repo->softDeletedIds);
-        self::assertSame([], $repo->hardDeletedIds);
+        self::assertSame([], $repo->erasedIds);
         self::assertCount(0, $audit->events);
     }
 
