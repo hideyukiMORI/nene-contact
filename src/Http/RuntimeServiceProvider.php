@@ -314,6 +314,11 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                     $orgSlug = $env('ORG_SLUG', '');
                     $baseDomain = $env('BASE_DOMAIN', 'localhost');
 
+                    // Machine API key (NENE2 ApiKeyAuthenticationMiddleware) gates the agent
+                    // read surface `/api/*` (M6). Unset → null → the middleware fails closed (401).
+                    $machineApiKeyRaw = $env('NENE2_MACHINE_API_KEY', '');
+                    $machineApiKey = $machineApiKeyRaw !== '' ? $machineApiKeyRaw : null;
+
                     $strategy = match ($mode) {
                         'path' => new PathPrefixResolutionStrategy(),
                         'subdomain' => new SubdomainResolutionStrategy($baseDomain),
@@ -350,11 +355,14 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         responseFactory: $responseFactory,
                         streamFactory: $streamFactory,
                         logger: $logger,
+                        machineApiKey: $machineApiKey,
                         domainExceptionHandlers: $exceptionHandlers,
                         requestIdHolder: $requestIdHolder,
                         routeRegistrars: $routeRegistrars,
                         authMiddleware: [$cors, $throttle, $orgResolver, $adminAuth, $capability],
                         debug: $config->debug,
+                        machineApiKeyProtectedPaths: [],
+                        machineApiKeyProtectedPathPrefixes: ['/api/'],
                         requestMaxBodyBytes: 64 * 1024,
                         problemDetailsBaseUrl: $config->problemDetailsBaseUrl,
                     );

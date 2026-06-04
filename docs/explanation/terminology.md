@@ -150,6 +150,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `handoff_status` | `submission_link` | `pending` / `succeeded` / `failed` |
 | `last_error` | `submission_link` | failure reason for retry; never contains a service token (M5) |
 | `external_reference` | handoff payload | idempotency key sent to the sibling = the Contact `submission_id` (DO D11) |
+| `include_pii` | agent API query (`/api/*`) | `true` returns raw values + is audited; default false / redacted (charter §11) |
 | `deal_opportunity_id` | `submission_link` | sibling pointer (Deal) |
 | `invoice_client_id` | `submission_link` | sibling pointer (Invoice) |
 | `vault_document_id` | `submission_link` | sibling pointer (Vault) |
@@ -267,6 +268,7 @@ options, `consent_label`, templates) is per-locale **data**, not catalog.
 | `NENE_VAULT_API_BASE_URL` / `NENE_VAULT_SERVICE_TOKEN` | Vault attachment archive |
 | `NENE_RECORDS_API_BASE_URL` / `NENE_RECORDS_BEARER_TOKEN` | Records read-only select options |
 | `NENE_CONCIERGE_WEBHOOK_SECRET` | Verify inbound Concierge posts |
+| `NENE2_MACHINE_API_KEY` | Machine API key for the agent read surface `/api/*` (`X-NENE2-API-Key`); MCP maps here (§11) |
 | `NENE_SUITE_ORG_EXTERNAL_ID` | Suite org federation (ADR 0006) |
 | `NENE_CONTACT_ENCRYPTION_KEY` | At-rest key for channel secrets (charter §6); base64 32-byte |
 

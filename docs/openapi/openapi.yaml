@@ -21,6 +21,7 @@ tags:
   - name: Submission
   - name: Attachment
   - name: Handoff
+  - name: Agent
   - name: Public
 
 security:
@@ -560,6 +561,71 @@ paths:
         '422': { $ref: '#/components/responses/ValidationProblem' }
         '429': { $ref: '#/components/responses/Problem' }
 
+  /api/forms:
+    get:
+      tags: [Agent]
+      operationId: agentListForms
+      summary: List contact forms for AI agents (metadata only)
+      description: >
+        Agent read surface (the OpenAPI MCP maps to; ADR 0002 — Contact only, no sibling DB).
+        Returns form structure (fields, locales) only — no secrets, no submitted PII.
+      security:
+        - machineApiKey: []
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: Form list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AgentFormListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /api/submissions:
+    get:
+      tags: [Agent]
+      operationId: agentListSubmissions
+      summary: List submissions for AI agents (redacted by default)
+      description: >
+        Redacted by default — no IP/user-agent, field values masked (charter §11). `include_pii=true`
+        returns raw values and is audit-logged as a bulk PII access (`submission.exported`).
+      security:
+        - machineApiKey: []
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+        - { $ref: '#/components/parameters/IncludePii' }
+      responses:
+        '200':
+          description: Submission list (redacted unless include_pii=true)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AgentSubmissionListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+
+  /api/submissions/{id}:
+    get:
+      tags: [Agent]
+      operationId: agentGetSubmission
+      summary: Get one submission for AI agents (redacted by default)
+      description: >
+        Redacted by default. `include_pii=true` returns raw values and is audit-logged
+        (`submission.viewed`, charter §11).
+      security:
+        - machineApiKey: []
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+        - { $ref: '#/components/parameters/IncludePii' }
+      responses:
+        '200':
+          description: Submission (redacted unless include_pii=true)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AgentSubmissionResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /public/forms/{public_form_key}/schema:
     get:
       tags: [Public]
@@ -617,6 +683,13 @@ components:
       type: http
       scheme: bearer
       bearerFormat: JWT
+    machineApiKey:
+      type: apiKey
+      in: header
+      name: X-NENE2-API-Key
+      description: >
+        Machine API key (NENE2 `ApiKeyAuthenticationMiddleware`, env `NENE2_MACHINE_API_KEY`).
+        Gates the agent read surface `/api/*` that MCP tools map to (ADR 0002).
 
   parameters:
     IdPath:
@@ -639,6 +712,12 @@ components:
       in: query
       required: false
       schema: { type: integer, minimum: 0, default: 0 }
+    IncludePii:
+      name: include_pii
+      in: query
+      required: false
+      description: When true, returns raw (unmasked) field values; audit-logged (charter §11).
+      schema: { type: boolean, default: false }
 
   responses:
     Problem:
@@ -878,6 +957,58 @@ components:
         consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
+
+    AgentFormResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        public_form_key: { type: string }
+        default_locale: { type: string }
+        locales: { type: array, items: { type: string } }
+        status: { type: string }
+        consent_required: { type: boolean }
+        retention_days: { type: [integer, 'null'] }
+        fields:
+          type: array
+          items:
+            type: object
+            properties:
+              name: { type: string }
+              field_type: { type: string }
+              required: { type: boolean }
+              label: { type: object, additionalProperties: { type: string } }
+      required: [id, name, public_form_key]
+
+    AgentFormListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AgentFormResponse' }
+
+    AgentSubmissionResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        contact_form_id: { type: integer }
+        status: { type: string }
+        pii_included: { type: boolean }
+        field_values: { type: object, additionalProperties: true, description: masked unless pii_included }
+        consent_given_at: { type: [string, 'null'], format: date-time }
+        submitted_at: { type: [string, 'null'] }
+      required: [id, contact_form_id, status, pii_included]
+
+    AgentSubmissionListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AgentSubmissionResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
+        pii_included: { type: boolean }
 
     SubmissionLinkResponse:
       type: object

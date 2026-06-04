@@ -9,6 +9,8 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Http\RequestScopedHolder;
+use NeneContact\Api\ApiRouteRegistrar;
+use NeneContact\Api\ApiServiceProvider;
 use NeneContact\Attachment\AttachmentNotFoundExceptionHandler;
 use NeneContact\Attachment\AttachmentRouteRegistrar;
 use NeneContact\Attachment\AttachmentServiceProvider;
@@ -69,6 +71,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
         $builder->addProvider(new SubmissionServiceProvider());
         $builder->addProvider(new AttachmentServiceProvider());
         $builder->addProvider(new HandoffServiceProvider());
+        $builder->addProvider(new ApiServiceProvider());
 
         $builder
             ->set(
@@ -81,6 +84,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $submission = $container->get(SubmissionRouteRegistrar::class);
                     $attachment = $container->get(AttachmentRouteRegistrar::class);
                     $handoff = $container->get(HandoffRouteRegistrar::class);
+                    $api = $container->get(ApiRouteRegistrar::class);
                     $notificationChannel = $container->get(NotificationChannelRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
@@ -111,6 +115,10 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Handoff route registrar service is invalid.');
                     }
 
+                    if (!$api instanceof ApiRouteRegistrar) {
+                        throw new LogicException('Api route registrar service is invalid.');
+                    }
+
                     if (!$notificationChannel instanceof NotificationChannelRouteRegistrar) {
                         throw new LogicException('Notification channel route registrar service is invalid.');
                     }
@@ -124,6 +132,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $submission,
                         $attachment,
                         $handoff,
+                        $api,
                     ];
                 },
             )

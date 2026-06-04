@@ -24,7 +24,9 @@ wins (ADR 0012).
   with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
 - **M5 Sibling handoff** ✅: Contact → Deal opportunity handoff + Contact → Vault attachment
   archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited).
-- **Next:** M6 AI/MCP, then M7 GA acceptance (A1–A8).
+- **M6 AI/MCP** 🚧: agent read surface `/api/*` (the OpenAPI MCP maps to; machine-key auth,
+  redacted by default, audited `include_pii`); MCP stdio server + write tools + deeper siblings next.
+- **Next:** finish M6, then M7 GA acceptance (A1–A8).
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
@@ -38,7 +40,7 @@ Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./
 | [M4](./milestones/m4-channels-webhooks.md) | Channels + webhooks + attachments | 3 | ✅ done |
 | [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin SPA) | 2 | 🚧 core done |
 | [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ✅ done |
-| [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ⏳ |
+| [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | 🚧 read API done |
 | [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | ⏳ |
 
 ```
