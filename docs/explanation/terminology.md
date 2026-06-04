@@ -137,7 +137,10 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `retention_days` | `contact_form` / org policy | retention before purge (charter §5) |
 | `consent_required` | `contact_form` | boolean |
 | `consent_label` | `contact_form` | per-locale `ja`/`en` object (ADR 0011) |
-| `field_values_json` | `submission` | submitted values |
+| `consent_given_at` | `submission` | immutable consent timestamp (charter §3) |
+| `deleted_at` | `submission` | soft-delete marker (ADR 0016); excluded from inbox |
+| `purged_at` | `submission` | PII erased in place after grace (ADR 0016, charter §5) |
+| `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
 | `options_json` | `form_field` | per-locale option labels |
 | `config_json` | `notification_channel` | encrypted at rest |
 | `handoff_status` | `submission_link` | `pending` / `succeeded` / `failed` |
@@ -150,9 +153,11 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 ## 9. Audit (`audit_event`, ADR 0013, [`../development/audit-logging.md`](../development/audit-logging.md))
 
 Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
-`deleted`, `viewed`, `exported`, `retried`.
+`deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`.
 
-Examples: `submission.viewed`, `submission.exported`, `submission.deleted`,
+Examples: `submission.viewed`, `submission.exported`, `submission.deleted` (soft-delete),
+`submission.corrected` (data-subject correction, §4), `submission.expired` (retention
+soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
 `contact_form.updated`, `notification_channel.created`, `handoff.retried`.
 
 | Term | Spelling | Notes |
@@ -256,6 +261,7 @@ options, `consent_label`, templates) is per-locale **data**, not catalog.
 | `NENE_RECORDS_API_BASE_URL` / `NENE_RECORDS_BEARER_TOKEN` | Records read-only select options |
 | `NENE_CONCIERGE_WEBHOOK_SECRET` | Verify inbound Concierge posts |
 | `NENE_SUITE_ORG_EXTERNAL_ID` | Suite org federation (ADR 0006) |
+| `NENE_CONTACT_ENCRYPTION_KEY` | At-rest key for channel secrets (charter §6); base64 32-byte |
 
 Names UPPER_SNAKE_CASE, product prefix `NENE_CONTACT_`. Secrets never committed.
 

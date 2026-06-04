@@ -113,7 +113,10 @@ makes compliance **possible and auditable**.
 - **Configurable retention** per organization (retention days on `contact_form` / org
   policy). A purge job deletes expired submissions.
 - **Soft delete → hard delete.** Deletion is two-stage: soft-delete hides the record;
-  hard-delete removes personal data after a documented grace period.
+  hard-delete removes personal data after a documented grace period. Per
+  [ADR 0016](../adr/0016-no-physical-deletion-pii-erase-in-place.md) the hard-delete is an
+  **erase-in-place** (the PII columns are cleared and `purged_at` set); the row itself is
+  never physically deleted, so the audit linkage survives.
 - **Audit metadata survives.** The audit log retains *that* a record existed and *who*
   deleted it (without re-storing the deleted personal data) — deletion is provable.
 - **No silent indefinite retention.** A form without a retention policy uses a documented

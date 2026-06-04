@@ -87,13 +87,4 @@ final class InMemoryOrganizationRepository implements OrganizationRepositoryInte
 
         $this->byId[$organization->id] = $organization;
     }
-
-    public function delete(int $id): void
-    {
-        if (!isset($this->byId[$id])) {
-            throw new OrganizationNotFoundException($id);
-        }
-
-        unset($this->byId[$id]);
-    }
 }

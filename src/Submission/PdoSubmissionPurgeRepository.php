@@ -65,8 +65,13 @@ final readonly class PdoSubmissionPurgeRepository implements SubmissionPurgeRepo
         );
     }
 
-    public function hardDeleteById(int $id): void
+    public function erasePiiById(int $id): void
     {
-        $this->query->execute('DELETE FROM submissions WHERE id = ?', [$id]);
+        // Crypto-shred in place (ADR 0016): clear personal data, keep the row + audit
+        // linkage. field_values_json is NOT NULL, so it is reset to an empty array.
+        $this->query->execute(
+            "UPDATE submissions SET field_values_json = '[]', consent_label_json = NULL, ip = NULL, user_agent = NULL, purged_at = ?, updated_at = ? WHERE id = ?",
+            [date('Y-m-d H:i:s'), date('Y-m-d H:i:s'), $id],
+        );
     }
 }

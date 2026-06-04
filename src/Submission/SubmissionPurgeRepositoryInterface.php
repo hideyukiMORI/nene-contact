@@ -28,5 +28,10 @@ interface SubmissionPurgeRepositoryInterface
 
     public function softDeleteById(int $id): void;
 
-    public function hardDeleteById(int $id): void;
+    /**
+     * Erases a submission's personal data in place (ADR 0016): the row survives for the
+     * audit trail; field values / ip / user_agent are cleared and `purged_at` is set. No
+     * physical row deletion.
+     */
+    public function erasePiiById(int $id): void;
 }

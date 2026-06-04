@@ -106,15 +106,6 @@ final readonly class PdoOrganizationRepository implements OrganizationRepository
         );
     }
 
-    public function delete(int $id): void
-    {
-        if ($this->findById($id) === null) {
-            throw new OrganizationNotFoundException($id);
-        }
-
-        $this->query->execute('DELETE FROM organizations WHERE id = ?', [$id]);
-    }
-
     /** @param array<string, mixed> $row */
     private function mapRow(array $row): Organization
     {
