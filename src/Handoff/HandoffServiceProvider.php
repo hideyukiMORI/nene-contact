@@ -18,7 +18,9 @@ use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Submission\SubmissionRepositoryInterface;
 use NeneContact\Upstream\DealClientInterface;
 use NeneContact\Upstream\HttpDealClient;
+use NeneContact\Upstream\HttpInvoiceClient;
 use NeneContact\Upstream\HttpVaultClient;
+use NeneContact\Upstream\InvoiceClientInterface;
 use NeneContact\Upstream\VaultClientInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
@@ -80,6 +82,31 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                InvoiceClientInterface::class,
+                static function (ContainerInterface $c): InvoiceClientInterface {
+                    $http = $c->get(ClientInterface::class);
+                    $psr17 = $c->get(Psr17Factory::class);
+
+                    if (!$http instanceof ClientInterface) {
+                        throw new LogicException('HTTP client service is invalid.');
+                    }
+
+                    if (!$psr17 instanceof Psr17Factory) {
+                        throw new LogicException('PSR-17 factory service is invalid.');
+                    }
+
+                    $baseUrl = $_SERVER['NENE_INVOICE_API_BASE_URL'] ?? $_ENV['NENE_INVOICE_API_BASE_URL'] ?? getenv('NENE_INVOICE_API_BASE_URL');
+                    $token = $_SERVER['NENE_INVOICE_SERVICE_TOKEN'] ?? $_ENV['NENE_INVOICE_SERVICE_TOKEN'] ?? getenv('NENE_INVOICE_SERVICE_TOKEN');
+
+                    return new HttpInvoiceClient(
+                        $http,
+                        $psr17,
+                        is_string($baseUrl) ? $baseUrl : '',
+                        is_string($token) ? $token : '',
+                    );
+                },
+            )
+            ->set(
                 SubmissionLinkRepositoryInterface::class,
                 static function (ContainerInterface $c): SubmissionLinkRepositoryInterface {
                     $query = $c->get(DatabaseQueryExecutorInterface::class);
@@ -127,6 +154,38 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                     }
 
                     return new HandoffToDealUseCase($submissions, $forms, $links, $deal, $audit);
+                },
+            )
+            ->set(
+                HandoffToInvoiceUseCaseInterface::class,
+                static function (ContainerInterface $c): HandoffToInvoiceUseCaseInterface {
+                    $submissions = $c->get(SubmissionRepositoryInterface::class);
+                    $forms = $c->get(ContactFormRepositoryInterface::class);
+                    $links = $c->get(SubmissionLinkRepositoryInterface::class);
+                    $invoice = $c->get(InvoiceClientInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$submissions instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$forms instanceof ContactFormRepositoryInterface) {
+                        throw new LogicException('Contact form repository service is invalid.');
+                    }
+
+                    if (!$links instanceof SubmissionLinkRepositoryInterface) {
+                        throw new LogicException('Submission link repository service is invalid.');
+                    }
+
+                    if (!$invoice instanceof InvoiceClientInterface) {
+                        throw new LogicException('Invoice client service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new HandoffToInvoiceUseCase($submissions, $forms, $links, $invoice, $audit);
                 },
             )
             ->set(
@@ -201,6 +260,23 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                HandoffToInvoiceHandler::class,
+                static function (ContainerInterface $c): HandoffToInvoiceHandler {
+                    $uc = $c->get(HandoffToInvoiceUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof HandoffToInvoiceUseCaseInterface) {
+                        throw new LogicException('HandoffToInvoice use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new HandoffToInvoiceHandler($uc, $json);
+                },
+            )
+            ->set(
                 HandoffAttachmentToVaultHandler::class,
                 static function (ContainerInterface $c): HandoffAttachmentToVaultHandler {
                     $uc = $c->get(HandoffAttachmentToVaultUseCaseInterface::class);
@@ -240,6 +316,7 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                     $list = $c->get(ListSubmissionHandoffsHandler::class);
                     $deal = $c->get(HandoffToDealHandler::class);
                     $vault = $c->get(HandoffAttachmentToVaultHandler::class);
+                    $invoice = $c->get(HandoffToInvoiceHandler::class);
 
                     if (!$list instanceof ListSubmissionHandoffsHandler) {
                         throw new LogicException('ListSubmissionHandoffs handler service is invalid.');
@@ -253,7 +330,11 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                         throw new LogicException('HandoffAttachmentToVault handler service is invalid.');
                     }
 
-                    return new HandoffRouteRegistrar($list, $deal, $vault);
+                    if (!$invoice instanceof HandoffToInvoiceHandler) {
+                        throw new LogicException('HandoffToInvoice handler service is invalid.');
+                    }
+
+                    return new HandoffRouteRegistrar($list, $deal, $vault, $invoice);
                 },
             );
     }

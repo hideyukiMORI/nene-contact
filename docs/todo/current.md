@@ -7,7 +7,7 @@
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
 **M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
-**M6 — AI / MCP** 🚧 agent read `/api/*` + MCP stdio + ingest + MCP write/confirm landed (2026-06-04); Invoice/Records siblings next
+**M6 — AI / MCP** 🚧 agent read `/api/*` + MCP stdio + ingest + write/confirm + Invoice handoff landed (2026-06-04); Records read next
 
 ## Phase 1 progress
 
@@ -112,7 +112,8 @@ RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (i
       two-step `confirmation_token` enforced on `PATCH /api/submissions/{id}` (no autonomous
       outbound on PII, §11); reusable for further write tools (#124)
 - [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
-- [ ] Contact → Invoice draft client; Contact → Records read-only select options
+- [x] Contact → Invoice draft client — `src/Upstream/` Invoice client + `POST /admin/submissions/{id}/handoffs/invoice`, idempotent, `invoice_client_id`, audited (#126)
+- [ ] Contact → Records read-only select options (field options from the Records entity API)
 
 Verified e2e (docker, MySQL, php -S with `NENE2_MACHINE_API_KEY`): `/api/*` requires
 `X-NENE2-API-Key` (missing/wrong → 401); `/api/forms` returns metadata only; submissions
@@ -128,7 +129,11 @@ missing required / bad source; old public rows backfilled to `source=form`. **MC
 confirm** (#124) verified (HTTP + MCP stdio): `PATCH /api/submissions/{id}` phase 1 (no token)
 returns a preview + `confirmation_token` and changes nothing; phase 2 (with token) applies +
 audits `submission.updated` (actor null); a token replayed for a different status/id is rejected
-(re-challenged); 401 without the machine key.
+(re-challenged); 401 without the machine key. **Invoice handoff** (#126) verified:
+`POST /admin/submissions/{id}/handoffs/invoice` → outbound `POST /api/clients/draft` (Bearer +
+Idempotency-Key + external_reference); success stores `invoice_client_id` + `succeeded`;
+unconfigured → `failed` + `last_error`, submission intact; retry upserts a single invoice link;
+audit `handoff.created`/`handoff.retried`.
 
 ## Next up
 
