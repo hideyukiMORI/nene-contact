@@ -1,0 +1,6 @@
+# Route all non-file/non-directory requests to the NENE2 front controller.
+# Requires mod_rewrite + AllowOverride All (set in docker/php/Dockerfile).
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [QSA,L]
