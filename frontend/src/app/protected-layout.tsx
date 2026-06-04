@@ -26,6 +26,7 @@ export function ProtectedLayout(): ReactNode {
         <Link to="/">{t('nav.dashboard')}</Link>
         <Link to="/contact-forms">{t('nav.forms')}</Link>
         <Link to="/submissions">{t('nav.inbox')}</Link>
+        <Link to="/users">{t('nav.users')}</Link>
         <span className="nc-nav-spacer" />
         <Button type="button" onClick={signOut}>
           {t('common.signOut')}
