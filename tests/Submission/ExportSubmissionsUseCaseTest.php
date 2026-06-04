@@ -32,6 +32,10 @@ final class ExportSubmissionsUseCaseTest extends TestCase
             {
             }
 
+            public function softDelete(int $id): void
+            {
+            }
+
             /** @return list<Submission> */
             public function findAll(int $limit, int $offset): array
             {
