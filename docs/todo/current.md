@@ -6,7 +6,8 @@
 **No-physical-deletion policy (ADR 0016)** ✅ complete on `main` (2026-06-04)
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
-**M5 — Sibling handoff** 🚧 Deal handoff landed (2026-06-04); Vault archive next
+**M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
+**Next: M6 — AI / MCP** (Phase 4)
 
 ## Phase 1 progress
 
@@ -75,19 +76,22 @@ raw values).
 - [x] User management (list / create / role+status) (#108 → #109)
 - [ ] Follow-ups: form edit/delete, inbox delete/correct/CSV buttons, org-switch UI, `data-theme`
 
-## M5 — Sibling handoff 🚧 (Phase 3)
+## M5 — Sibling handoff ✅ (Phase 3)
 
 - [x] Contact → Deal opportunity handoff — `src/Upstream/` Deal client, `submission_links`,
       idempotent (`external_reference = submission_id`), retry, non-destructive failure, audited (#112)
-- [ ] Contact → Vault attachment archive (DO D12) — `src/Upstream/` Vault client, `vault_document_id`
-- [ ] Admin SPA: handoff status + "Send to Deal" / retry button on the submission detail (follow-up)
+- [x] Contact → Vault attachment archive (DO D12) — `src/Upstream/` Vault client (multipart),
+      per-attachment `submission_links` row, `vault_document_id`, retry, audited (#116)
+- [ ] Admin SPA: handoff status + "Send to Deal" / "Archive to Vault" / retry buttons on the
+      submission detail (follow-up; the API exists)
 
-Verified e2e (docker, MySQL): handoff trigger → outbound `POST /api/opportunities`
-(Bearer token + `Idempotency-Key` + `external_reference`); success stores `deal_opportunity_id`
-+ `handoff_status=succeeded`; unconfigured/failed → `failed` + `last_error`, submission intact;
-retry is idempotent (single `submission_links` row, upsert — no DELETE, ADR 0016); RBAC 401
-without a token; audit `handoff.created` / `handoff.retried` (ids only, no PII). Now also
-verified over apache directly (the `/admin/*` API is reachable since #114 moved the SPA to `/console/`).
+Verified e2e (docker, MySQL, over apache): **Deal** — `POST /api/opportunities` (Bearer +
+`Idempotency-Key` + `external_reference`); success stores `deal_opportunity_id` + `succeeded`.
+**Vault** — multipart `POST /api/documents` (Bearer + `Idempotency-Key` + `external_reference`
++ file bytes); success stores `vault_document_id` + `succeeded`; per-attachment idempotent
+(unique `(submission_id, target, attachment_id)`). Both: unconfigured/failed → `failed` +
+`last_error`, submission/attachment intact; retry upserts a single row (no DELETE, ADR 0016);
+RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (ids only, no PII).
 
 ## Deploy fixes
 
@@ -97,9 +101,9 @@ verified over apache directly (the `/admin/*` API is reachable since #114 moved 
 
 ## Next up
 
-- [ ] M5 Vault attachment archive (above)
 - [ ] M6 MCP tool catalog over the OpenAPI surface (read-first)
 - [ ] M7 GA acceptance (A1–A8), operator docs, production `embed.js` build
+- [ ] Admin SPA handoff buttons (M5 follow-up, above)
 
 ## Handoff notes
 

@@ -32,6 +32,9 @@ final readonly class SubmissionLink
         public ?string $vaultDocumentId = null,
         public ?string $invoiceClientId = null,
         public ?string $lastError = null,
+        // Per-attachment targets (Vault) carry the attachment id; submission-level targets
+        // (Deal) leave it null. A submission has one link per (target, attachment_id).
+        public ?int $attachmentId = null,
         public ?int $id = null,
         public ?string $createdAt = null,
         public ?string $updatedAt = null,

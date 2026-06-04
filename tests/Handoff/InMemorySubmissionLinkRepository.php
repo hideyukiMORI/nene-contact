@@ -17,8 +17,13 @@ final class InMemorySubmissionLinkRepository implements SubmissionLinkRepository
 
     public function findBySubmissionAndTarget(int $submissionId, string $target): ?SubmissionLink
     {
+        return $this->findBySubmissionTargetAttachment($submissionId, $target, null);
+    }
+
+    public function findBySubmissionTargetAttachment(int $submissionId, string $target, ?int $attachmentId): ?SubmissionLink
+    {
         foreach ($this->links as $link) {
-            if ($link->submissionId === $submissionId && $link->target === $target) {
+            if ($link->submissionId === $submissionId && $link->target === $target && $link->attachmentId === $attachmentId) {
                 return $link;
             }
         }
@@ -34,7 +39,7 @@ final class InMemorySubmissionLinkRepository implements SubmissionLinkRepository
 
     public function save(SubmissionLink $link): int
     {
-        $existing = $this->findBySubmissionAndTarget($link->submissionId, $link->target);
+        $existing = $this->findBySubmissionTargetAttachment($link->submissionId, $link->target, $link->attachmentId);
         $id = $existing !== null ? (int) $existing->id : $this->nextId++;
 
         $stored = new SubmissionLink(
@@ -46,12 +51,13 @@ final class InMemorySubmissionLinkRepository implements SubmissionLinkRepository
             vaultDocumentId: $link->vaultDocumentId,
             invoiceClientId: $link->invoiceClientId,
             lastError: $link->lastError,
+            attachmentId: $link->attachmentId,
             id: $id,
         );
 
         $this->links = array_values(array_filter(
             $this->links,
-            static fn (SubmissionLink $l): bool => !($l->submissionId === $link->submissionId && $l->target === $link->target),
+            static fn (SubmissionLink $l): bool => !($l->submissionId === $link->submissionId && $l->target === $link->target && $l->attachmentId === $link->attachmentId),
         ));
         $this->links[] = $stored;
 

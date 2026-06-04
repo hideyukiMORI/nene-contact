@@ -9,6 +9,7 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Http\RequestScopedHolder;
+use NeneContact\Attachment\AttachmentNotFoundExceptionHandler;
 use NeneContact\Attachment\AttachmentRouteRegistrar;
 use NeneContact\Attachment\AttachmentServiceProvider;
 use NeneContact\Audit\AuditServiceProvider;
@@ -136,8 +137,9 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $organizationSlugConflict = $container->get(OrganizationSlugConflictExceptionHandler::class);
                     $contactFormNotFound = $container->get(ContactFormNotFoundExceptionHandler::class);
                     $submissionNotFound = $container->get(SubmissionNotFoundExceptionHandler::class);
+                    $attachmentNotFound = $container->get(AttachmentNotFoundExceptionHandler::class);
 
-                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound] as $handler) {
+                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
@@ -151,6 +153,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $organizationSlugConflict,
                         $contactFormNotFound,
                         $submissionNotFound,
+                        $attachmentNotFound,
                     ];
                 },
             );

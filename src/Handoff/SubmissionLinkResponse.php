@@ -16,6 +16,7 @@ final readonly class SubmissionLinkResponse
         return [
             'id' => $link->id,
             'submission_id' => $link->submissionId,
+            'attachment_id' => $link->attachmentId,
             'target' => $link->target,
             'handoff_status' => $link->handoffStatus,
             'deal_opportunity_id' => $link->dealOpportunityId,
@@ -37,6 +38,7 @@ final readonly class SubmissionLinkResponse
         return [
             'id' => $link->id,
             'submission_id' => $link->submissionId,
+            'attachment_id' => $link->attachmentId,
             'target' => $link->target,
             'handoff_status' => $link->handoffStatus,
             'deal_opportunity_id' => $link->dealOpportunityId,
