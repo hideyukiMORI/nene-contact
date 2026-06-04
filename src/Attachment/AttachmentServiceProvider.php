@@ -124,6 +124,18 @@ final readonly class AttachmentServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                AttachmentNotFoundExceptionHandler::class,
+                static function (ContainerInterface $c): AttachmentNotFoundExceptionHandler {
+                    $pd = $c->get(ProblemDetailsResponseFactory::class);
+
+                    if (!$pd instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    return new AttachmentNotFoundExceptionHandler($pd);
+                },
+            )
+            ->set(
                 DownloadAttachmentHandler::class,
                 static function (ContainerInterface $c): DownloadAttachmentHandler {
                     $attachments = $c->get(AttachmentRepositoryInterface::class);

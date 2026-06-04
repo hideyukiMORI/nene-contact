@@ -146,6 +146,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `options_json` | `form_field` | per-locale option labels |
 | `config_json` | `notification_channel` | encrypted at rest |
 | `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
+| `attachment_id` | `submission_link` | per-attachment targets (Vault) set this; submission-level targets (Deal) leave it null |
 | `handoff_status` | `submission_link` | `pending` / `succeeded` / `failed` |
 | `last_error` | `submission_link` | failure reason for retry; never contains a service token (M5) |
 | `external_reference` | handoff payload | idempotency key sent to the sibling = the Contact `submission_id` (DO D11) |

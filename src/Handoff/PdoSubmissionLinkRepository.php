@@ -14,7 +14,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoSubmissionLinkRepository implements SubmissionLinkRepositoryInterface
 {
-    private const COLUMNS = 'id, organization_id, submission_id, target, deal_opportunity_id, vault_document_id, invoice_client_id, handoff_status, last_error, created_at, updated_at';
+    private const COLUMNS = 'id, organization_id, submission_id, attachment_id, target, deal_opportunity_id, vault_document_id, invoice_client_id, handoff_status, last_error, created_at, updated_at';
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -28,8 +28,22 @@ final readonly class PdoSubmissionLinkRepository implements SubmissionLinkReposi
     public function findBySubmissionAndTarget(int $submissionId, string $target): ?SubmissionLink
     {
         $row = $this->query->fetchOne(
-            'SELECT ' . self::COLUMNS . ' FROM submission_links WHERE submission_id = ? AND target = ? AND organization_id = ?',
+            'SELECT ' . self::COLUMNS . ' FROM submission_links WHERE submission_id = ? AND target = ? AND attachment_id IS NULL AND organization_id = ?',
             [$submissionId, $target, $this->orgId->get()],
+        );
+
+        return $row !== null ? $this->mapRow($row) : null;
+    }
+
+    public function findBySubmissionTargetAttachment(int $submissionId, string $target, ?int $attachmentId): ?SubmissionLink
+    {
+        if ($attachmentId === null) {
+            return $this->findBySubmissionAndTarget($submissionId, $target);
+        }
+
+        $row = $this->query->fetchOne(
+            'SELECT ' . self::COLUMNS . ' FROM submission_links WHERE submission_id = ? AND target = ? AND attachment_id = ? AND organization_id = ?',
+            [$submissionId, $target, $attachmentId, $this->orgId->get()],
         );
 
         return $row !== null ? $this->mapRow($row) : null;
@@ -49,7 +63,7 @@ final readonly class PdoSubmissionLinkRepository implements SubmissionLinkReposi
     public function save(SubmissionLink $link): int
     {
         $now = date('Y-m-d H:i:s');
-        $existing = $this->findBySubmissionAndTarget($link->submissionId, $link->target);
+        $existing = $this->findBySubmissionTargetAttachment($link->submissionId, $link->target, $link->attachmentId);
 
         if ($existing !== null) {
             $this->query->execute(
@@ -72,11 +86,12 @@ final readonly class PdoSubmissionLinkRepository implements SubmissionLinkReposi
         }
 
         $this->query->execute(
-            'INSERT INTO submission_links (organization_id, submission_id, target, deal_opportunity_id, vault_document_id, invoice_client_id, handoff_status, last_error, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO submission_links (organization_id, submission_id, attachment_id, target, deal_opportunity_id, vault_document_id, invoice_client_id, handoff_status, last_error, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $link->organizationId,
                 $link->submissionId,
+                $link->attachmentId,
                 $link->target,
                 $link->dealOpportunityId,
                 $link->vaultDocumentId,
@@ -103,6 +118,7 @@ final readonly class PdoSubmissionLinkRepository implements SubmissionLinkReposi
             vaultDocumentId: isset($row['vault_document_id']) ? (string) $row['vault_document_id'] : null,
             invoiceClientId: isset($row['invoice_client_id']) ? (string) $row['invoice_client_id'] : null,
             lastError: isset($row['last_error']) ? (string) $row['last_error'] : null,
+            attachmentId: isset($row['attachment_id']) ? (int) $row['attachment_id'] : null,
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],

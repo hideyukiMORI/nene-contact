@@ -11,11 +11,15 @@ use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
+use NeneContact\Attachment\AttachmentRepositoryInterface;
+use NeneContact\Attachment\AttachmentStorageInterface;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Submission\SubmissionRepositoryInterface;
 use NeneContact\Upstream\DealClientInterface;
 use NeneContact\Upstream\HttpDealClient;
+use NeneContact\Upstream\HttpVaultClient;
+use NeneContact\Upstream\VaultClientInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
@@ -43,6 +47,31 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                     $token = $_SERVER['NENE_DEAL_SERVICE_TOKEN'] ?? $_ENV['NENE_DEAL_SERVICE_TOKEN'] ?? getenv('NENE_DEAL_SERVICE_TOKEN');
 
                     return new HttpDealClient(
+                        $http,
+                        $psr17,
+                        is_string($baseUrl) ? $baseUrl : '',
+                        is_string($token) ? $token : '',
+                    );
+                },
+            )
+            ->set(
+                VaultClientInterface::class,
+                static function (ContainerInterface $c): VaultClientInterface {
+                    $http = $c->get(ClientInterface::class);
+                    $psr17 = $c->get(Psr17Factory::class);
+
+                    if (!$http instanceof ClientInterface) {
+                        throw new LogicException('HTTP client service is invalid.');
+                    }
+
+                    if (!$psr17 instanceof Psr17Factory) {
+                        throw new LogicException('PSR-17 factory service is invalid.');
+                    }
+
+                    $baseUrl = $_SERVER['NENE_VAULT_API_BASE_URL'] ?? $_ENV['NENE_VAULT_API_BASE_URL'] ?? getenv('NENE_VAULT_API_BASE_URL');
+                    $token = $_SERVER['NENE_VAULT_SERVICE_TOKEN'] ?? $_ENV['NENE_VAULT_SERVICE_TOKEN'] ?? getenv('NENE_VAULT_SERVICE_TOKEN');
+
+                    return new HttpVaultClient(
                         $http,
                         $psr17,
                         is_string($baseUrl) ? $baseUrl : '',
@@ -101,6 +130,43 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                HandoffAttachmentToVaultUseCaseInterface::class,
+                static function (ContainerInterface $c): HandoffAttachmentToVaultUseCaseInterface {
+                    $submissions = $c->get(SubmissionRepositoryInterface::class);
+                    $attachments = $c->get(AttachmentRepositoryInterface::class);
+                    $storage = $c->get(AttachmentStorageInterface::class);
+                    $links = $c->get(SubmissionLinkRepositoryInterface::class);
+                    $vault = $c->get(VaultClientInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$submissions instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$attachments instanceof AttachmentRepositoryInterface) {
+                        throw new LogicException('Attachment repository service is invalid.');
+                    }
+
+                    if (!$storage instanceof AttachmentStorageInterface) {
+                        throw new LogicException('Attachment storage service is invalid.');
+                    }
+
+                    if (!$links instanceof SubmissionLinkRepositoryInterface) {
+                        throw new LogicException('Submission link repository service is invalid.');
+                    }
+
+                    if (!$vault instanceof VaultClientInterface) {
+                        throw new LogicException('Vault client service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new HandoffAttachmentToVaultUseCase($submissions, $attachments, $storage, $links, $vault, $audit);
+                },
+            )
+            ->set(
                 ListSubmissionHandoffsUseCaseInterface::class,
                 static function (ContainerInterface $c): ListSubmissionHandoffsUseCaseInterface {
                     $submissions = $c->get(SubmissionRepositoryInterface::class);
@@ -135,6 +201,23 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                HandoffAttachmentToVaultHandler::class,
+                static function (ContainerInterface $c): HandoffAttachmentToVaultHandler {
+                    $uc = $c->get(HandoffAttachmentToVaultUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof HandoffAttachmentToVaultUseCaseInterface) {
+                        throw new LogicException('HandoffAttachmentToVault use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new HandoffAttachmentToVaultHandler($uc, $json);
+                },
+            )
+            ->set(
                 ListSubmissionHandoffsHandler::class,
                 static function (ContainerInterface $c): ListSubmissionHandoffsHandler {
                     $uc = $c->get(ListSubmissionHandoffsUseCaseInterface::class);
@@ -156,6 +239,7 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                 static function (ContainerInterface $c): HandoffRouteRegistrar {
                     $list = $c->get(ListSubmissionHandoffsHandler::class);
                     $deal = $c->get(HandoffToDealHandler::class);
+                    $vault = $c->get(HandoffAttachmentToVaultHandler::class);
 
                     if (!$list instanceof ListSubmissionHandoffsHandler) {
                         throw new LogicException('ListSubmissionHandoffs handler service is invalid.');
@@ -165,7 +249,11 @@ final readonly class HandoffServiceProvider implements ServiceProviderInterface
                         throw new LogicException('HandoffToDeal handler service is invalid.');
                     }
 
-                    return new HandoffRouteRegistrar($list, $deal);
+                    if (!$vault instanceof HandoffAttachmentToVaultHandler) {
+                        throw new LogicException('HandoffAttachmentToVault handler service is invalid.');
+                    }
+
+                    return new HandoffRouteRegistrar($list, $deal, $vault);
                 },
             );
     }

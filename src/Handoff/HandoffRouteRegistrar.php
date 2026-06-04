@@ -17,6 +17,7 @@ final readonly class HandoffRouteRegistrar
     public function __construct(
         private ListSubmissionHandoffsHandler $listHandler,
         private HandoffToDealHandler $dealHandler,
+        private HandoffAttachmentToVaultHandler $vaultHandler,
     ) {
     }
 
@@ -24,8 +25,10 @@ final readonly class HandoffRouteRegistrar
     {
         $list = $this->listHandler;
         $deal = $this->dealHandler;
+        $vault = $this->vaultHandler;
 
         $router->get('/admin/submissions/{id}/handoffs', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->post('/admin/submissions/{id}/handoffs/deal', static fn (ServerRequestInterface $r) => $deal->handle($r));
+        $router->post('/admin/submissions/{id}/handoffs/vault/{attachmentId}', static fn (ServerRequestInterface $r) => $vault->handle($r));
     }
 }
