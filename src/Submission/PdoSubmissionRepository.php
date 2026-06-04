@@ -14,7 +14,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoSubmissionRepository implements SubmissionRepositoryInterface
 {
-    private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, status, ip, user_agent, submitted_at, created_at, updated_at';
+    private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, ip, user_agent, submitted_at, created_at, updated_at';
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -30,12 +30,14 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
         $now = date('Y-m-d H:i:s');
 
         $this->query->execute(
-            'INSERT INTO submissions (organization_id, contact_form_id, field_values_json, status, ip, user_agent, submitted_at, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO submissions (organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, ip, user_agent, submitted_at, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $submission->organizationId,
                 $submission->contactFormId,
                 json_encode($submission->fieldValues, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+                $submission->consentLabel !== null ? json_encode($submission->consentLabel, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) : null,
+                $submission->consentGivenAt,
                 $submission->status,
                 $submission->ip,
                 $submission->userAgent,
@@ -88,6 +90,9 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
     private function mapRow(array $row): Submission
     {
         $values = json_decode((string) $row['field_values_json'], true, 512, JSON_THROW_ON_ERROR);
+        $consentLabel = isset($row['consent_label_json'])
+            ? json_decode((string) $row['consent_label_json'], true, 512, JSON_THROW_ON_ERROR)
+            : null;
 
         return new Submission(
             organizationId: (int) $row['organization_id'],
@@ -96,6 +101,8 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
             status: (string) $row['status'],
             ip: isset($row['ip']) ? (string) $row['ip'] : null,
             userAgent: isset($row['user_agent']) ? (string) $row['user_agent'] : null,
+            consentLabel: is_array($consentLabel) ? $consentLabel : null,
+            consentGivenAt: isset($row['consent_given_at']) ? (string) $row['consent_given_at'] : null,
             id: (int) $row['id'],
             submittedAt: (string) $row['submitted_at'],
             createdAt: (string) $row['created_at'],

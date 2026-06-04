@@ -21,6 +21,8 @@ final readonly class ContactFormResponse
             'locales' => $form->locales,
             'allowed_origins' => $form->allowedOrigins,
             'status' => $form->status,
+            'consent_required' => $form->consentRequired,
+            'consent_label' => $form->consentLabel,
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'id' => $f->id,

@@ -83,6 +83,12 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
             }
         }
 
+        // Consent (charter §3): when required, the submission is rejected unless consent is
+        // affirmatively given (the embed checkbox is never pre-checked).
+        if ($form->consentRequired && ($body['consent'] ?? null) !== true) {
+            $errors[] = new ValidationError('consent', 'Consent is required to submit this form.', 'consent_required');
+        }
+
         if ($errors !== []) {
             throw new ValidationException($errors);
         }

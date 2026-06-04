@@ -19,6 +19,9 @@ final readonly class SubmissionResponse
             'contact_form_id' => $submission->contactFormId,
             'status' => $submission->status,
             'field_values' => $submission->fieldValues,
+            // Consent evidence for the disclosure right (charter §3/§4); immutable once stored.
+            'consent_label' => $submission->consentLabel,
+            'consent_given_at' => $submission->consentGivenAt,
             'submitted_at' => $submission->submittedAt,
         ];
     }
@@ -35,6 +38,7 @@ final readonly class SubmissionResponse
             'contact_form_id' => $submission->contactFormId,
             'status' => $submission->status,
             'field_keys' => array_keys($submission->fieldValues),
+            'consent_given_at' => $submission->consentGivenAt,
         ];
     }
 }

@@ -21,6 +21,9 @@ final readonly class PublicFormSchemaResponse
             'name' => $form->name,
             'default_locale' => $form->defaultLocale,
             'locales' => $form->locales,
+            // The embed renders an explicit, unchecked consent checkbox when required (charter §3).
+            'consent_required' => $form->consentRequired,
+            'consent_label' => $form->consentLabel,
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'field_type' => $f->fieldType,

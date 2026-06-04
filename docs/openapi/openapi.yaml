@@ -411,7 +411,12 @@ paths:
             schema:
               type: object
               additionalProperties: true
-              description: Field name/value pairs matching the form schema.
+              description: >
+                Field name/value pairs matching the form schema. When the form has
+                consent_required, include `consent: true` (affirmative) or the submit is
+                rejected (422); the consent checkbox is never pre-checked (charter §3).
+              properties:
+                consent: { type: boolean }
       responses:
         '201':
           description: Stored
@@ -617,6 +622,8 @@ components:
         locales: { type: array, items: { type: string, enum: [ja, en] } }
         allowed_origins: { type: array, items: { type: string } }
         status: { type: string }
+        consent_required: { type: boolean }
+        consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
@@ -639,6 +646,10 @@ components:
         default_locale: { type: string, enum: [ja, en] }
         locales: { type: array, items: { type: string, enum: [ja, en] } }
         allowed_origins: { type: array, items: { type: string } }
+        consent_required: { type: boolean, default: false }
+        consent_label:
+          allOf: [{ $ref: '#/components/schemas/LocaleMap' }]
+          description: Per-locale consent copy (ja/en); required for the default locale when consent_required is true (charter §3).
         fields:
           type: array
           items:
@@ -659,10 +670,12 @@ components:
         name: { type: string }
         default_locale: { type: string, enum: [ja, en] }
         locales: { type: array, items: { type: string, enum: [ja, en] } }
+        consent_required: { type: boolean }
+        consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
-      required: [public_form_key, name, default_locale, locales, fields]
+      required: [public_form_key, name, default_locale, locales, fields, consent_required]
 
     SubmitAccepted:
       type: object
@@ -678,6 +691,8 @@ components:
         contact_form_id: { type: integer }
         status: { type: string, enum: [open, in_progress, resolved, spam] }
         field_values: { type: object, additionalProperties: true }
+        consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
+        consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
 
