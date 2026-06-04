@@ -36,6 +36,7 @@ use NeneContact\Organization\Resolution\OrgResolverMiddleware;
 use NeneContact\Organization\Resolution\PathPrefixResolutionStrategy;
 use NeneContact\Organization\Resolution\SubdomainResolutionStrategy;
 use NeneContact\RateLimit\PublicSubmitThrottleMiddleware;
+use NeneContact\Submission\PublicFormReaderInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
@@ -337,6 +338,14 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         throw new LogicException('Public submit throttle middleware service is invalid.');
                     }
 
+                    $publicFormReader = $container->get(PublicFormReaderInterface::class);
+
+                    if (!$publicFormReader instanceof PublicFormReaderInterface) {
+                        throw new LogicException('Public form reader service is invalid.');
+                    }
+
+                    $cors = new PublicCorsMiddleware($publicFormReader);
+
                     return new RuntimeApplicationFactory(
                         responseFactory: $responseFactory,
                         streamFactory: $streamFactory,
@@ -344,7 +353,7 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         domainExceptionHandlers: $exceptionHandlers,
                         requestIdHolder: $requestIdHolder,
                         routeRegistrars: $routeRegistrars,
-                        authMiddleware: [$throttle, $orgResolver, $adminAuth, $capability],
+                        authMiddleware: [$cors, $throttle, $orgResolver, $adminAuth, $capability],
                         debug: $config->debug,
                         requestMaxBodyBytes: 64 * 1024,
                         problemDetailsBaseUrl: $config->problemDetailsBaseUrl,
