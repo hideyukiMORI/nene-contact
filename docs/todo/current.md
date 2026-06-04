@@ -7,7 +7,8 @@
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
 **M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
-**M6 — AI / MCP** 🚧 agent read `/api/*` + MCP stdio + ingest + write/confirm + Invoice handoff landed (2026-06-04); Records read next
+**M6 — AI / MCP** ✅ agent read `/api/*` + MCP stdio + ingest + write/confirm + Invoice + Records on `main` (2026-06-04)
+**Next: M7 — GA / acceptance** (A1–A8)
 
 ## Phase 1 progress
 
@@ -99,7 +100,7 @@ RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (i
       API over apache; the console SPA now serves from `/console/` (`public_html/console/`) and
       `/admin` redirects there, so API routes are no longer shadowed.
 
-## M6 — AI / MCP 🚧 (Phase 4)
+## M6 — AI / MCP ✅ (Phase 4)
 
 - [x] Agent read surface `/api/*` (the OpenAPI MCP maps to) — `GET /api/forms`,
       `GET /api/submissions`, `GET /api/submissions/{id}`; machine-key auth (`X-NENE2-API-Key`);
@@ -113,7 +114,8 @@ RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (i
       outbound on PII, §11); reusable for further write tools (#124)
 - [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
 - [x] Contact → Invoice draft client — `src/Upstream/` Invoice client + `POST /admin/submissions/{id}/handoffs/invoice`, idempotent, `invoice_client_id`, audited (#126)
-- [ ] Contact → Records read-only select options (field options from the Records entity API)
+- [x] Contact → Records read-only select options — `src/Upstream/` Records client +
+      `GET /admin/records/options?source=`, ManageForms, Records stays SSOT (#128)
 
 Verified e2e (docker, MySQL, php -S with `NENE2_MACHINE_API_KEY`): `/api/*` requires
 `X-NENE2-API-Key` (missing/wrong → 401); `/api/forms` returns metadata only; submissions
@@ -133,13 +135,16 @@ audits `submission.updated` (actor null); a token replayed for a different statu
 `POST /admin/submissions/{id}/handoffs/invoice` → outbound `POST /api/clients/draft` (Bearer +
 Idempotency-Key + external_reference); success stores `invoice_client_id` + `succeeded`;
 unconfigured → `failed` + `last_error`, submission intact; retry upserts a single invoice link;
-audit `handoff.created`/`handoff.retried`.
+audit `handoff.created`/`handoff.retried`. **Records read** (#128) verified:
+`GET /admin/records/options?source=countries` → outbound `GET /api/entities/countries/options`
+(Bearer) → `{source, items:[{value,label}]}` (bilingual labels pass through); missing source 422;
+unconfigured 502 problem; no token 401.
 
 ## Next up
 
-- [ ] M6 remaining slices (MCP server, write tools, ingest, Invoice/Records — above)
-- [ ] M7 GA acceptance (A1–A8), operator docs, production `embed.js` build
-- [ ] Admin SPA handoff buttons (M5 follow-up)
+- [ ] **M7 GA / acceptance** (A1–A8), operator docs, production `embed.js` build
+- [ ] Admin SPA: handoff buttons + Records-options import in the builder (M5/M6 UI follow-ups)
+- [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
 
 ## Handoff notes
 

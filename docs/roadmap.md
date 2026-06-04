@@ -24,10 +24,10 @@ wins (ADR 0012).
   with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
 - **M5 Sibling handoff** ✅: Contact → Deal opportunity handoff + Contact → Vault attachment
   archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited).
-- **M6 AI/MCP** 🚧: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
-  (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, and the
-  Contact → Invoice draft-client handoff; Records read-only select options next.
-- **Next:** finish M6, then M7 GA acceptance (A1–A8).
+- **M6 AI/MCP** ✅: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
+  (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, the
+  Contact → Invoice draft-client handoff, and Contact → Records read-only select options.
+- **Next:** M7 GA acceptance (A1–A8), operator docs, production `embed.js` build.
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
@@ -41,7 +41,7 @@ Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./
 | [M4](./milestones/m4-channels-webhooks.md) | Channels + webhooks + attachments | 3 | ✅ done |
 | [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin SPA) | 2 | 🚧 core done |
 | [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ✅ done |
-| [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | 🚧 read API done |
+| [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ✅ done |
 | [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | ⏳ |
 
 ```

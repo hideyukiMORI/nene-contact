@@ -63,8 +63,8 @@ Backend foundation and the compliance core are in place; the admin SPA and embed
 - ✅ **Embed widget** (`public_html/embed.js`) — floating / button / inline, schema-driven.
 - 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/console/`, served at `/console/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
 - ✅ **Sibling handoff (M5)** — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP (`src/Upstream/`, idempotent, retry, non-destructive, audited; [ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)).
-- 🚧 **AI / MCP (M6)** — agent read surface `/api/*` (machine-key auth, redacted by default, audited `include_pii`), a local **MCP stdio server** (`tools/local-mcp-server.php`, [docs](./docs/integrations/mcp.md)), **Concierge ingest** (`POST /api/submissions`, `source=concierge` → one inbox), **MCP write tools** behind a two-step confirmation token, and the **Contact → Invoice** draft-client handoff; Records select options next.
-- ⏳ Next: finish M6, then M7 GA acceptance.
+- ✅ **AI / MCP (M6)** — agent read surface `/api/*` (machine-key auth, redacted by default, audited `include_pii`), a local **MCP stdio server** (`tools/local-mcp-server.php`, [docs](./docs/integrations/mcp.md)), **Concierge ingest** (`POST /api/submissions`, `source=concierge` → one inbox), **MCP write tools** behind a two-step confirmation token, the **Contact → Invoice** draft-client handoff, and **Contact → Records** read-only select options.
+- ⏳ Next: M7 GA acceptance (A1–A8), operator docs, production `embed.js` build.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).
 

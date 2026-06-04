@@ -33,6 +33,8 @@ use NeneContact\Organization\OrganizationRouteRegistrar;
 use NeneContact\Organization\OrganizationServiceProvider;
 use NeneContact\Organization\OrganizationSlugConflictExceptionHandler;
 use NeneContact\RateLimit\RateLimitServiceProvider;
+use NeneContact\Records\RecordsRouteRegistrar;
+use NeneContact\Records\RecordsServiceProvider;
 use NeneContact\Submission\SubmissionNotFoundExceptionHandler;
 use NeneContact\Submission\SubmissionRouteRegistrar;
 use NeneContact\Submission\SubmissionServiceProvider;
@@ -72,6 +74,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
         $builder->addProvider(new AttachmentServiceProvider());
         $builder->addProvider(new HandoffServiceProvider());
         $builder->addProvider(new ApiServiceProvider());
+        $builder->addProvider(new RecordsServiceProvider());
 
         $builder
             ->set(
@@ -85,6 +88,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $attachment = $container->get(AttachmentRouteRegistrar::class);
                     $handoff = $container->get(HandoffRouteRegistrar::class);
                     $api = $container->get(ApiRouteRegistrar::class);
+                    $records = $container->get(RecordsRouteRegistrar::class);
                     $notificationChannel = $container->get(NotificationChannelRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
@@ -119,6 +123,10 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Api route registrar service is invalid.');
                     }
 
+                    if (!$records instanceof RecordsRouteRegistrar) {
+                        throw new LogicException('Records route registrar service is invalid.');
+                    }
+
                     if (!$notificationChannel instanceof NotificationChannelRouteRegistrar) {
                         throw new LogicException('Notification channel route registrar service is invalid.');
                     }
@@ -133,6 +141,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $attachment,
                         $handoff,
                         $api,
+                        $records,
                     ];
                 },
             )
