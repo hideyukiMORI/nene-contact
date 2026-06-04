@@ -61,7 +61,10 @@ defensible rule rather than ad-hoc `DELETE` statements scattered per domain.
 
 **Follow-up**
 
-- PR-B: revoke `DELETE` from the runtime DB user (migrations run as an admin user).
+- ✅ PR-B (#82): the MySQL init script (`docker/mysql/init/`) revokes `DELETE` from the
+  runtime user on fresh volume init — a raw `DELETE` is denied (1142), while the app and
+  forward migrations (DDL/INSERT/UPDATE) are unaffected. `phinx rollback` (which deletes
+  from `phinxlog`) is an admin/dev operation that needs elevated privileges.
 
 ## Related
 

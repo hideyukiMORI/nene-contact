@@ -45,6 +45,7 @@ services:
       - "${NENE_CONTACT_MYSQL_PORT:-3391}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
+      - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test:
         [
