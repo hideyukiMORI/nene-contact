@@ -5,7 +5,7 @@ import { ProtectedLayout } from '@/app/protected-layout';
 import { LoginPage } from '@/pages/login';
 import { HomePage } from '@/pages/home';
 import { ContactFormsPage } from '@/pages/contact-forms';
-import { SubmissionsPage } from '@/pages/submissions';
+import { SubmissionsPage, SubmissionDetailPage } from '@/pages/submissions';
 
 function LoginRoute(): ReactNode {
   const { session, signIn } = useAuth();
@@ -24,6 +24,7 @@ const router = createBrowserRouter(
         { index: true, element: <HomePage /> },
         { path: 'contact-forms', element: <ContactFormsPage /> },
         { path: 'submissions', element: <SubmissionsPage /> },
+        { path: 'submissions/:id', element: <SubmissionDetailPage /> },
       ],
     },
   ],

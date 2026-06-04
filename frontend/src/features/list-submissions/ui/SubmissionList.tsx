@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Alert, Button } from '@/shared/ui';
@@ -40,7 +41,9 @@ export function SubmissionList(): ReactNode {
         <tbody>
           {submissions.map((submission) => (
             <tr key={submission.id}>
-              <td>{submission.id}</td>
+              <td>
+                <Link to={`/submissions/${String(submission.id)}`}>{submission.id}</Link>
+              </td>
               <td>{submission.contactFormId}</td>
               <td>{submission.status}</td>
               <td>{submission.submittedAt ?? '-'}</td>
