@@ -11,27 +11,33 @@ wins (ADR 0012).
 
 ## Where we are (2026-06-04)
 
-- **Phase 0 — Governance** ✅ complete on `main` (2026-06-03).
-- **Phase 1 — Runtime foundation** 🚧 ~95%: org, tenant resolution, JWT/RBAC, audit,
+- **Phase 0 — Governance** ✅ complete (2026-06-03).
+- **Phase 1 — Runtime foundation** ✅ complete: org, tenant resolution, JWT/RBAC, audit,
   contact-form CRUD, public `schema`/`submit`, rate limiting, status workflow + notes,
-  CSV export, email notification, OpenAPI 3.1 gate. CI green.
-- **Binding compliance gaps** identified (not yet implemented): consent, retention/purge,
-  data-subject rights, prohibited-field registry, channel-secret encryption review.
-  These are MVP-required and acceptance-gating — tracked as **M2**, not deferred.
+  CSV export, email notification, OpenAPI 3.1 gate, org-scoped user management (M1).
+- **M2 Compliance hardening** ✅: consent, prohibited-field registry, retention + purge,
+  data-subject delete/correct, channel-secret encryption.
+- **No-physical-deletion policy** ✅ ([ADR 0016](./adr/0016-no-physical-deletion-pii-erase-in-place.md)):
+  records are soft-deleted / append-only; PII is erased in place; the DB user has no `DELETE`.
+- **M4 Channels + webhooks + attachments** ✅: Slack/Chatwork dispatch, signed webhooks, file attachments.
+- **M3 Forms + embed MVP** 🚧: `embed.js` widget ✅; admin SPA (React/TS/Vite → `public_html/admin/`)
+  with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
+- **Next:** M5 sibling handoff (Deal / Vault), M6 AI/MCP, then M7 GA acceptance (A1–A8).
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
 ## Milestones to GOAL
 
-| ID | Milestone | Phase | Theme |
+| ID | Milestone | Phase | Status |
 | --- | --- | --- | --- |
-| [M1](./milestones/m1-runtime-foundation.md) | Runtime foundation close-out | 1 | org-scoped user management |
-| [M2](./milestones/m2-compliance-hardening.md) | Compliance hardening (binding gap closure) | 1–2 | consent, prohibited fields, retention, DSR, secrets |
-| [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP | 2 | admin SPA, builder, inbox UI, `embed.js` |
-| [M4](./milestones/m4-channels-webhooks.md) | Channels + webhooks | 3 | Slack/Chatwork dispatch, signed webhooks, attachments |
-| [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | Upstream clients, Deal/Vault, SubmissionLink + retry |
-| [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | MCP read/write, Invoice/Records/Concierge |
-| [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | A1–A8 pass, operator docs, prod `embed.js` build |
+| [M1](./milestones/m1-runtime-foundation.md) | Runtime foundation close-out | 1 | ✅ done |
+| [M2](./milestones/m2-compliance-hardening.md) | Compliance hardening (binding gap closure) | 1–2 | ✅ done |
+| — | No physical deletion / PII erase-in-place (ADR 0016) | 2 | ✅ done |
+| [M4](./milestones/m4-channels-webhooks.md) | Channels + webhooks + attachments | 3 | ✅ done |
+| [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin SPA) | 2 | 🚧 core done |
+| [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ⏳ next |
+| [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ⏳ |
+| [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | ⏳ |
 
 ```
 M1 ──> M2 ──> M3 ──> M4 ──> M5 ──> M6 ──> M7 (GOAL)

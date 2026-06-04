@@ -47,4 +47,6 @@ Do not use 82xx / 83xx / 84xx / 85xx lanes.
 
 ## Status
 
-Phase 0 governance. See `docs/todo/current.md`.
+Backend foundation + compliance core + notifications/attachments done; admin SPA (`frontend/`)
+and embed widget (`public_html/embed.js`) landing. Physical row deletion is forbidden — PII is
+erased in place (ADR 0016). See `docs/todo/current.md` and `docs/roadmap.md`.

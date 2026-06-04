@@ -20,8 +20,10 @@ Where this document and NENE2 differ, **this document wins for NeNe Contact**.
 > **Enforcement:** violations of placement, dependency direction, data flow, security,
 > naming, or testing rules **block merge to `main`**. No temporary exception without an ADR.
 
-**Status:** Phase 2 — `frontend/` scaffold tracked by Issues. This is the binding policy;
-application code follows it as screens land.
+**Status:** Phase 2 — `frontend/` scaffold landed (React + TS + Vite, npm + lockfile, ESLint
+flat + Prettier + Vitest/MSW, openapi-typescript). Admin SPA screens (login, form builder,
+inbox list/detail, channels, users) and the `embed.js` widget are landing per this binding
+policy; remaining screens follow the same layering.
 
 ---
 
