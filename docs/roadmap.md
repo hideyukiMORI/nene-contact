@@ -28,8 +28,9 @@ wins (ADR 0012).
   (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, the
   Contact → Invoice draft-client handoff, and Contact → Records read-only select options.
 - **M7 GA / acceptance** 🚧: A1–A8 verified with code evidence
-  ([`review/acceptance-A1-A8.md`](./review/acceptance-A1-A8.md), verdict PASS); operator docs +
-  production `embed.js` build remain.
+  ([`review/acceptance-A1-A8.md`](./review/acceptance-A1-A8.md), verdict PASS) + operator guide
+  ([`operations/operator-guide.md`](./operations/operator-guide.md)); production `embed.js` build
+  + final reviews remain.
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
