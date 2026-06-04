@@ -55,8 +55,16 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 
 ## Status
 
-**Phase 1** — runtime foundation. NENE2 app scaffold + `GET /health` landed; multi-tenant
-org/auth and the contact-form domain follow.
+Backend foundation and the compliance core are in place; the admin SPA and embed widget are landing.
+
+- ✅ **Runtime + multi-tenant + auth** (org/JWT/RBAC), audit, contact-form & submission domains, rate limiting, OpenAPI 3.1 gate, org-scoped user management.
+- ✅ **Compliance hardening (M2)** — consent, prohibited-field registry, retention + purge, data-subject delete/correct, channel-secret encryption; **no physical row deletion** (PII erased in place, [ADR 0016](./docs/adr/0016-no-physical-deletion-pii-erase-in-place.md)).
+- ✅ **Notifications + webhooks + attachments (M4)** — email / Slack / Chatwork dispatch, signed outbound webhooks, file attachments.
+- ✅ **Embed widget** (`public_html/embed.js`) — floating / button / inline, schema-driven.
+- 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/admin/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
+- ⏳ Next: sibling HTTP handoff (Deal / Vault) and MCP tools.
+
+See [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).
 
 ## Quick Start
 
@@ -81,14 +89,25 @@ docker compose exec app php tools/create-user.php admin@example.com 'change-me' 
 
 NENE2 is consumed via a Composer `path` repository (`../NENE2`). Copy `.env.example` to
 `.env` to override config (problem-details base URL, tenant resolution, database).
+Channel secrets are encrypted at rest — set `NENE_CONTACT_ENCRYPTION_KEY` (see `.env.example`).
+
+### Frontend (admin SPA + embed widget)
+
+```bash
+npm ci --prefix frontend
+npm run check --prefix frontend        # type-check + lint + format + test
+npm run build --prefix frontend        # admin → public_html/admin/  (served at /admin/)
+```
+
+The admin SPA lives in `frontend/` (React + TypeScript + Vite, [`frontend-standards.md`](./docs/development/frontend-standards.md)); its build output (`public_html/admin/`) is generated, not committed. The public embed widget is `public_html/embed.js`; try it via `/embed-demo.html?form=YOUR_KEY`.
 
 ## Local ports (fixed — do not revert to defaults)
 
 | Service | Host port |
 | --- | --- |
-| PHP / API | **8900** |
-| phpMyAdmin (when added) | **8901** |
-| MySQL (when added) | **3391** |
+| PHP / API (admin SPA at `/admin/`, embed at `/embed.js`) | **8900** |
+| phpMyAdmin | **8901** |
+| MySQL | **3391** |
 
 Use the **89xx** lane only. Do not reuse NENE2 (82xx), Clear (83xx), Profile (84xx), or Invoice (85xx) ports.
 

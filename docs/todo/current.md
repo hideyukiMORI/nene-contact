@@ -5,7 +5,8 @@
 **M2 — Compliance hardening (binding gap closure)** ✅ complete on `main` (2026-06-04)
 **No-physical-deletion policy (ADR 0016)** ✅ complete on `main` (2026-06-04)
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
-**Next: M3 — Forms + embed MVP** (Phase 2 frontend) or **M5 — Sibling handoff** (Phase 3)
+**M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
+**Next: M5 — Sibling handoff** (Phase 3)
 
 ## Phase 1 progress
 
@@ -61,12 +62,24 @@ raw values).
 - [x] File attachments — upload/store/caps/scan-hook + admin list/download (audited) (#88 → #89)
 - [x] Attachment retention erase-in-place + orphan cleanup (ADR 0016) (#90 → #91)
 
+## M3 — Forms + embed MVP 🚧 (core landed)
+
+- [x] Per-form CORS for public endpoints (embed prerequisite) (#93 → #94)
+- [x] `embed.js` widget — floating/button/inline, schema-driven, consent + file upload (#95 → #96)
+- [x] Admin SPA scaffold + login (React/TS/Vite → `public_html/admin/`) (#97 → #98)
+- [x] Contact-form list (#99 → #100)
+- [x] Submissions inbox list with paging (#101 → #102)
+- [x] Submission detail — status update + notes (write pattern) (#103)
+- [x] Form builder — palette + dnd-kit reorder + create (ADR 0015) (#104 → #105)
+- [x] Notification channel management (#106 → #107)
+- [x] User management (list / create / role+status) (#108 → #109)
+- [ ] Follow-ups: form edit/delete, inbox delete/correct/CSV buttons, org-switch UI, `data-theme`
+
 ## Next up
 
-- [ ] **M3 Forms + embed MVP** (Phase 2): admin SPA, form builder (dnd-kit, ADR 0015), inbox
-  UI, `embed.js` widget — see `docs/milestones/m3-forms-embed-mvp.md`
 - [ ] M5 Sibling HTTP handoff (Deal / Vault) — `src/Upstream/`, idempotent, SubmissionLink (Phase 3)
 - [ ] M6 MCP tool catalog over the OpenAPI surface (read-first)
+- [ ] M7 GA acceptance (A1–A8), operator docs, production `embed.js` build
 
 ## Handoff notes
 
