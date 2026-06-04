@@ -1,0 +1,96 @@
+{
+  "$comment": "MCP tool catalog for NeNe Contact. Each tool maps to a Contact OpenAPI operation (ADR 0002 — Contact OpenAPI only, never a sibling DB). Consumed by tools/local-mcp-server.php via Nene2\\Mcp\\LocalMcpToolCatalog. Read-only for now; writes (with confirmation) land in a later M6 slice.",
+  "tools": [
+    {
+      "name": "contact_list_forms",
+      "title": "List contact forms",
+      "description": "List the organization's contact forms (structure and metadata only — no secrets, no submitted personal data).",
+      "safety": "read",
+      "source": {
+        "type": "openapi",
+        "operationId": "agentListForms",
+        "method": "GET",
+        "path": "/api/forms"
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum number of forms to return (default 50)."
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Pagination offset (default 0)."
+          }
+        },
+        "required": []
+      },
+      "responseSchemaRef": "AgentFormListResponse"
+    },
+    {
+      "name": "contact_list_submissions",
+      "title": "List submissions",
+      "description": "List submissions for triage. Redacted by default (no IP/user-agent, field values masked). Set include_pii=true ONLY when raw personal data is genuinely required — it returns unmasked values and is audit-logged (charter §11).",
+      "safety": "read",
+      "source": {
+        "type": "openapi",
+        "operationId": "agentListSubmissions",
+        "method": "GET",
+        "path": "/api/submissions"
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100,
+            "description": "Maximum number of submissions to return (default 20)."
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0,
+            "description": "Pagination offset (default 0)."
+          },
+          "include_pii": {
+            "type": "boolean",
+            "description": "Return raw (unmasked) field values. Audit-logged as a bulk PII access (charter §11). Default false."
+          }
+        },
+        "required": []
+      },
+      "responseSchemaRef": "AgentSubmissionListResponse"
+    },
+    {
+      "name": "contact_get_submission",
+      "title": "Get a submission",
+      "description": "Fetch one submission by id. Redacted by default; include_pii=true returns raw values and is audit-logged (charter §11).",
+      "safety": "read",
+      "source": {
+        "type": "openapi",
+        "operationId": "agentGetSubmission",
+        "method": "GET",
+        "path": "/api/submissions/{id}"
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The submission id."
+          },
+          "include_pii": {
+            "type": "boolean",
+            "description": "Return raw (unmasked) field values. Audit-logged (charter §11). Default false."
+          }
+        },
+        "required": ["id"]
+      },
+      "responseSchemaRef": "AgentSubmissionResponse"
+    }
+  ]
+}
