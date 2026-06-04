@@ -32,7 +32,7 @@ const router = createBrowserRouter(
       ],
     },
   ],
-  { basename: '/admin' },
+  { basename: '/console' },
 );
 
 export function AppRouter(): ReactNode {

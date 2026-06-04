@@ -61,7 +61,7 @@ Backend foundation and the compliance core are in place; the admin SPA and embed
 - ✅ **Compliance hardening (M2)** — consent, prohibited-field registry, retention + purge, data-subject delete/correct, channel-secret encryption; **no physical row deletion** (PII erased in place, [ADR 0016](./docs/adr/0016-no-physical-deletion-pii-erase-in-place.md)).
 - ✅ **Notifications + webhooks + attachments (M4)** — email / Slack / Chatwork dispatch, signed outbound webhooks, file attachments.
 - ✅ **Embed widget** (`public_html/embed.js`) — floating / button / inline, schema-driven.
-- 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/admin/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
+- 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/console/`, served at `/console/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
 - 🚧 **Sibling handoff (M5)** — Contact → Deal opportunity handoff over HTTP (`src/Upstream/`, idempotent, retry, audited; [ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)); Contact → Vault archive next.
 - ⏳ Next: M5 Vault attachment archive and MCP tools.
 
@@ -97,10 +97,10 @@ Channel secrets are encrypted at rest — set `NENE_CONTACT_ENCRYPTION_KEY` (see
 ```bash
 npm ci --prefix frontend
 npm run check --prefix frontend        # type-check + lint + format + test
-npm run build --prefix frontend        # admin → public_html/admin/  (served at /admin/)
+npm run build --prefix frontend        # console SPA → public_html/console/  (served at /console/)
 ```
 
-The admin SPA lives in `frontend/` (React + TypeScript + Vite, [`frontend-standards.md`](./docs/development/frontend-standards.md)); its build output (`public_html/admin/`) is generated, not committed. The public embed widget is `public_html/embed.js`; try it via `/embed-demo.html?form=YOUR_KEY`.
+The admin SPA lives in `frontend/` (React + TypeScript + Vite, [`frontend-standards.md`](./docs/development/frontend-standards.md)); its build output (`public_html/console/`, served at `/console/`) is generated, not committed. The admin **API** owns `/admin/*`, so the SPA is served from `/console/` to avoid shadowing it ([ADR-tracked in #114](https://github.com/hideyukiMORI/nene-contact/issues/114)); `/admin` redirects to `/console/`. The public embed widget is `public_html/embed.js`; try it via `/embed-demo.html?form=YOUR_KEY`.
 
 ## Local ports (fixed — do not revert to defaults)
 
