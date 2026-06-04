@@ -59,8 +59,9 @@ export interface FormBuilder {
   submit: () => Promise<ContactForm>;
 }
 
-export function useFormBuilder(): FormBuilder {
-  const [draft, setDraft] = useState<ContactFormDraft>(initialDraft);
+export function useFormBuilder(seed?: ContactFormDraft): FormBuilder {
+  // Seed from a preset/template when provided (lazy init so the seed is captured once).
+  const [draft, setDraft] = useState<ContactFormDraft>(() => seed ?? initialDraft);
   const mutation = useCreateContactFormMutation();
 
   const patchField = (id: string, patch: Partial<Omit<DraftField, 'id'>>): void => {
