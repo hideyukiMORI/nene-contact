@@ -15,6 +15,9 @@ final readonly class Submission
         public int $contactFormId,
         public array $fieldValues,
         public string $status = 'open',
+        // Origin of the submission: 'form' (public/embed) or a service source ('concierge',
+        // 'import', 'api') set by the ingest endpoint (M6, concierge-ingest-contract).
+        public string $source = 'form',
         public ?string $ip = null,
         public ?string $userAgent = null,
         public ?array $consentLabel = null,

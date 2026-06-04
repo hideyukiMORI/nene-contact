@@ -18,6 +18,7 @@ final readonly class ApiRouteRegistrar
         private ListAgentFormsHandler $formsHandler,
         private ListAgentSubmissionsHandler $listSubmissionsHandler,
         private GetAgentSubmissionHandler $getSubmissionHandler,
+        private IngestSubmissionHandler $ingestHandler,
     ) {
     }
 
@@ -26,9 +27,11 @@ final readonly class ApiRouteRegistrar
         $forms = $this->formsHandler;
         $list = $this->listSubmissionsHandler;
         $get = $this->getSubmissionHandler;
+        $ingest = $this->ingestHandler;
 
         $router->get('/api/forms', static fn (ServerRequestInterface $r) => $forms->handle($r));
         $router->get('/api/submissions', static fn (ServerRequestInterface $r) => $list->handle($r));
+        $router->post('/api/submissions', static fn (ServerRequestInterface $r) => $ingest->handle($r));
         $router->get('/api/submissions/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
     }
 }

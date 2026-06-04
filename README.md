@@ -63,7 +63,7 @@ Backend foundation and the compliance core are in place; the admin SPA and embed
 - ✅ **Embed widget** (`public_html/embed.js`) — floating / button / inline, schema-driven.
 - 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/console/`, served at `/console/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
 - ✅ **Sibling handoff (M5)** — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP (`src/Upstream/`, idempotent, retry, non-destructive, audited; [ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)).
-- 🚧 **AI / MCP (M6)** — agent read surface `/api/*` (machine-key auth, redacted by default, audited `include_pii`) + a local **MCP stdio server** (`tools/local-mcp-server.php`, [docs](./docs/integrations/mcp.md)) mapping read tools to it; write tools + deeper siblings next.
+- 🚧 **AI / MCP (M6)** — agent read surface `/api/*` (machine-key auth, redacted by default, audited `include_pii`), a local **MCP stdio server** (`tools/local-mcp-server.php`, [docs](./docs/integrations/mcp.md)), and **Concierge ingest** (`POST /api/submissions`, `source=concierge` → one inbox); MCP write tools + Invoice/Records next.
 - ⏳ Next: finish M6, then M7 GA acceptance.
 
 See [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).

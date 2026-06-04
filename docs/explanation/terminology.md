@@ -140,6 +140,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `consent_required` | `contact_form` | boolean |
 | `consent_label` | `contact_form` | per-locale `ja`/`en` object (ADR 0011) |
 | `consent_given_at` | `submission` | immutable consent timestamp (charter §3) |
+| `source` | `submission` | origin: `form` (public/embed) or service ingest `concierge` / `import` / `api` (M6) |
 | `deleted_at` | `submission` | soft-delete marker (ADR 0016); excluded from inbox |
 | `purged_at` | `submission` | PII erased in place after grace (ADR 0016, charter §5) |
 | `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
