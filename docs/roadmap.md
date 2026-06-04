@@ -25,8 +25,8 @@ wins (ADR 0012).
 - **M5 Sibling handoff** ✅: Contact → Deal opportunity handoff + Contact → Vault attachment
   archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited).
 - **M6 AI/MCP** 🚧: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
-  (`source=concierge`, one inbox), and MCP write tools behind a two-step confirmation token;
-  deeper siblings (Invoice draft client, Records select options) next.
+  (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, and the
+  Contact → Invoice draft-client handoff; Records read-only select options next.
 - **Next:** finish M6, then M7 GA acceptance (A1–A8).
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).

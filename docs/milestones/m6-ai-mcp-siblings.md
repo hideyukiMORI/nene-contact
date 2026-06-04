@@ -3,7 +3,7 @@
 **Phase 4** · expose Contact to AI agents via MCP over the OpenAPI surface, and complete
 the deeper sibling integrations. 🚧 **Agent read surface `/api/*` (#118), local MCP stdio
 server (#120), Concierge ingest (#122), and MCP write tools + confirmation token (#124)
-landed**; deeper siblings (Invoice draft client, Records select options) remain.
+landed**, plus the Invoice draft-client handoff (#126); Records select options remain.
 
 ## Goal
 
@@ -25,8 +25,9 @@ remaining sibling directions (Invoice, Records, Concierge ingest) come online.
       (#124 — `contact_update_submission_status` + two-step `confirmation_token` enforced on
       `PATCH /api/submissions/{id}`; more write tools follow the same pattern.)
 - [ ] MCP maps to Contact OpenAPI only — no sibling DB access (ADR 0002).
-- [ ] **Contact → Invoice**: create draft `client` (+ optional quote) from a submission,
-      idempotent, service token (Phase 4+).
+- [x] **Contact → Invoice**: create draft `client` from a submission, idempotent, service token
+      (#126 — `InvoiceClientInterface` + `POST /admin/submissions/{id}/handoffs/invoice`,
+      `invoice_client_id` on `submission_link`, non-destructive, audited). Optional quote is a follow-up.
 - [ ] **Contact → Records (read)**: populate `select` field options from the entity API
       (read-only, Phase 4+).
 - [x] **Concierge → Contact ingest**: `POST /api/submissions` with `source=concierge` via the

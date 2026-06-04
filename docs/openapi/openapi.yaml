@@ -502,6 +502,29 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /admin/submissions/{id}/handoffs/invoice:
+    post:
+      tags: [Handoff]
+      operationId: handoffSubmissionToInvoice
+      summary: Hand a submission to NeNe Invoice (create draft client); same call retries
+      description: >
+        Creates a draft client in NeNe Invoice over HTTP (invoice-handoff-contract), idempotent
+        via external_reference = submission_id. Always returns 200 with the resulting link;
+        `handoff_status` is `succeeded` (with `invoice_client_id`) or `failed` (with `last_error`,
+        submission untouched). Re-POST to retry. Audited (handoff.created / handoff.retried).
+        Requires the ManageSubmissions capability.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Handoff attempt recorded (see handoff_status for the outcome)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionLinkResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /admin/submissions/{id}/handoffs/vault/{attachmentId}:
     post:
       tags: [Handoff]
