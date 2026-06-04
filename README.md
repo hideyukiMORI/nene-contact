@@ -45,6 +45,7 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 | **Scope contract (GOAL / DO / DON'T)** | [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contract.md) |
 | **Compliance charter (binding)** | [`docs/explanation/data-protection-compliance.md`](./docs/explanation/data-protection-compliance.md) |
 | **Operator guide (self-hosting / data controller)** | [`docs/operations/operator-guide.md`](./docs/operations/operator-guide.md) |
+| **Help: tutorial + admin UI guide (ja)** | [`docs/help/`](./docs/help/) |
 | **Privacy & spam (operational)** | [`docs/explanation/privacy-and-spam-compliance.md`](./docs/explanation/privacy-and-spam-compliance.md) |
 | **Embed widget contract** | [`docs/explanation/embed-widget-spec.md`](./docs/explanation/embed-widget-spec.md) |
 | **Terminology registry (binding)** | [`docs/explanation/terminology.md`](./docs/explanation/terminology.md) |
