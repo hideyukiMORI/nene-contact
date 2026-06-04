@@ -20,6 +20,7 @@ final readonly class CreateContactFormInput
         public array $fields,
         public bool $consentRequired = false,
         public ?array $consentLabel = null,
+        public ?int $retentionDays = null,
     ) {
     }
 }

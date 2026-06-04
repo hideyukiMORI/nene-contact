@@ -65,6 +65,16 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
             $errors[] = new ValidationError('consent_label', "A consent label for the default locale ({$defaultLocale}) is required when consent is required.", 'required');
         }
 
+        // Retention (charter §5): optional per-form override; null falls back to the
+        // documented default. Must be a positive number of days when provided.
+        $retentionDays = null;
+        if (array_key_exists('retention_days', $body) && $body['retention_days'] !== null) {
+            $retentionDays = (int) $body['retention_days'];
+            if ($retentionDays < 1) {
+                $errors[] = new ValidationError('retention_days', 'Retention days must be a positive integer.', 'invalid');
+            }
+        }
+
         $rawFields = is_array($body['fields'] ?? null) ? $body['fields'] : [];
         $fields = [];
         $sort = 0;
@@ -126,6 +136,7 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
             fields: $fields,
             consentRequired: $consentRequired,
             consentLabel: $consentLabel === [] ? null : $consentLabel,
+            retentionDays: $retentionDays,
         ));
 
         return $this->response->create(

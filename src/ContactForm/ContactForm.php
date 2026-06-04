@@ -23,6 +23,7 @@ final readonly class ContactForm
         public string $status = 'active',
         public bool $consentRequired = false,
         public ?array $consentLabel = null,
+        public ?int $retentionDays = null,
         public ?int $id = null,
         public ?string $createdAt = null,
         public ?string $updatedAt = null,

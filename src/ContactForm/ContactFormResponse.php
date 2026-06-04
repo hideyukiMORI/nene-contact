@@ -23,6 +23,7 @@ final readonly class ContactFormResponse
             'status' => $form->status,
             'consent_required' => $form->consentRequired,
             'consent_label' => $form->consentLabel,
+            'retention_days' => $form->retentionDays,
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'id' => $f->id,

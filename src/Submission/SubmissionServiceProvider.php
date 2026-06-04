@@ -41,6 +41,35 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                SubmissionPurgeRepositoryInterface::class,
+                static function (ContainerInterface $c): SubmissionPurgeRepositoryInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    return new PdoSubmissionPurgeRepository($query);
+                },
+            )
+            ->set(
+                PurgeSubmissionsUseCaseInterface::class,
+                static function (ContainerInterface $c): PurgeSubmissionsUseCaseInterface {
+                    $repo = $c->get(SubmissionPurgeRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionPurgeRepositoryInterface) {
+                        throw new LogicException('Submission purge repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new PurgeSubmissionsUseCase($repo, $audit);
+                },
+            )
+            ->set(
                 PublicFormReaderInterface::class,
                 static function (ContainerInterface $c): PublicFormReaderInterface {
                     $query = $c->get(DatabaseQueryExecutorInterface::class);
