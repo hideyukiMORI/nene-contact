@@ -4,7 +4,7 @@ import { useAuth } from '@/app/auth-context';
 import { ProtectedLayout } from '@/app/protected-layout';
 import { LoginPage } from '@/pages/login';
 import { HomePage } from '@/pages/home';
-import { ContactFormsPage, ContactFormBuilderPage } from '@/pages/contact-forms';
+import { ContactFormsPage, ContactFormBuilderPage, ChannelsPage } from '@/pages/contact-forms';
 import { SubmissionsPage, SubmissionDetailPage } from '@/pages/submissions';
 
 function LoginRoute(): ReactNode {
@@ -24,6 +24,7 @@ const router = createBrowserRouter(
         { index: true, element: <HomePage /> },
         { path: 'contact-forms', element: <ContactFormsPage /> },
         { path: 'contact-forms/new', element: <ContactFormBuilderPage /> },
+        { path: 'contact-forms/:id/channels', element: <ChannelsPage /> },
         { path: 'submissions', element: <SubmissionsPage /> },
         { path: 'submissions/:id', element: <SubmissionDetailPage /> },
       ],
