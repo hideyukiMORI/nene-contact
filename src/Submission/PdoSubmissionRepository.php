@@ -53,7 +53,7 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
     public function findById(int $id): ?Submission
     {
         $row = $this->query->fetchOne(
-            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE id = ? AND organization_id = ?',
+            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
             [$id, $this->orgId->get()],
         );
 
@@ -63,8 +63,17 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
     public function updateStatus(int $id, string $status): void
     {
         $this->query->execute(
-            'UPDATE submissions SET status = ?, updated_at = ? WHERE id = ? AND organization_id = ?',
+            'UPDATE submissions SET status = ?, updated_at = ? WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
             [$status, date('Y-m-d H:i:s'), $id, $this->orgId->get()],
+        );
+    }
+
+    public function softDelete(int $id): void
+    {
+        $now = date('Y-m-d H:i:s');
+        $this->query->execute(
+            'UPDATE submissions SET deleted_at = ?, updated_at = ? WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
+            [$now, $now, $id, $this->orgId->get()],
         );
     }
 
@@ -72,7 +81,7 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
     public function findAll(int $limit, int $offset): array
     {
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE organization_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
+            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE organization_id = ? AND deleted_at IS NULL ORDER BY id DESC LIMIT ? OFFSET ?',
             [$this->orgId->get(), $limit, $offset],
         );
 
@@ -81,7 +90,7 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
 
     public function count(): int
     {
-        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM submissions WHERE organization_id = ?', [$this->orgId->get()]);
+        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM submissions WHERE organization_id = ? AND deleted_at IS NULL', [$this->orgId->get()]);
 
         return $row !== null ? (int) $row['cnt'] : 0;
     }

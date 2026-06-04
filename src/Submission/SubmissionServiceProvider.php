@@ -217,6 +217,23 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                DeleteSubmissionUseCaseInterface::class,
+                static function (ContainerInterface $c): DeleteSubmissionUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new DeleteSubmissionUseCase($repo, $audit);
+                },
+            )
+            ->set(
                 AddSubmissionNoteUseCaseInterface::class,
                 static function (ContainerInterface $c): AddSubmissionNoteUseCaseInterface {
                     $repo = $c->get(SubmissionRepositoryInterface::class);
@@ -270,6 +287,23 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     }
 
                     return new UpdateSubmissionStatusHandler($uc, $json);
+                },
+            )
+            ->set(
+                DeleteSubmissionHandler::class,
+                static function (ContainerInterface $c): DeleteSubmissionHandler {
+                    $uc = $c->get(DeleteSubmissionUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof DeleteSubmissionUseCaseInterface) {
+                        throw new LogicException('DeleteSubmission use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new DeleteSubmissionHandler($uc, $json);
                 },
             )
             ->set(
@@ -366,6 +400,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $list = $c->get(ListSubmissionsHandler::class);
                     $get = $c->get(GetSubmissionByIdHandler::class);
                     $updateStatus = $c->get(UpdateSubmissionStatusHandler::class);
+                    $delete = $c->get(DeleteSubmissionHandler::class);
                     $addNote = $c->get(AddSubmissionNoteHandler::class);
                     $listNotes = $c->get(ListSubmissionNotesHandler::class);
                     $export = $c->get(ExportSubmissionsHandler::class);
@@ -390,6 +425,10 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Update submission status handler service is invalid.');
                     }
 
+                    if (!$delete instanceof DeleteSubmissionHandler) {
+                        throw new LogicException('Delete submission handler service is invalid.');
+                    }
+
                     if (!$addNote instanceof AddSubmissionNoteHandler) {
                         throw new LogicException('Add submission note handler service is invalid.');
                     }
@@ -402,7 +441,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Export submissions handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $addNote, $listNotes, $export);
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $delete, $addNote, $listNotes, $export);
                 },
             );
     }

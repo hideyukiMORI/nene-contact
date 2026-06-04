@@ -341,6 +341,21 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
+    delete:
+      tags: [Submission]
+      operationId: deleteSubmission
+      summary: Soft-delete a submission (data-subject deletion right)
+      description: >
+        Soft-deletes the submission (charter §4): it is hidden from the inbox immediately
+        and hard-deleted by the purge job after a grace period (§5). Audited.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '204':
+          description: Soft-deleted
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
 
   /admin/submissions/{id}/notes:
     get:

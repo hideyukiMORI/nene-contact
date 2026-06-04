@@ -38,6 +38,10 @@ final class SubmitPublicFormUseCaseTest extends TestCase
             {
             }
 
+            public function softDelete(int $id): void
+            {
+            }
+
             /** @return list<Submission> */
             public function findAll(int $limit, int $offset): array
             {
@@ -133,6 +137,10 @@ final class SubmitPublicFormUseCaseTest extends TestCase
             }
 
             public function updateStatus(int $id, string $status): void
+            {
+            }
+
+            public function softDelete(int $id): void
             {
             }
 

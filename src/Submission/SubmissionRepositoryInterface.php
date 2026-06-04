@@ -15,6 +15,9 @@ interface SubmissionRepositoryInterface
     /** Organization-scoped status update. */
     public function updateStatus(int $id, string $status): void;
 
+    /** Organization-scoped soft-delete (sets deleted_at; hides the record from the inbox). */
+    public function softDelete(int $id): void;
+
     /**
      * Organization-scoped (inbox).
      *
