@@ -90,6 +90,7 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         new EmailChannelSender($mailer, $fromAddress),
                         new SlackChannelSender($http, $psr17),
                         new ChatworkChannelSender($http, $psr17),
+                        new WebhookChannelSender($http, $psr17),
                     ]);
                 },
             )

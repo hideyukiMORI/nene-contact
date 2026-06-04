@@ -15,7 +15,7 @@ use Psr\Http\Server\RequestHandlerInterface;
 final readonly class CreateNotificationChannelHandler implements RequestHandlerInterface
 {
     /** @var list<string> */
-    private const CHANNEL_TYPES = ['email', 'slack', 'chatwork'];
+    private const CHANNEL_TYPES = ['email', 'slack', 'chatwork', 'webhook'];
 
     public function __construct(
         private CreateNotificationChannelUseCaseInterface $useCase,
@@ -45,6 +45,18 @@ final readonly class CreateNotificationChannelHandler implements RequestHandlerI
             $recipient = isset($config['recipient']) ? trim((string) $config['recipient']) : '';
             if ($recipient === '' || filter_var($recipient, FILTER_VALIDATE_EMAIL) === false) {
                 $errors[] = new ValidationError('config.recipient', 'A valid recipient email is required for email channels.', 'invalid_email');
+            }
+        }
+
+        if ($channelType === 'webhook') {
+            $url = isset($config['url']) ? trim((string) $config['url']) : '';
+            if ($url === '' || filter_var($url, FILTER_VALIDATE_URL) === false) {
+                $errors[] = new ValidationError('config.url', 'A valid url is required for webhook channels.', 'invalid');
+            }
+
+            $secret = isset($config['secret']) ? (string) $config['secret'] : '';
+            if ($secret === '') {
+                $errors[] = new ValidationError('config.secret', 'A signing secret is required for webhook channels.', 'required');
             }
         }
 

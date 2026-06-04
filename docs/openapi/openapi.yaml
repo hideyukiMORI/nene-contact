@@ -794,7 +794,7 @@ components:
       properties:
         id: { type: integer }
         contact_form_id: { type: integer }
-        channel_type: { type: string, enum: [email, slack, chatwork] }
+        channel_type: { type: string, enum: [email, slack, chatwork, webhook] }
         is_enabled: { type: boolean }
       required: [id, contact_form_id, channel_type]
 
@@ -809,7 +809,12 @@ components:
       type: object
       properties:
         contact_form_id: { type: integer }
-        channel_type: { type: string, enum: [email, slack, chatwork] }
-        config: { type: object, additionalProperties: true }
+        channel_type: { type: string, enum: [email, slack, chatwork, webhook] }
+        config:
+          type: object
+          additionalProperties: true
+          description: >
+            Channel-specific keys (encrypted at rest). email: recipient; slack: webhook_url;
+            chatwork: api_token, room_id; webhook: url, secret (HMAC-SHA256 signing).
         is_enabled: { type: boolean }
       required: [contact_form_id, channel_type, config]
