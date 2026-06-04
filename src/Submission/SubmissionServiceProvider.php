@@ -12,7 +12,9 @@ use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
+use NeneContact\Attachment\AttachmentPurgeRepositoryInterface;
 use NeneContact\Attachment\AttachmentRepositoryInterface;
+use NeneContact\Attachment\AttachmentStorageInterface;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
@@ -58,17 +60,27 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 PurgeSubmissionsUseCaseInterface::class,
                 static function (ContainerInterface $c): PurgeSubmissionsUseCaseInterface {
                     $repo = $c->get(SubmissionPurgeRepositoryInterface::class);
+                    $attachments = $c->get(AttachmentPurgeRepositoryInterface::class);
+                    $storage = $c->get(AttachmentStorageInterface::class);
                     $audit = $c->get(AuditRecorderInterface::class);
 
                     if (!$repo instanceof SubmissionPurgeRepositoryInterface) {
                         throw new LogicException('Submission purge repository service is invalid.');
                     }
 
+                    if (!$attachments instanceof AttachmentPurgeRepositoryInterface) {
+                        throw new LogicException('Attachment purge repository service is invalid.');
+                    }
+
+                    if (!$storage instanceof AttachmentStorageInterface) {
+                        throw new LogicException('Attachment storage service is invalid.');
+                    }
+
                     if (!$audit instanceof AuditRecorderInterface) {
                         throw new LogicException('Audit recorder service is invalid.');
                     }
 
-                    return new PurgeSubmissionsUseCase($repo, $audit);
+                    return new PurgeSubmissionsUseCase($repo, $attachments, $storage, $audit);
                 },
             )
             ->set(
