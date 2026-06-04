@@ -1,8 +1,8 @@
 # Milestone M7: GA / acceptance
 
 **Phase 4** · the GOAL. NeNe Contact is "done right" at the bar a privacy/legal
-professional (士業) would accept. 🚧 **A1–A8 acceptance verified (#130)**; operator docs +
-production `embed.js` build remain.
+professional (士業) would accept. 🚧 **A1–A8 acceptance verified (#130) + operator guide
+(#132)**; production `embed.js` build + final reviews remain.
 
 ## Goal
 
@@ -30,9 +30,9 @@ produce a production `embed.js` build. After M7 the product meets its GOAL.
 
 ## Operational deliverables
 
-- [ ] **Operator documentation**: TLS-required checklist; cross-border / non-Japan visitor
+- [x] **Operator documentation**: TLS-required checklist; cross-border / non-Japan visitor
       responsibility (charter §9); privacy-notice surface guidance (operator is the data
-      controller).
+      controller). → [`../operations/operator-guide.md`](../operations/operator-guide.md) (#132)
 - [ ] **Production `embed.js` build**: hashed long-cache filename, CSP-friendly (no `eval`,
       no inline script from API responses).
 - [ ] Compliance self-review (`docs/review/compliance.md`) and governance/backend/frontend

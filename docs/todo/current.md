@@ -8,7 +8,7 @@
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
 **M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
 **M6 — AI / MCP** ✅ agent read `/api/*` + MCP stdio + ingest + write/confirm + Invoice + Records on `main` (2026-06-04)
-**M7 — GA / acceptance** 🚧 A1–A8 acceptance audit done (2026-06-04); operator docs + prod embed.js remain
+**M7 — GA / acceptance** 🚧 A1–A8 audit + operator guide done (2026-06-04); prod embed.js + final reviews remain
 
 ## Phase 1 progress
 
@@ -143,14 +143,15 @@ unconfigured 502 problem; no token 401.
 ## M7 — GA / acceptance 🚧 (Phase 4)
 
 - [x] A1–A8 acceptance audit with code evidence — `docs/review/acceptance-A1-A8.md`; verdict PASS (#130)
-- [ ] Operator documentation: TLS-required checklist, cross-border / non-Japan visitor
-      responsibility (charter §9), privacy-notice surface guidance (operator = data controller)
+- [x] Operator documentation — `docs/operations/operator-guide.md`: TLS checklist, cross-border
+      responsibility (§9), privacy-notice/consent surface, notifications, data-subject rights +
+      retention, env-secrets reference (#132)
 - [ ] Production `embed.js` build: hashed long-cache filename, CSP-friendly (no eval/inline)
 - [ ] Compliance/governance/backend/frontend reviews pass on the release
 
 ## Next up
 
-- [ ] M7 operator docs + production `embed.js` (above)
+- [ ] M7 production `embed.js` build + final reviews (above)
 - [ ] Admin SPA: handoff buttons + Records-options import in the builder (M5/M6 UI follow-ups)
 - [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
 
