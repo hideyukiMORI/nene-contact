@@ -102,12 +102,20 @@ ESLint `import/no-restricted-paths` enforces the matrix; placement drift is reje
 | Routing | **React Router** (URL is shareable state) |
 | Server state | **TanStack Query v5** (no Redux/Zustand without ADR) |
 | Forms | **React Hook Form + Zod** (client UX validation only — API authoritative) |
-| Lint/format | **ESLint** flat (typescript strict-type-checked, react-hooks, jsx-a11y, import/no-restricted-paths) `--max-warnings 0` + **Prettier** |
-| Test | **Vitest + Testing Library + MSW** |
-| Styling | design tokens in `shared/ui/theme/`; **no raw color/spacing/type literals** in components |
+| Lint/format | **ESLint** flat (typescript strict-type-checked, react-hooks, react-refresh, jsx-a11y, import/no-restricted-paths, no Tailwind arbitrary values) `--max-warnings 0` + **Prettier** |
+| Test | **Vitest + Testing Library + MSW** (unit); **Playwright** (browser e2e, `npm run e2e`) |
+| Styling | **Tailwind CSS v4** (`@tailwindcss/vite`) with semantic `@theme` tokens in `shared/ui/theme/index.css`; **no raw color/spacing/type literals** and **no arbitrary `[...]` values** in components |
+| Fonts | **@fontsource** self-hosted (`fonts.ts`, admin only): Inter + Noto Sans JP + JetBrains Mono (ja/en, ADR 0011) |
+| UI workbench | **Storybook** (`@storybook/react-vite` + addon-docs + addon-a11y); `*.stories.tsx` colocated in `shared/ui` |
+| Dead code | **knip** (`knip.json`) in `check` |
+| Hooks | **husky** + **lint-staged** pre-commit |
 | API types | **openapi-typescript** → `shared/api/schema.gen.ts` (generated; not edited) |
 
-Alternate stack requires an ADR.
+Conventions and major versions track the sibling frontends (reference: **nene-records**):
+`tsconfig.json` (solution) + `tsconfig.app.json` + `tsconfig.node.json`; a separate
+`vitest.config.ts`; `.npmrc` `legacy-peer-deps=true`. `npm run check` =
+`type-check` (`tsc -b`) → `lint` → `format` → `test` → `knip` → `build-storybook`. Alternate
+stack requires an ADR.
 
 **Admin form builder (ADR 0015):** a **custom UI** (field palette + ordered field list +
 config panel + live preview), **not** a node-graph/canvas library — `form_field` is an
@@ -122,11 +130,13 @@ preview reuses the embed schema renderer. See
 
 ```text
 frontend/
-  package.json  package-lock.json  vite.config.ts  eslint.config.js  tsconfig*.json
+  package.json  package-lock.json  .npmrc  vite.config.ts  vitest.config.ts
+  eslint.config.js  tsconfig*.json  knip.json  playwright.config.ts  .storybook/
   embed/                    # public embed widget (isolated, untrusted-page safe)
     src/  index.ts
+  e2e/                      # Playwright browser specs
   src/                      # admin SPA
-    main.tsx
+    main.tsx  fonts.ts
     app/        providers.tsx router.tsx root-error-boundary.tsx auth-gate.tsx
     pages/      login/  submissions/  contact-forms/  settings/ …
     features/   list-submissions/  edit-contact-form/ …
@@ -278,9 +288,10 @@ validation error display).
 npm ci --prefix frontend
 npm run dev --prefix frontend          # Vite dev; API proxied to PHP app
 npm run codegen --prefix frontend      # regenerate shared/api/schema.gen.ts from OpenAPI
-npm run check --prefix frontend        # type-check + lint + format + test
+npm run check --prefix frontend        # type-check + lint + format + test + knip + build-storybook
+npm run storybook --prefix frontend    # Storybook dev workbench (port 6006)
+npm run e2e --prefix frontend          # Playwright (run `npx playwright install chromium` once)
 npm run build --prefix frontend        # console SPA → public_html/console/
-npm run build:embed --prefix frontend  # widget → public_html/embed.js (hashed)
 ```
 
 CI on frontend changes: `npm ci` → `npm run check` → `npm audit --audit-level=high`.

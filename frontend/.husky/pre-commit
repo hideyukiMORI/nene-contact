@@ -1,0 +1,3 @@
+# Run lint-staged against the frontend workspace regardless of the hook's cwd.
+ROOT="$(git rev-parse --show-toplevel)"
+cd "$ROOT/frontend" && npx lint-staged

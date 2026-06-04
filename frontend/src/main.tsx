@@ -1,6 +1,7 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import '@/shared/ui/theme/themes/base.css';
+import '@/fonts';
+import '@/shared/ui/theme/index.css';
 import { Providers } from '@/app/providers';
 import { AppRouter } from '@/app/router';
 
