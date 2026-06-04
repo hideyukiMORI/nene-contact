@@ -19,6 +19,9 @@ final class RetentionPolicy
     /** Grace period between soft-delete and hard-delete (purge). */
     public const GRACE_DAYS = 30;
 
+    /** Grace before an uploaded-but-never-submitted attachment (orphan) is erased. */
+    public const ORPHAN_GRACE_DAYS = 1;
+
     public static function retentionDaysFor(?int $formRetentionDays): int
     {
         return $formRetentionDays ?? self::DEFAULT_RETENTION_DAYS;

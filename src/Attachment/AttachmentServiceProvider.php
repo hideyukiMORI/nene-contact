@@ -42,6 +42,18 @@ final readonly class AttachmentServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                AttachmentPurgeRepositoryInterface::class,
+                static function (ContainerInterface $c): AttachmentPurgeRepositoryInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    return new PdoAttachmentPurgeRepository($query);
+                },
+            )
+            ->set(
                 AttachmentStorageInterface::class,
                 static function (ContainerInterface $c): AttachmentStorageInterface {
                     $root = $c->get(RuntimeServiceProvider::PROJECT_ROOT);

@@ -32,8 +32,8 @@ assert($useCase instanceof PurgeSubmissionsUseCaseInterface);
 $result = $useCase->execute($apply);
 
 if ($result->applied) {
-    fwrite(STDOUT, "Purge applied: {$result->expired} expired (soft-deleted), {$result->purged} purged (PII erased in place).\n");
+    fwrite(STDOUT, "Purge applied: {$result->expired} expired (soft-deleted), {$result->purged} purged (PII erased in place), {$result->attachmentsErased} attachment(s) erased.\n");
 } else {
-    fwrite(STDOUT, "Dry-run (no changes): {$result->expired} would be soft-deleted on retention expiry, {$result->purged} would have PII erased after grace.\n");
+    fwrite(STDOUT, "Dry-run (no changes): {$result->expired} would be soft-deleted on retention expiry, {$result->purged} would have PII erased after grace, {$result->attachmentsErased} attachment(s) would be erased.\n");
     fwrite(STDOUT, "Re-run with --apply to perform the purge.\n");
 }

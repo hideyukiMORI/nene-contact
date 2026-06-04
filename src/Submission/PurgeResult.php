@@ -9,6 +9,7 @@ final readonly class PurgeResult
     public function __construct(
         public int $expired,
         public int $purged,
+        public int $attachmentsErased,
         public bool $applied,
     ) {
     }
