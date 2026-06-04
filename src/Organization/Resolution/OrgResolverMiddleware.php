@@ -21,7 +21,10 @@ use Psr\Http\Server\RequestHandlerInterface;
  *  - /admin/auth/           — login issues the token that carries org_id
  *  - /admin/organizations   — superadmin tenant management (cross-tenant)
  *  - /public/, /embed.js    — embed resolves org via public_form_key (ADR 0014), not host
- *  - /api/                  — service clients resolve org via the org-scoped token
+ *
+ * The agent read surface `/api/*` (machine-key auth, M6) resolves the org via the active
+ * tenant strategy like the admin host — single mode uses `ORG_SLUG`. (A per-org service
+ * token would let `/api/*` carry its own org; not needed for the single-tenant deployment.)
  *
  * Repositories on bypass routes must not call $orgId->get().
  */
@@ -34,7 +37,6 @@ final readonly class OrgResolverMiddleware implements MiddlewareInterface
         '/admin/organizations',
         '/public/',
         '/embed.js',
-        '/api/',
     ];
 
     /**

@@ -1,7 +1,8 @@
 # Milestone M6: AI/MCP + deeper siblings
 
 **Phase 4** · expose Contact to AI agents via MCP over the OpenAPI surface, and complete
-the deeper sibling integrations.
+the deeper sibling integrations. 🚧 **Agent read surface `/api/*` landed** (#118 — the OpenAPI
+MCP maps to); MCP stdio server + write tools + deeper siblings remain.
 
 ## Goal
 
@@ -11,9 +12,12 @@ remaining sibling directions (Invoice, Records, Concierge ingest) come online.
 
 ## Acceptance criteria
 
-- [ ] **MCP read catalog** over the OpenAPI surface (DO D10): forms and submissions; returns
-      **redacted** payloads by default (no IP/UA, masked PII); `include_pii=true` is an
-      explicit admin tool and is **audit-logged** (charter §11).
+- [x] **Agent read surface `/api/*`** — the OpenAPI MCP maps to (DO D10): `GET /api/forms`,
+      `GET /api/submissions`, `GET /api/submissions/{id}`; machine-key auth (`X-NENE2-API-Key`);
+      **redacted** by default (no IP/UA, masked PII); `include_pii=true` returns raw values and
+      is **audit-logged** (`submission.exported`/`viewed`, charter §11). (#118)
+- [ ] **MCP stdio server** (Node, mirroring NENE2 `mcp-tools`) mapping its read tools to the
+      `/api/*` surface above.
 - [ ] **MCP write tools** require an explicit **write tool + confirmation token** and are
       audited; **no autonomous outbound action** on personal data (charter §11, DON'T X9).
 - [ ] MCP maps to Contact OpenAPI only — no sibling DB access (ADR 0002).
