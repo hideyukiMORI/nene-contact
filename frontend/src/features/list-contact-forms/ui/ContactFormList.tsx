@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Alert, Button } from '@/shared/ui';
@@ -34,6 +35,7 @@ export function ContactFormList(): ReactNode {
           <th>{t('contactForms.column.key')}</th>
           <th>{t('contactForms.column.locales')}</th>
           <th>{t('contactForms.column.status')}</th>
+          <th />
         </tr>
       </thead>
       <tbody>
@@ -45,6 +47,11 @@ export function ContactFormList(): ReactNode {
             </td>
             <td>{form.locales.join(', ')}</td>
             <td>{form.status}</td>
+            <td>
+              <Link to={`/contact-forms/${String(form.id)}/channels`}>
+                {t('contactForms.channels')}
+              </Link>
+            </td>
           </tr>
         ))}
       </tbody>

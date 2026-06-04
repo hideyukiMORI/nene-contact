@@ -1,5 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { screen } from '@testing-library/react';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
@@ -28,7 +29,11 @@ describe('ContactFormList', () => {
       ),
     );
 
-    renderWithProviders(<ContactFormList />);
+    renderWithProviders(
+      <MemoryRouter>
+        <ContactFormList />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByText('Contact us')).toBeInTheDocument();
     expect(screen.getByText('key-1')).toBeInTheDocument();
@@ -38,7 +43,11 @@ describe('ContactFormList', () => {
   it('renders the empty state when there are no forms', async () => {
     server.use(http.get(URL, () => HttpResponse.json({ items: [], total: 0 })));
 
-    renderWithProviders(<ContactFormList />);
+    renderWithProviders(
+      <MemoryRouter>
+        <ContactFormList />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByText('フォームがまだありません。')).toBeInTheDocument();
   });
@@ -53,7 +62,11 @@ describe('ContactFormList', () => {
       ),
     );
 
-    renderWithProviders(<ContactFormList />);
+    renderWithProviders(
+      <MemoryRouter>
+        <ContactFormList />
+      </MemoryRouter>,
+    );
 
     expect(await screen.findByRole('alert')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '再試行' })).toBeInTheDocument();
