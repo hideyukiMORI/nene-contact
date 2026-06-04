@@ -1,7 +1,8 @@
 # Milestone M7: GA / acceptance
 
 **Phase 4** · the GOAL. NeNe Contact is "done right" at the bar a privacy/legal
-professional (士業) would accept.
+professional (士業) would accept. 🚧 **A1–A8 acceptance verified (#130)**; operator docs +
+production `embed.js` build remain.
 
 ## Goal
 
@@ -11,18 +12,20 @@ produce a production `embed.js` build. After M7 the product meets its GOAL.
 
 ## Acceptance criteria (A1–A8)
 
-- [ ] **A1** — A privacy/legal professional reviewing the system finds **zero deviations**
+✅ **Verified with code evidence in [`../review/acceptance-A1-A8.md`](../review/acceptance-A1-A8.md) (#130).**
+
+- [x] **A1** — A privacy/legal professional reviewing the system finds **zero deviations**
       from `data-protection-compliance.md`.
-- [ ] **A2** — Every DON'T row is **structurally impossible**, not merely unimplemented.
-- [ ] **A3** — Every public endpoint meets ADR 0010 (allowed-origins, rate limit, honeypot,
+- [x] **A2** — Every DON'T row is **structurally impossible**, not merely unimplemented.
+- [x] **A3** — Every public endpoint meets ADR 0010 (allowed-origins, rate limit, honeypot,
       body cap, no PII in URLs, CORS not `*`).
-- [ ] **A4** — Prohibited fields (My Number, raw card numbers) cannot be configured;
+- [x] **A4** — Prohibited fields (My Number, raw card numbers) cannot be configured;
       要配慮個人情報 is never a silent default.
-- [ ] **A5** — Admin mutations and PII view/export are audit-logged; deletion leaves an
+- [x] **A5** — Admin mutations and PII view/export are audit-logged; deletion leaves an
       audit trail.
-- [ ] **A6** — Locales are `ja`/`en` only; no general i18n framework.
-- [ ] **A7** — Siblings reached over HTTP only; no shared database.
-- [ ] **A8** — Any binding deviation is recorded in an ADR (maintainer self-authority; no
+- [x] **A6** — Locales are `ja`/`en` only; no general i18n framework.
+- [x] **A7** — Siblings reached over HTTP only; no shared database.
+- [x] **A8** — Any binding deviation is recorded in an ADR (maintainer self-authority; no
       external sign-off gate, ADR 0012).
 
 ## Operational deliverables

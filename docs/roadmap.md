@@ -27,7 +27,9 @@ wins (ADR 0012).
 - **M6 AI/MCP** ✅: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
   (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, the
   Contact → Invoice draft-client handoff, and Contact → Records read-only select options.
-- **Next:** M7 GA acceptance (A1–A8), operator docs, production `embed.js` build.
+- **M7 GA / acceptance** 🚧: A1–A8 verified with code evidence
+  ([`review/acceptance-A1-A8.md`](./review/acceptance-A1-A8.md), verdict PASS); operator docs +
+  production `embed.js` build remain.
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
@@ -42,7 +44,7 @@ Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./
 | [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin SPA) | 2 | 🚧 core done |
 | [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ✅ done |
 | [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ✅ done |
-| [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | ⏳ |
+| [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | 🚧 A1–A8 verified |
 
 ```
 M1 ──> M2 ──> M3 ──> M4 ──> M5 ──> M6 ──> M7 (GOAL)
