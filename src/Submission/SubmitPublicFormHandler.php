@@ -11,6 +11,7 @@ use Nene2\Routing\Router;
 use Nene2\Validation\ValidationError;
 use Nene2\Validation\ValidationException;
 use NeneContact\ContactForm\ContactForm;
+use NeneContact\ContactForm\FieldType;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -51,7 +52,7 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
 
         // Honeypot: any non-empty honeypot value → accept silently, do not store (ADR 0010).
         foreach ($form->fields as $field) {
-            if ($field->fieldType === 'honeypot' && trim((string) ($body[$field->name] ?? '')) !== '') {
+            if ($field->fieldType === FieldType::Honeypot->value && trim((string) ($body[$field->name] ?? '')) !== '') {
                 return $this->response->createEmpty(204);
             }
         }
@@ -60,7 +61,7 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
         $values = [];
 
         foreach ($form->fields as $field) {
-            if ($field->fieldType === 'honeypot') {
+            if ($field->fieldType === FieldType::Honeypot->value) {
                 continue;
             }
 
@@ -72,7 +73,7 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
                 continue;
             }
 
-            if (!$isEmpty && $field->fieldType === 'email' && is_string($raw) && filter_var($raw, FILTER_VALIDATE_EMAIL) === false) {
+            if (!$isEmpty && $field->fieldType === FieldType::Email->value && is_string($raw) && filter_var($raw, FILTER_VALIDATE_EMAIL) === false) {
                 $errors[] = new ValidationError($field->name, 'Must be a valid email address.', 'invalid_email');
                 continue;
             }

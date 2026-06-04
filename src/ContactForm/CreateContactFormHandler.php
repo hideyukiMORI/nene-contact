@@ -17,9 +17,6 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
     /** @var list<string> */
     private const SUPPORTED_LOCALES = ['ja', 'en'];
 
-    /** @var list<string> */
-    private const FIELD_TYPES = ['text', 'email', 'textarea', 'select', 'checkbox', 'file', 'honeypot'];
-
     public function __construct(
         private CreateContactFormUseCaseInterface $useCase,
         private JsonResponseFactory $response,
@@ -70,7 +67,9 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
             /** @var list<array<string, mixed>>|null $options */
             $options = is_array($raw['options'] ?? null) ? array_values(array_filter($raw['options'], 'is_array')) : null;
 
-            if (!in_array($fieldType, self::FIELD_TYPES, true)) {
+            if (FieldType::isProhibited($fieldType)) {
+                $errors[] = new ValidationError("fields.{$i}.field_type", "Field type '{$fieldType}' is prohibited (APPI compliance, charter §8).", 'prohibited');
+            } elseif (!FieldType::isAllowed($fieldType)) {
                 $errors[] = new ValidationError("fields.{$i}.field_type", 'Unsupported field type.', 'invalid');
             }
 
@@ -82,7 +81,7 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
                 $errors[] = new ValidationError("fields.{$i}.label", "Label for the default locale ({$defaultLocale}) is required.", 'required');
             }
 
-            if ($fieldType === 'select' && ($options === null || $options === [])) {
+            if ($fieldType === FieldType::Select->value && ($options === null || $options === [])) {
                 $errors[] = new ValidationError("fields.{$i}.options", 'Select fields require options.', 'required');
             }
 

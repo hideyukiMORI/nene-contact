@@ -593,7 +593,13 @@ components:
       type: object
       properties:
         id: { type: integer }
-        field_type: { type: string, enum: [text, email, textarea, select, checkbox, file, honeypot] }
+        field_type:
+          type: string
+          enum: [text, email, textarea, select, checkbox, file, honeypot]
+          description: >
+            Closed allowlist (single source of truth: NeneContact\ContactForm\FieldType).
+            My Number and raw payment card numbers are prohibited as any field type and
+            要配慮個人情報 is never a default (APPI charter §8, Definition of Done A4).
         name: { type: string }
         label: { $ref: '#/components/schemas/LocaleMap' }
         required: { type: boolean }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\Notification;
 
 use NeneContact\ContactForm\ContactForm;
+use NeneContact\ContactForm\FieldType;
 use NeneContact\ContactForm\FormField;
 use NeneContact\Submission\Submission;
 use Symfony\Component\Mailer\MailerInterface;
@@ -54,7 +55,7 @@ final readonly class EmailSubmissionNotifier implements SubmissionNotifierInterf
     {
         $labels = [];
         foreach ($form->fields as $field) {
-            if ($field->fieldType === 'honeypot') {
+            if ($field->fieldType === FieldType::Honeypot->value) {
                 continue;
             }
             $labels[$field->name] = $this->label($field, $form->defaultLocale);
