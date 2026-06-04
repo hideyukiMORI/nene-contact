@@ -58,6 +58,10 @@ final class LoginUseCaseTest extends TestCase
                 return 0;
             }
 
+            public function update(int $id, string $role, string $status): void
+            {
+            }
+
             public function delete(int $id): void
             {
             }

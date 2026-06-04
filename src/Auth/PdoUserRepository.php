@@ -66,6 +66,14 @@ final readonly class PdoUserRepository implements UserRepositoryInterface
         return $row !== null ? (int) $row['cnt'] : 0;
     }
 
+    public function update(int $id, string $role, string $status): void
+    {
+        $this->query->execute(
+            'UPDATE users SET role = ?, status = ?, updated_at = ? WHERE id = ?',
+            [$role, $status, date('Y-m-d H:i:s'), $id],
+        );
+    }
+
     public function delete(int $id): void
     {
         $this->query->execute('DELETE FROM users WHERE id = ?', [$id]);

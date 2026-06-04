@@ -12,7 +12,10 @@ use Nene2\Http\RequestScopedHolder;
 use NeneContact\Audit\AuditServiceProvider;
 use NeneContact\Auth\AuthRouteRegistrar;
 use NeneContact\Auth\AuthServiceProvider;
+use NeneContact\Auth\EmailConflictExceptionHandler;
 use NeneContact\Auth\InvalidCredentialsExceptionHandler;
+use NeneContact\Auth\UserAdminRouteRegistrar;
+use NeneContact\Auth\UserNotFoundExceptionHandler;
 use NeneContact\ContactForm\ContactFormNotFoundExceptionHandler;
 use NeneContact\ContactForm\ContactFormRouteRegistrar;
 use NeneContact\ContactForm\ContactFormServiceProvider;
@@ -65,6 +68,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                 self::ROUTE_REGISTRARS,
                 static function (ContainerInterface $container): array {
                     $auth = $container->get(AuthRouteRegistrar::class);
+                    $userAdmin = $container->get(UserAdminRouteRegistrar::class);
                     $organization = $container->get(OrganizationRouteRegistrar::class);
                     $contactForm = $container->get(ContactFormRouteRegistrar::class);
                     $submission = $container->get(SubmissionRouteRegistrar::class);
@@ -72,6 +76,10 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
 
                     if (!$auth instanceof AuthRouteRegistrar) {
                         throw new LogicException('Auth route registrar service is invalid.');
+                    }
+
+                    if (!$userAdmin instanceof UserAdminRouteRegistrar) {
+                        throw new LogicException('User admin route registrar service is invalid.');
                     }
 
                     if (!$organization instanceof OrganizationRouteRegistrar) {
@@ -92,6 +100,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
 
                     return [
                         $auth,
+                        $userAdmin,
                         $organization,
                         $contactForm,
                         $notificationChannel,
@@ -103,12 +112,14 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                 self::EXCEPTION_HANDLERS,
                 static function (ContainerInterface $container): array {
                     $invalidCredentials = $container->get(InvalidCredentialsExceptionHandler::class);
+                    $userNotFound = $container->get(UserNotFoundExceptionHandler::class);
+                    $emailConflict = $container->get(EmailConflictExceptionHandler::class);
                     $organizationNotFound = $container->get(OrganizationNotFoundExceptionHandler::class);
                     $organizationSlugConflict = $container->get(OrganizationSlugConflictExceptionHandler::class);
                     $contactFormNotFound = $container->get(ContactFormNotFoundExceptionHandler::class);
                     $submissionNotFound = $container->get(SubmissionNotFoundExceptionHandler::class);
 
-                    foreach ([$invalidCredentials, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound] as $handler) {
+                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
@@ -116,6 +127,8 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
 
                     return [
                         $invalidCredentials,
+                        $userNotFound,
+                        $emailConflict,
                         $organizationNotFound,
                         $organizationSlugConflict,
                         $contactFormNotFound,
