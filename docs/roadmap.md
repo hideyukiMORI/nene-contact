@@ -22,7 +22,9 @@ wins (ADR 0012).
 - **M4 Channels + webhooks + attachments** ✅: Slack/Chatwork dispatch, signed webhooks, file attachments.
 - **M3 Forms + embed MVP** 🚧: `embed.js` widget ✅; admin SPA (React/TS/Vite → `public_html/admin/`)
   with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
-- **Next:** M5 sibling handoff (Deal / Vault), M6 AI/MCP, then M7 GA acceptance (A1–A8).
+- **M5 Sibling handoff** 🚧: Contact → Deal opportunity handoff landed (`src/Upstream/`,
+  `submission_links`, idempotent, retry, audited); Contact → Vault archive is the next slice.
+- **Next:** M5 Vault archive, M6 AI/MCP, then M7 GA acceptance (A1–A8).
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
@@ -35,7 +37,7 @@ Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./
 | — | No physical deletion / PII erase-in-place (ADR 0016) | 2 | ✅ done |
 | [M4](./milestones/m4-channels-webhooks.md) | Channels + webhooks + attachments | 3 | ✅ done |
 | [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin SPA) | 2 | 🚧 core done |
-| [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ⏳ next |
+| [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | 🚧 Deal done |
 | [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ⏳ |
 | [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | ⏳ |
 

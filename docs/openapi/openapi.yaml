@@ -20,6 +20,7 @@ tags:
   - name: NotificationChannel
   - name: Submission
   - name: Attachment
+  - name: Handoff
   - name: Public
 
 security:
@@ -460,6 +461,46 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /admin/submissions/{id}/handoffs:
+    get:
+      tags: [Handoff]
+      operationId: listSubmissionHandoffs
+      summary: List a submission's sibling handoff links (status + pointers)
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Handoff link list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionLinkListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
+  /admin/submissions/{id}/handoffs/deal:
+    post:
+      tags: [Handoff]
+      operationId: handoffSubmissionToDeal
+      summary: Hand a submission to NeNe Deal (create opportunity); same call retries
+      description: >
+        Creates an opportunity in NeNe Deal over HTTP (DO D11), idempotent via
+        external_reference = submission_id. Always returns 200 with the resulting link;
+        `handoff_status` is `succeeded` (with `deal_opportunity_id`) or `failed` (with
+        `last_error`, submission untouched). Re-POST to retry. Audited (handoff.created /
+        handoff.retried). Requires the ManageSubmissions capability.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Handoff attempt recorded (see handoff_status for the outcome)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionLinkResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /public/forms/{public_form_key}/attachments:
     post:
       tags: [Attachment]
@@ -810,6 +851,28 @@ components:
         consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
+
+    SubmissionLinkResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        submission_id: { type: integer }
+        target: { type: string, enum: [deal, vault, invoice] }
+        handoff_status: { type: string, enum: [pending, succeeded, failed] }
+        deal_opportunity_id: { type: [string, 'null'] }
+        vault_document_id: { type: [string, 'null'] }
+        invoice_client_id: { type: [string, 'null'] }
+        last_error: { type: [string, 'null'] }
+        created_at: { type: [string, 'null'], format: date-time }
+        updated_at: { type: [string, 'null'], format: date-time }
+      required: [id, submission_id, target, handoff_status]
+
+    SubmissionLinkListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubmissionLinkResponse' }
 
     AttachmentResponse:
       type: object
