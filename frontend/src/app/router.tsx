@@ -1,16 +1,10 @@
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/app/auth-context';
+import { ProtectedLayout } from '@/app/protected-layout';
 import { LoginPage } from '@/pages/login';
 import { HomePage } from '@/pages/home';
-
-function HomeRoute(): ReactNode {
-  const { session, signOut } = useAuth();
-  if (session === null) {
-    return <Navigate to="/login" replace />;
-  }
-  return <HomePage session={session} onSignOut={signOut} />;
-}
+import { ContactFormsPage } from '@/pages/contact-forms';
 
 function LoginRoute(): ReactNode {
   const { session, signIn } = useAuth();
@@ -22,8 +16,14 @@ function LoginRoute(): ReactNode {
 
 const router = createBrowserRouter(
   [
-    { path: '/', element: <HomeRoute /> },
     { path: '/login', element: <LoginRoute /> },
+    {
+      element: <ProtectedLayout />,
+      children: [
+        { index: true, element: <HomePage /> },
+        { path: 'contact-forms', element: <ContactFormsPage /> },
+      ],
+    },
   ],
   { basename: '/admin' },
 );
