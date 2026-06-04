@@ -126,6 +126,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `email` | SMTP / mailer | `recipient` |
 | `slack` | Slack incoming webhook | `webhook_url` |
 | `chatwork` | Chatwork API | `api_token`, `room_id` |
+| `webhook` | Signed outbound HTTP POST (D6) | `url`, `secret` (HMAC-SHA256) |
 
 ---
 
