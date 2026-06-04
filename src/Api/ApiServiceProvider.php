@@ -7,6 +7,7 @@ namespace NeneContact\Api;
 use LogicException;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
+use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
@@ -14,6 +15,7 @@ use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
 use NeneContact\Submission\SubmissionRepositoryInterface;
+use NeneContact\Submission\UpdateSubmissionStatusUseCaseInterface;
 use Psr\Container\ContainerInterface;
 
 final readonly class ApiServiceProvider implements ServiceProviderInterface
@@ -21,6 +23,16 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
     public function register(ContainerBuilder $builder): void
     {
         $builder
+            ->set(
+                ConfirmationToken::class,
+                static function (): ConfirmationToken {
+                    // Server-side signing secret (the caller never holds it, so it cannot forge
+                    // a token without doing phase 1). Reuses the local JWT secret.
+                    $secret = $_SERVER['NENE2_LOCAL_JWT_SECRET'] ?? $_ENV['NENE2_LOCAL_JWT_SECRET'] ?? getenv('NENE2_LOCAL_JWT_SECRET');
+
+                    return new ConfirmationToken(is_string($secret) ? $secret : '');
+                },
+            )
             ->set(
                 ListAgentFormsUseCaseInterface::class,
                 static function (ContainerInterface $c): ListAgentFormsUseCaseInterface {
@@ -169,12 +181,45 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                UpdateSubmissionStatusAgentHandler::class,
+                static function (ContainerInterface $c): UpdateSubmissionStatusAgentHandler {
+                    $submissions = $c->get(SubmissionRepositoryInterface::class);
+                    $uc = $c->get(UpdateSubmissionStatusUseCaseInterface::class);
+                    $confirmation = $c->get(ConfirmationToken::class);
+                    $json = $c->get(JsonResponseFactory::class);
+                    $pd = $c->get(ProblemDetailsResponseFactory::class);
+
+                    if (!$submissions instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$uc instanceof UpdateSubmissionStatusUseCaseInterface) {
+                        throw new LogicException('UpdateSubmissionStatus use case service is invalid.');
+                    }
+
+                    if (!$confirmation instanceof ConfirmationToken) {
+                        throw new LogicException('Confirmation token service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    if (!$pd instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    return new UpdateSubmissionStatusAgentHandler($submissions, $uc, $confirmation, $json, $pd);
+                },
+            )
+            ->set(
                 ApiRouteRegistrar::class,
                 static function (ContainerInterface $c): ApiRouteRegistrar {
                     $forms = $c->get(ListAgentFormsHandler::class);
                     $list = $c->get(ListAgentSubmissionsHandler::class);
                     $get = $c->get(GetAgentSubmissionHandler::class);
                     $ingest = $c->get(IngestSubmissionHandler::class);
+                    $updateStatus = $c->get(UpdateSubmissionStatusAgentHandler::class);
 
                     if (!$forms instanceof ListAgentFormsHandler) {
                         throw new LogicException('ListAgentForms handler service is invalid.');
@@ -192,7 +237,11 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                         throw new LogicException('IngestSubmission handler service is invalid.');
                     }
 
-                    return new ApiRouteRegistrar($forms, $list, $get, $ingest);
+                    if (!$updateStatus instanceof UpdateSubmissionStatusAgentHandler) {
+                        throw new LogicException('UpdateSubmissionStatusAgent handler service is invalid.');
+                    }
+
+                    return new ApiRouteRegistrar($forms, $list, $get, $ingest, $updateStatus);
                 },
             );
     }

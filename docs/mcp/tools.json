@@ -91,6 +91,38 @@
         "required": ["id"]
       },
       "responseSchemaRef": "AgentSubmissionResponse"
+    },
+    {
+      "name": "contact_update_submission_status",
+      "title": "Update submission status (requires confirmation)",
+      "description": "Two-step write. Call once with id + status and NO confirmation_token to get a preview and a confirmation_token (nothing changes). Then call again with the same id + status plus that confirmation_token to apply the change. Never auto-confirm without the operator's intent (charter §11).",
+      "safety": "write",
+      "source": {
+        "type": "openapi",
+        "operationId": "agentUpdateSubmissionStatus",
+        "method": "PATCH",
+        "path": "/api/submissions/{id}"
+      },
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "description": "The submission id."
+          },
+          "status": {
+            "type": "string",
+            "enum": ["open", "in_progress", "resolved", "spam"],
+            "description": "The new status."
+          },
+          "confirmation_token": {
+            "type": "string",
+            "description": "Omit on the first call to get a token + preview; pass it back on the second call to apply."
+          }
+        },
+        "required": ["id", "status"]
+      },
+      "responseSchemaRef": "AgentStatusUpdateResult"
     }
   ]
 }

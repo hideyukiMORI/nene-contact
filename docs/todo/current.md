@@ -7,7 +7,7 @@
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
 **M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
-**M6 — AI / MCP** 🚧 agent read `/api/*` + MCP stdio server + Concierge ingest landed (2026-06-04); MCP write tools + Invoice/Records next
+**M6 — AI / MCP** 🚧 agent read `/api/*` + MCP stdio + ingest + MCP write/confirm landed (2026-06-04); Invoice/Records siblings next
 
 ## Phase 1 progress
 
@@ -108,7 +108,9 @@ RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (i
       `tools/local-mcp-server.php` + `docs/mcp/tools.json` + `composer mcp` gate (#120)
 - [x] Concierge → Contact ingest `POST /api/submissions` — machine-key, org-scoped, `source`
       column, validated like public submit, audited + notified (#122)
-- [ ] MCP write tools + confirmation token (no autonomous outbound on PII, §11)
+- [x] MCP write tools + confirmation token — `contact_update_submission_status` with a
+      two-step `confirmation_token` enforced on `PATCH /api/submissions/{id}` (no autonomous
+      outbound on PII, §11); reusable for further write tools (#124)
 - [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
 - [ ] Contact → Invoice draft client; Contact → Records read-only select options
 
@@ -122,7 +124,11 @@ machine key (redacted by default; `include_pii=true` returns raw + is audited). 
 ingest** (#122) verified: `POST /api/submissions` (machine key) creates a `source=concierge`
 row (201 `{id,status,source}`), shows in the inbox/agent surface tagged `concierge`, audited
 `submission.created` (source + field-keys, no PII); 401 without key, 422 for unknown form /
-missing required / bad source; old public rows backfilled to `source=form`.
+missing required / bad source; old public rows backfilled to `source=form`. **MCP write +
+confirm** (#124) verified (HTTP + MCP stdio): `PATCH /api/submissions/{id}` phase 1 (no token)
+returns a preview + `confirmation_token` and changes nothing; phase 2 (with token) applies +
+audits `submission.updated` (actor null); a token replayed for a different status/id is rejected
+(re-challenged); 401 without the machine key.
 
 ## Next up
 

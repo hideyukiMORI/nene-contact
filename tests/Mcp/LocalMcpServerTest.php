@@ -29,16 +29,21 @@ final class LocalMcpServerTest extends TestCase
         self::assertArrayHasKey('serverInfo', $response['result']);
     }
 
-    public function test_tools_list_exposes_read_only_tools(): void
+    public function test_tools_list_marks_read_and_write_tools(): void
     {
         $response = $this->server(new FakeMcpHttpClient())->handle(['jsonrpc' => '2.0', 'id' => 2, 'method' => 'tools/list']);
 
         self::assertNotNull($response);
         $tools = $response['result']['tools'];
-        self::assertCount(3, $tools);
+        self::assertCount(4, $tools);
+
+        $byName = [];
         foreach ($tools as $tool) {
-            self::assertTrue($tool['annotations']['readOnlyHint']);
+            $byName[$tool['name']] = $tool['annotations']['readOnlyHint'];
         }
+
+        self::assertTrue($byName['contact_list_submissions']);
+        self::assertFalse($byName['contact_update_submission_status']);
     }
 
     public function test_tools_call_interpolates_path_and_passes_query(): void

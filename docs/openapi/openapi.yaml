@@ -649,6 +649,33 @@ paths:
               schema: { $ref: '#/components/schemas/AgentSubmissionResponse' }
         '401': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [Agent]
+      operationId: agentUpdateSubmissionStatus
+      summary: Update submission status (two-step confirmation token, agent write)
+      description: >
+        Agent write behind a confirmation token (charter §11 — no autonomous outbound action).
+        Call without `confirmation_token` to get a preview + token (nothing changes); call again
+        with the token to apply (audited). The token binds to this submission id + status.
+      security:
+        - machineApiKey: []
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AgentStatusUpdateRequest' }
+      responses:
+        '200':
+          description: Either a confirmation challenge (no change) or the applied result
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AgentStatusUpdateResult' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+        '503': { $ref: '#/components/responses/Problem' }
 
   /public/forms/{public_form_key}/schema:
     get:
@@ -1052,6 +1079,31 @@ components:
         status: { type: string }
         source: { type: string }
       required: [id, status, source]
+
+    AgentStatusUpdateRequest:
+      type: object
+      properties:
+        status: { type: string, enum: [open, in_progress, resolved, spam] }
+        confirmation_token: { type: string, description: omit to get a token + preview; pass back to apply }
+      required: [status]
+
+    AgentStatusUpdateResult:
+      type: object
+      description: A confirmation challenge (requires_confirmation=true, no change) or the applied result.
+      properties:
+        requires_confirmation: { type: boolean }
+        action: { type: string }
+        confirmation_token: { type: string }
+        expires_at: { type: [string, 'null'], format: date-time }
+        preview:
+          type: object
+          properties:
+            submission_id: { type: integer }
+            current_status: { type: string }
+            requested_status: { type: string }
+        confirmed: { type: boolean }
+        submission: { $ref: '#/components/schemas/AgentSubmissionResponse' }
+      required: [requires_confirmation]
 
     SubmissionLinkResponse:
       type: object
