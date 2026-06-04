@@ -1,6 +1,7 @@
 # Milestone M4: Channels + webhooks
 
 **Phase 3** · complete the notification surface beyond email and add attachments.
+✅ **Complete** (2026-06-04): dispatch #84/#85, webhooks #86/#87, attachments #88/#89 + #90/#91.
 
 ## Goal
 
@@ -10,18 +11,18 @@ webhooks for operator automation, and a file-attachment field.
 
 ## Acceptance criteria
 
-- [ ] **Slack dispatch** on new submission, using stored channel config (DO D5).
-- [ ] **Chatwork dispatch** on new submission, using stored channel config (DO D5).
-- [ ] Notification templates use **field summaries only** — never full attachment bytes,
+- [x] **Slack dispatch** on new submission, using stored channel config (DO D5). (#84/#85)
+- [x] **Chatwork dispatch** on new submission, using stored channel config (DO D5). (#84/#85)
+- [x] Notification templates use **field summaries only** — never full attachment bytes,
       never secrets (charter §7).
-- [ ] **Signed outbound webhooks** on new submission to operator-configured URLs, with a
-      verifiable signature (DO D6); target URL is operator responsibility.
-- [ ] **File attachment field** (DO D12): size/type allowlist; separate multipart endpoint
-      (not the 64 KiB JSON submit); attachment bytes never inlined into notifications;
-      virus-scan hook stub for Phase 3+ (charter §2).
-- [ ] All channel/secret config encrypted at rest; dispatch failures surfaced to the
-      operator (do not drop the submission).
-- [ ] OpenAPI updated; mutations audited (ADR 0013); `composer check` green.
+- [x] **Signed outbound webhooks** on new submission to operator-configured URLs, with a
+      verifiable HMAC signature (DO D6); target URL is operator responsibility. (#86/#87)
+- [x] **File attachment field** (DO D12): size/type allowlist; separate multipart endpoint;
+      attachment bytes never inlined into notifications; virus-scan hook stub; retention
+      erase-in-place + orphan cleanup (ADR 0016). (#88/#89, #90/#91)
+- [x] All channel/secret config encrypted at rest (#74); per-channel dispatch failures are
+      isolated (best-effort) and never drop the submission.
+- [x] OpenAPI updated; mutations audited (ADR 0013); `composer check` green.
 
 ## Out of scope
 

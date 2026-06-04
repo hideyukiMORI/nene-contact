@@ -3,7 +3,9 @@
 **Phase 0 — Governance** ✅ complete on `main` (2026-06-03)
 **Phase 1 — Runtime foundation** ✅ complete on `main` (2026-06-04)
 **M2 — Compliance hardening (binding gap closure)** ✅ complete on `main` (2026-06-04)
-**Next: M3 — Forms + embed MVP** (Phase 2; see `docs/roadmap.md`, `docs/milestones/`)
+**No-physical-deletion policy (ADR 0016)** ✅ complete on `main` (2026-06-04)
+**M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
+**Next: M3 — Forms + embed MVP** (Phase 2 frontend) or **M5 — Sibling handoff** (Phase 3)
 
 ## Phase 1 progress
 
@@ -52,12 +54,18 @@ raw values).
 - [x] GitHub Issue #1 — governance on `main` (https://github.com/hideyukiMORI/nene-contact)
 - [ ] Add NeNe Contact row to publication-strategy family copy (optional follow-up)
 
+## M4 — Channels + webhooks + attachments ✅
+
+- [x] Slack / Chatwork dispatch (per-channel sender + composite, best-effort) (#84 → #85)
+- [x] Signed outbound webhook channel (HMAC-SHA256) (#86 → #87)
+- [x] File attachments — upload/store/caps/scan-hook + admin list/download (audited) (#88 → #89)
+- [x] Attachment retention erase-in-place + orphan cleanup (ADR 0016) (#90 → #91)
+
 ## Next up
 
 - [ ] **M3 Forms + embed MVP** (Phase 2): admin SPA, form builder (dnd-kit, ADR 0015), inbox
   UI, `embed.js` widget — see `docs/milestones/m3-forms-embed-mvp.md`
-- [ ] M4 Slack / Chatwork notification dispatch (channels stored; only email dispatched so far)
-- [ ] M5 Sibling HTTP handoff (Deal / Vault) — Phase 3
+- [ ] M5 Sibling HTTP handoff (Deal / Vault) — `src/Upstream/`, idempotent, SubmissionLink (Phase 3)
 - [ ] M6 MCP tool catalog over the OpenAPI surface (read-first)
 
 ## Handoff notes
