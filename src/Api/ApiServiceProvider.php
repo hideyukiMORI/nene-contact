@@ -12,6 +12,7 @@ use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
+use NeneContact\Notification\SubmissionNotifierInterface;
 use NeneContact\Submission\SubmissionRepositoryInterface;
 use Psr\Container\ContainerInterface;
 
@@ -73,6 +74,28 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                IngestSubmissionUseCaseInterface::class,
+                static function (ContainerInterface $c): IngestSubmissionUseCaseInterface {
+                    $submissions = $c->get(SubmissionRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+                    $notifier = $c->get(SubmissionNotifierInterface::class);
+
+                    if (!$submissions instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    if (!$notifier instanceof SubmissionNotifierInterface) {
+                        throw new LogicException('Submission notifier service is invalid.');
+                    }
+
+                    return new IngestSubmissionUseCase($submissions, $audit, $notifier);
+                },
+            )
+            ->set(
                 ListAgentFormsHandler::class,
                 static function (ContainerInterface $c): ListAgentFormsHandler {
                     $uc = $c->get(ListAgentFormsUseCaseInterface::class);
@@ -124,11 +147,34 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                IngestSubmissionHandler::class,
+                static function (ContainerInterface $c): IngestSubmissionHandler {
+                    $forms = $c->get(ContactFormRepositoryInterface::class);
+                    $uc = $c->get(IngestSubmissionUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$forms instanceof ContactFormRepositoryInterface) {
+                        throw new LogicException('Contact form repository service is invalid.');
+                    }
+
+                    if (!$uc instanceof IngestSubmissionUseCaseInterface) {
+                        throw new LogicException('IngestSubmission use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new IngestSubmissionHandler($forms, $uc, $json);
+                },
+            )
+            ->set(
                 ApiRouteRegistrar::class,
                 static function (ContainerInterface $c): ApiRouteRegistrar {
                     $forms = $c->get(ListAgentFormsHandler::class);
                     $list = $c->get(ListAgentSubmissionsHandler::class);
                     $get = $c->get(GetAgentSubmissionHandler::class);
+                    $ingest = $c->get(IngestSubmissionHandler::class);
 
                     if (!$forms instanceof ListAgentFormsHandler) {
                         throw new LogicException('ListAgentForms handler service is invalid.');
@@ -142,7 +188,11 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                         throw new LogicException('GetAgentSubmission handler service is invalid.');
                     }
 
-                    return new ApiRouteRegistrar($forms, $list, $get);
+                    if (!$ingest instanceof IngestSubmissionHandler) {
+                        throw new LogicException('IngestSubmission handler service is invalid.');
+                    }
+
+                    return new ApiRouteRegistrar($forms, $list, $get, $ingest);
                 },
             );
     }

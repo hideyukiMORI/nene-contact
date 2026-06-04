@@ -24,9 +24,8 @@ wins (ADR 0012).
   with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
 - **M5 Sibling handoff** ✅: Contact → Deal opportunity handoff + Contact → Vault attachment
   archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited).
-- **M6 AI/MCP** 🚧: agent read surface `/api/*` (machine-key auth, redacted by default, audited
-  `include_pii`) + local MCP stdio server (`tools/local-mcp-server.php`, PHP) mapping read tools
-  to it; MCP write tools + deeper siblings (Invoice/Records/Concierge) next.
+- **M6 AI/MCP** 🚧: agent read surface `/api/*` + local MCP stdio server + Concierge ingest
+  (`POST /api/submissions`, `source=concierge`, one inbox); MCP write tools + Invoice/Records next.
 - **Next:** finish M6, then M7 GA acceptance (A1–A8).
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).

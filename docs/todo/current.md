@@ -7,7 +7,7 @@
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
 **M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
 **M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
-**M6 — AI / MCP** 🚧 agent read surface `/api/*` + local MCP stdio server landed (2026-06-04); write tools + deeper siblings next
+**M6 — AI / MCP** 🚧 agent read `/api/*` + MCP stdio server + Concierge ingest landed (2026-06-04); MCP write tools + Invoice/Records next
 
 ## Phase 1 progress
 
@@ -106,8 +106,10 @@ RBAC 401; unknown attachment 404; audit `handoff.created` / `handoff.retried` (i
       redacted by default, audited `include_pii=true`; org via tenant strategy (#118)
 - [x] MCP stdio server (PHP, `Nene2\Mcp\LocalMcpServer`) mapping read tools to `/api/*` —
       `tools/local-mcp-server.php` + `docs/mcp/tools.json` + `composer mcp` gate (#120)
+- [x] Concierge → Contact ingest `POST /api/submissions` — machine-key, org-scoped, `source`
+      column, validated like public submit, audited + notified (#122)
 - [ ] MCP write tools + confirmation token (no autonomous outbound on PII, §11)
-- [ ] Concierge → Contact ingest `POST /api/submissions` (service token + webhook secret)
+- [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
 - [ ] Contact → Invoice draft client; Contact → Records read-only select options
 
 Verified e2e (docker, MySQL, php -S with `NENE2_MACHINE_API_KEY`): `/api/*` requires
@@ -116,7 +118,11 @@ redacted by default (masked emails `c***@e***.com`, no IP/UA); `include_pii=true
 + audit (`submission.viewed` single / `submission.exported` list, `via=agent_api`); redacted
 reads not audited; unknown submission 404. **MCP stdio** (#120) verified end-to-end: JSON-RPC
 `initialize` → `tools/list` (3 read-only tools) → `tools/call` proxies to `/api/*` with the
-machine key (redacted by default; `include_pii=true` returns raw + is audited).
+machine key (redacted by default; `include_pii=true` returns raw + is audited). **Concierge
+ingest** (#122) verified: `POST /api/submissions` (machine key) creates a `source=concierge`
+row (201 `{id,status,source}`), shows in the inbox/agent surface tagged `concierge`, audited
+`submission.created` (source + field-keys, no PII); 401 without key, 422 for unknown form /
+missing required / bad source; old public rows backfilled to `source=form`.
 
 ## Next up
 

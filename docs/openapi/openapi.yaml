@@ -603,6 +603,30 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/AgentSubmissionListResponse' }
         '401': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Agent]
+      operationId: agentIngestSubmission
+      summary: Ingest a submission from a service client (e.g. Concierge) into the inbox
+      description: >
+        Creates a submission from a service client (concierge-ingest-contract). `contact_form_id`
+        must belong to the resolved organization. Field values are validated against the form
+        (required, email, consent) like the public submit; audited (`submission.created`) and
+        notified. No autonomous outbound action on personal data (charter §11).
+      security:
+        - machineApiKey: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IngestSubmissionRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/IngestSubmissionResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
 
   /api/submissions/{id}:
     get:
@@ -952,6 +976,7 @@ components:
         id: { type: integer }
         contact_form_id: { type: integer }
         status: { type: string, enum: [open, in_progress, resolved, spam] }
+        source: { type: string, description: "origin: form (public/embed) or service (concierge/import/api)" }
         field_values: { type: object, additionalProperties: true }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         consent_given_at: { type: [string, 'null'], format: date-time }
@@ -993,6 +1018,7 @@ components:
         id: { type: integer }
         contact_form_id: { type: integer }
         status: { type: string }
+        source: { type: string }
         pii_included: { type: boolean }
         field_values: { type: object, additionalProperties: true, description: masked unless pii_included }
         consent_given_at: { type: [string, 'null'], format: date-time }
@@ -1009,6 +1035,23 @@ components:
         offset: { type: integer }
         total: { type: integer }
         pii_included: { type: boolean }
+
+    IngestSubmissionRequest:
+      type: object
+      properties:
+        source: { type: string, enum: [concierge, import, api] }
+        contact_form_id: { type: integer }
+        field_values: { type: object, additionalProperties: true }
+        consent: { type: boolean, description: required when the form requires consent }
+      required: [source, contact_form_id, field_values]
+
+    IngestSubmissionResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        status: { type: string }
+        source: { type: string }
+      required: [id, status, source]
 
     SubmissionLinkResponse:
       type: object

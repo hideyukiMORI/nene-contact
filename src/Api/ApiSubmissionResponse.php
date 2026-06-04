@@ -20,6 +20,7 @@ final readonly class ApiSubmissionResponse
             'id' => $submission->id,
             'contact_form_id' => $submission->contactFormId,
             'status' => $submission->status,
+            'source' => $submission->source,
             'pii_included' => $includePii,
             'field_values' => $includePii
                 ? $submission->fieldValues

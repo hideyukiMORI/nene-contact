@@ -14,7 +14,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoSubmissionRepository implements SubmissionRepositoryInterface
 {
-    private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, ip, user_agent, submitted_at, created_at, updated_at';
+    private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, submitted_at, created_at, updated_at';
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -30,8 +30,8 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
         $now = date('Y-m-d H:i:s');
 
         $this->query->execute(
-            'INSERT INTO submissions (organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, ip, user_agent, submitted_at, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO submissions (organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, submitted_at, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $submission->organizationId,
                 $submission->contactFormId,
@@ -39,6 +39,7 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
                 $submission->consentLabel !== null ? json_encode($submission->consentLabel, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE) : null,
                 $submission->consentGivenAt,
                 $submission->status,
+                $submission->source,
                 $submission->ip,
                 $submission->userAgent,
                 $now,
@@ -122,6 +123,7 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
             contactFormId: (int) $row['contact_form_id'],
             fieldValues: is_array($values) ? $values : [],
             status: (string) $row['status'],
+            source: isset($row['source']) ? (string) $row['source'] : 'form',
             ip: isset($row['ip']) ? (string) $row['ip'] : null,
             userAgent: isset($row['user_agent']) ? (string) $row['user_agent'] : null,
             consentLabel: is_array($consentLabel) ? $consentLabel : null,
