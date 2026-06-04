@@ -2,13 +2,19 @@
 # Requires mod_rewrite + AllowOverride All (set in docker/php/Dockerfile).
 RewriteEngine On
 
-# Admin SPA client-side routing: serve the built SPA shell for non-file /admin/* paths
+# The operator console SPA lives under /console/ (built to public_html/console/). The admin
+# **API** owns /admin/* — keeping the SPA on a separate prefix means API routes are never
+# shadowed by the SPA fallback (#114). Old /admin bookmark → console for convenience.
+RewriteRule ^admin/?$ /console/ [R=302,L]
+
+# Console SPA client-side routing: serve the built SPA shell for non-file /console/* paths
 # (deep links / reload). Real files (assets, index.html) are served directly.
-RewriteCond %{REQUEST_URI} ^/admin/
+RewriteCond %{REQUEST_URI} ^/console/
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule ^ /admin/index.html [L]
+RewriteRule ^ /console/index.html [L]
 
+# Everything else (the /admin/* API, /public/*, /health, …) → NENE2 front controller.
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]

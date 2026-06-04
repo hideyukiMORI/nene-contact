@@ -86,13 +86,17 @@ Verified e2e (docker, MySQL): handoff trigger → outbound `POST /api/opportunit
 (Bearer token + `Idempotency-Key` + `external_reference`); success stores `deal_opportunity_id`
 + `handoff_status=succeeded`; unconfigured/failed → `failed` + `last_error`, submission intact;
 retry is idempotent (single `submission_links` row, upsert — no DELETE, ADR 0016); RBAC 401
-without a token; audit `handoff.created` / `handoff.retried` (ids only, no PII). Note: the
-admin API is currently reached via the front controller directly — see the `.htaccess` follow-up.
+without a token; audit `handoff.created` / `handoff.retried` (ids only, no PII). Now also
+verified over apache directly (the `/admin/*` API is reachable since #114 moved the SPA to `/console/`).
+
+## Deploy fixes
+
+- [x] **`.htaccess` SPA shadow fix** (#114) — the `/admin/*` SPA rewrite shadowed the `/admin/*`
+      API over apache; the console SPA now serves from `/console/` (`public_html/console/`) and
+      `/admin` redirects there, so API routes are no longer shadowed.
 
 ## Next up
 
-- [ ] **`.htaccess` SPA shadow fix** — the `/admin/*` SPA rewrite shadows the `/admin/*` API
-      over apache (docker); decouple the SPA URL prefix from the API prefix (separate Issue)
 - [ ] M5 Vault attachment archive (above)
 - [ ] M6 MCP tool catalog over the OpenAPI surface (read-first)
 - [ ] M7 GA acceptance (A1–A8), operator docs, production `embed.js` build

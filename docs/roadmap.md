@@ -20,7 +20,7 @@ wins (ADR 0012).
 - **No-physical-deletion policy** ✅ ([ADR 0016](./adr/0016-no-physical-deletion-pii-erase-in-place.md)):
   records are soft-deleted / append-only; PII is erased in place; the DB user has no `DELETE`.
 - **M4 Channels + webhooks + attachments** ✅: Slack/Chatwork dispatch, signed webhooks, file attachments.
-- **M3 Forms + embed MVP** 🚧: `embed.js` widget ✅; admin SPA (React/TS/Vite → `public_html/admin/`)
+- **M3 Forms + embed MVP** 🚧: `embed.js` widget ✅; admin SPA (React/TS/Vite → `public_html/console/`, served at `/console/`)
   with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
 - **M5 Sibling handoff** 🚧: Contact → Deal opportunity handoff landed (`src/Upstream/`,
   `submission_links`, idempotent, retry, audited); Contact → Vault archive is the next slice.

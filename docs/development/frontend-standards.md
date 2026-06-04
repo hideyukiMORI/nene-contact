@@ -96,7 +96,7 @@ ESLint `import/no-restricted-paths` enforces the matrix; placement drift is reje
 | --- | --- |
 | UI | **React** (latest stable) — function components + hooks only, no class components |
 | Language | **TypeScript** strict (`any` forbidden; use `unknown` + narrow) |
-| Bundler | **Vite** → admin build to `public_html/admin/` |
+| Bundler | **Vite** → console SPA build to `public_html/console/` (served at `/console/`) |
 | Package manager | **npm**; commit `frontend/package-lock.json`; CI `npm ci` |
 | Node | active **LTS (≥22)**; `engines` + `packageManager` in `package.json` |
 | Routing | **React Router** (URL is shareable state) |
@@ -143,8 +143,9 @@ frontend/
   tests/  setup/  msw/  factories/  render/
 ```
 
-Admin build → `public_html/admin/`. Embed build → `public_html/embed.js`. Source and
-`node_modules/` stay outside `public_html/`.
+Console SPA build → `public_html/console/` (served at `/console/`; the admin API owns
+`/admin/*`, so the SPA uses a separate prefix to avoid shadowing it — #114). Embed build →
+`public_html/embed.js`. Source and `node_modules/` stay outside `public_html/`.
 
 ### Placement matrix (zero tolerance)
 
@@ -278,7 +279,7 @@ npm ci --prefix frontend
 npm run dev --prefix frontend          # Vite dev; API proxied to PHP app
 npm run codegen --prefix frontend      # regenerate shared/api/schema.gen.ts from OpenAPI
 npm run check --prefix frontend        # type-check + lint + format + test
-npm run build --prefix frontend        # admin → public_html/admin/
+npm run build --prefix frontend        # console SPA → public_html/console/
 npm run build:embed --prefix frontend  # widget → public_html/embed.js (hashed)
 ```
 

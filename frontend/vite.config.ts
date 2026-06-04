@@ -3,9 +3,11 @@ import { fileURLToPath, URL } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { defineConfig } from 'vite';
 
-// Admin SPA build → public_html/admin/ (served under /admin/). Source stays in frontend/src.
+// Operator console SPA build → public_html/console/ (served under /console/). The admin API
+// owns /admin/*, so the SPA uses a separate prefix to avoid shadowing it (#114). Source stays
+// in frontend/src.
 export default defineConfig({
-  base: '/admin/',
+  base: '/console/',
   plugins: [react()],
   resolve: {
     alias: {
@@ -13,7 +15,7 @@ export default defineConfig({
     },
   },
   build: {
-    outDir: '../public_html/admin',
+    outDir: '../public_html/console',
     emptyOutDir: true,
   },
   server: {
