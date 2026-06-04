@@ -70,6 +70,15 @@ curl http://127.0.0.1:8900/health                # {"status":"ok","service":"NEN
 # or the full stack (fixed 89xx lane): docker compose up
 ```
 
+On a fresh database the entrypoint applies migrations automatically; create the
+organization the single-tenant resolver expects (`ORG_SLUG`, default `default`)
+once, plus a bootstrap operator:
+
+```bash
+docker compose exec app php tools/create-organization.php "Default" default
+docker compose exec app php tools/create-user.php admin@example.com 'change-me' admin 1
+```
+
 NENE2 is consumed via a Composer `path` repository (`../NENE2`). Copy `.env.example` to
 `.env` to override config (problem-details base URL, tenant resolution, database).
 
