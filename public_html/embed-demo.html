@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NeNe Contact — embed demo</title>
+  <style>
+    body { font-family: system-ui, sans-serif; max-width: 640px; margin: 40px auto; padding: 0 16px; color: #1f2937; }
+    code { background: #f3f4f6; padding: 2px 5px; border-radius: 4px; }
+    .hint { color: #6b7280; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <h1>NeNe Contact — embed demo</h1>
+  <p class="hint">
+    Open <code>/embed-demo.html?form=YOUR_PUBLIC_FORM_KEY&amp;trigger=inline</code>
+    (trigger: <code>floating</code> | <code>button</code> | <code>inline</code>; add <code>&amp;lang=en</code>).
+  </p>
+  <p>Operator snippet (paste on any site):</p>
+  <pre><code>&lt;script src="/embed.js" data-form="YOUR_KEY" data-trigger="floating" data-lang="ja" async&gt;&lt;/script&gt;</code></pre>
+  <hr>
+  <div id="demo"></div>
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var key = params.get('form');
+      if (!key) {
+        document.getElementById('demo').textContent = 'Add ?form=YOUR_PUBLIC_FORM_KEY to the URL to render the widget.';
+        return;
+      }
+      var s = document.createElement('script');
+      s.src = '/embed.js';
+      s.setAttribute('data-form', key);
+      s.setAttribute('data-trigger', params.get('trigger') || 'inline');
+      if (params.get('lang')) { s.setAttribute('data-lang', params.get('lang')); }
+      document.getElementById('demo').appendChild(s);
+    })();
+  </script>
+</body>
+</html>
