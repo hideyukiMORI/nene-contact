@@ -13,6 +13,7 @@ use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
+use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
@@ -263,6 +264,28 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                CorrectSubmissionUseCaseInterface::class,
+                static function (ContainerInterface $c): CorrectSubmissionUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $forms = $c->get(ContactFormRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$forms instanceof ContactFormRepositoryInterface) {
+                        throw new LogicException('Contact form repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new CorrectSubmissionUseCase($repo, $forms, $audit);
+                },
+            )
+            ->set(
                 AddSubmissionNoteUseCaseInterface::class,
                 static function (ContainerInterface $c): AddSubmissionNoteUseCaseInterface {
                     $repo = $c->get(SubmissionRepositoryInterface::class);
@@ -333,6 +356,23 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     }
 
                     return new DeleteSubmissionHandler($uc, $json);
+                },
+            )
+            ->set(
+                CorrectSubmissionHandler::class,
+                static function (ContainerInterface $c): CorrectSubmissionHandler {
+                    $uc = $c->get(CorrectSubmissionUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof CorrectSubmissionUseCaseInterface) {
+                        throw new LogicException('CorrectSubmission use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new CorrectSubmissionHandler($uc, $json);
                 },
             )
             ->set(
@@ -430,6 +470,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $get = $c->get(GetSubmissionByIdHandler::class);
                     $updateStatus = $c->get(UpdateSubmissionStatusHandler::class);
                     $delete = $c->get(DeleteSubmissionHandler::class);
+                    $correct = $c->get(CorrectSubmissionHandler::class);
                     $addNote = $c->get(AddSubmissionNoteHandler::class);
                     $listNotes = $c->get(ListSubmissionNotesHandler::class);
                     $export = $c->get(ExportSubmissionsHandler::class);
@@ -458,6 +499,10 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Delete submission handler service is invalid.');
                     }
 
+                    if (!$correct instanceof CorrectSubmissionHandler) {
+                        throw new LogicException('Correct submission handler service is invalid.');
+                    }
+
                     if (!$addNote instanceof AddSubmissionNoteHandler) {
                         throw new LogicException('Add submission note handler service is invalid.');
                     }
@@ -470,7 +515,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Export submissions handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $delete, $addNote, $listNotes, $export);
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $delete, $correct, $addNote, $listNotes, $export);
                 },
             );
     }

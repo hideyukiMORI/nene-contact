@@ -77,6 +77,20 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
         );
     }
 
+    /** @param array<string, mixed> $values */
+    public function updateFieldValues(int $id, array $values): void
+    {
+        $this->query->execute(
+            'UPDATE submissions SET field_values_json = ?, updated_at = ? WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
+            [
+                json_encode($values, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE),
+                date('Y-m-d H:i:s'),
+                $id,
+                $this->orgId->get(),
+            ],
+        );
+    }
+
     /** @return list<Submission> */
     public function findAll(int $limit, int $offset): array
     {

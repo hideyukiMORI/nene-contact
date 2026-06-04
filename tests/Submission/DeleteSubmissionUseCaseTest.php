@@ -44,6 +44,11 @@ final class DeleteSubmissionUseCaseTest extends TestCase
                 $this->current = null;
             }
 
+            /** @param array<string, mixed> $values */
+            public function updateFieldValues(int $id, array $values): void
+            {
+            }
+
             /** @return list<Submission> */
             public function findAll(int $limit, int $offset): array
             {
@@ -112,6 +117,11 @@ final class DeleteSubmissionUseCaseTest extends TestCase
             }
 
             public function softDelete(int $id): void
+            {
+            }
+
+            /** @param array<string, mixed> $values */
+            public function updateFieldValues(int $id, array $values): void
             {
             }
 
