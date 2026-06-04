@@ -21,6 +21,7 @@ tags:
   - name: Submission
   - name: Attachment
   - name: Handoff
+  - name: Records
   - name: Agent
   - name: Public
 
@@ -584,6 +585,32 @@ paths:
         '422': { $ref: '#/components/responses/ValidationProblem' }
         '429': { $ref: '#/components/responses/Problem' }
 
+  /admin/records/options:
+    get:
+      tags: [Records]
+      operationId: fetchRecordsOptions
+      summary: Fetch select options from a NeNe Records entity (read-only)
+      description: >
+        Reads a Records entity's select options over HTTP (ADR 0002 — Records is the SSOT; no
+        shared DB) for the form builder to import into a select field. Requires the ManageForms
+        capability. Upstream failures surface as problem details.
+      parameters:
+        - name: source
+          in: query
+          required: true
+          description: The Records entity key.
+          schema: { type: string }
+      responses:
+        '200':
+          description: Options
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RecordsOptionsResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+        '502': { $ref: '#/components/responses/Problem' }
+
   /api/forms:
     get:
       tags: [Agent]
@@ -1032,6 +1059,19 @@ components:
         consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
+
+    RecordsOptionsResponse:
+      type: object
+      properties:
+        source: { type: string }
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              value: { type: string }
+              label: { type: string }
+            required: [value, label]
 
     AgentFormResponse:
       type: object
