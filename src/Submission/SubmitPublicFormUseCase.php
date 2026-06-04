@@ -28,6 +28,12 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             throw new LogicException('Cannot submit against an unsaved form.');
         }
 
+        // Immutable consent evidence (charter §3): snapshot the consent copy in force and
+        // the moment it was granted. Recorded only when the form requires consent (the
+        // handler has already rejected a missing affirmative consent).
+        $consentLabel = $form->consentRequired ? $form->consentLabel : null;
+        $consentGivenAt = $form->consentRequired ? date('Y-m-d H:i:s') : null;
+
         $id = $this->submissions->create(new Submission(
             organizationId: $form->organizationId,
             contactFormId: $form->id,
@@ -35,6 +41,8 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             status: 'open',
             ip: $ip,
             userAgent: $userAgent,
+            consentLabel: $consentLabel,
+            consentGivenAt: $consentGivenAt,
         ));
 
         $stored = new Submission(
@@ -44,6 +52,8 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             status: 'open',
             ip: $ip,
             userAgent: $userAgent,
+            consentLabel: $consentLabel,
+            consentGivenAt: $consentGivenAt,
             id: $id,
         );
 

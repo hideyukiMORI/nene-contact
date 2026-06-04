@@ -33,6 +33,8 @@ final readonly class CreateContactFormUseCase implements CreateContactFormUseCas
             allowedOrigins: $input->allowedOrigins,
             fields: $input->fields,
             status: 'active',
+            consentRequired: $input->consentRequired,
+            consentLabel: $input->consentLabel,
         );
 
         $id = $this->forms->save($form);

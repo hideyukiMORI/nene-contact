@@ -15,7 +15,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoContactFormRepository implements ContactFormRepositoryInterface
 {
-    private const FORM_COLUMNS = 'id, organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, created_at, updated_at';
+    private const FORM_COLUMNS = 'id, organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, created_at, updated_at';
     private const FIELD_COLUMNS = 'id, contact_form_id, field_type, name, label_json, required, options_json, sort_order';
 
     /**
@@ -35,8 +35,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
         return $this->tx->transactional(static function (DatabaseQueryExecutorInterface $q) use ($form, $organizationId, $now): int {
             $q->execute(
-                'INSERT INTO contact_forms (organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO contact_forms (organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     $organizationId,
                     $form->name,
@@ -45,6 +45,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
                     self::encode($form->locales),
                     self::encode($form->allowedOrigins),
                     $form->status,
+                    $form->consentRequired ? 1 : 0,
+                    $form->consentLabel !== null ? self::encode($form->consentLabel) : null,
                     $now,
                     $now,
                 ],
@@ -155,6 +157,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
         $locales = self::decode(isset($row['locales_json']) ? (string) $row['locales_json'] : null) ?? [];
         /** @var list<string> $allowedOrigins */
         $allowedOrigins = self::decode(isset($row['allowed_origins_json']) ? (string) $row['allowed_origins_json'] : null) ?? [];
+        /** @var array<string, string>|null $consentLabel */
+        $consentLabel = self::decode(isset($row['consent_label_json']) ? (string) $row['consent_label_json'] : null);
 
         return new ContactForm(
             organizationId: (int) $row['organization_id'],
@@ -165,6 +169,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
             allowedOrigins: $allowedOrigins,
             fields: $fields,
             status: (string) $row['status'],
+            consentRequired: (bool) $row['consent_required'],
+            consentLabel: $consentLabel,
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],

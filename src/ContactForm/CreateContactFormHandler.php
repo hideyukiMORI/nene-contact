@@ -49,6 +49,22 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
 
         $allowedOrigins = self::stringList($body['allowed_origins'] ?? []);
 
+        // Consent (charter §3): when required, a per-locale label for the default locale is
+        // mandatory, and labels are restricted to {ja, en} (ADR 0011).
+        $consentRequired = (bool) ($body['consent_required'] ?? false);
+        /** @var array<string, string> $consentLabel */
+        $consentLabel = is_array($body['consent_label'] ?? null)
+            ? array_map(static fn ($v): string => (string) $v, $body['consent_label'])
+            : [];
+
+        if ($consentLabel !== [] && array_diff(array_keys($consentLabel), self::SUPPORTED_LOCALES) !== []) {
+            $errors[] = new ValidationError('consent_label', 'Consent label locales must be a subset of {ja, en}.', 'invalid');
+        }
+
+        if ($consentRequired && (!isset($consentLabel[$defaultLocale]) || trim($consentLabel[$defaultLocale]) === '')) {
+            $errors[] = new ValidationError('consent_label', "A consent label for the default locale ({$defaultLocale}) is required when consent is required.", 'required');
+        }
+
         $rawFields = is_array($body['fields'] ?? null) ? $body['fields'] : [];
         $fields = [];
         $sort = 0;
@@ -108,6 +124,8 @@ final readonly class CreateContactFormHandler implements RequestHandlerInterface
             locales: $locales,
             allowedOrigins: $allowedOrigins,
             fields: $fields,
+            consentRequired: $consentRequired,
+            consentLabel: $consentLabel === [] ? null : $consentLabel,
         ));
 
         return $this->response->create(
