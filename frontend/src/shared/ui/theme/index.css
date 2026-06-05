@@ -572,9 +572,15 @@ code,
   font-size: 13.5px;
   font-weight: 550;
   color: var(--text);
+  text-decoration: none;
 }
 .menu-item:hover {
   background: var(--surface-2);
+  text-decoration: none;
+}
+.menu-item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 .menu-item svg {
   width: 17px;
@@ -621,19 +627,102 @@ code,
 .dash {
   display: flex;
   flex-direction: column;
-  gap: 22px;
+  gap: 24px;
 }
 .dash .recent-when {
   text-align: right;
   white-space: nowrap;
   font-size: 12.5px;
 }
-/* dashboard stat — accent the "open" tile when there is work to do */
-.stat.stat-accent .s-val {
+/* operations layout — needs-attention (wide) beside the side rail */
+.dash-cols {
+  display: grid;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 22px;
+  align-items: start;
+}
+.dash-side {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+@media (max-width: 980px) {
+  .dash-cols {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* stat rail — hairline-divided figures with serif values */
+.stat-rail {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+.stat-rail > div {
+  padding: 17px 0;
+}
+.stat-rail > div + div {
+  border-left: 1px solid var(--border);
+  padding-left: 22px;
+}
+.stat-rail .sr-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+}
+.stat-rail .sr-label svg {
+  color: var(--text-faint);
+}
+.stat-rail .sr-val {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 32px;
+  letter-spacing: -0.01em;
+  line-height: 1;
+  margin-top: 9px;
+}
+.stat-rail .sr-sub {
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-top: 8px;
+}
+.stat-rail .sr-item-accent .sr-val {
   color: var(--st-open-fg);
 }
-.stat.stat-accent .s-label svg {
+.stat-rail .sr-item-accent .sr-label svg {
   color: var(--st-open-dot);
+}
+@media (max-width: 760px) {
+  .stat-rail {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .stat-rail > div:nth-child(odd) {
+    border-left: none;
+    padding-left: 0;
+  }
+}
+
+/* leading accent icon in a card header */
+.card-ico {
+  display: inline-flex;
+  color: var(--accent);
+}
+.dash .menu-list {
+  padding: 6px;
+}
+.dash .menu-item .faint {
+  color: var(--text-faint);
+}
+.dash .empty-pad {
+  padding: 34px 24px;
+}
+.dash .forms-status {
+  text-align: right;
 }
 .page-head-row {
   display: flex;
