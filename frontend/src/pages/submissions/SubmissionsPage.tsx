@@ -6,9 +6,12 @@ export function SubmissionsPage(): ReactNode {
   const { t } = useI18n();
 
   return (
-    <section className="nc-card nc-section">
-      <h1>{t('inbox.title')}</h1>
+    <>
+      <div className="page-head">
+        <h1>{t('inbox.title')}</h1>
+        <p className="lead">{t('inbox.lead')}</p>
+      </div>
       <SubmissionList />
-    </section>
+    </>
   );
 }

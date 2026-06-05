@@ -1480,6 +1480,23 @@ td.col-actions {
   margin-top: 16px;
 }
 
+/* inbox (submissions list) */
+th.col-right,
+td.col-right {
+  text-align: right;
+  white-space: nowrap;
+}
+.submission-id {
+  font-size: 11.5px;
+}
+.table-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+}
+
 /* ---------- Tooltip / Help ---------- */
 .help-dot {
   display: inline-grid;
