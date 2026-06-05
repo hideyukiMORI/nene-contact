@@ -2,10 +2,11 @@ import type { ReactNode } from 'react';
 
 // Line-icon set for the contact-forms list (Design System v2). Paths trace the
 // 24×24 grid from the design source; rendered as inline SVG so no markup is injected.
-export type FormIconName = 'plus' | 'forms' | 'bell' | 'copy' | 'check';
+export type FormIconName = 'plus' | 'forms' | 'bell' | 'copy' | 'check' | 'code';
 
 const PATHS: Record<FormIconName, ReactNode> = {
   plus: <path d="M12 5v14M5 12h14" />,
+  code: <path d="M9 8l-4 4 4 4M15 8l4 4-4 4" />,
   forms: (
     <>
       <rect x="4" y="3" width="16" height="18" rx="2" />
