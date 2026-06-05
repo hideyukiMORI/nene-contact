@@ -7,13 +7,13 @@ export function toSubmission(dto: SubmissionDto): Submission {
     contactFormId: dto.contact_form_id,
     status: dto.status,
     submittedAt: dto.submitted_at ?? null,
+    fieldValues: dto.field_values ?? {},
   };
 }
 
 export function toSubmissionDetail(dto: SubmissionDto): SubmissionDetail {
   return {
     ...toSubmission(dto),
-    fieldValues: dto.field_values ?? {},
     consentLabel: dto.consent_label ?? null,
     consentGivenAt: dto.consent_given_at ?? null,
   };

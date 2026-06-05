@@ -92,7 +92,7 @@ export const ja = {
   'user.status.disabled': '無効',
   'inbox.title': '受信箱',
   'inbox.lead':
-    '届いた送信の一覧です。フォーム・状態・期間で絞り込み、行をクリックで詳細を開けます。',
+    '届いた送信の一覧です。横断検索で本文や差出人を探し、フォーム・状態・期間で絞り込めます。',
   'inbox.empty': '受信データがまだありません。',
   'inbox.emptyTitle': 'まだ送信はありません',
   'inbox.emptyBody': 'フォームを公開すると、ここに届きます。',
@@ -101,7 +101,8 @@ export const ja = {
   'inbox.unknownForm': 'フォーム #{id}',
   'inbox.tab.all': 'すべて',
   'inbox.allForms': 'すべてのフォーム',
-  'inbox.search': 'フォーム名・ID で検索',
+  'inbox.search': '差出人・本文・フォーム名で横断検索',
+  'inbox.column.from': '差出人',
   'inbox.clear': 'クリア',
   'inbox.clearAll': 'すべて解除',
   'inbox.clearFilters': '絞り込みを解除',
