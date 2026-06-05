@@ -7,6 +7,28 @@ import { server } from '../../../../tests/msw/server';
 import { SubmissionList } from '@/features/list-submissions';
 
 const URL = 'http://localhost/admin/submissions';
+const FORMS_URL = 'http://localhost/admin/contact-forms';
+
+function mockForms(): void {
+  server.use(
+    http.get(FORMS_URL, () =>
+      HttpResponse.json({
+        items: [
+          {
+            id: 3,
+            name: 'Contact us',
+            public_form_key: 'k3',
+            default_locale: 'ja',
+            locales: ['ja'],
+            status: 'active',
+            fields: [],
+          },
+        ],
+        total: 1,
+      }),
+    ),
+  );
+}
 
 function renderList(): void {
   renderWithProviders(
@@ -18,6 +40,7 @@ function renderList(): void {
 
 describe('SubmissionList', () => {
   it('renders submissions and the page indicator on success', async () => {
+    mockForms();
     server.use(
       http.get(URL, () =>
         HttpResponse.json({
@@ -41,16 +64,20 @@ describe('SubmissionList', () => {
 
     expect(await screen.findByText('2026-06-04 00:00:00')).toBeInTheDocument();
     expect(screen.getByText('1 / 1')).toBeInTheDocument();
+    // form name resolved from the contact-forms list, with the id beneath
+    expect(screen.getByText('Contact us')).toBeInTheDocument();
+    expect(screen.getByText('#9')).toBeInTheDocument();
   });
 
   it('renders the empty state', async () => {
+    mockForms();
     server.use(
       http.get(URL, () => HttpResponse.json({ items: [], total: 0, limit: 20, offset: 0 })),
     );
 
     renderList();
 
-    expect(await screen.findByText('受信データがまだありません。')).toBeInTheDocument();
+    expect(await screen.findByText('まだ送信はありません')).toBeInTheDocument();
   });
 
   it('renders an error with retry', async () => {
