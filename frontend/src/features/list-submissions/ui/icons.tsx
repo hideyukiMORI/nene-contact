@@ -2,7 +2,14 @@ import type { ReactNode } from 'react';
 
 // Line-icon set for the inbox (Design System v2). Paths trace the 24×24 grid from
 // the design source; rendered as inline SVG so no markup is injected.
-export type InboxIconName = 'inbox' | 'chevLeft' | 'chevRight' | 'search';
+export type InboxIconName =
+  | 'inbox'
+  | 'chevLeft'
+  | 'chevRight'
+  | 'chevDown'
+  | 'search'
+  | 'calendar'
+  | 'x';
 
 const PATHS: Record<InboxIconName, ReactNode> = {
   inbox: (
@@ -13,12 +20,20 @@ const PATHS: Record<InboxIconName, ReactNode> = {
   ),
   chevLeft: <path d="M15 6l-6 6 6 6" />,
   chevRight: <path d="M9 6l6 6-6 6" />,
+  chevDown: <path d="M6 9l6 6 6-6" />,
   search: (
     <>
       <circle cx="11" cy="11" r="7" />
       <path d="M21 21l-4-4" />
     </>
   ),
+  calendar: (
+    <>
+      <rect x="3" y="5" width="18" height="16" rx="2" />
+      <path d="M3 9h18M8 3v4M16 3v4" />
+    </>
+  ),
+  x: <path d="M6 6l12 12M18 6L6 18" />,
 };
 
 export function InboxIcon({ name, size = 16 }: { name: InboxIconName; size?: number }): ReactNode {
