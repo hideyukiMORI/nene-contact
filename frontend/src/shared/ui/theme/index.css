@@ -1445,6 +1445,41 @@ td.col-actions {
   flex: none;
 }
 
+/* notification channels */
+.ch-page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 16px;
+}
+.segmented.full {
+  display: flex;
+  width: 100%;
+}
+.segmented.full button {
+  flex: 1;
+  justify-content: center;
+}
+.ch-type {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+.ch-type svg {
+  color: var(--accent);
+}
+.add-channel {
+  max-width: 560px;
+}
+.add-channel-title {
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+.add-channel-submit {
+  margin-top: 16px;
+}
+
 /* ---------- Tooltip / Help ---------- */
 .help-dot {
   display: inline-grid;
