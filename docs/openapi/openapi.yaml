@@ -282,9 +282,36 @@ paths:
       tags: [Submission]
       operationId: listSubmissions
       summary: List submissions in the organization
+      description: >-
+        Inbox list. Field values are **masked** (charter §11) — the bulk list never discloses
+        raw PII; full content is on the single submission detail. Filtering/search run
+        server-side so raw values are never shipped in bulk to the client.
       parameters:
         - { $ref: '#/components/parameters/Limit' }
         - { $ref: '#/components/parameters/Offset' }
+        - name: status
+          in: query
+          required: false
+          schema: { type: string, enum: [open, in_progress, resolved, spam] }
+        - name: contact_form_id
+          in: query
+          required: false
+          schema: { type: integer }
+        - name: from
+          in: query
+          required: false
+          description: Inclusive lower bound on submitted_at (YYYY-MM-DD).
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: false
+          description: Inclusive upper bound on submitted_at (YYYY-MM-DD).
+          schema: { type: string, format: date }
+        - name: q
+          in: query
+          required: false
+          description: Free-text match over submitted content (matched server-side; raw values are not returned).
+          schema: { type: string }
       responses:
         '200':
           description: Submission list
@@ -1224,10 +1251,15 @@ components:
       properties:
         items:
           type: array
+          description: Submissions with masked field values (charter §11).
           items: { $ref: '#/components/schemas/SubmissionResponse' }
         limit: { type: integer }
         offset: { type: integer }
         total: { type: integer }
+        status_counts:
+          type: object
+          description: Per-status totals for the current query/form/date filter (status filter ignored).
+          additionalProperties: { type: integer }
 
     UpdateSubmissionStatusRequest:
       type: object

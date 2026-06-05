@@ -122,7 +122,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 static function (ContainerInterface $c): ListSubmissionsUseCaseInterface {
                     $repo = $c->get(SubmissionRepositoryInterface::class);
 
-                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                    if (!$repo instanceof SubmissionSearchRepositoryInterface) {
                         throw new LogicException('Submission repository service is invalid.');
                     }
 

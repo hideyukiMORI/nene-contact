@@ -25,5 +25,6 @@ export function toSubmissionList(dto: SubmissionListDto): SubmissionList {
     total: dto.total ?? 0,
     limit: dto.limit ?? 0,
     offset: dto.offset ?? 0,
+    statusCounts: dto.status_counts ?? {},
   };
 }

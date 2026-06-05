@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NeneContact\Api;
+namespace NeneContact\Submission;
 
 /**
  * Masks submitted field values for the redacted agent read surface (charter §11): an agent

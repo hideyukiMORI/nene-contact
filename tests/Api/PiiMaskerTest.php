@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NeneContact\Tests\Api;
 
-use NeneContact\Api\PiiMasker;
+use NeneContact\Submission\PiiMasker;
 use PHPUnit\Framework\TestCase;
 
 final class PiiMaskerTest extends TestCase

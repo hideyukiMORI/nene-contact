@@ -12,7 +12,9 @@ use Nene2\Http\RequestScopedHolder;
  * (public submit resolves the org from public_form_key, ADR 0014); inbox reads are
  * organization-scoped via the resolved holder (ADR 0006).
  */
-final readonly class PdoSubmissionRepository implements SubmissionRepositoryInterface
+final readonly class PdoSubmissionRepository implements
+    SubmissionRepositoryInterface,
+    SubmissionSearchRepositoryInterface
 {
     private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, submitted_at, created_at, updated_at';
 
@@ -108,6 +110,85 @@ final readonly class PdoSubmissionRepository implements SubmissionRepositoryInte
         $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM submissions WHERE organization_id = ? AND deleted_at IS NULL', [$this->orgId->get()]);
 
         return $row !== null ? (int) $row['cnt'] : 0;
+    }
+
+    public function search(SubmissionFilter $filter, int $limit, int $offset): array
+    {
+        [$where, $params] = $this->whereFor($filter, includeStatus: true);
+        $params[] = $limit;
+        $params[] = $offset;
+
+        $rows = $this->query->fetchAll(
+            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE ' . $where . ' ORDER BY id DESC LIMIT ? OFFSET ?',
+            $params,
+        );
+
+        return array_map(fn (array $row): Submission => $this->mapRow($row), $rows);
+    }
+
+    public function countMatching(SubmissionFilter $filter): int
+    {
+        [$where, $params] = $this->whereFor($filter, includeStatus: true);
+        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM submissions WHERE ' . $where, $params);
+
+        return $row !== null ? (int) $row['cnt'] : 0;
+    }
+
+    public function statusCounts(SubmissionFilter $filter): array
+    {
+        // Ignore the status constraint so tabs show totals across statuses for this query.
+        [$where, $params] = $this->whereFor($filter, includeStatus: false);
+        $rows = $this->query->fetchAll(
+            'SELECT status, COUNT(*) AS cnt FROM submissions WHERE ' . $where . ' GROUP BY status',
+            $params,
+        );
+
+        $counts = [];
+        foreach ($rows as $row) {
+            $counts[(string) $row['status']] = (int) $row['cnt'];
+        }
+
+        return $counts;
+    }
+
+    /**
+     * Builds the shared WHERE clause (org-scoped, not soft-deleted) plus optional filters.
+     *
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private function whereFor(SubmissionFilter $filter, bool $includeStatus): array
+    {
+        $clauses = ['organization_id = ?', 'deleted_at IS NULL'];
+        $params = [$this->orgId->get()];
+
+        if ($includeStatus && $filter->status !== null && $filter->status !== '') {
+            $clauses[] = 'status = ?';
+            $params[] = $filter->status;
+        }
+        if ($filter->contactFormId !== null) {
+            $clauses[] = 'contact_form_id = ?';
+            $params[] = $filter->contactFormId;
+        }
+        if ($filter->from !== null && $filter->from !== '') {
+            $clauses[] = 'submitted_at >= ?';
+            $params[] = $filter->from . ' 00:00:00';
+        }
+        if ($filter->to !== null && $filter->to !== '') {
+            $clauses[] = 'submitted_at <= ?';
+            $params[] = $filter->to . ' 23:59:59';
+        }
+        if ($filter->q !== null && trim($filter->q) !== '') {
+            // Match raw submitted content server-side; raw values never leave the server.
+            $clauses[] = 'field_values_json LIKE ?';
+            $params[] = '%' . $this->escapeLike(trim($filter->q)) . '%';
+        }
+
+        return [implode(' AND ', $clauses), $params];
+    }
+
+    private function escapeLike(string $value): string
+    {
+        return str_replace(['\\', '%', '_'], ['\\\\', '\\%', '\\_'], $value);
     }
 
     /** @param array<string, mixed> $row */

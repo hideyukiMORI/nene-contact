@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
@@ -6,7 +6,7 @@ import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Alert, Button } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { SUBMISSION_STATUSES } from '@/entities/submission';
-import type { Submission, SubmissionStatus } from '@/entities/submission';
+import type { Submission, SubmissionListParams, SubmissionStatus } from '@/entities/submission';
 import { useSubmissions } from '@/features/list-submissions/hooks/use-submissions';
 import { InboxIcon } from '@/features/list-submissions/ui/icons';
 import { DateRangePicker } from '@/features/list-submissions/ui/DateRangePicker';
@@ -16,42 +16,53 @@ const PAGE_SIZE = 20;
 
 type StatusFilter = 'all' | SubmissionStatus;
 
-// Is the submission inside the active date range? submittedAt is "YYYY-MM-DD HH:MM:SS".
-function withinRange(
-  submittedAt: string | null,
-  range: RangeKey,
-  from: string,
-  to: string,
-): boolean {
-  if (range === 'all') return true;
-  if (submittedAt === null) return false;
-  const d = new Date(submittedAt.replace(' ', 'T'));
-  if (Number.isNaN(d.getTime())) return false;
+const pad = (n: number): string => String(n).padStart(2, '0');
+const ymd = (d: Date): string =>
+  `${String(d.getFullYear())}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
+// Translate a preset / custom range into concrete from/to dates for the server filter.
+function rangeToDates(range: RangeKey, from: string, to: string): { from?: string; to?: string } {
+  if (range === 'all') return {};
   if (range === 'custom') {
-    if (from.length > 0 && d < new Date(`${from}T00:00:00`)) return false;
-    if (to.length > 0 && d > new Date(`${to}T23:59:59`)) return false;
-    return true;
+    const custom: { from?: string; to?: string } = {};
+    if (from !== '') custom.from = from;
+    if (to !== '') custom.to = to;
+    return custom;
   }
-
   const now = new Date();
-  let start: Date;
-  let end: Date;
   if (range === 'month') {
-    start = new Date(now.getFullYear(), now.getMonth(), 1);
-    end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-  } else if (range === 'lastMonth') {
-    start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-    end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-  } else {
-    const days = range === 'today' ? 1 : range === '7d' ? 7 : 30;
-    start = new Date(now);
-    start.setHours(0, 0, 0, 0);
-    start.setDate(start.getDate() - (days - 1));
-    end = new Date(now);
-    end.setHours(23, 59, 59, 999);
+    return {
+      from: ymd(new Date(now.getFullYear(), now.getMonth(), 1)),
+      to: ymd(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
+    };
   }
-  return d >= start && d <= end;
+  if (range === 'lastMonth') {
+    return {
+      from: ymd(new Date(now.getFullYear(), now.getMonth() - 1, 1)),
+      to: ymd(new Date(now.getFullYear(), now.getMonth(), 0)),
+    };
+  }
+  const days = range === 'today' ? 1 : range === '7d' ? 7 : 30;
+  const start = new Date(now);
+  start.setHours(0, 0, 0, 0);
+  start.setDate(start.getDate() - (days - 1));
+  return { from: ymd(start), to: ymd(now) };
+}
+
+function valueText(v: unknown): string {
+  if (typeof v === 'string') return v;
+  if (Array.isArray(v)) return v.map((x) => valueText(x)).join(', ');
+  if (v == null) return '';
+  if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+  return JSON.stringify(v);
+}
+
+// Sender = the name/company field if present, else the first value (already masked by the API).
+function senderOf(s: Submission): string {
+  const entries = Object.entries(s.fieldValues);
+  const named = entries.find(([k]) => /名前|name|会社|company/i.test(k));
+  const picked = named ?? entries[0];
+  return picked ? valueText(picked[1]) || '—' : '—';
 }
 
 function StatusBadge({ status }: { status: SubmissionStatus }): ReactNode {
@@ -67,81 +78,50 @@ function StatusBadge({ status }: { status: SubmissionStatus }): ReactNode {
 export function SubmissionList(): ReactNode {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const { submissions, isLoading, error, refetch } = useSubmissions();
   const formsQuery = useContactFormsQuery();
   const forms = formsQuery.data?.items ?? [];
 
   const [status, setStatus] = useState<StatusFilter>('all');
   const [formId, setFormId] = useState<'all' | number>('all');
-  const [query, setQuery] = useState('');
   const [range, setRange] = useState<RangeKey>('all');
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
+  const [qInput, setQInput] = useState('');
+  const [q, setQ] = useState('');
   const [page, setPage] = useState(1);
+
+  // Debounce the search box, and reset to the first page when the query changes.
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      setQ(qInput);
+      setPage(1);
+    }, 300);
+    return () => {
+      window.clearTimeout(id);
+    };
+  }, [qInput]);
+
+  const dates = rangeToDates(range, from, to);
+  const params: SubmissionListParams = {
+    limit: PAGE_SIZE,
+    offset: (page - 1) * PAGE_SIZE,
+    ...(status !== 'all' ? { status } : {}),
+    ...(formId !== 'all' ? { contactFormId: formId } : {}),
+    ...(dates.from !== undefined ? { from: dates.from } : {}),
+    ...(dates.to !== undefined ? { to: dates.to } : {}),
+    ...(q !== '' ? { q } : {}),
+  };
+
+  const { submissions, total, statusCounts, isLoading, error, refetch } = useSubmissions(params);
 
   const formName = (id: number): string => {
     const match = forms.find((f) => f.id === id);
     return match?.name ?? t('inbox.unknownForm', { id: String(id) });
   };
 
-  const valueText = (v: unknown): string => {
-    if (typeof v === 'string') return v;
-    if (Array.isArray(v)) return v.map((x) => valueText(x)).join(', ');
-    if (v == null) return '';
-    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
-    return JSON.stringify(v);
-  };
-
-  // Sender = the name/company field if present, else the first value.
-  const senderOf = (s: Submission): string => {
-    const entries = Object.entries(s.fieldValues);
-    const named = entries.find(([k]) => /名前|name|会社|company/i.test(k));
-    const picked = named ?? entries[0];
-    return picked ? valueText(picked[1]) || '—' : '—';
-  };
-
-  const counts = useMemo(() => {
-    const result: Record<StatusFilter, number> = {
-      all: submissions.length,
-      open: 0,
-      in_progress: 0,
-      resolved: 0,
-      spam: 0,
-    };
-    for (const s of submissions) {
-      result[s.status] += 1;
-    }
-    return result;
-  }, [submissions]);
-
-  const filtered = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return submissions.filter((s) => {
-      if (status !== 'all' && s.status !== status) return false;
-      if (formId !== 'all' && s.contactFormId !== formId) return false;
-      if (!withinRange(s.submittedAt, range, from, to)) return false;
-      if (q.length > 0) {
-        const content = Object.entries(s.fieldValues)
-          .map(([k, v]) => `${k} ${valueText(v)}`)
-          .join(' ');
-        const haystack =
-          `${formName(s.contactFormId)} #${String(s.id)} ${s.submittedAt ?? ''} ${content}`.toLowerCase();
-        if (!haystack.includes(q)) return false;
-      }
-      return true;
-    });
-    // formName depends on forms; recompute when those change too.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submissions, forms, status, formId, query, range, from, to]);
-
-  const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
-  const current = Math.min(page, pageCount);
-  const pageItems = filtered.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE);
-
-  const resetTo = (apply: () => void): void => {
-    apply();
-    setPage(1);
-  };
+  const hasFilters = status !== 'all' || formId !== 'all' || range !== 'all' || q !== '';
+  const pageCount = Math.max(1, Math.ceil(total / PAGE_SIZE));
+  const allCount = Object.values(statusCounts).reduce((sum, n) => sum + n, 0);
 
   if (isLoading) {
     return (
@@ -162,7 +142,8 @@ export function SubmissionList(): ReactNode {
     );
   }
 
-  if (submissions.length === 0) {
+  // Nothing has ever arrived (no active filter, empty result).
+  if (total === 0 && !hasFilters) {
     return (
       <div className="card">
         <div className="empty">
@@ -176,11 +157,12 @@ export function SubmissionList(): ReactNode {
     );
   }
 
-  const tabs: { key: StatusFilter; label: string }[] = [
-    { key: 'all', label: t('inbox.tab.all') },
+  const tabs: { key: StatusFilter; label: string; count: number }[] = [
+    { key: 'all', label: t('inbox.tab.all'), count: allCount },
     ...SUBMISSION_STATUSES.map((s) => ({
       key: s,
       label: t(`submission.status.${s}`),
+      count: statusCounts[s] ?? 0,
     })),
   ];
 
@@ -201,33 +183,26 @@ export function SubmissionList(): ReactNode {
         ? t(rangeLabelKey[range])
         : '';
 
-  const clearDate = (): void => {
-    resetTo(() => {
-      setRange('all');
-      setFrom('');
-      setTo('');
-    });
-  };
   const clearAll = (): void => {
-    resetTo(() => {
-      setStatus('all');
-      setFormId('all');
-      setQuery('');
-      setRange('all');
-      setFrom('');
-      setTo('');
-    });
+    setStatus('all');
+    setFormId('all');
+    setRange('all');
+    setFrom('');
+    setTo('');
+    setQInput('');
+    setQ('');
+    setPage(1);
   };
 
   const chips: { key: string; label: string; clear: () => void }[] = [];
-  if (query.length > 0) {
+  if (q !== '') {
     chips.push({
       key: 'q',
-      label: t('inbox.chip.search', { q: query }),
+      label: t('inbox.chip.search', { q }),
       clear: () => {
-        resetTo(() => {
-          setQuery('');
-        });
+        setQInput('');
+        setQ('');
+        setPage(1);
       },
     });
   }
@@ -236,23 +211,28 @@ export function SubmissionList(): ReactNode {
       key: 'form',
       label: formName(formId),
       clear: () => {
-        resetTo(() => {
-          setFormId('all');
-        });
+        setFormId('all');
+        setPage(1);
       },
     });
   }
   if (range !== 'all') {
-    chips.push({ key: 'range', label: rangeChipLabel, clear: clearDate });
+    chips.push({
+      key: 'range',
+      label: rangeChipLabel,
+      clear: () => {
+        setRange('all');
+        setFrom('');
+        setTo('');
+        setPage(1);
+      },
+    });
   }
 
   const countLabel =
-    filtered.length === submissions.length
-      ? t('inbox.count.total', { total: String(submissions.length) })
-      : t('inbox.count.filtered', {
-          filtered: String(filtered.length),
-          total: String(submissions.length),
-        });
+    total === allCount
+      ? t('inbox.count.total', { total: String(allCount) })
+      : t('inbox.count.filtered', { filtered: String(total), total: String(allCount) });
 
   return (
     <>
@@ -264,13 +244,12 @@ export function SubmissionList(): ReactNode {
               type="button"
               className={status === tab.key ? 'on' : ''}
               onClick={() => {
-                resetTo(() => {
-                  setStatus(tab.key);
-                });
+                setStatus(tab.key);
+                setPage(1);
               }}
             >
               {tab.label}
-              <span className="seg-count">{counts[tab.key]}</span>
+              <span className="seg-count">{tab.count}</span>
             </button>
           ))}
         </div>
@@ -285,21 +264,17 @@ export function SubmissionList(): ReactNode {
           <input
             className="input"
             placeholder={t('inbox.search')}
-            value={query}
+            value={qInput}
             onChange={(e) => {
-              resetTo(() => {
-                setQuery(e.target.value);
-              });
+              setQInput(e.target.value);
             }}
           />
-          {query.length > 0 ? (
+          {qInput !== '' ? (
             <button
               type="button"
               className="affix-btn"
               onClick={() => {
-                resetTo(() => {
-                  setQuery('');
-                });
+                setQInput('');
               }}
             >
               {t('inbox.clear')}
@@ -312,9 +287,8 @@ export function SubmissionList(): ReactNode {
           value={formId === 'all' ? 'all' : String(formId)}
           onChange={(e) => {
             const value = e.target.value;
-            resetTo(() => {
-              setFormId(value === 'all' ? 'all' : Number(value));
-            });
+            setFormId(value === 'all' ? 'all' : Number(value));
+            setPage(1);
           }}
         >
           <option value="all">{t('inbox.allForms')}</option>
@@ -330,11 +304,10 @@ export function SubmissionList(): ReactNode {
           from={from}
           to={to}
           onChange={({ range: r, from: f, to: nextTo }) => {
-            resetTo(() => {
-              setRange(r);
-              setFrom(f);
-              setTo(nextTo);
-            });
+            setRange(r);
+            setFrom(f);
+            setTo(nextTo);
+            setPage(1);
           }}
         />
       </div>
@@ -353,7 +326,7 @@ export function SubmissionList(): ReactNode {
         </div>
       ) : null}
 
-      {filtered.length === 0 ? (
+      {submissions.length === 0 ? (
         <div className="card">
           <div className="empty">
             <div className="e-ico">
@@ -361,11 +334,9 @@ export function SubmissionList(): ReactNode {
             </div>
             <h3>{t('inbox.noMatch')}</h3>
             <p>{t('inbox.noMatchBody')}</p>
-            {chips.length > 0 ? (
-              <button type="button" className="btn btn-sm" onClick={clearAll}>
-                {t('inbox.clearFilters')}
-              </button>
-            ) : null}
+            <button type="button" className="btn btn-sm" onClick={clearAll}>
+              {t('inbox.clearFilters')}
+            </button>
           </div>
         </div>
       ) : (
@@ -380,7 +351,7 @@ export function SubmissionList(): ReactNode {
               </tr>
             </thead>
             <tbody>
-              {pageItems.map((submission) => (
+              {submissions.map((submission) => (
                 <tr
                   key={submission.id}
                   className="clickable"
@@ -406,23 +377,23 @@ export function SubmissionList(): ReactNode {
             <button
               type="button"
               className="btn btn-sm"
-              disabled={current <= 1}
+              disabled={page <= 1}
               onClick={() => {
-                setPage(current - 1);
+                setPage(page - 1);
               }}
             >
               <InboxIcon name="chevLeft" size={14} />
               {t('common.prev')}
             </button>
             <span className="hint">
-              {t('inbox.page', { page: String(current), pages: String(pageCount) })}
+              {t('inbox.page', { page: String(page), pages: String(pageCount) })}
             </span>
             <button
               type="button"
               className="btn btn-sm"
-              disabled={current >= pageCount}
+              disabled={page >= pageCount}
               onClick={() => {
-                setPage(current + 1);
+                setPage(page + 1);
               }}
             >
               {t('common.next')}

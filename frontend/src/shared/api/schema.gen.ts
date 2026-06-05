@@ -169,7 +169,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List submissions in the organization */
+        /**
+         * List submissions in the organization
+         * @description Inbox list. Field values are **masked** (charter §11) — the bulk list never discloses raw PII; full content is on the single submission detail. Filtering/search run server-side so raw values are never shipped in bulk to the client.
+         */
         get: operations["listSubmissions"];
         put?: never;
         post?: never;
@@ -290,6 +293,83 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/submissions/{id}/handoffs": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List a submission's sibling handoff links (status + pointers) */
+        get: operations["listSubmissionHandoffs"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/submissions/{id}/handoffs/deal": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hand a submission to NeNe Deal (create opportunity); same call retries
+         * @description Creates an opportunity in NeNe Deal over HTTP (DO D11), idempotent via external_reference = submission_id. Always returns 200 with the resulting link; `handoff_status` is `succeeded` (with `deal_opportunity_id`) or `failed` (with `last_error`, submission untouched). Re-POST to retry. Audited (handoff.created / handoff.retried). Requires the ManageSubmissions capability.
+         */
+        post: operations["handoffSubmissionToDeal"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/submissions/{id}/handoffs/invoice": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Hand a submission to NeNe Invoice (create draft client); same call retries
+         * @description Creates a draft client in NeNe Invoice over HTTP (invoice-handoff-contract), idempotent via external_reference = submission_id. Always returns 200 with the resulting link; `handoff_status` is `succeeded` (with `invoice_client_id`) or `failed` (with `last_error`, submission untouched). Re-POST to retry. Audited (handoff.created / handoff.retried). Requires the ManageSubmissions capability.
+         */
+        post: operations["handoffSubmissionToInvoice"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/submissions/{id}/handoffs/vault/{attachmentId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Archive a submission attachment in NeNe Vault; same call retries
+         * @description Uploads the attachment bytes to NeNe Vault as a received document over HTTP (DO D12), idempotent per attachment. Always returns 200 with the resulting link; `handoff_status` is `succeeded` (with `vault_document_id`) or `failed` (with `last_error`, attachment untouched). Re-POST to retry. Audited (handoff.created / handoff.retried). Requires the ManageSubmissions capability.
+         */
+        post: operations["handoffAttachmentToVault"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/public/forms/{public_form_key}/attachments": {
         parameters: {
             query?: never;
@@ -308,6 +388,94 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/records/options": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Fetch select options from a NeNe Records entity (read-only)
+         * @description Reads a Records entity's select options over HTTP (ADR 0002 — Records is the SSOT; no shared DB) for the form builder to import into a select field. Requires the ManageForms capability. Upstream failures surface as problem details.
+         */
+        get: operations["fetchRecordsOptions"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/forms": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List contact forms for AI agents (metadata only)
+         * @description Agent read surface (the OpenAPI MCP maps to; ADR 0002 — Contact only, no sibling DB). Returns form structure (fields, locales) only — no secrets, no submitted PII.
+         */
+        get: operations["agentListForms"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/submissions": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List submissions for AI agents (redacted by default)
+         * @description Redacted by default — no IP/user-agent, field values masked (charter §11). `include_pii=true` returns raw values and is audit-logged as a bulk PII access (`submission.exported`).
+         */
+        get: operations["agentListSubmissions"];
+        put?: never;
+        /**
+         * Ingest a submission from a service client (e.g. Concierge) into the inbox
+         * @description Creates a submission from a service client (concierge-ingest-contract). `contact_form_id` must belong to the resolved organization. Field values are validated against the form (required, email, consent) like the public submit; audited (`submission.created`) and notified. No autonomous outbound action on personal data (charter §11).
+         */
+        post: operations["agentIngestSubmission"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/submissions/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get one submission for AI agents (redacted by default)
+         * @description Redacted by default. `include_pii=true` returns raw values and is audit-logged (`submission.viewed`, charter §11).
+         */
+        get: operations["agentGetSubmission"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update submission status (two-step confirmation token, agent write)
+         * @description Agent write behind a confirmation token (charter §11 — no autonomous outbound action). Call without `confirmation_token` to get a preview + token (nothing changes); call again with the token to apply (audited). The token binds to this submission id + status.
+         */
+        patch: operations["agentUpdateSubmissionStatus"];
         trace?: never;
     };
     "/public/forms/{public_form_key}/schema": {
@@ -518,6 +686,8 @@ export interface components {
             contact_form_id: number;
             /** @enum {string} */
             status: "open" | "in_progress" | "resolved" | "spam";
+            /** @description origin: form (public/embed) or service (concierge/import/api) */
+            source?: string;
             field_values?: {
                 [key: string]: unknown;
             };
@@ -525,6 +695,111 @@ export interface components {
             /** Format: date-time */
             consent_given_at?: string | null;
             submitted_at?: string | null;
+        };
+        RecordsOptionsResponse: {
+            source?: string;
+            items?: {
+                value: string;
+                label: string;
+            }[];
+        };
+        AgentFormResponse: {
+            id: number;
+            name: string;
+            public_form_key: string;
+            default_locale?: string;
+            locales?: string[];
+            status?: string;
+            consent_required?: boolean;
+            retention_days?: number | null;
+            fields?: {
+                name?: string;
+                field_type?: string;
+                required?: boolean;
+                label?: {
+                    [key: string]: string;
+                };
+            }[];
+        };
+        AgentFormListResponse: {
+            items?: components["schemas"]["AgentFormResponse"][];
+        };
+        AgentSubmissionResponse: {
+            id: number;
+            contact_form_id: number;
+            status: string;
+            source?: string;
+            pii_included: boolean;
+            /** @description masked unless pii_included */
+            field_values?: {
+                [key: string]: unknown;
+            };
+            /** Format: date-time */
+            consent_given_at?: string | null;
+            submitted_at?: string | null;
+        };
+        AgentSubmissionListResponse: {
+            items?: components["schemas"]["AgentSubmissionResponse"][];
+            limit?: number;
+            offset?: number;
+            total?: number;
+            pii_included?: boolean;
+        };
+        IngestSubmissionRequest: {
+            /** @enum {string} */
+            source: "concierge" | "import" | "api";
+            contact_form_id: number;
+            field_values: {
+                [key: string]: unknown;
+            };
+            /** @description required when the form requires consent */
+            consent?: boolean;
+        };
+        IngestSubmissionResponse: {
+            id: number;
+            status: string;
+            source: string;
+        };
+        AgentStatusUpdateRequest: {
+            /** @enum {string} */
+            status: "open" | "in_progress" | "resolved" | "spam";
+            /** @description omit to get a token + preview; pass back to apply */
+            confirmation_token?: string;
+        };
+        /** @description A confirmation challenge (requires_confirmation=true, no change) or the applied result. */
+        AgentStatusUpdateResult: {
+            requires_confirmation: boolean;
+            action?: string;
+            confirmation_token?: string;
+            /** Format: date-time */
+            expires_at?: string | null;
+            preview?: {
+                submission_id?: number;
+                current_status?: string;
+                requested_status?: string;
+            };
+            confirmed?: boolean;
+            submission?: components["schemas"]["AgentSubmissionResponse"];
+        };
+        SubmissionLinkResponse: {
+            id: number;
+            submission_id: number;
+            attachment_id?: number | null;
+            /** @enum {string} */
+            target: "deal" | "vault" | "invoice";
+            /** @enum {string} */
+            handoff_status: "pending" | "succeeded" | "failed";
+            deal_opportunity_id?: string | null;
+            vault_document_id?: string | null;
+            invoice_client_id?: string | null;
+            last_error?: string | null;
+            /** Format: date-time */
+            created_at?: string | null;
+            /** Format: date-time */
+            updated_at?: string | null;
+        };
+        SubmissionLinkListResponse: {
+            items?: components["schemas"]["SubmissionLinkResponse"][];
         };
         AttachmentResponse: {
             id: number;
@@ -547,10 +822,15 @@ export interface components {
             size_bytes?: number;
         };
         SubmissionListResponse: {
+            /** @description Submissions with masked field values (charter §11). */
             items?: components["schemas"]["SubmissionResponse"][];
             limit?: number;
             offset?: number;
             total?: number;
+            /** @description Per-status totals for the current query/form/date filter (status filter ignored). */
+            status_counts?: {
+                [key: string]: number;
+            };
         };
         UpdateSubmissionStatusRequest: {
             /** @enum {string} */
@@ -621,6 +901,8 @@ export interface components {
         PublicFormKeyPath: string;
         Limit: number;
         Offset: number;
+        /** @description When true, returns raw (unmasked) field values; audit-logged (charter §11). */
+        IncludePii: boolean;
     };
     requestBodies: never;
     headers: never;
@@ -992,6 +1274,14 @@ export interface operations {
             query?: {
                 limit?: components["parameters"]["Limit"];
                 offset?: components["parameters"]["Offset"];
+                status?: "open" | "in_progress" | "resolved" | "spam";
+                contact_form_id?: number;
+                /** @description Inclusive lower bound on submitted_at (YYYY-MM-DD). */
+                from?: string;
+                /** @description Inclusive upper bound on submitted_at (YYYY-MM-DD). */
+                to?: string;
+                /** @description Free-text match over submitted content (matched server-side; raw values are not returned). */
+                q?: string;
             };
             header?: never;
             path?: never;
@@ -1247,6 +1537,107 @@ export interface operations {
             404: components["responses"]["Problem"];
         };
     };
+    listSubmissionHandoffs: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Handoff link list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionLinkListResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    handoffSubmissionToDeal: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Handoff attempt recorded (see handoff_status for the outcome) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionLinkResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    handoffSubmissionToInvoice: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Handoff attempt recorded (see handoff_status for the outcome) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionLinkResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    handoffAttachmentToVault: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+                attachmentId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Handoff attempt recorded (see handoff_status for the outcome) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionLinkResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
     uploadAttachment: {
         parameters: {
             query?: never;
@@ -1278,6 +1669,166 @@ export interface operations {
             404: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
             429: components["responses"]["Problem"];
+        };
+    };
+    fetchRecordsOptions: {
+        parameters: {
+            query: {
+                /** @description The Records entity key. */
+                source: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Options */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["RecordsOptionsResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+            502: components["responses"]["Problem"];
+        };
+    };
+    agentListForms: {
+        parameters: {
+            query?: {
+                limit?: components["parameters"]["Limit"];
+                offset?: components["parameters"]["Offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Form list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentFormListResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    agentListSubmissions: {
+        parameters: {
+            query?: {
+                limit?: components["parameters"]["Limit"];
+                offset?: components["parameters"]["Offset"];
+                /** @description When true, returns raw (unmasked) field values; audit-logged (charter §11). */
+                include_pii?: components["parameters"]["IncludePii"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Submission list (redacted unless include_pii=true) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSubmissionListResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+        };
+    };
+    agentIngestSubmission: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IngestSubmissionRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["IngestSubmissionResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    agentGetSubmission: {
+        parameters: {
+            query?: {
+                /** @description When true, returns raw (unmasked) field values; audit-logged (charter §11). */
+                include_pii?: components["parameters"]["IncludePii"];
+            };
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Submission (redacted unless include_pii=true) */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentSubmissionResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    agentUpdateSubmissionStatus: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AgentStatusUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description Either a confirmation challenge (no change) or the applied result */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AgentStatusUpdateResult"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+            503: components["responses"]["Problem"];
         };
     };
     getPublicFormSchema: {
