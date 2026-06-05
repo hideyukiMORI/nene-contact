@@ -2,7 +2,16 @@ import type { ReactNode } from 'react';
 
 // Line-icon set for the dashboard (Design System v2). Paths trace the 24×24 grid
 // from the design source; rendered as inline SVG so no markup is injected.
-export type DashIconName = 'forms' | 'inbox' | 'mail' | 'check' | 'chevRight' | 'user';
+export type DashIconName =
+  | 'forms'
+  | 'inbox'
+  | 'mail'
+  | 'check'
+  | 'chevRight'
+  | 'user'
+  | 'users'
+  | 'plus'
+  | 'sparkle';
 
 const PATHS: Record<DashIconName, ReactNode> = {
   forms: (
@@ -31,11 +40,29 @@ const PATHS: Record<DashIconName, ReactNode> = {
       <path d="M5.5 20a6.5 6.5 0 0 1 13 0" />
     </>
   ),
+  users: (
+    <>
+      <circle cx="9" cy="8" r="3.2" />
+      <path d="M3.5 20a5.5 5.5 0 0 1 11 0" />
+      <path d="M16 5.2a3 3 0 0 1 0 5.6M17.5 20a5.2 5.2 0 0 0-2.5-4.4" />
+    </>
+  ),
+  plus: <path d="M12 5v14M5 12h14" />,
+  sparkle: <path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z" />,
 };
 
-export function DashIcon({ name, size = 16 }: { name: DashIconName; size?: number }): ReactNode {
+export function DashIcon({
+  name,
+  size = 16,
+  className,
+}: {
+  name: DashIconName;
+  size?: number;
+  className?: string;
+}): ReactNode {
   return (
     <svg
+      className={className}
       width={size}
       height={size}
       viewBox="0 0 24 24"

@@ -116,8 +116,9 @@ describe('HomePage', () => {
 
     renderDashboard();
 
-    expect(
-      await screen.findByText('まだ送信はありません。フォームを公開すると、ここに届きます。'),
-    ).toBeInTheDocument();
+    // needs-attention shows the all-caught-up empty state
+    expect(await screen.findByText('対応待ちはありません')).toBeInTheDocument();
+    // and the forms card shows its own empty state
+    expect(screen.getByText('フォームがありません')).toBeInTheDocument();
   });
 });
