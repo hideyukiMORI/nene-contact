@@ -40,12 +40,14 @@ describe('ManageChannels', () => {
     renderWithProviders(<ManageChannels contactFormId={3} />);
 
     // Empty state first.
-    expect(await screen.findByText('チャネルがまだありません。')).toBeInTheDocument();
+    const emptyText = 'まだありません。下から1つ追加しましょう（まずはメールがおすすめ）。';
+    expect(await screen.findByText(emptyText)).toBeInTheDocument();
 
-    await user.selectOptions(screen.getByLabelText('種別'), 'webhook');
+    // Type is chosen via the segmented control, not a <select>.
+    await user.click(screen.getByRole('button', { name: 'Webhook' }));
     await user.type(screen.getByLabelText('URL'), 'https://hooks.example/x');
     await user.type(screen.getByLabelText('署名シークレット'), 'whsec');
-    await user.click(screen.getByRole('button', { name: 'チャネルを追加' }));
+    await user.click(screen.getByRole('button', { name: 'この通知先を追加' }));
 
     await waitFor(() => {
       expect(captured.value?.channel_type).toBe('webhook');
@@ -53,7 +55,7 @@ describe('ManageChannels', () => {
     expect(captured.value?.config).toEqual({ url: 'https://hooks.example/x', secret: 'whsec' });
     // The list refreshes (invalidation) and the empty state disappears.
     await waitFor(() => {
-      expect(screen.queryByText('チャネルがまだありません。')).not.toBeInTheDocument();
+      expect(screen.queryByText(emptyText)).not.toBeInTheDocument();
     });
   });
 });

@@ -2,10 +2,19 @@ import { useState, type ReactNode } from 'react';
 import type { ChannelType } from '@/entities/notification-channel';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
-import { Alert, Button } from '@/shared/ui';
+import { Alert } from '@/shared/ui';
 import { useChannels } from '@/features/manage-channels/hooks/use-channels';
+import { ChannelIcon } from '@/features/manage-channels/ui/icons';
+import type { ChannelIconName } from '@/features/manage-channels/ui/icons';
 
 const CHANNEL_TYPES: ChannelType[] = ['email', 'slack', 'chatwork', 'webhook'];
+
+const TYPE_ICON: Record<ChannelType, ChannelIconName> = {
+  email: 'mail',
+  slack: 'slack',
+  chatwork: 'chat',
+  webhook: 'code',
+};
 
 const CONFIG_FIELDS: Record<ChannelType, { key: string; inputType: string }[]> = {
   email: [{ key: 'recipient', inputType: 'email' }],
@@ -34,68 +43,100 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
   };
 
   return (
-    <div className="nc-section">
-      {isLoading ? <p>{t('common.loading')}</p> : null}
-      {error !== null ? <Alert>{t('channels.error')}</Alert> : null}
-      {!isLoading && error === null && channels.length === 0 ? (
-        <p className="nc-muted">{t('channels.empty')}</p>
-      ) : null}
-      {channels.length > 0 ? (
-        <table className="nc-table">
-          <thead>
-            <tr>
-              <th>{t('channels.column.type')}</th>
-              <th>{t('channels.column.enabled')}</th>
-            </tr>
-          </thead>
-          <tbody>
-            {channels.map((channel) => (
-              <tr key={channel.id}>
-                <td>{t(`channel.type.${channel.channelType}`)}</td>
-                <td>{channel.isEnabled ? t('channels.enabled.yes') : t('channels.enabled.no')}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      ) : null}
-
-      <fieldset className="nc-fieldset">
-        <legend>{t('channels.add')}</legend>
-        <div className="nc-field">
-          <label className="nc-label" htmlFor="nc-channel-type">
-            {t('channels.type')}
-          </label>
-          <select
-            id="nc-channel-type"
-            className="nc-input"
-            value={channelType}
-            onChange={(e) => {
-              setChannelType(e.target.value as ChannelType);
-              setConfig({});
-            }}
-          >
-            {CHANNEL_TYPES.map((type) => (
-              <option key={type} value={type}>
-                {t(`channel.type.${type}`)}
-              </option>
-            ))}
-          </select>
+    <div className="ch-page">
+      <div className="card">
+        <div className="card-head">
+          <span className="card-ico">
+            <ChannelIcon name="bell" size={16} />
+          </span>
+          <h3>{t('channels.configured')}</h3>
         </div>
 
-        {CONFIG_FIELDS[channelType].map((field) => {
-          const id = `nc-cfg-${field.key}`;
+        {isLoading ? (
+          <div className="card-pad">
+            <p className="faint">{t('common.loading')}</p>
+          </div>
+        ) : error !== null ? (
+          <div className="card-pad">
+            <Alert>{t('channels.error')}</Alert>
+          </div>
+        ) : channels.length === 0 ? (
+          <div className="card-pad">
+            <p className="faint">{t('channels.empty')}</p>
+          </div>
+        ) : (
+          <div className="table-wrap">
+            <table className="tbl">
+              <thead>
+                <tr>
+                  <th>{t('channels.column.type')}</th>
+                  <th>{t('channels.column.enabled')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {channels.map((channel) => (
+                  <tr key={channel.id}>
+                    <td>
+                      <span className="ch-type">
+                        <ChannelIcon name={TYPE_ICON[channel.channelType]} size={16} />
+                        {t(`channel.type.${channel.channelType}`)}
+                      </span>
+                    </td>
+                    <td>
+                      {channel.isEnabled ? (
+                        <span className="badge resolved">
+                          <span className="dot" />
+                          {t('channels.on')}
+                        </span>
+                      ) : (
+                        <span className="chip">{t('channels.off')}</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      <div className="card card-pad add-channel">
+        <h3 className="add-channel-title">{t('channels.add')}</h3>
+
+        <div className="field">
+          <span className="label">{t('channels.type')}</span>
+          <div className="segmented full">
+            {CHANNEL_TYPES.map((type) => (
+              <button
+                key={type}
+                type="button"
+                className={channelType === type ? 'on' : ''}
+                onClick={() => {
+                  setChannelType(type);
+                  setConfig({});
+                }}
+              >
+                <ChannelIcon name={TYPE_ICON[type]} size={15} />
+                {t(`channel.type.${type}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {CONFIG_FIELDS[channelType].map((fieldDef) => {
+          const id = `ch-cfg-${fieldDef.key}`;
           return (
-            <div key={field.key} className="nc-field">
-              <label className="nc-label" htmlFor={id}>
-                {t(`channel.config.${field.key}` as MessageKey)}
+            <div key={fieldDef.key} className="field">
+              <label className="label" htmlFor={id}>
+                {t(`channel.config.${fieldDef.key}` as MessageKey)}
               </label>
               <input
                 id={id}
-                className="nc-input"
-                type={field.inputType}
-                value={config[field.key] ?? ''}
+                className="input"
+                type={fieldDef.inputType}
+                value={config[fieldDef.key] ?? ''}
                 onChange={(e) => {
-                  setConfig((c) => ({ ...c, [field.key]: e.target.value }));
+                  setConfig((c) => ({ ...c, [fieldDef.key]: e.target.value }));
                 }}
               />
             </div>
@@ -103,10 +144,17 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
         })}
 
         {createError !== null ? <Alert>{t('channels.createError')}</Alert> : null}
-        <Button type="button" disabled={isCreating} onClick={onCreate}>
+
+        <button
+          type="button"
+          className="btn btn-primary add-channel-submit"
+          disabled={isCreating}
+          onClick={onCreate}
+        >
+          <ChannelIcon name="plus" size={16} />
           {isCreating ? t('channels.creating') : t('channels.create')}
-        </Button>
-      </fieldset>
+        </button>
+      </div>
     </div>
   );
 }
