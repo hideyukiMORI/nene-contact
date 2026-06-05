@@ -1188,6 +1188,31 @@ table.tbl tbody tr.clickable:hover {
   color: var(--text);
 }
 
+/* contact-forms list */
+.btn {
+  text-decoration: none;
+}
+.btn:hover {
+  text-decoration: none;
+}
+.key-cell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.lang-cell {
+  display: inline-flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+th.col-actions,
+td.col-actions {
+  text-align: right;
+}
+.empty .btn {
+  margin-top: 16px;
+}
+
 /* ---------- Tooltip / Help ---------- */
 .help-dot {
   display: inline-grid;
