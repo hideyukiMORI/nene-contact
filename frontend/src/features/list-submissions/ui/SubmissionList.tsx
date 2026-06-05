@@ -2,16 +2,57 @@ import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
+import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Alert, Button } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { SUBMISSION_STATUSES } from '@/entities/submission';
 import type { SubmissionStatus } from '@/entities/submission';
 import { useSubmissions } from '@/features/list-submissions/hooks/use-submissions';
 import { InboxIcon } from '@/features/list-submissions/ui/icons';
+import { DateRangePicker } from '@/features/list-submissions/ui/DateRangePicker';
+import type { RangeKey } from '@/features/list-submissions/ui/DateRangePicker';
 
 const PAGE_SIZE = 20;
 
 type StatusFilter = 'all' | SubmissionStatus;
+
+// Is the submission inside the active date range? submittedAt is "YYYY-MM-DD HH:MM:SS".
+function withinRange(
+  submittedAt: string | null,
+  range: RangeKey,
+  from: string,
+  to: string,
+): boolean {
+  if (range === 'all') return true;
+  if (submittedAt === null) return false;
+  const d = new Date(submittedAt.replace(' ', 'T'));
+  if (Number.isNaN(d.getTime())) return false;
+
+  if (range === 'custom') {
+    if (from.length > 0 && d < new Date(`${from}T00:00:00`)) return false;
+    if (to.length > 0 && d > new Date(`${to}T23:59:59`)) return false;
+    return true;
+  }
+
+  const now = new Date();
+  let start: Date;
+  let end: Date;
+  if (range === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+  } else if (range === 'lastMonth') {
+    start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+    end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+  } else {
+    const days = range === 'today' ? 1 : range === '7d' ? 7 : 30;
+    start = new Date(now);
+    start.setHours(0, 0, 0, 0);
+    start.setDate(start.getDate() - (days - 1));
+    end = new Date(now);
+    end.setHours(23, 59, 59, 999);
+  }
+  return d >= start && d <= end;
+}
 
 function StatusBadge({ status }: { status: SubmissionStatus }): ReactNode {
   const { t } = useI18n();
@@ -33,6 +74,9 @@ export function SubmissionList(): ReactNode {
   const [status, setStatus] = useState<StatusFilter>('all');
   const [formId, setFormId] = useState<'all' | number>('all');
   const [query, setQuery] = useState('');
+  const [range, setRange] = useState<RangeKey>('all');
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
   const [page, setPage] = useState(1);
 
   const formName = (id: number): string => {
@@ -59,6 +103,7 @@ export function SubmissionList(): ReactNode {
     return submissions.filter((s) => {
       if (status !== 'all' && s.status !== status) return false;
       if (formId !== 'all' && s.contactFormId !== formId) return false;
+      if (!withinRange(s.submittedAt, range, from, to)) return false;
       if (q.length > 0) {
         const haystack =
           `${formName(s.contactFormId)} #${String(s.id)} ${s.submittedAt ?? ''}`.toLowerCase();
@@ -68,7 +113,7 @@ export function SubmissionList(): ReactNode {
     });
     // formName depends on forms; recompute when those change too.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [submissions, forms, status, formId, query]);
+  }, [submissions, forms, status, formId, query, range, from, to]);
 
   const pageCount = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE));
   const current = Math.min(page, pageCount);
@@ -120,6 +165,76 @@ export function SubmissionList(): ReactNode {
     })),
   ];
 
+  const md = (s: string): string => (s.length > 0 ? s.slice(5).replace('-', '/') : '');
+  const rangeLabelKey: Record<Exclude<RangeKey, 'all' | 'custom'>, MessageKey> = {
+    today: 'inbox.dp.today',
+    '7d': 'inbox.dp.last7',
+    '30d': 'inbox.dp.last30',
+    month: 'inbox.dp.thisMonth',
+    lastMonth: 'inbox.dp.lastMonth',
+  };
+  const rangeChipLabel =
+    range === 'custom'
+      ? from === to
+        ? md(from)
+        : `${md(from)} – ${md(to)}`
+      : range !== 'all'
+        ? t(rangeLabelKey[range])
+        : '';
+
+  const clearDate = (): void => {
+    resetTo(() => {
+      setRange('all');
+      setFrom('');
+      setTo('');
+    });
+  };
+  const clearAll = (): void => {
+    resetTo(() => {
+      setStatus('all');
+      setFormId('all');
+      setQuery('');
+      setRange('all');
+      setFrom('');
+      setTo('');
+    });
+  };
+
+  const chips: { key: string; label: string; clear: () => void }[] = [];
+  if (query.length > 0) {
+    chips.push({
+      key: 'q',
+      label: t('inbox.chip.search', { q: query }),
+      clear: () => {
+        resetTo(() => {
+          setQuery('');
+        });
+      },
+    });
+  }
+  if (formId !== 'all') {
+    chips.push({
+      key: 'form',
+      label: formName(formId),
+      clear: () => {
+        resetTo(() => {
+          setFormId('all');
+        });
+      },
+    });
+  }
+  if (range !== 'all') {
+    chips.push({ key: 'range', label: rangeChipLabel, clear: clearDate });
+  }
+
+  const countLabel =
+    filtered.length === submissions.length
+      ? t('inbox.count.total', { total: String(submissions.length) })
+      : t('inbox.count.filtered', {
+          filtered: String(filtered.length),
+          total: String(submissions.length),
+        });
+
   return (
     <>
       <div className="inbox-filters">
@@ -140,43 +255,84 @@ export function SubmissionList(): ReactNode {
             </button>
           ))}
         </div>
+        <span className="hint filter-count">{countLabel}</span>
+      </div>
 
-        <div className="filter-right">
-          <select
-            className="select select-auto"
-            value={formId === 'all' ? 'all' : String(formId)}
+      <div className="inbox-search-row">
+        <div className="input-affix search-affix">
+          <span className="affix-ico">
+            <InboxIcon name="search" size={16} />
+          </span>
+          <input
+            className="input"
+            placeholder={t('inbox.search')}
+            value={query}
             onChange={(e) => {
-              const value = e.target.value;
               resetTo(() => {
-                setFormId(value === 'all' ? 'all' : Number(value));
+                setQuery(e.target.value);
               });
             }}
-          >
-            <option value="all">{t('inbox.allForms')}</option>
-            {forms.map((form) => (
-              <option key={form.id} value={String(form.id)}>
-                {form.name}
-              </option>
-            ))}
-          </select>
-
-          <div className="input-affix search-affix">
-            <span className="affix-ico">
-              <InboxIcon name="search" size={15} />
-            </span>
-            <input
-              className="input"
-              placeholder={t('inbox.search')}
-              value={query}
-              onChange={(e) => {
+          />
+          {query.length > 0 ? (
+            <button
+              type="button"
+              className="affix-btn"
+              onClick={() => {
                 resetTo(() => {
-                  setQuery(e.target.value);
+                  setQuery('');
                 });
               }}
-            />
-          </div>
+            >
+              {t('inbox.clear')}
+            </button>
+          ) : null}
         </div>
+
+        <select
+          className="select select-auto"
+          value={formId === 'all' ? 'all' : String(formId)}
+          onChange={(e) => {
+            const value = e.target.value;
+            resetTo(() => {
+              setFormId(value === 'all' ? 'all' : Number(value));
+            });
+          }}
+        >
+          <option value="all">{t('inbox.allForms')}</option>
+          {forms.map((form) => (
+            <option key={form.id} value={String(form.id)}>
+              {form.name}
+            </option>
+          ))}
+        </select>
+
+        <DateRangePicker
+          range={range}
+          from={from}
+          to={to}
+          onChange={({ range: r, from: f, to: nextTo }) => {
+            resetTo(() => {
+              setRange(r);
+              setFrom(f);
+              setTo(nextTo);
+            });
+          }}
+        />
       </div>
+
+      {chips.length > 0 ? (
+        <div className="inbox-chips">
+          {chips.map((c) => (
+            <button key={c.key} type="button" className="chip chip-clear" onClick={c.clear}>
+              {c.label}
+              <InboxIcon name="x" size={12} />
+            </button>
+          ))}
+          <button type="button" className="link-btn" onClick={clearAll}>
+            {t('inbox.clearAll')}
+          </button>
+        </div>
+      ) : null}
 
       {filtered.length === 0 ? (
         <div className="card">
@@ -186,6 +342,11 @@ export function SubmissionList(): ReactNode {
             </div>
             <h3>{t('inbox.noMatch')}</h3>
             <p>{t('inbox.noMatchBody')}</p>
+            {chips.length > 0 ? (
+              <button type="button" className="btn btn-sm" onClick={clearAll}>
+                {t('inbox.clearFilters')}
+              </button>
+            ) : null}
           </div>
         </div>
       ) : (
