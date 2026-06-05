@@ -499,6 +499,35 @@ code,
   font-size: 14.5px;
   max-width: 64ch;
 }
+.eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.spacer {
+  flex: 1;
+}
+/* dashboard layout */
+.dash {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+.dash .recent-when {
+  text-align: right;
+  white-space: nowrap;
+  font-size: 12.5px;
+}
+/* dashboard stat — accent the "open" tile when there is work to do */
+.stat.stat-accent .s-val {
+  color: var(--st-open-fg);
+}
+.stat.stat-accent .s-label svg {
+  color: var(--st-open-dot);
+}
 .page-head-row {
   display: flex;
   align-items: flex-start;
@@ -549,9 +578,22 @@ code,
 .grid-3 {
   grid-template-columns: repeat(3, 1fr);
 }
+.grid-4 {
+  grid-template-columns: repeat(4, 1fr);
+}
+@media (max-width: 1080px) {
+  .grid-4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
 @media (max-width: 880px) {
   .grid-2,
   .grid-3 {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 560px) {
+  .grid-4 {
     grid-template-columns: 1fr;
   }
 }
