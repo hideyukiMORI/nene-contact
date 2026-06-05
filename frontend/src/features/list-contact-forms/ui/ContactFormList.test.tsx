@@ -37,7 +37,11 @@ describe('ContactFormList', () => {
 
     expect(await screen.findByText('Contact us')).toBeInTheDocument();
     expect(screen.getByText('key-1')).toBeInTheDocument();
-    expect(screen.getByText('ja, en')).toBeInTheDocument();
+    // locales render as individual chips
+    expect(screen.getByText('ja')).toBeInTheDocument();
+    expect(screen.getByText('en')).toBeInTheDocument();
+    // active status renders the localized badge
+    expect(screen.getByText('公開中')).toBeInTheDocument();
   });
 
   it('renders the empty state when there are no forms', async () => {
@@ -49,7 +53,7 @@ describe('ContactFormList', () => {
       </MemoryRouter>,
     );
 
-    expect(await screen.findByText('フォームがまだありません。')).toBeInTheDocument();
+    expect(await screen.findByText('まだフォームがありません')).toBeInTheDocument();
   });
 
   it('renders an error with retry on failure', async () => {
