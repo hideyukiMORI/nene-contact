@@ -11,7 +11,13 @@ describe('submission mappers', () => {
         field_values: { email: 'x@example.com' },
         submitted_at: '2026-06-04 00:00:00',
       }),
-    ).toEqual({ id: 9, contactFormId: 3, status: 'open', submittedAt: '2026-06-04 00:00:00' });
+    ).toEqual({
+      id: 9,
+      contactFormId: 3,
+      status: 'open',
+      submittedAt: '2026-06-04 00:00:00',
+      fieldValues: { email: 'x@example.com' },
+    });
   });
 
   it('maps a list with paging metadata and defaults', () => {

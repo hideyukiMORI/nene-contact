@@ -5,6 +5,9 @@ export interface Submission {
   contactFormId: number;
   status: SubmissionStatus;
   submittedAt: string | null;
+  // The admin list endpoint returns field values for every row, so the inbox can search
+  // content / show the sender without per-row detail fetches.
+  fieldValues: Record<string, unknown>;
 }
 
 export interface SubmissionList {
@@ -20,7 +23,6 @@ export interface SubmissionListParams {
 }
 
 export interface SubmissionDetail extends Submission {
-  fieldValues: Record<string, unknown>;
   consentLabel: Record<string, string> | null;
   consentGivenAt: string | null;
 }

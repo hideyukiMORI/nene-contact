@@ -6,7 +6,7 @@ import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Alert, Button } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { SUBMISSION_STATUSES } from '@/entities/submission';
-import type { SubmissionStatus } from '@/entities/submission';
+import type { Submission, SubmissionStatus } from '@/entities/submission';
 import { useSubmissions } from '@/features/list-submissions/hooks/use-submissions';
 import { InboxIcon } from '@/features/list-submissions/ui/icons';
 import { DateRangePicker } from '@/features/list-submissions/ui/DateRangePicker';
@@ -84,6 +84,22 @@ export function SubmissionList(): ReactNode {
     return match?.name ?? t('inbox.unknownForm', { id: String(id) });
   };
 
+  const valueText = (v: unknown): string => {
+    if (typeof v === 'string') return v;
+    if (Array.isArray(v)) return v.map((x) => valueText(x)).join(', ');
+    if (v == null) return '';
+    if (typeof v === 'number' || typeof v === 'boolean') return String(v);
+    return JSON.stringify(v);
+  };
+
+  // Sender = the name/company field if present, else the first value.
+  const senderOf = (s: Submission): string => {
+    const entries = Object.entries(s.fieldValues);
+    const named = entries.find(([k]) => /名前|name|会社|company/i.test(k));
+    const picked = named ?? entries[0];
+    return picked ? valueText(picked[1]) || '—' : '—';
+  };
+
   const counts = useMemo(() => {
     const result: Record<StatusFilter, number> = {
       all: submissions.length,
@@ -105,8 +121,11 @@ export function SubmissionList(): ReactNode {
       if (formId !== 'all' && s.contactFormId !== formId) return false;
       if (!withinRange(s.submittedAt, range, from, to)) return false;
       if (q.length > 0) {
+        const content = Object.entries(s.fieldValues)
+          .map(([k, v]) => `${k} ${valueText(v)}`)
+          .join(' ');
         const haystack =
-          `${formName(s.contactFormId)} #${String(s.id)} ${s.submittedAt ?? ''}`.toLowerCase();
+          `${formName(s.contactFormId)} #${String(s.id)} ${s.submittedAt ?? ''} ${content}`.toLowerCase();
         if (!haystack.includes(q)) return false;
       }
       return true;
@@ -355,6 +374,7 @@ export function SubmissionList(): ReactNode {
             <thead>
               <tr>
                 <th>{t('inbox.column.form')}</th>
+                <th>{t('inbox.column.from')}</th>
                 <th>{t('inbox.column.status')}</th>
                 <th className="col-right">{t('inbox.column.submittedAt')}</th>
               </tr>
@@ -372,6 +392,7 @@ export function SubmissionList(): ReactNode {
                     <div className="cell-strong">{formName(submission.contactFormId)}</div>
                     <div className="faint mono submission-id">#{submission.id}</div>
                   </td>
+                  <td className="sender-cell">{senderOf(submission)}</td>
                   <td>
                     <StatusBadge status={submission.status} />
                   </td>
