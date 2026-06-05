@@ -178,9 +178,15 @@ final readonly class PdoSubmissionRepository implements
             $params[] = $filter->to . ' 23:59:59';
         }
         if ($filter->q !== null && trim($filter->q) !== '') {
-            // Match raw submitted content server-side; raw values never leave the server.
-            $clauses[] = 'field_values_json LIKE ?';
-            $params[] = '%' . $this->escapeLike(trim($filter->q)) . '%';
+            // Match raw submitted content and the form name server-side (org-scoped); raw
+            // values never leave the server. The form-name match uses a correlated subquery
+            // so the result shape stays a plain submissions row set.
+            $like = '%' . $this->escapeLike(trim($filter->q)) . '%';
+            $clauses[] = '(field_values_json LIKE ? OR contact_form_id IN '
+                . '(SELECT id FROM contact_forms WHERE organization_id = ? AND name LIKE ?))';
+            $params[] = $like;
+            $params[] = $this->orgId->get();
+            $params[] = $like;
         }
 
         return [implode(' AND ', $clauses), $params];
