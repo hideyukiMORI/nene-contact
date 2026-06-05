@@ -15,11 +15,18 @@ export interface SubmissionList {
   total: number;
   limit: number;
   offset: number;
+  // Per-status totals for the current query (status filter ignored), for the inbox tabs.
+  statusCounts: Record<string, number>;
 }
 
 export interface SubmissionListParams {
   limit: number;
   offset: number;
+  status?: SubmissionStatus;
+  contactFormId?: number;
+  from?: string;
+  to?: string;
+  q?: string;
 }
 
 export interface SubmissionDetail extends Submission {

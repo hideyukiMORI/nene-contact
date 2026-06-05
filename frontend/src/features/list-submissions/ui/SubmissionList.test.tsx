@@ -56,6 +56,7 @@ describe('SubmissionList', () => {
           total: 1,
           limit: 20,
           offset: 0,
+          status_counts: { open: 1 },
         }),
       ),
     );

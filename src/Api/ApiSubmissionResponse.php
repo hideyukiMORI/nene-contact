@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NeneContact\Api;
 
+use NeneContact\Submission\PiiMasker;
 use NeneContact\Submission\Submission;
 
 /**

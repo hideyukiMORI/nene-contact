@@ -6,5 +6,5 @@ namespace NeneContact\Submission;
 
 interface ListSubmissionsUseCaseInterface
 {
-    public function execute(int $limit, int $offset): ListSubmissionsResult;
+    public function execute(SubmissionFilter $filter, int $limit, int $offset): ListSubmissionsResult;
 }

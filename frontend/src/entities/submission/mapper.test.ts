@@ -26,6 +26,7 @@ describe('submission mappers', () => {
       total: 5,
       limit: 20,
       offset: 0,
+      statusCounts: {},
     });
   });
 });

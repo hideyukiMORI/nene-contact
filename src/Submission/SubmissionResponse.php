@@ -11,6 +11,25 @@ namespace NeneContact\Submission;
  */
 final readonly class SubmissionResponse
 {
+    /**
+     * Redacted list item for the inbox: field values are **masked** (charter §11), so the
+     * bulk list never discloses raw PII — full content is only on the single detail view.
+     * Consent copy is omitted from the list; it belongs to the detail/disclosure path.
+     *
+     * @return array<string, mixed>
+     */
+    public static function toListItem(Submission $submission): array
+    {
+        return [
+            'id' => $submission->id,
+            'contact_form_id' => $submission->contactFormId,
+            'status' => $submission->status,
+            'source' => $submission->source,
+            'field_values' => PiiMasker::maskValues($submission->fieldValues),
+            'submitted_at' => $submission->submittedAt,
+        ];
+    }
+
     /** @return array<string, mixed> */
     public static function toArray(Submission $submission): array
     {
