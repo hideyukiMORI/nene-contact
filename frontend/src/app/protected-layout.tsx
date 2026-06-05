@@ -1,50 +1,89 @@
-import { NavLink, Navigate, Outlet } from 'react-router-dom';
+import { Fragment, useState } from 'react';
+import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/app/auth-context';
 import { useI18n } from '@/shared/i18n';
+import { useTheme } from '@/shared/theme';
+import { useSubmissionsQuery } from '@/entities/submission';
 import type { Session } from '@/entities/auth';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
+import { ShellIcon } from '@/app/shell-icons';
+import type { ShellIconName } from '@/app/shell-icons';
 
 // Pages read the session via react-router's Outlet context (no upward import of app/).
 interface AdminOutletContext {
   session: Session;
 }
 
-function NavIcon({ d }: { d: string }): ReactNode {
-  return (
-    <svg
-      className="nav-ico"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <path d={d} />
-    </svg>
-  );
+interface NavLinkItem {
+  to: string;
+  end?: boolean;
+  labelKey: MessageKey;
+  icon: ShellIconName;
+  badge?: number;
 }
 
-const NAV: { to: string; end?: boolean; labelKey: MessageKey; icon: string }[] = [
-  { to: '/', end: true, labelKey: 'nav.dashboard', icon: 'M3 11l9-8 9 8M5 10v10h14V10' },
+interface Crumb {
+  label: string;
+  to?: string;
+}
+
+const NAV_GROUPS: { labelKey: MessageKey; items: NavLinkItem[] }[] = [
   {
-    to: '/contact-forms',
-    labelKey: 'nav.forms',
-    icon: 'M8 4h8a2 2 0 0 1 2 2v14l-6-3-6 3V6a2 2 0 0 1 2-2z',
+    labelKey: 'nav.group.main',
+    items: [
+      { to: '/', end: true, labelKey: 'nav.dashboard', icon: 'dashboard' },
+      { to: '/contact-forms', labelKey: 'nav.forms', icon: 'forms' },
+      { to: '/submissions', labelKey: 'nav.inbox', icon: 'inbox' },
+    ],
   },
-  { to: '/submissions', labelKey: 'nav.inbox', icon: 'M3 7l9 6 9-6M3 7v10h18V7' },
   {
-    to: '/users',
-    labelKey: 'nav.users',
-    icon: 'M16 18v-1a4 4 0 0 0-8 0v1M12 11a3 3 0 1 0 0-6 3 3 0 0 0 0 6z',
+    labelKey: 'nav.group.manage',
+    items: [{ to: '/users', labelKey: 'nav.users', icon: 'users' }],
   },
 ];
+
+// Breadcrumbs derived from the current path; the final crumb is the current page.
+function useCrumbs(): Crumb[] {
+  const { t } = useI18n();
+  const segments = useLocation()
+    .pathname.split('/')
+    .filter((s) => s.length > 0);
+
+  if (segments.length === 0) {
+    return [{ label: t('nav.dashboard') }];
+  }
+  if (segments[0] === 'contact-forms') {
+    if (segments[1] === 'new') {
+      return [{ label: t('nav.forms'), to: '/contact-forms' }, { label: t('crumb.create') }];
+    }
+    if (segments[2] === 'channels') {
+      return [{ label: t('nav.forms'), to: '/contact-forms' }, { label: t('crumb.notifications') }];
+    }
+    return [{ label: t('nav.forms') }];
+  }
+  if (segments[0] === 'submissions') {
+    if (segments[1] !== undefined) {
+      return [{ label: t('nav.inbox'), to: '/submissions' }, { label: `#${segments[1]}` }];
+    }
+    return [{ label: t('nav.inbox') }];
+  }
+  if (segments[0] === 'users') {
+    return [{ label: t('nav.users') }];
+  }
+  return [{ label: t('nav.dashboard') }];
+}
 
 export function ProtectedLayout(): ReactNode {
   const { session, signOut } = useAuth();
   const { t, locale, setLocale } = useI18n();
+  const { theme, toggleTheme } = useTheme();
+  const crumbs = useCrumbs();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // The inbox badge counts the unhandled submissions on the most recent page.
+  const submissionsQuery = useSubmissionsQuery({ limit: 100, offset: 0 });
+  const openCount = (submissionsQuery.data?.items ?? []).filter((s) => s.status === 'open').length;
 
   if (session === null) {
     return <Navigate to="/login" replace />;
@@ -52,41 +91,40 @@ export function ProtectedLayout(): ReactNode {
 
   const context: AdminOutletContext = { session };
   const initial = (session.email.at(0) ?? '?').toUpperCase();
+  const isDark = theme === 'dark';
 
   return (
     <div className="app">
       <aside className="sidebar">
         <div className="brand">
           <span className="brand-mark">
-            <svg
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M4 6h16M4 12h16M4 18h10" />
-            </svg>
+            <ShellIcon name="send" size={17} />
           </span>
-          <span>
+          <span className="brand-text">
             <span className="brand-name">NeNe Contact</span>
-            <span className="brand-sub">{t('common.appName')}</span>
+            <span className="brand-sub">{t('common.console')}</span>
           </span>
         </div>
 
-        <div className="nav-group-label">{t('nav.dashboard')}</div>
-        {NAV.map((item) => (
-          <NavLink
-            key={item.to}
-            to={item.to}
-            end={item.end ?? false}
-            className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
-          >
-            <NavIcon d={item.icon} />
-            {t(item.labelKey)}
-          </NavLink>
+        {NAV_GROUPS.map((group) => (
+          <Fragment key={group.labelKey}>
+            <div className="nav-group-label">{t(group.labelKey)}</div>
+            {group.items.map((item) => {
+              const badge = item.to === '/submissions' ? openCount : 0;
+              return (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end ?? false}
+                  className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
+                >
+                  <ShellIcon name={item.icon} className="nav-ico" />
+                  <span className="nav-label">{t(item.labelKey)}</span>
+                  {badge > 0 ? <span className="nav-badge">{badge}</span> : null}
+                </NavLink>
+              );
+            })}
+          </Fragment>
         ))}
 
         <span className="nav-spacer" />
@@ -94,7 +132,30 @@ export function ProtectedLayout(): ReactNode {
 
       <div className="main">
         <header className="topbar">
+          <nav className="crumbs">
+            {crumbs.map((crumb, i) => (
+              <Fragment key={`${crumb.label}-${String(i)}`}>
+                {i > 0 ? <ShellIcon name="chevRight" size={13} className="sep" /> : null}
+                {crumb.to !== undefined && i < crumbs.length - 1 ? (
+                  <Link to={crumb.to}>{crumb.label}</Link>
+                ) : (
+                  <span className={i === crumbs.length - 1 ? 'cur' : ''}>{crumb.label}</span>
+                )}
+              </Fragment>
+            ))}
+          </nav>
+
           <span className="topbar-spacer" />
+
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={toggleTheme}
+            aria-label={isDark ? t('theme.toLight') : t('theme.toDark')}
+          >
+            <ShellIcon name={isDark ? 'sun' : 'moon'} />
+          </button>
+
           <div className="lang-toggle">
             <button
               type="button"
@@ -103,7 +164,7 @@ export function ProtectedLayout(): ReactNode {
                 setLocale('ja');
               }}
             >
-              JA
+              日本語
             </button>
             <button
               type="button"
@@ -115,14 +176,47 @@ export function ProtectedLayout(): ReactNode {
               EN
             </button>
           </div>
-          <span className="acct">
-            <span className="avatar">{initial}</span>
-            <span className="acct-email">{session.email}</span>
-          </span>
-          <button type="button" className="btn btn-sm" onClick={signOut}>
-            {t('common.signOut')}
-          </button>
+
+          <div className="acct-wrap">
+            <button
+              type="button"
+              className="acct"
+              onClick={() => {
+                setMenuOpen((open) => !open);
+              }}
+            >
+              <span className="avatar">{initial}</span>
+              <span className="acct-email">{session.email}</span>
+              <ShellIcon name="chevDown" size={15} />
+            </button>
+            {menuOpen ? (
+              <>
+                <button
+                  type="button"
+                  className="menu-backdrop"
+                  aria-hidden="true"
+                  tabIndex={-1}
+                  onClick={() => {
+                    setMenuOpen(false);
+                  }}
+                />
+                <div className="card acct-menu">
+                  <div className="acct-info">
+                    <div className="nc-muted">{t('common.signedIn')}</div>
+                    <div className="acct-name">{session.email}</div>
+                    <div className="acct-role">{t('home.role', { role: session.role })}</div>
+                  </div>
+                  <div className="divider" />
+                  <button type="button" className="menu-item" onClick={signOut}>
+                    <ShellIcon name="logout" size={17} />
+                    {t('common.signOut')}
+                  </button>
+                </div>
+              </>
+            ) : null}
+          </div>
         </header>
+
         <main className="page">
           <Outlet context={context} />
         </main>
