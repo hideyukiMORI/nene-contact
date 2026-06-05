@@ -1496,6 +1496,37 @@ td.col-right {
   padding: 12px 16px;
   border-top: 1px solid var(--border);
 }
+.inbox-filters {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.inbox-filters .filter-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.segmented .seg-count {
+  margin-left: 6px;
+  font-size: 11px;
+  opacity: 0.75;
+}
+.select.select-auto {
+  width: auto;
+}
+.search-affix {
+  width: 220px;
+}
+.search-affix .affix-ico {
+  display: grid;
+  place-items: center;
+  padding-left: 10px;
+  color: var(--text-faint);
+}
 
 /* ---------- Tooltip / Help ---------- */
 .help-dot {
