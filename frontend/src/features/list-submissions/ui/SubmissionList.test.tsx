@@ -64,8 +64,8 @@ describe('SubmissionList', () => {
 
     expect(await screen.findByText('2026-06-04 00:00:00')).toBeInTheDocument();
     expect(screen.getByText('1 / 1')).toBeInTheDocument();
-    // form name resolved from the contact-forms list, with the id beneath
-    expect(screen.getByText('Contact us')).toBeInTheDocument();
+    // form name resolved from the contact-forms list (row cell + filter option), id beneath
+    expect(screen.getAllByText('Contact us').length).toBeGreaterThan(0);
     expect(screen.getByText('#9')).toBeInTheDocument();
   });
 
