@@ -131,10 +131,21 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
         });
     }
 
+    public function softDelete(int $id): void
+    {
+        $now = date('Y-m-d H:i:s');
+
+        // Org-scoped soft delete — never a physical DELETE (ADR 0016). Submissions are kept.
+        $this->query->execute(
+            'UPDATE contact_forms SET deleted_at = ?, updated_at = ? WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
+            [$now, $now, $id, $this->orgId->get()],
+        );
+    }
+
     public function findById(int $id): ?ContactForm
     {
         $row = $this->query->fetchOne(
-            'SELECT ' . self::FORM_COLUMNS . ' FROM contact_forms WHERE id = ? AND organization_id = ?',
+            'SELECT ' . self::FORM_COLUMNS . ' FROM contact_forms WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
             [$id, $this->orgId->get()],
         );
 
@@ -144,7 +155,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm
     {
         $row = $this->query->fetchOne(
-            'SELECT ' . self::FORM_COLUMNS . ' FROM contact_forms WHERE public_form_key = ? AND organization_id = ?',
+            'SELECT ' . self::FORM_COLUMNS . ' FROM contact_forms WHERE public_form_key = ? AND organization_id = ? AND deleted_at IS NULL',
             [$publicFormKey, $this->orgId->get()],
         );
 
@@ -159,7 +170,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
     public function findAll(int $limit, int $offset): array
     {
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::FORM_COLUMNS . ' FROM contact_forms WHERE organization_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
+            'SELECT ' . self::FORM_COLUMNS . ' FROM contact_forms WHERE organization_id = ? AND deleted_at IS NULL ORDER BY id DESC LIMIT ? OFFSET ?',
             [$this->orgId->get(), $limit, $offset],
         );
 
@@ -168,7 +179,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
     public function count(): int
     {
-        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM contact_forms WHERE organization_id = ?', [$this->orgId->get()]);
+        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM contact_forms WHERE organization_id = ? AND deleted_at IS NULL', [$this->orgId->get()]);
 
         return $row !== null ? (int) $row['cnt'] : 0;
     }

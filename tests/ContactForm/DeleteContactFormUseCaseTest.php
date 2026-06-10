@@ -4,53 +4,36 @@ declare(strict_types=1);
 
 namespace NeneContact\Tests\ContactForm;
 
-use Nene2\Http\RequestScopedHolder;
 use NeneContact\Audit\AuditEvent;
 use NeneContact\Audit\AuditEventRepositoryInterface;
 use NeneContact\Audit\AuditRecorder;
 use NeneContact\ContactForm\ContactForm;
+use NeneContact\ContactForm\ContactFormNotFoundException;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
-use NeneContact\ContactForm\CreateContactFormInput;
-use NeneContact\ContactForm\CreateContactFormUseCase;
+use NeneContact\ContactForm\DeleteContactFormUseCase;
 use NeneContact\ContactForm\FormField;
 use PHPUnit\Framework\TestCase;
 
-final class CreateContactFormUseCaseTest extends TestCase
+final class DeleteContactFormUseCaseTest extends TestCase
 {
-    public function test_creates_form_with_key_org_scope_and_audit(): void
+    private function repoWithForm(): ContactFormRepositoryInterface
     {
         $repo = new class () implements ContactFormRepositoryInterface {
             /** @var array<int, ContactForm> */
             public array $byId = [];
-            private int $next = 1;
 
             public function save(ContactForm $form): int
             {
-                $id = $this->next++;
-                $this->byId[$id] = new ContactForm(
-                    organizationId: $form->organizationId,
-                    name: $form->name,
-                    publicFormKey: $form->publicFormKey,
-                    defaultLocale: $form->defaultLocale,
-                    locales: $form->locales,
-                    allowedOrigins: $form->allowedOrigins,
-                    fields: $form->fields,
-                    status: $form->status,
-                    id: $id,
-                    createdAt: '2026-06-04 00:00:00',
-                    updatedAt: '2026-06-04 00:00:00',
-                );
-
-                return $id;
+                return 0;
             }
 
             public function update(ContactForm $form): void
             {
-                $this->byId[(int) $form->id] = $form;
             }
 
             public function softDelete(int $id): void
             {
+                // A soft delete hides the form from every read.
                 unset($this->byId[$id]);
             }
 
@@ -76,7 +59,29 @@ final class CreateContactFormUseCaseTest extends TestCase
             }
         };
 
-        $auditRepo = new class () implements AuditEventRepositoryInterface {
+        $repo->byId[1] = new ContactForm(
+            organizationId: 7,
+            name: 'Contact us',
+            publicFormKey: 'k',
+            defaultLocale: 'ja',
+            locales: ['ja'],
+            allowedOrigins: [],
+            fields: [new FormField(fieldType: 'text', name: 'name', label: ['ja' => '氏名'], required: false, sortOrder: 0)],
+            status: 'active',
+            id: 1,
+            createdAt: '2026-06-04 00:00:00',
+            updatedAt: '2026-06-04 00:00:00',
+        );
+
+        return $repo;
+    }
+
+    /**
+     * @return object{events: list<AuditEvent>}&AuditEventRepositoryInterface
+     */
+    private function auditRepo(): AuditEventRepositoryInterface
+    {
+        return new class () implements AuditEventRepositoryInterface {
             /** @var list<AuditEvent> */
             public array $events = [];
 
@@ -98,33 +103,36 @@ final class CreateContactFormUseCaseTest extends TestCase
                 return count($this->events);
             }
         };
+    }
 
-        /** @var RequestScopedHolder<int> $holder */
-        $holder = new RequestScopedHolder();
-        $holder->set(7);
+    public function test_soft_deletes_and_audits(): void
+    {
+        $repo = $this->repoWithForm();
+        $auditRepo = $this->auditRepo();
 
-        $useCase = new CreateContactFormUseCase($repo, new AuditRecorder($auditRepo), $holder);
+        $useCase = new DeleteContactFormUseCase($repo, new AuditRecorder($auditRepo));
 
-        $field = new FormField(fieldType: 'email', name: 'email', label: ['ja' => 'メール', 'en' => 'Email'], required: true, sortOrder: 0);
-        $form = $useCase->execute(5, new CreateContactFormInput(
-            name: 'Contact us',
-            defaultLocale: 'ja',
-            locales: ['ja', 'en'],
-            allowedOrigins: ['https://example.com'],
-            fields: [$field],
-        ));
+        $useCase->execute(5, 1);
 
-        self::assertGreaterThan(0, $form->id);
-        self::assertSame(7, $form->organizationId);
-        self::assertSame(32, strlen($form->publicFormKey));
-        self::assertCount(1, $form->fields);
+        self::assertNull($repo->findById(1), 'the form is hidden from reads after deletion');
 
         self::assertCount(1, $auditRepo->events);
         $event = $auditRepo->events[0];
-        self::assertSame('contact_form.created', $event->action);
+        self::assertSame('contact_form.deleted', $event->action);
         self::assertSame(5, $event->actorUserId);
         self::assertSame(7, $event->organizationId);
-        self::assertNull($event->before);
-        self::assertNotNull($event->after);
+        self::assertNotNull($event->before);
+        self::assertNull($event->after);
+        self::assertSame('Contact us', $event->before['name'] ?? null);
+    }
+
+    public function test_missing_form_throws_not_found(): void
+    {
+        $repo = $this->repoWithForm();
+
+        $useCase = new DeleteContactFormUseCase($repo, new AuditRecorder($this->auditRepo()));
+
+        $this->expectException(ContactFormNotFoundException::class);
+        $useCase->execute(5, 99);
     }
 }

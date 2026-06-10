@@ -75,6 +75,10 @@ final class HandoffToDealUseCaseTest extends TestCase
             {
             }
 
+            public function softDelete(int $id): void
+            {
+            }
+
             public function findById(int $id): ?ContactForm
             {
                 if ($id === 0) {

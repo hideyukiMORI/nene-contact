@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import { Icon } from '@/shared/ui';
+import { Icon, Modal } from '@/shared/ui';
 import { useContactForms } from '@/features/list-contact-forms/hooks/use-contact-forms';
 import { EmbedModal } from '@/features/embed-form';
+import { useDeleteContactFormMutation } from '@/entities/contact-form';
 import type { ContactForm } from '@/entities/contact-form';
 
 export type FormStatusFilter = 'all' | 'active' | 'disabled';
@@ -50,6 +51,8 @@ export function ContactFormList({
   const { t } = useI18n();
   const { forms, isLoading, error, refetch } = useContactForms();
   const [embedForm, setEmbedForm] = useState<ContactForm | null>(null);
+  const [deleteForm, setDeleteForm] = useState<ContactForm | null>(null);
+  const deleteMutation = useDeleteContactFormMutation();
 
   if (isLoading) {
     return <div className="fm-card fm-state">{t('common.loading')}</div>;
@@ -162,6 +165,16 @@ export function ContactFormList({
                       <Icon name="bell" size={14} />
                       {t('contactForms.notify')}
                     </Link>
+                    <button
+                      type="button"
+                      className="fm-kbtn"
+                      aria-label={t('contactForms.delete')}
+                      onClick={() => {
+                        setDeleteForm(form);
+                      }}
+                    >
+                      <Icon name="trash" size={16} />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -177,6 +190,52 @@ export function ContactFormList({
             setEmbedForm(null);
           }}
         />
+      ) : null}
+
+      {deleteForm !== null ? (
+        <Modal
+          title={t('contactForms.deleteTitle')}
+          subtitle={t('contactForms.deleteNote')}
+          icon={<Icon name="trash" size={19} />}
+          onClose={() => {
+            setDeleteForm(null);
+          }}
+          foot={
+            <>
+              <button
+                type="button"
+                className="ex-btn ghost"
+                onClick={() => {
+                  setDeleteForm(null);
+                }}
+              >
+                {t('common.close')}
+              </button>
+              <button
+                type="button"
+                className="ex-btn danger"
+                disabled={deleteMutation.isPending}
+                onClick={() => {
+                  deleteMutation.mutate(deleteForm.id, {
+                    onSuccess: () => {
+                      setDeleteForm(null);
+                    },
+                  });
+                }}
+              >
+                <Icon name="trash" size={14} />
+                {deleteMutation.isPending ? t('contactForms.deleting') : t('contactForms.delete')}
+              </button>
+            </>
+          }
+        >
+          <p className="md-confirm">{t('contactForms.deleteConfirm', { name: deleteForm.name })}</p>
+          {deleteMutation.error !== null ? (
+            <div className="au-note" role="alert">
+              {t('contactForms.deleteError')}
+            </div>
+          ) : null}
+        </Modal>
       ) : null}
     </>
   );

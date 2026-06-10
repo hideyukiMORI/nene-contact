@@ -262,6 +262,21 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
+    delete:
+      tags: [ContactForm]
+      operationId: deleteContactForm
+      summary: Delete a contact form (soft delete)
+      description: >-
+        Soft-deletes the form (ADR 0016 — no physical row deletion): it drops out of every
+        read immediately, while received submissions are retained. Audited as
+        contact_form.deleted (ADR 0013).
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
 
   /admin/notification-channels:
     get:

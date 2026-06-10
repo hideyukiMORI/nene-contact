@@ -91,6 +91,23 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                 },
             )
             ->set(
+                DeleteContactFormUseCaseInterface::class,
+                static function (ContainerInterface $c): DeleteContactFormUseCaseInterface {
+                    $repo = $c->get(ContactFormRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof ContactFormRepositoryInterface) {
+                        throw new LogicException('Contact form repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new DeleteContactFormUseCase($repo, $audit);
+                },
+            )
+            ->set(
                 ListContactFormsUseCaseInterface::class,
                 static function (ContainerInterface $c): ListContactFormsUseCaseInterface {
                     $repo = $c->get(ContactFormRepositoryInterface::class);
@@ -149,6 +166,23 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                 },
             )
             ->set(
+                DeleteContactFormHandler::class,
+                static function (ContainerInterface $c): DeleteContactFormHandler {
+                    $uc = $c->get(DeleteContactFormUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof DeleteContactFormUseCaseInterface) {
+                        throw new LogicException('DeleteContactForm use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new DeleteContactFormHandler($uc, $json);
+                },
+            )
+            ->set(
                 ListContactFormsHandler::class,
                 static function (ContainerInterface $c): ListContactFormsHandler {
                     $uc = $c->get(ListContactFormsUseCaseInterface::class);
@@ -201,6 +235,7 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                     $get = $c->get(GetContactFormByIdHandler::class);
                     $create = $c->get(CreateContactFormHandler::class);
                     $update = $c->get(UpdateContactFormHandler::class);
+                    $delete = $c->get(DeleteContactFormHandler::class);
 
                     if (!$list instanceof ListContactFormsHandler) {
                         throw new LogicException('ListContactForms handler service is invalid.');
@@ -218,7 +253,11 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                         throw new LogicException('UpdateContactForm handler service is invalid.');
                     }
 
-                    return new ContactFormRouteRegistrar($list, $get, $create, $update);
+                    if (!$delete instanceof DeleteContactFormHandler) {
+                        throw new LogicException('DeleteContactForm handler service is invalid.');
+                    }
+
+                    return new ContactFormRouteRegistrar($list, $get, $create, $update, $delete);
                 },
             );
     }
