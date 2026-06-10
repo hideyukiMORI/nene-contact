@@ -5,7 +5,7 @@ import { ProtectedLayout } from '@/app/protected-layout';
 import { LoginPage } from '@/pages/login';
 import { HomePage } from '@/pages/home';
 import { ContactFormsPage, ContactFormBuilderPage, ChannelsPage } from '@/pages/contact-forms';
-import { SubmissionsPage, SubmissionDetailPage } from '@/pages/submissions';
+import { SubmissionsPage } from '@/pages/submissions';
 import { UsersPage } from '@/pages/users';
 import { SettingsPage } from '@/pages/settings';
 
@@ -28,7 +28,7 @@ const router = createBrowserRouter(
         { path: 'contact-forms/new', element: <ContactFormBuilderPage /> },
         { path: 'contact-forms/:id/channels', element: <ChannelsPage /> },
         { path: 'submissions', element: <SubmissionsPage /> },
-        { path: 'submissions/:id', element: <SubmissionDetailPage /> },
+        { path: 'submissions/:id', element: <SubmissionsPage /> },
         { path: 'users', element: <UsersPage /> },
         { path: 'settings', element: <SettingsPage /> },
       ],
