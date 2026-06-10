@@ -222,6 +222,7 @@ export const ja = {
   'contactForms.detail.retentionDays': '{n} 日',
   'contactForms.detail.origins': '許可オリジン',
   'contactForms.detail.originsAny': '制限なし',
+  'contactForms.detail.hidden': '非表示（スパム対策）',
   'contactForms.detail.type': '種別',
   'contactForms.detail.label': 'ラベル',
   'contactForms.detail.required': '必須',
