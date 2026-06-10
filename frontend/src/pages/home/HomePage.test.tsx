@@ -96,14 +96,16 @@ describe('HomePage', () => {
 
     renderDashboard();
 
-    expect(await screen.findByText('今日のやること')).toBeInTheDocument();
+    expect(await screen.findByText('ダッシュボード')).toBeInTheDocument();
     // recent submissions resolve the form name from the contact-forms list
     expect(await screen.findAllByText('Contact us')).not.toHaveLength(0);
     // unknown form id falls back to a labelled placeholder
     expect(screen.getByText('フォーム #99')).toBeInTheDocument();
     // stat labels are present
     expect(screen.getByText('公開中のフォーム')).toBeInTheDocument();
-    expect(screen.getByText('総受信')).toBeInTheDocument();
+    expect(screen.getByText('未対応の送信')).toBeInTheDocument();
+    // the 7-day trend card shows the API total
+    expect(screen.getByText('受信の推移（7日）')).toBeInTheDocument();
   });
 
   it('renders the empty state when there are no submissions', async () => {
@@ -116,9 +118,7 @@ describe('HomePage', () => {
 
     renderDashboard();
 
-    // needs-attention shows the all-caught-up empty state
-    expect(await screen.findByText('対応待ちはありません')).toBeInTheDocument();
-    // and the forms card shows its own empty state
-    expect(screen.getByText('フォームがありません')).toBeInTheDocument();
+    // the recent card shows its empty state when there are no submissions
+    expect(await screen.findByText('最近の受信はありません')).toBeInTheDocument();
   });
 });
