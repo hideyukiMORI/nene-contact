@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   toContactForm,
+  toContactFormDetail,
   toContactFormDraft,
   toContactFormList,
   toCreateContactFormDto,
@@ -110,5 +111,26 @@ describe('contact-form mappers', () => {
       required: true,
       options: [{ value: 'a', label: { ja: 'A' } }],
     });
+  });
+
+  it('maps a form DTO to the full detail (draft + server identity)', () => {
+    const detail = toContactFormDetail({
+      id: 9,
+      name: 'Contact us',
+      public_form_key: 'abc',
+      default_locale: 'ja',
+      locales: ['ja'],
+      allowed_origins: [],
+      status: 'disabled',
+      consent_required: false,
+      fields: [],
+    });
+
+    expect(detail.id).toBe(9);
+    expect(detail.publicFormKey).toBe('abc');
+    expect(detail.status).toBe('disabled');
+    // and it still carries the editable draft fields
+    expect(detail.name).toBe('Contact us');
+    expect(detail.fields).toEqual([]);
   });
 });

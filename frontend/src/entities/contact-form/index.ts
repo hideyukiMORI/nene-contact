@@ -1,4 +1,4 @@
-export { useContactFormsQuery, useContactFormDraftQuery } from '@/entities/contact-form/queries';
+export { useContactFormsQuery, useContactFormQuery } from '@/entities/contact-form/queries';
 export {
   useCreateContactFormMutation,
   useUpdateContactFormMutation,
@@ -7,12 +7,14 @@ export {
 export {
   toContactForm,
   toContactFormList,
+  toContactFormDetail,
   toCreateContactFormDto,
 } from '@/entities/contact-form/mapper';
 export { contactFormKeys } from '@/entities/contact-form/query-keys';
 export type {
   ContactForm,
   ContactFormList,
+  ContactFormDetail,
   ContactFormDraft,
   DraftField,
   DraftFieldOption,

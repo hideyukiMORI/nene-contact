@@ -1,7 +1,7 @@
 import { useNavigate, useParams } from 'react-router-dom';
 import { useState, type ReactNode } from 'react';
 import type { ContactFormDraft } from '@/entities/contact-form';
-import { useContactFormDraftQuery } from '@/entities/contact-form';
+import { useContactFormQuery } from '@/entities/contact-form';
 import { useI18n } from '@/shared/i18n';
 import { FormBuilder, PresetPicker } from '@/features/build-contact-form';
 
@@ -19,7 +19,7 @@ export function ContactFormBuilderPage(): ReactNode {
 function EditForm({ id }: { id: number }): ReactNode {
   const { t } = useI18n();
   const navigate = useNavigate();
-  const query = useContactFormDraftQuery(id);
+  const query = useContactFormQuery(id);
 
   if (query.isPending) {
     return <div className="fm-body fm-state">{t('common.loading')}</div>;

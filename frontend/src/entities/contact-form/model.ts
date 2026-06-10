@@ -40,3 +40,11 @@ export interface ContactFormDraft {
   retentionDays: number | null;
   fields: DraftField[];
 }
+
+// A full form: the editable draft plus the server-owned identity. Used by the read-only
+// detail view and as the builder's edit seed (a draft is a structural subset).
+export interface ContactFormDetail extends ContactFormDraft {
+  id: number;
+  publicFormKey: string;
+  status: string;
+}

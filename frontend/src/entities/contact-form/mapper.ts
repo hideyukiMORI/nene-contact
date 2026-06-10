@@ -5,6 +5,7 @@ import type {
 } from '@/entities/contact-form/api-types';
 import type {
   ContactForm,
+  ContactFormDetail,
   ContactFormDraft,
   ContactFormList,
   DraftField,
@@ -60,6 +61,16 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
     consentLabel: dto.consent_label ?? null,
     retentionDays: dto.retention_days ?? null,
     fields,
+  };
+}
+
+// Full form for the read-only detail view (draft + server-owned identity).
+export function toContactFormDetail(dto: ContactFormDto): ContactFormDetail {
+  return {
+    ...toContactFormDraft(dto),
+    id: dto.id,
+    publicFormKey: dto.public_form_key,
+    status: dto.status ?? 'active',
   };
 }
 

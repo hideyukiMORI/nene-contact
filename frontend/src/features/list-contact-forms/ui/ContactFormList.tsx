@@ -115,7 +115,9 @@ export function ContactFormList({
                       <Icon name="forms" size={19} />
                     </span>
                     <div>
-                      <div className="t">{form.name}</div>
+                      <Link className="t" to={`/contact-forms/${String(form.id)}`}>
+                        {form.name}
+                      </Link>
                       <div className="u">
                         {form.publicFormKey}
                         <CopyKeyButton value={form.publicFormKey} />
