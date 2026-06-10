@@ -1,14 +1,9 @@
+import { useOutletContext } from 'react-router-dom';
 import type { ReactNode } from 'react';
-import { useI18n } from '@/shared/i18n';
+import type { Session } from '@/entities/auth';
 import { ManageUsers } from '@/features/manage-users';
 
 export function UsersPage(): ReactNode {
-  const { t } = useI18n();
-
-  return (
-    <section className="nc-card nc-section">
-      <h1>{t('users.title')}</h1>
-      <ManageUsers />
-    </section>
-  );
+  const { session } = useOutletContext<{ session: Session }>();
+  return <ManageUsers currentEmail={session.email} />;
 }

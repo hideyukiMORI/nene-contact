@@ -1,11 +1,13 @@
 import { useEffect } from 'react';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
+import { Icon } from '@/shared/ui/icon';
 
-// Centered overlay dialog (Design System v2). Click the scrim or press Escape to close;
+// Centered Pro Console dialog (md-*). Click the scrim or press Escape to close;
 // the panel itself stops propagation. Styling lives in the centralized theme.
 export function Modal({
   title,
+  subtitle,
   icon,
   onClose,
   children,
@@ -13,6 +15,7 @@ export function Modal({
   wide = false,
 }: {
   title: string;
+  subtitle?: string;
   icon?: ReactNode;
   onClose: () => void;
   children: ReactNode;
@@ -34,46 +37,32 @@ export function Modal({
   }, [onClose]);
 
   return (
-    <div className="overlay">
+    <div className="md-overlay">
       <button
         type="button"
-        className="overlay-scrim"
+        className="md-scrim"
         aria-hidden="true"
         tabIndex={-1}
         onClick={onClose}
       />
       <div
-        className={wide ? 'modal wide' : 'modal'}
+        className={wide ? 'md-dialog wide' : 'md-dialog'}
         role="dialog"
         aria-modal="true"
         aria-label={title}
       >
-        <div className="modal-head">
-          {icon !== undefined ? <span className="modal-mark">{icon}</span> : null}
-          <h2>{title}</h2>
-          <button
-            type="button"
-            className="icon-btn x-btn"
-            onClick={onClose}
-            aria-label={t('common.close')}
-          >
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="1.8"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              aria-hidden="true"
-            >
-              <path d="M6 6l12 12M18 6L6 18" />
-            </svg>
+        <div className="md-head">
+          {icon !== undefined ? <span className="mi">{icon}</span> : null}
+          <div className="md-htext">
+            <div className="ti">{title}</div>
+            {subtitle !== undefined ? <div className="ds">{subtitle}</div> : null}
+          </div>
+          <button type="button" className="md-x" onClick={onClose} aria-label={t('common.close')}>
+            <Icon name="x" size={15} />
           </button>
         </div>
-        <div className="modal-body">{children}</div>
-        {foot !== undefined ? <div className="modal-foot">{foot}</div> : null}
+        <div className="md-body">{children}</div>
+        {foot !== undefined ? <div className="md-foot">{foot}</div> : null}
       </div>
     </div>
   );
