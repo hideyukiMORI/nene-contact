@@ -4757,7 +4757,209 @@ h3 {
 }
 
 /* ============================================================
-   Pro Console — submission detail (single-pane, ib-detail)
+   Pro Console — inbox two-pane (list + detail)
+   ============================================================ */
+.ib-wrap {
+  flex: 1;
+  display: flex;
+  min-height: 0;
+  background: var(--ex-bg);
+}
+.ib-list {
+  width: 376px;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--ex-surface);
+  border-right: 1px solid var(--ex-border);
+}
+.ib-listhead {
+  padding: 15px 16px 13px;
+  border-bottom: 1px solid var(--ex-border);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ib-htitle {
+  display: flex;
+  align-items: baseline;
+  gap: 9px;
+}
+.ib-htitle h1 {
+  font-family: var(--ex-font-display);
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+.ib-htitle .c {
+  font-size: 12px;
+  color: var(--ex-faint);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.ib-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 11px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  color: var(--ex-faint);
+  background: var(--ex-surface);
+}
+.ib-search svg {
+  width: 15px;
+  height: 15px;
+  flex: none;
+}
+.ib-search input {
+  border: 0;
+  background: transparent;
+  outline: none;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ex-text);
+  width: 100%;
+}
+.ib-search input::placeholder {
+  color: var(--ex-faint);
+}
+.ib-tabs {
+  display: flex;
+  gap: 6px;
+}
+.ib-tab {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: var(--ex-surface2);
+  white-space: nowrap;
+  border: 0;
+  font-family: inherit;
+  cursor: pointer;
+}
+.ib-tab.on {
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+}
+.ib-tab .n {
+  margin-left: 5px;
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}
+.ib-tab.on .n {
+  opacity: 0.8;
+}
+.ib-rows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+.ib-row {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 13px 16px 13px 14px;
+  border-bottom: 1px solid var(--ex-border);
+  border-left: 2px solid transparent;
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  font-family: inherit;
+}
+.ib-row:not(.on):hover {
+  background: color-mix(in srgb, var(--ex-brand) 5%, transparent);
+}
+.ib-row.on {
+  background: color-mix(in srgb, var(--ex-brand) 7%, transparent);
+  border-left-color: var(--ex-brand);
+}
+.ib-row .r1 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ib-row .r1 .dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  flex: none;
+}
+.ib-row .nm {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ex-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ib-row.unread .nm {
+  font-weight: 750;
+}
+.ib-row .time {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ex-faint);
+  flex: none;
+  white-space: nowrap;
+}
+.ib-row .r2 {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ib-row .ty {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  flex: none;
+}
+.ib-row .snip {
+  font-size: 12px;
+  color: var(--ex-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
+.ib-rows-state {
+  padding: 40px 18px;
+  text-align: center;
+  color: var(--ex-muted);
+  font-size: 12.5px;
+}
+.ib-nodetail {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: var(--ex-faint);
+  font-size: 13px;
+  background: var(--ex-bg);
+  padding: 24px;
+}
+.ib-nodetail .ic {
+  display: grid;
+  place-items: center;
+  gap: 10px;
+}
+.ib-nodetail svg {
+  width: 30px;
+  height: 30px;
+  opacity: 0.6;
+}
+
+/* ============================================================
+   Pro Console — submission detail (ib-detail pane)
    ============================================================ */
 .ib-detail {
   flex: 1;

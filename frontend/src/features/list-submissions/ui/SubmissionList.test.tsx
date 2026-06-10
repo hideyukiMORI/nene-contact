@@ -33,13 +33,13 @@ function mockForms(): void {
 function renderList(): void {
   renderWithProviders(
     <MemoryRouter initialEntries={['/submissions']}>
-      <SubmissionList />
+      <SubmissionList selectedId={null} />
     </MemoryRouter>,
   );
 }
 
 describe('SubmissionList', () => {
-  it('renders submissions and the page indicator on success', async () => {
+  it('renders submission rows on success', async () => {
     mockForms();
     server.use(
       http.get(URL, () =>
@@ -49,12 +49,12 @@ describe('SubmissionList', () => {
               id: 9,
               contact_form_id: 3,
               status: 'open',
-              field_values: {},
+              field_values: { name: 'Yamada' },
               submitted_at: '2026-06-04 00:00:00',
             },
           ],
           total: 1,
-          limit: 20,
+          limit: 100,
           offset: 0,
           status_counts: { open: 1 },
         }),
@@ -63,11 +63,11 @@ describe('SubmissionList', () => {
 
     renderList();
 
-    expect(await screen.findByText('2026-06-04 00:00:00')).toBeInTheDocument();
-    expect(screen.getByText('1 / 1')).toBeInTheDocument();
-    // form name resolved from the contact-forms list (row cell + filter option), id beneath
-    expect(screen.getAllByText('Contact us').length).toBeGreaterThan(0);
-    expect(screen.getByText('#9')).toBeInTheDocument();
+    // row sender (masked value as returned) and form name (resolved) render
+    expect(await screen.findByText('Yamada')).toBeInTheDocument();
+    expect(screen.getByText('Contact us')).toBeInTheDocument();
+    // compact received time
+    expect(screen.getByText('06-04 00:00')).toBeInTheDocument();
   });
 
   it('renders the empty state', async () => {
