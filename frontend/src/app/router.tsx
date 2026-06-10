@@ -13,6 +13,7 @@ import {
 import { SubmissionsPage } from '@/pages/submissions';
 import { UsersPage } from '@/pages/users';
 import { SettingsPage } from '@/pages/settings';
+import { AuditLogPage } from '@/pages/audit-log';
 
 function LoginRoute(): ReactNode {
   const { session, signIn } = useAuth();
@@ -37,6 +38,7 @@ const router = createBrowserRouter(
         { path: 'submissions', element: <SubmissionsPage /> },
         { path: 'submissions/:id', element: <SubmissionsPage /> },
         { path: 'users', element: <UsersPage /> },
+        { path: 'audit-log', element: <AuditLogPage /> },
         { path: 'settings', element: <SettingsPage /> },
       ],
     },

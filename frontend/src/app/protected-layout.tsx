@@ -41,6 +41,7 @@ const NAV_GROUPS: { labelKey: MessageKey; items: NavLinkItem[] }[] = [
     labelKey: 'nav.group.manage',
     items: [
       { to: '/users', labelKey: 'nav.users', icon: 'users' },
+      { to: '/audit-log', labelKey: 'nav.auditLog', icon: 'shield' },
       { to: '/settings', labelKey: 'nav.settings', icon: 'settings' },
     ],
   },
@@ -76,6 +77,9 @@ function usePageCrumbs(): Crumb[] {
   }
   if (segments[0] === 'users') {
     return [{ label: t('nav.users') }];
+  }
+  if (segments[0] === 'audit-log') {
+    return [{ label: t('nav.auditLog') }];
   }
   if (segments[0] === 'settings') {
     return [{ label: t('nav.settings') }];

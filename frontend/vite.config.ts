@@ -39,6 +39,7 @@ export default defineConfig(({ mode }) => {
         '/admin/submissions': target,
         '/admin/notification-channels': target,
         '/admin/users': target,
+        '/admin/audit-events': target,
         '/admin/records': target,
         '/api': target,
         '/public': target,
