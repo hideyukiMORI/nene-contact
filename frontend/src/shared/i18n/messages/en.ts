@@ -192,7 +192,13 @@ export const en: Partial<MessageCatalog> = {
   'contactForms.new': 'New form',
   'contactForms.channels': 'Channels',
   'contactForms.code': 'Code',
+  'contactForms.embed': 'Embed',
   'contactForms.notify': 'Notify',
+  'contactForms.count': '{n}',
+  'contactForms.tabs.all': 'All',
+  'contactForms.tabs.active': 'Active',
+  'contactForms.tabs.disabled': 'Disabled',
+  'contactForms.searchPh': 'Search by name',
   'embed.title': 'Embed on your site',
   'embed.intro':
     'Paste this one line on your site to go live. Pick a look below and the code updates automatically.',
