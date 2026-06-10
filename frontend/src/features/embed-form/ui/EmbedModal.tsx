@@ -1,18 +1,17 @@
 import { Fragment, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import { Modal } from '@/shared/ui';
+import { Icon, Modal } from '@/shared/ui';
+import type { IconName } from '@/shared/ui';
 import { env } from '@/shared/config/env';
 import type { ContactForm } from '@/entities/contact-form';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import { EmbedIcon } from '@/features/embed-form/ui/icons';
-import type { EmbedIconName } from '@/features/embed-form/ui/icons';
 
 type Trigger = 'floating' | 'button' | 'inline';
 
 interface TriggerOption {
   value: Trigger;
-  icon: EmbedIconName;
+  icon: IconName;
   labelKey: MessageKey;
   descKey: MessageKey;
 }
@@ -83,7 +82,7 @@ function CopyButton({
 
   return (
     <button type="button" className={className} onClick={onCopy}>
-      <EmbedIcon name={done ? 'check' : 'copy'} size={iconOnly ? 14 : 16} />
+      <Icon name={done ? 'check' : 'copy'} size={iconOnly ? 14 : 16} />
       {iconOnly ? null : done ? t('embed.copied') : label}
     </button>
   );
@@ -121,27 +120,27 @@ export function EmbedModal({
     <Modal
       wide
       title={t('embed.title')}
-      icon={<EmbedIcon name="code" size={18} />}
+      icon={<Icon name="code" size={18} />}
       onClose={onClose}
       foot={
         <>
-          <a className="btn" href={demoUrl} target="_blank" rel="noreferrer">
-            <EmbedIcon name="external" size={16} />
+          <a className="ex-btn ghost" href={demoUrl} target="_blank" rel="noreferrer">
+            <Icon name="external" size={16} />
             {t('embed.tryDemo')}
           </a>
-          <CopyButton text={code} className="btn btn-primary" label={t('embed.copyCode')} />
+          <CopyButton text={code} className="ex-btn" label={t('embed.copyCode')} />
         </>
       }
     >
-      <div className="notice info">
-        <EmbedIcon name="bulb" size={18} className="n-ico" />
+      <div className="md-note">
+        <Icon name="bulb" size={18} className="n-ico" />
         <div>{t('embed.intro')}</div>
       </div>
 
       <div className="embed-grid">
         <div>
-          <div className="field">
-            <span className="label">{t('embed.step1')}</span>
+          <div className="md-field">
+            <span className="l">{t('embed.step1')}</span>
             <div className="embed-triggers">
               {TRIGGERS.map((option) => (
                 <button
@@ -153,7 +152,7 @@ export function EmbedModal({
                   }}
                 >
                   <span className="trigger-ico">
-                    <EmbedIcon name={option.icon} size={17} />
+                    <Icon name={option.icon} size={17} />
                   </span>
                   <span className="tc-body">
                     <span className="tc-title">{t(option.labelKey)}</span>
@@ -161,7 +160,7 @@ export function EmbedModal({
                   </span>
                   {trigger === option.value ? (
                     <span className="tc-check">
-                      <EmbedIcon name="check" size={18} />
+                      <Icon name="check" size={18} />
                     </span>
                   ) : null}
                 </button>
@@ -170,10 +169,9 @@ export function EmbedModal({
           </div>
 
           <div className="row-2 embed-row">
-            <div className="field">
-              <span className="label">{t('embed.step2')}</span>
+            <div className="md-field">
+              <span className="l">{t('embed.step2')}</span>
               <select
-                className="select"
                 value={lang}
                 onChange={(e) => {
                   setLang(e.target.value);
@@ -187,10 +185,9 @@ export function EmbedModal({
               </select>
             </div>
             {trigger === 'button' ? (
-              <div className="field">
-                <span className="label">{t('embed.buttonLabel')}</span>
+              <div className="md-field">
+                <span className="l">{t('embed.buttonLabel')}</span>
                 <input
-                  className="input"
                   value={buttonLabel}
                   onChange={(e) => {
                     setButtonLabel(e.target.value);
@@ -200,8 +197,8 @@ export function EmbedModal({
             ) : null}
           </div>
 
-          <div className="field embed-row">
-            <span className="label">{t('embed.step3')}</span>
+          <div className="md-field embed-row">
+            <span className="l">{t('embed.step3')}</span>
             <div className="code-block">
               <div className="copy-fab">
                 <CopyButton text={code} className="btn btn-sm" iconOnly />
@@ -223,14 +220,14 @@ export function EmbedModal({
             </div>
           </div>
 
-          <div className="notice tip-note embed-row">
-            <EmbedIcon name="shield" size={18} className="n-ico" />
+          <div className="md-note embed-row">
+            <Icon name="shield" size={18} className="n-ico" />
             <div>{t('embed.httpsNote')}</div>
           </div>
         </div>
 
         <div>
-          <span className="label">{t('embed.preview')}</span>
+          <span className="l">{t('embed.preview')}</span>
           <div className="embed-preview">
             <div className="epv-bar">
               <span className="epv-dot epv-dot-r" />
@@ -245,13 +242,13 @@ export function EmbedModal({
 
               {trigger === 'floating' ? (
                 <div className="epv-bubble">
-                  <EmbedIcon name="chat" size={15} />
+                  <Icon name="chat" size={15} />
                   {t('embed.previewContact')}
                 </div>
               ) : null}
               {trigger === 'button' ? (
                 <div className="epv-btn">
-                  <EmbedIcon name="send" size={14} />
+                  <Icon name="send" size={14} />
                   {buttonLabel.length > 0 ? buttonLabel : t('embed.previewContact')}
                 </div>
               ) : null}
