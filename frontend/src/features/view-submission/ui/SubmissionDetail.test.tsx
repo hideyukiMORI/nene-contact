@@ -1,10 +1,19 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
+import { MemoryRouter } from 'react-router-dom';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
 import { SubmissionDetail } from '@/features/view-submission';
+
+function renderDetail(): void {
+  renderWithProviders(
+    <MemoryRouter>
+      <SubmissionDetail submissionId={9} />
+    </MemoryRouter>,
+  );
+}
 
 const DETAIL = 'http://localhost/admin/submissions/9';
 const NOTES = 'http://localhost/admin/submissions/9/notes';
@@ -26,7 +35,7 @@ describe('SubmissionDetail', () => {
       http.get(NOTES, () => HttpResponse.json({ items: [] })),
     );
 
-    renderWithProviders(<SubmissionDetail submissionId={9} />);
+    renderDetail();
 
     expect(await screen.findByText('visitor@example.com')).toBeInTheDocument();
     expect(screen.getByLabelText('状態')).toHaveValue('open');
@@ -45,7 +54,7 @@ describe('SubmissionDetail', () => {
     );
     const user = userEvent.setup();
 
-    renderWithProviders(<SubmissionDetail submissionId={9} />);
+    renderDetail();
     await screen.findByText('visitor@example.com');
 
     await user.selectOptions(screen.getByLabelText('状態'), 'resolved');
@@ -74,7 +83,7 @@ describe('SubmissionDetail', () => {
     );
     const user = userEvent.setup();
 
-    renderWithProviders(<SubmissionDetail submissionId={9} />);
+    renderDetail();
     await screen.findByText('visitor@example.com');
 
     await user.type(screen.getByLabelText('メモを追加'), 'called the customer');
