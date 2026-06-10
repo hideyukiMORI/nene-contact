@@ -29,11 +29,16 @@ function valueText(v: unknown): string {
   return JSON.stringify(v);
 }
 
-// Sender = the name/company field if present, else the first value (already masked by the API).
+// Sender label, in priority order: a name/company field, then an email field, then the
+// first non-empty value, then the first field. Values are already masked by the API.
 function senderOf(s: Submission): string {
   const entries = Object.entries(s.fieldValues);
-  const named = entries.find(([k]) => /名前|name|会社|company/i.test(k));
-  const picked = named ?? entries[0];
+  const byKey = (re: RegExp): [string, unknown] | undefined => entries.find(([k]) => re.test(k));
+  const picked =
+    byKey(/名前|氏名|name|会社|company/i) ??
+    byKey(/mail|メール|e-?mail/i) ??
+    entries.find(([, v]) => valueText(v) !== '') ??
+    entries[0];
   return picked ? valueText(picked[1]) || '—' : '—';
 }
 
