@@ -5,9 +5,7 @@ import type { ReactNode } from 'react';
 import type { Session } from '@/entities/auth';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
-import { Alert } from '@/shared/ui';
 import { useLogin } from '@/features/login/hooks/use-login';
-import { LoginIcon } from '@/features/login/ui/icons';
 
 const schema = z.object({
   email: z.string().min(1, 'login.error.emailRequired'),
@@ -18,8 +16,10 @@ type FormValues = z.infer<typeof schema>;
 
 export function Login({
   onAuthenticated,
+  onForgot,
 }: {
   onAuthenticated: (session: Session) => void;
+  onForgot?: () => void;
 }): ReactNode {
   const { t } = useI18n();
   const { login, isPending, error } = useLogin();
@@ -51,49 +51,56 @@ export function Login({
       }}
       noValidate
     >
-      {submitError !== null ? <Alert>{submitError}</Alert> : null}
+      {submitError !== null ? (
+        <div className="au-note" role="alert">
+          {submitError}
+        </div>
+      ) : null}
 
-      <div className="field">
-        <label className="label" htmlFor="login-email">
+      <div className="au-field">
+        <label className="l" htmlFor="login-email">
           {t('login.email')}
         </label>
         <input
           id="login-email"
-          className="input"
+          className="au-inp"
           type="email"
           autoComplete="username"
+          placeholder={t('auth.emailPh')}
           aria-invalid={errors.email !== undefined}
           {...register('email')}
         />
         {errors.email?.message !== undefined ? (
-          <span className="field-error">{t(errors.email.message as MessageKey)}</span>
+          <span className="au-err">{t(errors.email.message as MessageKey)}</span>
         ) : null}
       </div>
 
-      <div className="field">
-        <label className="label" htmlFor="login-password">
-          {t('login.password')}
-        </label>
+      <div className="au-field">
+        <div className="au-lrow">
+          <label className="l" htmlFor="login-password">
+            {t('login.password')}
+          </label>
+          {onForgot !== undefined ? (
+            <button type="button" className="au-link" onClick={onForgot}>
+              {t('auth.forgot')}
+            </button>
+          ) : null}
+        </div>
         <input
           id="login-password"
-          className="input"
+          className="au-inp"
           type="password"
           autoComplete="current-password"
           aria-invalid={errors.password !== undefined}
           {...register('password')}
         />
         {errors.password?.message !== undefined ? (
-          <span className="field-error">{t(errors.password.message as MessageKey)}</span>
+          <span className="au-err">{t(errors.password.message as MessageKey)}</span>
         ) : null}
       </div>
 
-      <button
-        className="btn btn-primary btn-block btn-lg auth-submit"
-        type="submit"
-        disabled={isPending}
-      >
+      <button className="au-btn" type="submit" disabled={isPending}>
         {isPending ? t('login.submitting') : t('login.submit')}
-        <LoginIcon name="chevRight" size={16} />
       </button>
     </form>
   );
