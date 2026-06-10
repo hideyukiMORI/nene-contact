@@ -50,6 +50,11 @@ final class UpdateContactFormUseCaseTest extends TestCase
                 );
             }
 
+            public function softDelete(int $id): void
+            {
+                unset($this->byId[$id]);
+            }
+
             public function findById(int $id): ?ContactForm
             {
                 return $this->byId[$id] ?? null;

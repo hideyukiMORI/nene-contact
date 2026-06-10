@@ -3378,6 +3378,15 @@ h3 {
   border-color: var(--ex-border);
   box-shadow: none;
 }
+.ex-btn.danger {
+  background: var(--ex-danger);
+  border-color: color-mix(in srgb, var(--ex-danger) 80%, #000 8%);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-danger) 35%, transparent);
+}
+.ex-btn.danger:hover {
+  background: color-mix(in srgb, var(--ex-danger) 90%, #000 10%);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ex-danger) 38%, transparent);
+}
 
 /* ---------------- checklist / progress / sparkline ---------------- */
 .ex-progress {
@@ -4147,6 +4156,26 @@ h3 {
 }
 .fm-gbtn:hover {
   background: var(--ex-surface2);
+  border-color: var(--ex-faint);
+}
+.fm-kbtn {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ex-radius);
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  cursor: pointer;
+}
+.fm-kbtn svg {
+  width: 16px;
+  height: 16px;
+}
+.fm-kbtn:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-text);
   border-color: var(--ex-faint);
 }
 .fm-state {
@@ -5424,6 +5453,12 @@ h3 {
   font-weight: 600;
   color: var(--ex-muted);
   margin-bottom: 6px;
+}
+.md-confirm {
+  margin: 0;
+  font-size: 13.5px;
+  line-height: 1.65;
+  color: var(--ex-text);
 }
 .md-field input,
 .md-field select {

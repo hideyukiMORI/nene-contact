@@ -90,6 +90,10 @@ final class CorrectSubmissionUseCaseTest extends TestCase
             {
             }
 
+            public function softDelete(int $id): void
+            {
+            }
+
             public function findById(int $id): ?ContactForm
             {
                 return $this->form;

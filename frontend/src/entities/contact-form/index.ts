@@ -2,6 +2,7 @@ export { useContactFormsQuery, useContactFormDraftQuery } from '@/entities/conta
 export {
   useCreateContactFormMutation,
   useUpdateContactFormMutation,
+  useDeleteContactFormMutation,
 } from '@/entities/contact-form/mutations';
 export {
   toContactForm,

@@ -42,3 +42,13 @@ export function useUpdateContactFormMutation(): UseMutationResult<
     },
   });
 }
+
+export function useDeleteContactFormMutation(): UseMutationResult<unknown, AppError, number> {
+  const queryClient = useQueryClient();
+  return useMutation<unknown, AppError, number>({
+    mutationFn: (id) => apiClient.delete(`/admin/contact-forms/${String(id)}`),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: contactFormKeys.all });
+    },
+  });
+}

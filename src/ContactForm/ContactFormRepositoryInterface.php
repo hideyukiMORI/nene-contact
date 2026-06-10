@@ -12,6 +12,9 @@ interface ContactFormRepositoryInterface
     /** Replaces the editable columns and the field set of an existing (org-scoped) form. */
     public function update(ContactForm $form): void;
 
+    /** Soft-deletes an (org-scoped) form; deleted forms drop out of every read (ADR 0016). */
+    public function softDelete(int $id): void;
+
     public function findById(int $id): ?ContactForm;
 
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm;
