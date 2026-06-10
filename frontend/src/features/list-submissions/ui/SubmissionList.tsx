@@ -3,18 +3,24 @@ import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import { Alert, Button } from '@/shared/ui';
+import { Icon } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { SUBMISSION_STATUSES } from '@/entities/submission';
 import type { Submission, SubmissionListParams, SubmissionStatus } from '@/entities/submission';
 import { useSubmissions } from '@/features/list-submissions/hooks/use-submissions';
-import { InboxIcon } from '@/features/list-submissions/ui/icons';
 import { DateRangePicker } from '@/features/list-submissions/ui/DateRangePicker';
 import type { RangeKey } from '@/features/list-submissions/ui/DateRangePicker';
 
 const PAGE_SIZE = 20;
 
 type StatusFilter = 'all' | SubmissionStatus;
+
+const BADGE_CLASS: Record<SubmissionStatus, string> = {
+  open: 'open',
+  in_progress: 'prog',
+  resolved: 'done',
+  spam: 'spam',
+};
 
 const pad = (n: number): string => String(n).padStart(2, '0');
 const ymd = (d: Date): string =>
@@ -68,7 +74,7 @@ function senderOf(s: Submission): string {
 function StatusBadge({ status }: { status: SubmissionStatus }): ReactNode {
   const { t } = useI18n();
   return (
-    <span className={`badge ${status}`}>
+    <span className={`ex-badge ${BADGE_CLASS[status]}`}>
       <span className="dot" />
       {t(`submission.status.${status}`)}
     </span>
@@ -125,19 +131,23 @@ export function SubmissionList(): ReactNode {
 
   if (isLoading) {
     return (
-      <div className="card card-pad">
-        <p className="faint">{t('common.loading')}</p>
+      <div className="fm-body">
+        <div className="fm-card fm-state">{t('common.loading')}</div>
       </div>
     );
   }
 
   if (error !== null) {
     return (
-      <div className="nc-stack">
-        <Alert>{t('inbox.error')}</Alert>
-        <Button type="button" onClick={refetch}>
-          {t('common.retry')}
-        </Button>
+      <div className="fm-body">
+        <div className="fm-card fm-empty">
+          <div className="au-note" role="alert">
+            {t('inbox.error')}
+          </div>
+          <button type="button" className="ex-btn ghost" onClick={refetch}>
+            {t('common.retry')}
+          </button>
+        </div>
       </div>
     );
   }
@@ -145,10 +155,13 @@ export function SubmissionList(): ReactNode {
   // Nothing has ever arrived (no active filter, empty result).
   if (total === 0 && !hasFilters) {
     return (
-      <div className="card">
-        <div className="empty">
+      <div className="fm-body">
+        <div className="fm-head">
+          <h1>{t('inbox.title')}</h1>
+        </div>
+        <div className="fm-card fm-empty">
           <div className="e-ico">
-            <InboxIcon name="inbox" size={26} />
+            <Icon name="inbox" size={26} />
           </div>
           <h3>{t('inbox.emptyTitle')}</h3>
           <p>{t('inbox.emptyBody')}</p>
@@ -235,35 +248,38 @@ export function SubmissionList(): ReactNode {
       : t('inbox.count.filtered', { filtered: String(total), total: String(allCount) });
 
   return (
-    <>
-      <div className="inbox-filters">
-        <div className="segmented">
+    <div className="fm-body">
+      <div className="fm-head">
+        <h1>{t('inbox.title')}</h1>
+        <span className="c">{countLabel}</span>
+      </div>
+
+      <div className="fm-toolbar wrap">
+        <div className="fm-tabs">
           {tabs.map((tab) => (
             <button
               key={tab.key}
               type="button"
-              className={status === tab.key ? 'on' : ''}
+              className={'fm-tab' + (status === tab.key ? ' on' : '')}
               onClick={() => {
                 setStatus(tab.key);
                 setPage(1);
               }}
             >
               {tab.label}
-              <span className="seg-count">{tab.count}</span>
+              <span className="n">{tab.count}</span>
             </button>
           ))}
         </div>
-        <span className="hint filter-count">{countLabel}</span>
       </div>
 
-      <div className="inbox-search-row">
-        <div className="input-affix search-affix">
-          <span className="affix-ico">
-            <InboxIcon name="search" size={16} />
-          </span>
+      <div className="fm-toolbar wrap">
+        <div className="fm-search grow">
+          <Icon name="search" size={15} />
           <input
-            className="input"
+            type="search"
             placeholder={t('inbox.search')}
+            aria-label={t('inbox.search')}
             value={qInput}
             onChange={(e) => {
               setQInput(e.target.value);
@@ -272,7 +288,7 @@ export function SubmissionList(): ReactNode {
           {qInput !== '' ? (
             <button
               type="button"
-              className="affix-btn"
+              className="fm-affix-btn"
               onClick={() => {
                 setQInput('');
               }}
@@ -283,7 +299,8 @@ export function SubmissionList(): ReactNode {
         </div>
 
         <select
-          className="select select-auto"
+          className="fm-select"
+          aria-label={t('inbox.allForms')}
           value={formId === 'all' ? 'all' : String(formId)}
           onChange={(e) => {
             const value = e.target.value;
@@ -313,41 +330,39 @@ export function SubmissionList(): ReactNode {
       </div>
 
       {chips.length > 0 ? (
-        <div className="inbox-chips">
+        <div className="fm-chiprow">
           {chips.map((c) => (
-            <button key={c.key} type="button" className="chip chip-clear" onClick={c.clear}>
+            <button key={c.key} type="button" className="fm-chip" onClick={c.clear}>
               {c.label}
-              <InboxIcon name="x" size={12} />
+              <Icon name="x" size={12} />
             </button>
           ))}
-          <button type="button" className="link-btn" onClick={clearAll}>
+          <button type="button" className="fm-chip-clearall" onClick={clearAll}>
             {t('inbox.clearAll')}
           </button>
         </div>
       ) : null}
 
       {submissions.length === 0 ? (
-        <div className="card">
-          <div className="empty">
-            <div className="e-ico">
-              <InboxIcon name="inbox" size={26} />
-            </div>
-            <h3>{t('inbox.noMatch')}</h3>
-            <p>{t('inbox.noMatchBody')}</p>
-            <button type="button" className="btn btn-sm" onClick={clearAll}>
-              {t('inbox.clearFilters')}
-            </button>
+        <div className="fm-card fm-empty">
+          <div className="e-ico">
+            <Icon name="inbox" size={26} />
           </div>
+          <h3>{t('inbox.noMatch')}</h3>
+          <p>{t('inbox.noMatchBody')}</p>
+          <button type="button" className="ex-btn ghost" onClick={clearAll}>
+            {t('inbox.clearFilters')}
+          </button>
         </div>
       ) : (
-        <div className="card table-wrap">
-          <table className="tbl">
+        <div className="fm-card">
+          <table className="fm-tbl">
             <thead>
               <tr>
                 <th>{t('inbox.column.form')}</th>
                 <th>{t('inbox.column.from')}</th>
                 <th>{t('inbox.column.status')}</th>
-                <th className="col-right">{t('inbox.column.submittedAt')}</th>
+                <th className="act">{t('inbox.column.submittedAt')}</th>
               </tr>
             </thead>
             <tbody>
@@ -360,48 +375,48 @@ export function SubmissionList(): ReactNode {
                   }}
                 >
                   <td>
-                    <div className="cell-strong">{formName(submission.contactFormId)}</div>
-                    <div className="faint mono submission-id">#{submission.id}</div>
+                    <div className="t">{formName(submission.contactFormId)}</div>
+                    <div className="id">#{submission.id}</div>
                   </td>
-                  <td className="sender-cell">{senderOf(submission)}</td>
+                  <td className="sender">{senderOf(submission)}</td>
                   <td>
                     <StatusBadge status={submission.status} />
                   </td>
-                  <td className="cell-mute col-right">{submission.submittedAt ?? '—'}</td>
+                  <td className="right">{submission.submittedAt ?? '—'}</td>
                 </tr>
               ))}
             </tbody>
           </table>
 
-          <div className="table-foot">
+          <div className="fm-foot">
             <button
               type="button"
-              className="btn btn-sm"
+              className="fm-pgbtn"
               disabled={page <= 1}
               onClick={() => {
                 setPage(page - 1);
               }}
             >
-              <InboxIcon name="chevLeft" size={14} />
+              <Icon name="chevLeft" size={14} />
               {t('common.prev')}
             </button>
-            <span className="hint">
+            <span className="pg">
               {t('inbox.page', { page: String(page), pages: String(pageCount) })}
             </span>
             <button
               type="button"
-              className="btn btn-sm"
+              className="fm-pgbtn"
               disabled={page >= pageCount}
               onClick={() => {
                 setPage(page + 1);
               }}
             >
               {t('common.next')}
-              <InboxIcon name="chevRight" size={14} />
+              <Icon name="chevRight" size={14} />
             </button>
           </div>
         </div>
       )}
-    </>
+    </div>
   );
 }

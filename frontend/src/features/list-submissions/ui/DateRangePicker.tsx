@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import { InboxIcon } from '@/features/list-submissions/ui/icons';
+import { Icon } from '@/shared/ui';
 
 export type RangeKey = 'all' | 'today' | '7d' | '30d' | 'month' | 'lastMonth' | 'custom';
 
@@ -144,9 +144,9 @@ export function DateRangePicker({
           }
         }}
       >
-        <InboxIcon name="calendar" size={15} />
+        <Icon name="calendar" size={15} />
         <span>{triggerLabel}</span>
-        <InboxIcon name="chevDown" size={13} />
+        <Icon name="chevDown" size={13} />
       </button>
 
       {open ? (
@@ -176,7 +176,7 @@ export function DateRangePicker({
                   setView(addMonths(view, -1));
                 }}
               >
-                <InboxIcon name="chevLeft" size={14} />
+                <Icon name="chevLeft" size={14} />
               </button>
               <div className="dp-cal-title">{monthTitle}</div>
               <button
@@ -187,7 +187,7 @@ export function DateRangePicker({
                   setView(addMonths(view, 1));
                 }}
               >
-                <InboxIcon name="chevRight" size={14} />
+                <Icon name="chevRight" size={14} />
               </button>
             </div>
 
