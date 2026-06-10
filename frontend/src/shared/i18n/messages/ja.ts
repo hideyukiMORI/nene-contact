@@ -69,6 +69,7 @@ export const ja = {
   'crumb.create': '作成',
   'crumb.notifications': '通知先',
   'common.help': 'ヘルプ',
+  'common.menu': 'メニュー',
   'theme.toDark': 'ダークに切替',
   'theme.toLight': 'ライトに切替',
   'settings.title': '設定',

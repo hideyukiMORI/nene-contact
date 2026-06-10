@@ -2,7 +2,7 @@ import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@/entities/auth';
 import { useI18n } from '@/shared/i18n';
-import { Icon } from '@/shared/ui';
+import { BrandMark, Icon } from '@/shared/ui';
 import { Login } from '@/features/login';
 
 type Variant = 'login' | 'signup' | 'reset';
@@ -45,7 +45,7 @@ export function LoginPage({
       <aside className="au-brand">
         <div className="au-mkrow">
           <span className="au-mk">
-            <Icon name="send" size={18} />
+            <BrandMark size={34} />
           </span>
           <span className="au-name">NeNe Contact</span>
         </div>

@@ -71,6 +71,7 @@ export const en: Partial<MessageCatalog> = {
   'crumb.create': 'Create',
   'crumb.notifications': 'Notifications',
   'common.help': 'Help',
+  'common.menu': 'Menu',
   'theme.toDark': 'Switch to dark',
   'theme.toLight': 'Switch to light',
   'settings.title': 'Settings',
