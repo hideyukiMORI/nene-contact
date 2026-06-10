@@ -2,14 +2,13 @@ import { useState, type ReactNode } from 'react';
 import type { ChannelType } from '@/entities/notification-channel';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
-import { Alert } from '@/shared/ui';
+import { Icon } from '@/shared/ui';
+import type { IconName } from '@/shared/ui';
 import { useChannels } from '@/features/manage-channels/hooks/use-channels';
-import { ChannelIcon } from '@/features/manage-channels/ui/icons';
-import type { ChannelIconName } from '@/features/manage-channels/ui/icons';
 
 const CHANNEL_TYPES: ChannelType[] = ['email', 'slack', 'chatwork', 'webhook'];
 
-const TYPE_ICON: Record<ChannelType, ChannelIconName> = {
+const TYPE_ICON: Record<ChannelType, IconName> = {
   email: 'mail',
   slack: 'slack',
   chatwork: 'chat',
@@ -43,117 +42,116 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
   };
 
   return (
-    <div className="ch-page">
-      <div className="card">
-        <div className="card-head">
-          <span className="card-ico">
-            <ChannelIcon name="bell" size={16} />
-          </span>
+    <div className="ch-grid">
+      <div className="fm-card">
+        <div className="ex-cardhead">
+          <Icon name="bell" size={15} />
           <h3>{t('channels.configured')}</h3>
         </div>
 
         {isLoading ? (
-          <div className="card-pad">
-            <p className="faint">{t('common.loading')}</p>
-          </div>
+          <div className="fm-state">{t('common.loading')}</div>
         ) : error !== null ? (
-          <div className="card-pad">
-            <Alert>{t('channels.error')}</Alert>
+          <div className="fm-state">
+            <div className="au-note" role="alert">
+              {t('channels.error')}
+            </div>
           </div>
         ) : channels.length === 0 ? (
-          <div className="card-pad">
-            <p className="faint">{t('channels.empty')}</p>
-          </div>
+          <div className="fm-state">{t('channels.empty')}</div>
         ) : (
-          <div className="table-wrap">
-            <table className="tbl">
-              <thead>
-                <tr>
-                  <th>{t('channels.column.type')}</th>
-                  <th>{t('channels.column.enabled')}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {channels.map((channel) => (
-                  <tr key={channel.id}>
-                    <td>
-                      <span className="ch-type">
-                        <ChannelIcon name={TYPE_ICON[channel.channelType]} size={16} />
-                        {t(`channel.type.${channel.channelType}`)}
+          <table className="fm-tbl">
+            <thead>
+              <tr>
+                <th>{t('channels.column.type')}</th>
+                <th>{t('channels.column.enabled')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {channels.map((channel) => (
+                <tr key={channel.id}>
+                  <td>
+                    <span className="ch-type">
+                      <Icon name={TYPE_ICON[channel.channelType]} size={16} />
+                      {t(`channel.type.${channel.channelType}`)}
+                    </span>
+                  </td>
+                  <td>
+                    {channel.isEnabled ? (
+                      <span className="ex-badge done">
+                        <span className="dot" />
+                        {t('channels.on')}
                       </span>
-                    </td>
-                    <td>
-                      {channel.isEnabled ? (
-                        <span className="badge resolved">
-                          <span className="dot" />
-                          {t('channels.on')}
-                        </span>
-                      ) : (
-                        <span className="chip">{t('channels.off')}</span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+                    ) : (
+                      <span className="fm-st ended">
+                        <span className="d" />
+                        {t('channels.off')}
+                      </span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
-      <div className="card card-pad add-channel">
-        <h3 className="add-channel-title">{t('channels.add')}</h3>
-
-        <div className="field">
-          <span className="label">{t('channels.type')}</span>
-          <div className="segmented full">
-            {CHANNEL_TYPES.map((type) => (
-              <button
-                key={type}
-                type="button"
-                className={channelType === type ? 'on' : ''}
-                onClick={() => {
-                  setChannelType(type);
-                  setConfig({});
-                }}
-              >
-                <ChannelIcon name={TYPE_ICON[type]} size={15} />
-                {t(`channel.type.${type}`)}
-              </button>
-            ))}
-          </div>
+      <div className="fm-card">
+        <div className="ex-cardhead">
+          <Icon name="plus" size={15} />
+          <h3>{t('channels.add')}</h3>
         </div>
-
-        {CONFIG_FIELDS[channelType].map((fieldDef) => {
-          const id = `ch-cfg-${fieldDef.key}`;
-          return (
-            <div key={fieldDef.key} className="field">
-              <label className="label" htmlFor={id}>
-                {t(`channel.config.${fieldDef.key}` as MessageKey)}
-              </label>
-              <input
-                id={id}
-                className="input"
-                type={fieldDef.inputType}
-                value={config[fieldDef.key] ?? ''}
-                onChange={(e) => {
-                  setConfig((c) => ({ ...c, [fieldDef.key]: e.target.value }));
-                }}
-              />
+        <div className="ex-card-pad">
+          <div className="bd-frow">
+            <span className="l">{t('channels.type')}</span>
+            <div className="ch-seg">
+              {CHANNEL_TYPES.map((type) => (
+                <button
+                  key={type}
+                  type="button"
+                  className={channelType === type ? 'on' : ''}
+                  onClick={() => {
+                    setChannelType(type);
+                    setConfig({});
+                  }}
+                >
+                  <Icon name={TYPE_ICON[type]} size={15} />
+                  {t(`channel.type.${type}`)}
+                </button>
+              ))}
             </div>
-          );
-        })}
+          </div>
 
-        {createError !== null ? <Alert>{t('channels.createError')}</Alert> : null}
+          {CONFIG_FIELDS[channelType].map((fieldDef) => {
+            const id = `ch-cfg-${fieldDef.key}`;
+            return (
+              <div key={fieldDef.key} className="bd-frow">
+                <label className="l" htmlFor={id}>
+                  {t(`channel.config.${fieldDef.key}` as MessageKey)}
+                </label>
+                <input
+                  id={id}
+                  type={fieldDef.inputType}
+                  value={config[fieldDef.key] ?? ''}
+                  onChange={(e) => {
+                    setConfig((c) => ({ ...c, [fieldDef.key]: e.target.value }));
+                  }}
+                />
+              </div>
+            );
+          })}
 
-        <button
-          type="button"
-          className="btn btn-primary add-channel-submit"
-          disabled={isCreating}
-          onClick={onCreate}
-        >
-          <ChannelIcon name="plus" size={16} />
-          {isCreating ? t('channels.creating') : t('channels.create')}
-        </button>
+          {createError !== null ? (
+            <div className="au-note" role="alert">
+              {t('channels.createError')}
+            </div>
+          ) : null}
+
+          <button type="button" className="ex-btn" disabled={isCreating} onClick={onCreate}>
+            <Icon name="plus" size={14} />
+            {isCreating ? t('channels.creating') : t('channels.create')}
+          </button>
+        </div>
       </div>
     </div>
   );
