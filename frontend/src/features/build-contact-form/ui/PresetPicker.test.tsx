@@ -13,8 +13,8 @@ describe('PresetPicker', () => {
     expect(screen.getByText('お問い合わせ')).toBeInTheDocument();
     expect(screen.getByText('空から作成')).toBeInTheDocument();
 
-    const useButtons = screen.getAllByRole('button', { name: 'このテンプレートを使う' });
-    await userEvent.click(useButtons[1] as HTMLElement);
+    // Each preset is a single selectable card; pick the お問い合わせ template.
+    await userEvent.click(screen.getByRole('button', { name: /^お問い合わせ/ }));
 
     expect(onPick).toHaveBeenCalledTimes(1);
     const preset = onPick.mock.calls[0]?.[0] as { build: () => { fields: unknown[] } };
