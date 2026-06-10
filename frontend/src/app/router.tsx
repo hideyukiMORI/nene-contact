@@ -7,6 +7,7 @@ import { HomePage } from '@/pages/home';
 import { ContactFormsPage, ContactFormBuilderPage, ChannelsPage } from '@/pages/contact-forms';
 import { SubmissionsPage, SubmissionDetailPage } from '@/pages/submissions';
 import { UsersPage } from '@/pages/users';
+import { SettingsPage } from '@/pages/settings';
 
 function LoginRoute(): ReactNode {
   const { session, signIn } = useAuth();
@@ -29,6 +30,7 @@ const router = createBrowserRouter(
         { path: 'submissions', element: <SubmissionsPage /> },
         { path: 'submissions/:id', element: <SubmissionDetailPage /> },
         { path: 'users', element: <UsersPage /> },
+        { path: 'settings', element: <SettingsPage /> },
       ],
     },
   ],

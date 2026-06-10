@@ -5,10 +5,10 @@ import { useAuth } from '@/app/auth-context';
 import { useI18n } from '@/shared/i18n';
 import { useTheme } from '@/shared/theme';
 import { useSubmissionsQuery } from '@/entities/submission';
+import { Icon } from '@/shared/ui';
+import type { IconName } from '@/shared/ui';
 import type { Session } from '@/entities/auth';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import { ShellIcon } from '@/app/shell-icons';
-import type { ShellIconName } from '@/app/shell-icons';
 
 // Pages read the session via react-router's Outlet context (no upward import of app/).
 interface AdminOutletContext {
@@ -19,8 +19,8 @@ interface NavLinkItem {
   to: string;
   end?: boolean;
   labelKey: MessageKey;
-  icon: ShellIconName;
-  badge?: number;
+  icon: IconName;
+  badge?: boolean;
 }
 
 interface Crumb {
@@ -34,17 +34,20 @@ const NAV_GROUPS: { labelKey: MessageKey; items: NavLinkItem[] }[] = [
     items: [
       { to: '/', end: true, labelKey: 'nav.dashboard', icon: 'dashboard' },
       { to: '/contact-forms', labelKey: 'nav.forms', icon: 'forms' },
-      { to: '/submissions', labelKey: 'nav.inbox', icon: 'inbox' },
+      { to: '/submissions', labelKey: 'nav.inbox', icon: 'inbox', badge: true },
     ],
   },
   {
     labelKey: 'nav.group.manage',
-    items: [{ to: '/users', labelKey: 'nav.users', icon: 'users' }],
+    items: [
+      { to: '/users', labelKey: 'nav.users', icon: 'users' },
+      { to: '/settings', labelKey: 'nav.settings', icon: 'settings' },
+    ],
   },
 ];
 
 // Breadcrumbs derived from the current path; the final crumb is the current page.
-function useCrumbs(): Crumb[] {
+function usePageCrumbs(): Crumb[] {
   const { t } = useI18n();
   const segments = useLocation()
     .pathname.split('/')
@@ -71,6 +74,9 @@ function useCrumbs(): Crumb[] {
   if (segments[0] === 'users') {
     return [{ label: t('nav.users') }];
   }
+  if (segments[0] === 'settings') {
+    return [{ label: t('nav.settings') }];
+  }
   return [{ label: t('nav.dashboard') }];
 }
 
@@ -78,7 +84,7 @@ export function ProtectedLayout(): ReactNode {
   const { session, signOut } = useAuth();
   const { t, locale, setLocale } = useI18n();
   const { theme, toggleTheme } = useTheme();
-  const crumbs = useCrumbs();
+  const pageCrumbs = usePageCrumbs();
   const [menuOpen, setMenuOpen] = useState(false);
 
   // The inbox badge counts the unhandled submissions on the most recent page.
@@ -92,50 +98,51 @@ export function ProtectedLayout(): ReactNode {
   const context: AdminOutletContext = { session };
   const initial = (session.email.at(0) ?? '?').toUpperCase();
   const isDark = theme === 'dark';
+  const crumbs: Crumb[] = [{ label: t('crumb.home') }, ...pageCrumbs];
 
   return (
-    <div className="app">
-      <aside className="sidebar">
-        <div className="brand">
-          <span className="brand-mark">
-            <ShellIcon name="send" size={17} />
+    <div className="ex-frame">
+      <nav className="ex-nav">
+        <div className="ex-brand">
+          <span className="ex-brand-mark">
+            <Icon name="send" size={15} />
           </span>
-          <span className="brand-text">
-            <span className="brand-name">NeNe Contact</span>
-            <span className="brand-sub">{t('common.console')}</span>
+          <span className="ex-brand-text">
+            <span className="ex-brand-name">NeNe Contact</span>
+            <span className="ex-brand-sub">{t('common.console')}</span>
           </span>
         </div>
 
         {NAV_GROUPS.map((group) => (
           <Fragment key={group.labelKey}>
-            <div className="nav-group-label">{t(group.labelKey)}</div>
-            {group.items.map((item) => {
-              const badge = item.to === '/submissions' ? openCount : 0;
-              return (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end ?? false}
-                  className={({ isActive }) => 'nav-item' + (isActive ? ' active' : '')}
-                >
-                  <ShellIcon name={item.icon} className="nav-ico" />
-                  <span className="nav-label">{t(item.labelKey)}</span>
-                  {badge > 0 ? <span className="nav-badge">{badge}</span> : null}
-                </NavLink>
-              );
-            })}
+            <div className="ex-navgroup">{t(group.labelKey)}</div>
+            {group.items.map((item) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                end={item.end ?? false}
+                className={({ isActive }) => 'ex-navitem' + (isActive ? ' on' : '')}
+              >
+                <Icon name={item.icon} size={17} />
+                <span className="ex-navlabel">{t(item.labelKey)}</span>
+                {item.badge === true && openCount > 0 ? (
+                  <span className="ex-navbadge">{openCount}</span>
+                ) : null}
+              </NavLink>
+            ))}
           </Fragment>
         ))}
 
-        <span className="nav-spacer" />
-      </aside>
+        <span className="ex-navspacer" />
+        <div className="ex-navfoot">{t('nav.guideTour')}</div>
+      </nav>
 
-      <div className="main">
-        <header className="topbar">
-          <nav className="crumbs">
+      <div className="ex-main">
+        <header className="ex-topbar">
+          <nav className="ex-crumb">
             {crumbs.map((crumb, i) => (
               <Fragment key={`${crumb.label}-${String(i)}`}>
-                {i > 0 ? <ShellIcon name="chevRight" size={13} className="sep" /> : null}
+                {i > 0 ? <span className="sep">›</span> : null}
                 {crumb.to !== undefined && i < crumbs.length - 1 ? (
                   <Link to={crumb.to}>{crumb.label}</Link>
                 ) : (
@@ -145,79 +152,105 @@ export function ProtectedLayout(): ReactNode {
             ))}
           </nav>
 
-          <span className="topbar-spacer" />
+          <span className="ex-tspacer" />
 
-          <button
-            type="button"
-            className="icon-btn"
-            onClick={toggleTheme}
-            aria-label={isDark ? t('theme.toLight') : t('theme.toDark')}
-          >
-            <ShellIcon name={isDark ? 'sun' : 'moon'} />
-          </button>
-
-          <div className="lang-toggle">
+          <div className="ex-chiprow">
             <button
               type="button"
-              className={locale === 'ja' ? 'on' : ''}
-              onClick={() => {
-                setLocale('ja');
-              }}
+              className="ex-ipill"
+              onClick={toggleTheme}
+              aria-label={isDark ? t('theme.toLight') : t('theme.toDark')}
             >
-              日本語
+              <Icon name={isDark ? 'sun' : 'moon'} size={15} />
             </button>
-            <button
-              type="button"
-              className={locale === 'en' ? 'on' : ''}
-              onClick={() => {
-                setLocale('en');
-              }}
-            >
-              EN
-            </button>
-          </div>
 
-          <div className="acct-wrap">
-            <button
-              type="button"
-              className="acct"
-              onClick={() => {
-                setMenuOpen((open) => !open);
-              }}
-            >
-              <span className="avatar">{initial}</span>
-              <span className="acct-email">{session.email}</span>
-              <ShellIcon name="chevDown" size={15} />
+            <button type="button" className="ex-ipill" aria-label={t('common.help')}>
+              <Icon name="help" size={15} />
             </button>
-            {menuOpen ? (
-              <>
-                <button
-                  type="button"
-                  className="menu-backdrop"
-                  aria-hidden="true"
-                  tabIndex={-1}
-                  onClick={() => {
-                    setMenuOpen(false);
-                  }}
-                />
-                <div className="card acct-menu">
-                  <div className="acct-info">
-                    <div className="nc-muted">{t('common.signedIn')}</div>
-                    <div className="acct-name">{session.email}</div>
-                    <div className="acct-role">{t('home.role', { role: session.role })}</div>
+
+            <div className="ex-lang">
+              <button
+                type="button"
+                className={locale === 'ja' ? 'on' : ''}
+                onClick={() => {
+                  setLocale('ja');
+                }}
+              >
+                日本語
+              </button>
+              <button
+                type="button"
+                className={locale === 'en' ? 'on' : ''}
+                onClick={() => {
+                  setLocale('en');
+                }}
+              >
+                EN
+              </button>
+            </div>
+
+            <div className="ex-acct-wrap">
+              <button
+                type="button"
+                className="ex-avatar"
+                aria-haspopup="menu"
+                aria-expanded={menuOpen}
+                onClick={() => {
+                  setMenuOpen((open) => !open);
+                }}
+              >
+                {initial}
+              </button>
+              {menuOpen ? (
+                <>
+                  <button
+                    type="button"
+                    className="ex-menu-backdrop"
+                    aria-hidden="true"
+                    tabIndex={-1}
+                    onClick={() => {
+                      setMenuOpen(false);
+                    }}
+                  />
+                  <div className="mn-pop mn-acct" role="menu">
+                    <div className="mn-ahead">
+                      <span className="mn-av">{initial}</span>
+                      <div>
+                        <div className="nm">{session.email}</div>
+                        <div className="em">{t('home.role', { role: session.role })}</div>
+                      </div>
+                    </div>
+                    <div className="mn-list">
+                      <Link
+                        to="/settings"
+                        className="mn-item"
+                        role="menuitem"
+                        onClick={() => {
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <Icon name="settings" size={16} />
+                        {t('nav.settings')}
+                      </Link>
+                      <div className="mn-sep" />
+                      <button
+                        type="button"
+                        className="mn-item danger"
+                        role="menuitem"
+                        onClick={signOut}
+                      >
+                        <Icon name="logout" size={16} />
+                        {t('common.signOut')}
+                      </button>
+                    </div>
                   </div>
-                  <div className="divider" />
-                  <button type="button" className="menu-item" onClick={signOut}>
-                    <ShellIcon name="logout" size={17} />
-                    {t('common.signOut')}
-                  </button>
-                </div>
-              </>
-            ) : null}
+                </>
+              ) : null}
+            </div>
           </div>
         </header>
 
-        <main className="page">
+        <main className="ex-content">
           <Outlet context={context} />
         </main>
       </div>
