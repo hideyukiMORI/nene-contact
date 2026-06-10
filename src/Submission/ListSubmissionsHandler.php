@@ -11,6 +11,9 @@ use Psr\Http\Server\RequestHandlerInterface;
 
 final readonly class ListSubmissionsHandler implements RequestHandlerInterface
 {
+    /** @var list<string> Allowed inbox sort keys. */
+    private const SORTS = ['date_desc', 'date_asc', 'status', 'form'];
+
     public function __construct(
         private ListSubmissionsUseCaseInterface $useCase,
         private JsonResponseFactory $response,
@@ -23,6 +26,8 @@ final readonly class ListSubmissionsHandler implements RequestHandlerInterface
         $limit = max(1, min(100, (int) ($params['limit'] ?? 20)));
         $offset = max(0, (int) ($params['offset'] ?? 0));
 
+        $sort = $this->stringParam($params, 'sort');
+
         $filter = new SubmissionFilter(
             status: $this->stringParam($params, 'status'),
             contactFormId: isset($params['contact_form_id']) && $params['contact_form_id'] !== ''
@@ -31,6 +36,7 @@ final readonly class ListSubmissionsHandler implements RequestHandlerInterface
             from: $this->stringParam($params, 'from'),
             to: $this->stringParam($params, 'to'),
             q: $this->stringParam($params, 'q'),
+            sort: in_array($sort, self::SORTS, true) ? $sort : null,
         );
 
         $result = $this->useCase->execute($filter, $limit, $offset);

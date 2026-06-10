@@ -17,6 +17,7 @@ final readonly class SubmissionFilter
         public ?string $from = null,
         public ?string $to = null,
         public ?string $q = null,
+        public ?string $sort = null,
     ) {
     }
 }

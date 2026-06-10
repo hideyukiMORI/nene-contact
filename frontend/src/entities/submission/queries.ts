@@ -21,6 +21,7 @@ function buildQuery(params: SubmissionListParams): string {
   if (params.from !== undefined && params.from !== '') search.set('from', params.from);
   if (params.to !== undefined && params.to !== '') search.set('to', params.to);
   if (params.q !== undefined && params.q !== '') search.set('q', params.q);
+  if (params.sort !== undefined) search.set('sort', params.sort);
   return search.toString();
 }
 

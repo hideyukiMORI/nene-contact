@@ -4,9 +4,11 @@ export { toSubmission, toSubmissionDetail, toSubmissionList } from '@/entities/s
 export { submissionKeys } from '@/entities/submission/query-keys';
 export {
   SUBMISSION_STATUSES,
+  SUBMISSION_SORTS,
   type Submission,
   type SubmissionDetail,
   type SubmissionList,
   type SubmissionListParams,
   type SubmissionStatus,
+  type SubmissionSort,
 } from '@/entities/submission/model';

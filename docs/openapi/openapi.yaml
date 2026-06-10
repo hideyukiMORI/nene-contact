@@ -390,6 +390,11 @@ paths:
           required: false
           description: Free-text match over submitted content (matched server-side; raw values are not returned).
           schema: { type: string }
+        - name: sort
+          in: query
+          required: false
+          description: Row order. Defaults to newest first.
+          schema: { type: string, enum: [date_desc, date_asc, status, form] }
       responses:
         '200':
           description: Submission list

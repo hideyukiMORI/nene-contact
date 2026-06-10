@@ -19,6 +19,10 @@ export interface SubmissionList {
   statusCounts: Record<string, number>;
 }
 
+export type SubmissionSort = 'date_desc' | 'date_asc' | 'status' | 'form';
+
+export const SUBMISSION_SORTS: SubmissionSort[] = ['date_desc', 'date_asc', 'status', 'form'];
+
 export interface SubmissionListParams {
   limit: number;
   offset: number;
@@ -27,6 +31,7 @@ export interface SubmissionListParams {
   from?: string;
   to?: string;
   q?: string;
+  sort?: SubmissionSort;
 }
 
 export interface SubmissionDetail extends Submission {
