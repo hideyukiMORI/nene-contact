@@ -136,9 +136,17 @@ export interface paths {
         };
         /** Get a contact form by id */
         get: operations["getContactFormById"];
-        put?: never;
+        /**
+         * Update a contact form
+         * @description Replaces the editable fields (name, locales, consent, retention, allowed origins, and the field set) of an existing form. The public form key is immutable, so existing embeds keep working. Audited as contact_form.updated (ADR 0013).
+         */
+        put: operations["updateContactForm"];
         post?: never;
-        delete?: never;
+        /**
+         * Delete a contact form (soft delete)
+         * @description Soft-deletes the form (ADR 0016 — no physical row deletion): it drops out of every read immediately, while received submissions are retained. Audited as contact_form.deleted (ADR 0013).
+         */
+        delete: operations["deleteContactForm"];
         options?: never;
         head?: never;
         patch?: never;
@@ -156,6 +164,26 @@ export interface paths {
         put?: never;
         /** Create a notification channel for a form */
         post: operations["createNotificationChannel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/audit-events": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * List the organization's audit trail
+         * @description Append-only record of every mutation (ADR 0013): who (actor_user_id), what (action / entity_type / entity_id) and the sanitized before/after snapshots. Scoped to the resolved organization; requires the ViewAuditLog capability (admin / superadmin). Ordered newest first.
+         */
+        get: operations["listAuditEvents"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -832,6 +860,31 @@ export interface components {
                 [key: string]: number;
             };
         };
+        AuditEventResponse: {
+            id?: number;
+            /** @description User who performed the change; null for system/CLI actions. */
+            actor_user_id?: number | null;
+            organization_id?: number | null;
+            /** @description e.g. submission.status_updated, contact_form.updated, organization.created */
+            action?: string;
+            entity_type?: string;
+            entity_id?: number | null;
+            /** @description Sanitized snapshot before the change (null for creates). */
+            before?: {
+                [key: string]: unknown;
+            } | null;
+            /** @description Sanitized snapshot after the change (null for deletes). */
+            after?: {
+                [key: string]: unknown;
+            } | null;
+            created_at?: string | null;
+        };
+        AuditEventListResponse: {
+            items?: components["schemas"]["AuditEventResponse"][];
+            limit?: number;
+            offset?: number;
+            total?: number;
+        };
         UpdateSubmissionStatusRequest: {
             /** @enum {string} */
             status: "open" | "in_progress" | "resolved" | "spam";
@@ -1216,6 +1269,59 @@ export interface operations {
             404: components["responses"]["Problem"];
         };
     };
+    updateContactForm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateContactFormRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ContactFormResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    deleteContactForm: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
     listNotificationChannels: {
         parameters: {
             query: {
@@ -1267,6 +1373,31 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
+        };
+    };
+    listAuditEvents: {
+        parameters: {
+            query?: {
+                limit?: components["parameters"]["Limit"];
+                offset?: components["parameters"]["Offset"];
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Audit event list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AuditEventListResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
         };
     };
     listSubmissions: {
