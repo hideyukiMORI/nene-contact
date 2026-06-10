@@ -103,7 +103,10 @@ final readonly class ContactFormBodyValidator
                 $errors[] = new ValidationError("fields.{$i}.name", 'Field name is required.', 'required');
             }
 
-            if (!isset($label[$defaultLocale]) || $label[$defaultLocale] === '') {
+            // A honeypot is hidden from visitors (ADR 0010), so it carries no visible label —
+            // exempt it from the default-locale label requirement.
+            if ($fieldType !== FieldType::Honeypot->value
+                && (!isset($label[$defaultLocale]) || $label[$defaultLocale] === '')) {
                 $errors[] = new ValidationError("fields.{$i}.label", "Label for the default locale ({$defaultLocale}) is required.", 'required');
             }
 
