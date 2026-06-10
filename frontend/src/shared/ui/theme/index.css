@@ -4226,43 +4226,41 @@ a.t:hover {
   text-align: center;
   color: var(--ex-muted);
 }
-.cf-props {
-  display: grid;
-  grid-template-columns: 168px 1fr;
-  gap: 13px 18px;
-  padding: 16px 18px;
-  margin: 0;
+/* read-only form detail = the builder canvas/panel, non-interactive */
+.bd-field.ro {
+  cursor: default;
 }
-.cf-props dt {
-  font-size: 12px;
-  color: var(--ex-faint);
-  font-weight: 600;
-  margin: 0;
+.bd-field.ro:hover {
+  border-color: var(--ex-border);
 }
-.cf-props dd {
+.bd-tname-static {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ex-text);
+  white-space: nowrap;
+}
+.bd-frow .v {
   font-size: 13px;
   color: var(--ex-text);
-  margin: 0;
   display: flex;
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
   overflow-wrap: anywhere;
 }
-.cf-key {
-  font-family: var(--ex-font-mono);
-  font-size: 12px;
-  color: var(--ex-muted);
-}
-.cf-origins {
-  display: flex;
+.bd-frow .v.col {
   flex-direction: column;
-  gap: 2px;
+  align-items: flex-start;
+  gap: 3px;
 }
-.cf-origins code {
+.bd-frow .v code {
   font-family: var(--ex-font-mono);
   font-size: 12px;
   color: var(--ex-muted);
+}
+.bd-ro-note {
+  font-size: 12px;
+  color: var(--ex-faint);
 }
 .fm-empty {
   display: flex;

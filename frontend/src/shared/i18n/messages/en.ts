@@ -224,6 +224,7 @@ export const en: Partial<MessageCatalog> = {
   'contactForms.detail.retentionDays': '{n} days',
   'contactForms.detail.origins': 'Allowed origins',
   'contactForms.detail.originsAny': 'No restriction',
+  'contactForms.detail.hidden': 'Hidden (spam protection)',
   'contactForms.detail.type': 'Type',
   'contactForms.detail.label': 'Label',
   'contactForms.detail.required': 'Required',
