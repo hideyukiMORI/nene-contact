@@ -77,6 +77,60 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
         });
     }
 
+    public function update(ContactForm $form): void
+    {
+        $organizationId = $this->orgId->get();
+        $now = date('Y-m-d H:i:s');
+        $formId = (int) $form->id;
+
+        $this->tx->transactional(static function (DatabaseQueryExecutorInterface $q) use ($form, $organizationId, $formId, $now): void {
+            // Editable columns only; public_form_key / status / organization_id / created_at
+            // are preserved. Org-scoped so a cross-tenant id updates nothing.
+            $q->execute(
+                'UPDATE contact_forms
+                 SET name = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, updated_at = ?
+                 WHERE id = ? AND organization_id = ?',
+                [
+                    $form->name,
+                    $form->defaultLocale,
+                    self::encode($form->locales),
+                    self::encode($form->allowedOrigins),
+                    $form->consentRequired ? 1 : 0,
+                    $form->consentLabel !== null ? self::encode($form->consentLabel) : null,
+                    $form->retentionDays,
+                    $now,
+                    $formId,
+                    $organizationId,
+                ],
+            );
+
+            // Fields are a fully-owned child collection: retire the live ones (soft-delete,
+            // ADR 0016 — never a physical DELETE) and re-insert the new set below.
+            $q->execute(
+                'UPDATE form_fields SET deleted_at = ?, updated_at = ? WHERE contact_form_id = ? AND deleted_at IS NULL',
+                [$now, $now, $formId],
+            );
+
+            foreach ($form->fields as $field) {
+                $q->execute(
+                    'INSERT INTO form_fields (contact_form_id, field_type, name, label_json, required, options_json, sort_order, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    [
+                        $formId,
+                        $field->fieldType,
+                        $field->name,
+                        self::encode($field->label),
+                        $field->required ? 1 : 0,
+                        $field->options !== null ? self::encode($field->options) : null,
+                        $field->sortOrder,
+                        $now,
+                        $now,
+                    ],
+                );
+            }
+        });
+    }
+
     public function findById(int $id): ?ContactForm
     {
         $row = $this->query->fetchOne(
@@ -123,7 +177,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
     private function loadFields(int $formId): array
     {
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::FIELD_COLUMNS . ' FROM form_fields WHERE contact_form_id = ? ORDER BY sort_order ASC, id ASC',
+            'SELECT ' . self::FIELD_COLUMNS . ' FROM form_fields WHERE contact_form_id = ? AND deleted_at IS NULL ORDER BY sort_order ASC, id ASC',
             [$formId],
         );
 

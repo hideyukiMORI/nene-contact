@@ -44,6 +44,11 @@ final class CreateContactFormUseCaseTest extends TestCase
                 return $id;
             }
 
+            public function update(ContactForm $form): void
+            {
+                $this->byId[(int) $form->id] = $form;
+            }
+
             public function findById(int $id): ?ContactForm
             {
                 return $this->byId[$id] ?? null;

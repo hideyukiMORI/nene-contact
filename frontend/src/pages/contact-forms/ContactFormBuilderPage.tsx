@@ -1,13 +1,59 @@
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { useState, type ReactNode } from 'react';
 import type { ContactFormDraft } from '@/entities/contact-form';
+import { useContactFormDraftQuery } from '@/entities/contact-form';
 import { useI18n } from '@/shared/i18n';
 import { FormBuilder, PresetPicker } from '@/features/build-contact-form';
 
 export function ContactFormBuilderPage(): ReactNode {
+  const { id } = useParams();
+  const editId = id !== undefined && /^\d+$/.test(id) ? Number(id) : null;
+
+  if (editId !== null) {
+    return <EditForm id={editId} />;
+  }
+  return <CreateForm />;
+}
+
+// Edit mode: load the existing form as a draft, then open the builder against it (PUT on save).
+function EditForm({ id }: { id: number }): ReactNode {
   const { t } = useI18n();
   const navigate = useNavigate();
-  // null = still choosing a template; otherwise the editor is seeded with the chosen draft.
+  const query = useContactFormDraftQuery(id);
+
+  if (query.isPending) {
+    return <div className="fm-body fm-state">{t('common.loading')}</div>;
+  }
+  if (query.error !== null) {
+    return (
+      <div className="fm-body">
+        <div className="fm-card fm-empty">
+          <div className="au-note" role="alert">
+            {t('builder.loadError')}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <FormBuilder
+      initialDraft={query.data}
+      formId={id}
+      onBack={() => {
+        void navigate('/contact-forms');
+      }}
+      onCreated={() => {
+        void navigate('/contact-forms');
+      }}
+    />
+  );
+}
+
+// Create mode: pick a template, then open the blank/seeded builder (POST on save).
+function CreateForm(): ReactNode {
+  const { t } = useI18n();
+  const navigate = useNavigate();
   const [seed, setSeed] = useState<ContactFormDraft | null>(null);
 
   if (seed === null) {

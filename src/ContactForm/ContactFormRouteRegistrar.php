@@ -13,6 +13,7 @@ final readonly class ContactFormRouteRegistrar
         private ListContactFormsHandler $listHandler,
         private GetContactFormByIdHandler $getHandler,
         private CreateContactFormHandler $createHandler,
+        private UpdateContactFormHandler $updateHandler,
     ) {
     }
 
@@ -21,9 +22,11 @@ final readonly class ContactFormRouteRegistrar
         $list = $this->listHandler;
         $get = $this->getHandler;
         $create = $this->createHandler;
+        $update = $this->updateHandler;
 
         $router->get('/admin/contact-forms', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->get('/admin/contact-forms/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
         $router->post('/admin/contact-forms', static fn (ServerRequestInterface $r) => $create->handle($r));
+        $router->put('/admin/contact-forms/{id}', static fn (ServerRequestInterface $r) => $update->handle($r));
     }
 }

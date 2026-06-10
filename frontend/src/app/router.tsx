@@ -26,6 +26,7 @@ const router = createBrowserRouter(
         { index: true, element: <HomePage /> },
         { path: 'contact-forms', element: <ContactFormsPage /> },
         { path: 'contact-forms/new', element: <ContactFormBuilderPage /> },
+        { path: 'contact-forms/:id/edit', element: <ContactFormBuilderPage /> },
         { path: 'contact-forms/:id/channels', element: <ChannelsPage /> },
         { path: 'submissions', element: <SubmissionsPage /> },
         { path: 'submissions/:id', element: <SubmissionsPage /> },

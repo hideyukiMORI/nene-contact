@@ -68,6 +68,29 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                 },
             )
             ->set(
+                UpdateContactFormUseCaseInterface::class,
+                static function (ContainerInterface $c): UpdateContactFormUseCaseInterface {
+                    $repo = $c->get(ContactFormRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$repo instanceof ContactFormRepositoryInterface) {
+                        throw new LogicException('Contact form repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new UpdateContactFormUseCase($repo, $audit, $orgId);
+                },
+            )
+            ->set(
                 ListContactFormsUseCaseInterface::class,
                 static function (ContainerInterface $c): ListContactFormsUseCaseInterface {
                     $repo = $c->get(ContactFormRepositoryInterface::class);
@@ -106,6 +129,23 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                     }
 
                     return new CreateContactFormHandler($uc, $json);
+                },
+            )
+            ->set(
+                UpdateContactFormHandler::class,
+                static function (ContainerInterface $c): UpdateContactFormHandler {
+                    $uc = $c->get(UpdateContactFormUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof UpdateContactFormUseCaseInterface) {
+                        throw new LogicException('UpdateContactForm use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new UpdateContactFormHandler($uc, $json);
                 },
             )
             ->set(
@@ -160,6 +200,7 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                     $list = $c->get(ListContactFormsHandler::class);
                     $get = $c->get(GetContactFormByIdHandler::class);
                     $create = $c->get(CreateContactFormHandler::class);
+                    $update = $c->get(UpdateContactFormHandler::class);
 
                     if (!$list instanceof ListContactFormsHandler) {
                         throw new LogicException('ListContactForms handler service is invalid.');
@@ -173,7 +214,11 @@ final readonly class ContactFormServiceProvider implements ServiceProviderInterf
                         throw new LogicException('CreateContactForm handler service is invalid.');
                     }
 
-                    return new ContactFormRouteRegistrar($list, $get, $create);
+                    if (!$update instanceof UpdateContactFormHandler) {
+                        throw new LogicException('UpdateContactForm handler service is invalid.');
+                    }
+
+                    return new ContactFormRouteRegistrar($list, $get, $create, $update);
                 },
             );
     }

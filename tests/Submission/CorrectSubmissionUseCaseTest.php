@@ -86,6 +86,10 @@ final class CorrectSubmissionUseCaseTest extends TestCase
                 return 1;
             }
 
+            public function update(ContactForm $form): void
+            {
+            }
+
             public function findById(int $id): ?ContactForm
             {
                 return $this->form;

@@ -1,5 +1,8 @@
-export { useContactFormsQuery } from '@/entities/contact-form/queries';
-export { useCreateContactFormMutation } from '@/entities/contact-form/mutations';
+export { useContactFormsQuery, useContactFormDraftQuery } from '@/entities/contact-form/queries';
+export {
+  useCreateContactFormMutation,
+  useUpdateContactFormMutation,
+} from '@/entities/contact-form/mutations';
 export {
   toContactForm,
   toContactFormList,

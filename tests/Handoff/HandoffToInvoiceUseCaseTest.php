@@ -71,6 +71,10 @@ final class HandoffToInvoiceUseCaseTest extends TestCase
                 return 1;
             }
 
+            public function update(ContactForm $form): void
+            {
+            }
+
             public function findById(int $id): ?ContactForm
             {
                 if ($id === 0) {
