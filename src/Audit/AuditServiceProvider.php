@@ -37,6 +37,24 @@ final readonly class AuditServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                AuditEventSearchRepositoryInterface::class,
+                static function (ContainerInterface $c): AuditEventSearchRepositoryInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new PdoAuditEventRepository($query, $orgId);
+                },
+            )
+            ->set(
                 AuditRecorderInterface::class,
                 static function (ContainerInterface $c): AuditRecorderInterface {
                     $repo = $c->get(AuditEventRepositoryInterface::class);
@@ -51,10 +69,10 @@ final readonly class AuditServiceProvider implements ServiceProviderInterface
             ->set(
                 ListAuditEventsUseCaseInterface::class,
                 static function (ContainerInterface $c): ListAuditEventsUseCaseInterface {
-                    $repo = $c->get(AuditEventRepositoryInterface::class);
+                    $repo = $c->get(AuditEventSearchRepositoryInterface::class);
 
-                    if (!$repo instanceof AuditEventRepositoryInterface) {
-                        throw new LogicException('Audit event repository service is invalid.');
+                    if (!$repo instanceof AuditEventSearchRepositoryInterface) {
+                        throw new LogicException('Audit event search repository service is invalid.');
                     }
 
                     return new ListAuditEventsUseCase($repo);

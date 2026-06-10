@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\Tests\Audit;
 
 use NeneContact\Audit\AuditEvent;
+use NeneContact\Audit\AuditEventFilter;
 use NeneContact\Audit\ListAuditEventsUseCase;
 use NeneContact\Tests\Auth\InMemoryAuditEventRepository;
 use PHPUnit\Framework\TestCase;
@@ -17,12 +18,25 @@ final class ListAuditEventsUseCaseTest extends TestCase
         $repo->append(new AuditEvent(action: 'organization.created', entityType: 'organization', entityId: 1));
         $repo->append(new AuditEvent(action: 'user.created', entityType: 'user', entityId: 2));
 
-        $result = (new ListAuditEventsUseCase($repo))->execute(20, 0);
+        $result = (new ListAuditEventsUseCase($repo))->execute(new AuditEventFilter(), 20, 0);
 
         self::assertSame(20, $result->limit);
         self::assertSame(0, $result->offset);
         self::assertSame(2, $result->total);
         self::assertCount(2, $result->items);
         self::assertSame('organization.created', $result->items[0]->action);
+    }
+
+    public function test_search_filters_by_action_and_entity(): void
+    {
+        $repo = new InMemoryAuditEventRepository();
+        $repo->append(new AuditEvent(action: 'organization.created', entityType: 'organization', entityId: 1));
+        $repo->append(new AuditEvent(action: 'user.created', entityType: 'user', entityId: 2));
+
+        $result = (new ListAuditEventsUseCase($repo))->execute(new AuditEventFilter(q: 'user'), 20, 0);
+
+        self::assertSame(1, $result->total);
+        self::assertCount(1, $result->items);
+        self::assertSame('user.created', $result->items[0]->action);
     }
 }

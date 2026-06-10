@@ -331,6 +331,21 @@ paths:
       parameters:
         - { $ref: '#/components/parameters/Limit' }
         - { $ref: '#/components/parameters/Offset' }
+        - name: q
+          in: query
+          required: false
+          description: Free-text match over action / entity type / "entity_type #id".
+          schema: { type: string }
+        - name: from
+          in: query
+          required: false
+          description: Inclusive lower bound on created_at (YYYY-MM-DD).
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: false
+          description: Inclusive upper bound on created_at (YYYY-MM-DD).
+          schema: { type: string, format: date }
       responses:
         '200':
           description: Audit event list

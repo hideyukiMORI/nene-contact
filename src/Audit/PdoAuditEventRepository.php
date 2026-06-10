@@ -7,7 +7,7 @@ namespace NeneContact\Audit;
 use Nene2\Database\DatabaseQueryExecutorInterface;
 use Nene2\Http\RequestScopedHolder;
 
-final readonly class PdoAuditEventRepository implements AuditEventRepositoryInterface
+final readonly class PdoAuditEventRepository implements AuditEventRepositoryInterface, AuditEventSearchRepositoryInterface
 {
     private const COLUMNS = 'id, actor_user_id, organization_id, action, entity_type, entity_id, before_json, after_json, created_at';
 
@@ -41,21 +41,59 @@ final readonly class PdoAuditEventRepository implements AuditEventRepositoryInte
     }
 
     /** @return list<AuditEvent> */
-    public function findAll(int $limit, int $offset): array
+    public function search(AuditEventFilter $filter, int $limit, int $offset): array
     {
+        [$where, $params] = $this->whereClause($filter);
+        $params[] = $limit;
+        $params[] = $offset;
+
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::COLUMNS . ' FROM audit_events WHERE organization_id = ? ORDER BY id DESC LIMIT ? OFFSET ?',
-            [$this->orgId->get(), $limit, $offset],
+            'SELECT ' . self::COLUMNS . ' FROM audit_events WHERE ' . $where . ' ORDER BY id DESC LIMIT ? OFFSET ?',
+            $params,
         );
 
         return array_map(fn (array $row): AuditEvent => $this->mapRow($row), $rows);
     }
 
-    public function count(): int
+    public function countMatching(AuditEventFilter $filter): int
     {
-        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM audit_events WHERE organization_id = ?', [$this->orgId->get()]);
+        [$where, $params] = $this->whereClause($filter);
+        $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM audit_events WHERE ' . $where, $params);
 
         return $row !== null ? (int) $row['cnt'] : 0;
+    }
+
+    /**
+     * Always tenant-scoped; `q` matches action / entity_type / "entity_type #id";
+     * from/to bound created_at inclusively (date strings).
+     *
+     * @return array{0: string, 1: list<mixed>}
+     */
+    private function whereClause(AuditEventFilter $filter): array
+    {
+        $where = 'organization_id = ?';
+        $params = [$this->orgId->get()];
+
+        $q = $filter->q !== null ? trim($filter->q) : '';
+        if ($q !== '') {
+            $like = '%' . $q . '%';
+            $where .= " AND (action LIKE ? OR entity_type LIKE ? OR CONCAT(entity_type, ' #', entity_id) LIKE ?)";
+            $params[] = $like;
+            $params[] = $like;
+            $params[] = $like;
+        }
+
+        if ($filter->from !== null && $filter->from !== '') {
+            $where .= ' AND created_at >= ?';
+            $params[] = $filter->from . ' 00:00:00';
+        }
+
+        if ($filter->to !== null && $filter->to !== '') {
+            $where .= ' AND created_at <= ?';
+            $params[] = $filter->to . ' 23:59:59';
+        }
+
+        return [$where, $params];
     }
 
     /** @param array<string, mixed>|null $value */

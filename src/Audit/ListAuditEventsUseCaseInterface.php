@@ -6,5 +6,5 @@ namespace NeneContact\Audit;
 
 interface ListAuditEventsUseCaseInterface
 {
-    public function execute(int $limit, int $offset): ListAuditEventsResult;
+    public function execute(AuditEventFilter $filter, int $limit, int $offset): ListAuditEventsResult;
 }

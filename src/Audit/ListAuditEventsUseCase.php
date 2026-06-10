@@ -13,15 +13,15 @@ namespace NeneContact\Audit;
 final readonly class ListAuditEventsUseCase implements ListAuditEventsUseCaseInterface
 {
     public function __construct(
-        private AuditEventRepositoryInterface $events,
+        private AuditEventSearchRepositoryInterface $events,
     ) {
     }
 
-    public function execute(int $limit, int $offset): ListAuditEventsResult
+    public function execute(AuditEventFilter $filter, int $limit, int $offset): ListAuditEventsResult
     {
         return new ListAuditEventsResult(
-            items: $this->events->findAll($limit, $offset),
-            total: $this->events->count(),
+            items: $this->events->search($filter, $limit, $offset),
+            total: $this->events->countMatching($filter),
             limit: $limit,
             offset: $offset,
         );

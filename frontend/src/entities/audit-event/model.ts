@@ -20,4 +20,7 @@ export interface AuditEventList {
 export interface AuditEventListParams {
   limit: number;
   offset: number;
+  q?: string;
+  from?: string;
+  to?: string;
 }

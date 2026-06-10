@@ -23,7 +23,13 @@ final readonly class ListAuditEventsHandler implements RequestHandlerInterface
         $limit = max(1, min(100, (int) ($params['limit'] ?? 20)));
         $offset = max(0, (int) ($params['offset'] ?? 0));
 
-        $result = $this->useCase->execute($limit, $offset);
+        $filter = new AuditEventFilter(
+            q: $this->stringParam($params, 'q'),
+            from: $this->stringParam($params, 'from'),
+            to: $this->stringParam($params, 'to'),
+        );
+
+        $result = $this->useCase->execute($filter, $limit, $offset);
 
         return $this->response->create([
             'items' => array_map(
@@ -34,5 +40,19 @@ final readonly class ListAuditEventsHandler implements RequestHandlerInterface
             'offset' => $result->offset,
             'total' => $result->total,
         ]);
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private function stringParam(array $params, string $key): ?string
+    {
+        $value = $params[$key] ?? null;
+        if (!is_string($value)) {
+            return null;
+        }
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 }
