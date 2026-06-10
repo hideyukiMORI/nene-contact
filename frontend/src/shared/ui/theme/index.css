@@ -3166,7 +3166,7 @@ h3 {
   overflow-y: auto;
   padding: var(--ex-pad);
 }
-.ex-content:has(> .ex-body, > .fm-body, > .ib-wrap, > .bd-editor, > .se-wrap) {
+.ex-content:has(> .ex-body, > .fm-body, > .ib-wrap, > .ib-detail, > .bd-editor, > .se-wrap) {
   overflow: hidden;
   padding: 0;
 }
@@ -4754,4 +4754,294 @@ h3 {
 .fm-pgbtn svg {
   width: 14px;
   height: 14px;
+}
+
+/* ============================================================
+   Pro Console — submission detail (single-pane, ib-detail)
+   ============================================================ */
+.ib-detail {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  background: var(--ex-bg);
+}
+.ib-dhead {
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.ib-av {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  font-weight: 700;
+  font-size: 16px;
+  font-family: var(--ex-font-display);
+}
+.ib-who {
+  min-width: 0;
+}
+.ib-who .nm {
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.ib-who .sub {
+  font-size: 12.5px;
+  color: var(--ex-muted);
+  margin-top: 3px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ib-acts {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+}
+.ib-statussel {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  font-size: 12px;
+  font-weight: 650;
+  font-family: inherit;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  cursor: pointer;
+}
+.ib-iconbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: var(--ex-radius);
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  flex: none;
+  cursor: pointer;
+}
+.ib-iconbtn svg {
+  width: 16px;
+  height: 16px;
+}
+.ib-dbody {
+  padding: 22px 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 760px;
+  width: 100%;
+}
+.ib-meta {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  gap: 11px 20px;
+  align-items: baseline;
+  margin: 0;
+}
+.ib-meta dt {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  font-weight: 700;
+  margin: 0;
+  font-family: var(--ex-font-mono);
+}
+.ib-meta dd {
+  font-size: 13px;
+  color: var(--ex-text);
+  margin: 0;
+  font-weight: 500;
+  overflow-wrap: anywhere;
+}
+.ib-msg-lab {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  font-weight: 700;
+  margin-bottom: -6px;
+}
+.ib-tags {
+  display: flex;
+  gap: 7px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.ib-tag {
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  border-radius: 999px;
+  padding: 3px 11px;
+  font-size: 11.5px;
+  font-weight: 650;
+}
+.ib-addtag {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px dashed var(--ex-border);
+  border-radius: 999px;
+  padding: 3px 9px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+}
+.ib-addtag svg {
+  width: 12px;
+  height: 12px;
+}
+.ib-memo {
+  background: var(--ex-surface2);
+  border: 1px dashed var(--ex-border);
+  border-radius: var(--ex-radius-lg);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.ib-memo .lab {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.ib-memo .lab svg {
+  width: 13px;
+  height: 13px;
+}
+.ib-notelist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ib-note {
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  padding: 9px 12px;
+  font-size: 12.5px;
+  color: var(--ex-text);
+  line-height: 1.6;
+}
+.ib-note .when {
+  display: block;
+  font-size: 10.5px;
+  color: var(--ex-faint);
+  margin-top: 4px;
+}
+.ib-memo textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  padding: 9px 11px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  min-height: 60px;
+  resize: vertical;
+}
+.ib-memo textarea:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.ib-memo .row {
+  display: flex;
+  justify-content: flex-end;
+}
+.ib-tl {
+  display: flex;
+  flex-direction: column;
+}
+.ib-tlrow {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding-bottom: 15px;
+  position: relative;
+}
+.ib-tlrow:last-child {
+  padding-bottom: 0;
+}
+.ib-tlrow .d {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  flex: none;
+  margin-top: 2px;
+  position: relative;
+  z-index: 1;
+}
+.ib-tlrow:not(:last-child)::before {
+  content: '';
+  position: absolute;
+  left: 4px;
+  top: 11px;
+  bottom: -2px;
+  width: 1px;
+  background: var(--ex-border);
+}
+.ib-tlrow .tlc {
+  flex: 1;
+  min-width: 0;
+}
+.ib-tlrow .tt {
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ex-text);
+}
+.ib-tlrow .time2 {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--ex-faint);
+  flex: none;
+}
+.ib-foot {
+  border-top: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  padding: 13px 24px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ib-foot .sp {
+  flex: 1;
+}
+.ib-state {
+  padding: 40px 24px;
+  color: var(--ex-muted);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: flex-start;
 }
