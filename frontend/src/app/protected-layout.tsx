@@ -60,6 +60,9 @@ function usePageCrumbs(): Crumb[] {
     if (segments[1] === 'new') {
       return [{ label: t('nav.forms'), to: '/contact-forms' }, { label: t('crumb.create') }];
     }
+    if (segments[2] === 'edit') {
+      return [{ label: t('nav.forms'), to: '/contact-forms' }, { label: t('contactForms.edit') }];
+    }
     if (segments[2] === 'channels') {
       return [{ label: t('nav.forms'), to: '/contact-forms' }, { label: t('crumb.notifications') }];
     }

@@ -154,6 +154,10 @@ export function ContactFormList({
                       <Icon name="code" size={14} />
                       {t('contactForms.embed')}
                     </button>
+                    <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/edit`}>
+                      <Icon name="edit" size={14} />
+                      {t('contactForms.edit')}
+                    </Link>
                     <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/channels`}>
                       <Icon name="bell" size={14} />
                       {t('contactForms.notify')}

@@ -1,6 +1,9 @@
 import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
-import { useCreateContactFormMutation } from '@/entities/contact-form';
+import {
+  useCreateContactFormMutation,
+  useUpdateContactFormMutation,
+} from '@/entities/contact-form';
 import type { AppError } from '@/shared/api/errors';
 import type { ContactForm, ContactFormDraft, DraftField } from '@/entities/contact-form';
 import type { SupportedLocale } from '@/shared/i18n/locales';
@@ -59,10 +62,14 @@ export interface FormBuilder {
   submit: () => Promise<ContactForm>;
 }
 
-export function useFormBuilder(seed?: ContactFormDraft): FormBuilder {
-  // Seed from a preset/template when provided (lazy init so the seed is captured once).
+export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBuilder {
+  // Seed from a preset/template (create) or an existing form (edit); lazy init captures it once.
   const [draft, setDraft] = useState<ContactFormDraft>(() => seed ?? initialDraft);
-  const mutation = useCreateContactFormMutation();
+  const createMutation = useCreateContactFormMutation();
+  const updateMutation = useUpdateContactFormMutation();
+  // editId is fixed for the lifetime of the builder (the route id never changes mid-edit).
+  const [editId] = useState(formId);
+  const mutation = editId !== undefined ? updateMutation : createMutation;
 
   const patchField = (id: string, patch: Partial<Omit<DraftField, 'id'>>): void => {
     setDraft((d) => ({
@@ -144,6 +151,9 @@ export function useFormBuilder(seed?: ContactFormDraft): FormBuilder {
         options: values.map((value) => ({ value, label: { [draft.defaultLocale]: value } })),
       });
     },
-    submit: () => mutation.mutateAsync(draft),
+    submit: () =>
+      editId !== undefined
+        ? updateMutation.mutateAsync({ id: editId, draft })
+        : createMutation.mutateAsync(draft),
   };
 }

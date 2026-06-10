@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
   toContactForm,
+  toContactFormDraft,
   toContactFormList,
   toCreateContactFormDto,
 } from '@/entities/contact-form/mapper';
@@ -64,5 +65,50 @@ describe('contact-form mappers', () => {
     });
     expect(dto).not.toHaveProperty('consent_label');
     expect(dto).not.toHaveProperty('retention_days');
+  });
+
+  it('maps a form DTO to an editable draft (and survives a round-trip to the request)', () => {
+    const draft = toContactFormDraft({
+      id: 9,
+      name: 'Contact us',
+      public_form_key: 'abc',
+      default_locale: 'ja',
+      locales: ['ja', 'en'],
+      allowed_origins: ['https://example.com'],
+      status: 'active',
+      consent_required: true,
+      consent_label: { ja: '同意します' },
+      retention_days: 30,
+      fields: [
+        {
+          id: 4,
+          field_type: 'select',
+          name: 'topic',
+          label: { ja: '種別' },
+          required: true,
+          options: [{ value: 'a', label: { ja: 'A' } }],
+          sort_order: 0,
+        },
+      ],
+    });
+
+    expect(draft.name).toBe('Contact us');
+    expect(draft.allowedOrigins).toEqual(['https://example.com']);
+    expect(draft.consentLabel).toEqual({ ja: '同意します' });
+    expect(draft.retentionDays).toBe(30);
+    expect(draft.fields).toHaveLength(1);
+    expect(draft.fields[0]?.id).toBe('4');
+    expect(draft.fields[0]?.options).toEqual([{ value: 'a', label: { ja: 'A' } }]);
+
+    // The draft re-serializes to the request shape used for the PUT.
+    const dto = toCreateContactFormDto(draft);
+    expect(dto.name).toBe('Contact us');
+    expect(dto.fields[0]).toEqual({
+      field_type: 'select',
+      name: 'topic',
+      label: { ja: '種別' },
+      required: true,
+      options: [{ value: 'a', label: { ja: 'A' } }],
+    });
   });
 });

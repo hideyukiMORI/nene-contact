@@ -41,13 +41,16 @@ export function FormBuilder({
   onCreated,
   onBack,
   initialDraft,
+  formId,
 }: {
   onCreated: () => void;
   onBack?: () => void;
   initialDraft?: ContactFormDraft;
+  formId?: number;
 }): ReactNode {
   const { t } = useI18n();
-  const builder = useFormBuilder(initialDraft);
+  const builder = useFormBuilder(initialDraft, formId);
+  const isEditing = formId !== undefined;
   const { draft } = builder;
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -116,7 +119,11 @@ export function FormBuilder({
         </span>
         <button type="button" className="ex-btn" disabled={builder.isPending} onClick={onSubmit}>
           <Icon name="check" size={14} />
-          {builder.isPending ? t('builder.creating') : t('builder.publish')}
+          {builder.isPending
+            ? t('builder.creating')
+            : isEditing
+              ? t('builder.saveChanges')
+              : t('builder.publish')}
         </button>
       </div>
 

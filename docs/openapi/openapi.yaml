@@ -237,6 +237,31 @@ paths:
         '401': { $ref: '#/components/responses/Problem' }
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
+    put:
+      tags: [ContactForm]
+      operationId: updateContactForm
+      summary: Update a contact form
+      description: >-
+        Replaces the editable fields (name, locales, consent, retention, allowed origins,
+        and the field set) of an existing form. The public form key is immutable, so existing
+        embeds keep working. Audited as contact_form.updated (ADR 0013).
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateContactFormRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ContactFormResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
 
   /admin/notification-channels:
     get:

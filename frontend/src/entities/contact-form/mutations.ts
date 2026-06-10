@@ -22,3 +22,23 @@ export function useCreateContactFormMutation(): UseMutationResult<
     },
   });
 }
+
+export function useUpdateContactFormMutation(): UseMutationResult<
+  ContactForm,
+  AppError,
+  { id: number; draft: ContactFormDraft }
+> {
+  const queryClient = useQueryClient();
+  return useMutation<ContactForm, AppError, { id: number; draft: ContactFormDraft }>({
+    mutationFn: async ({ id, draft }) =>
+      toContactForm(
+        await apiClient.put<ContactFormDto>(
+          `/admin/contact-forms/${String(id)}`,
+          toCreateContactFormDto(draft),
+        ),
+      ),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: contactFormKeys.all });
+    },
+  });
+}
