@@ -2765,3 +2765,763 @@ h3 {
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* ============================================================
+   NeNe Contact — Pro Console design system (Claude Design 確定版)
+   teal sidebar (el-teal) × warm H40 accent (acc-vt1) × left-accent
+   active nav (act-accent). The chosen direction is resolved directly
+   into :root as --ex-* tokens; components read them unprefixed.
+   Dark mode reads the same tokens via [data-theme="dark"].
+   ============================================================ */
+
+:root {
+  /* base — Pro Console (.exwrap.pr) */
+  --ex-radius: 7px;
+  --ex-radius-lg: 9px;
+  --ex-pad: 14px;
+  --ex-row-pad: 8px 12px;
+  --ex-bg: #f6f7f9;
+  --ex-surface: #ffffff;
+  --ex-surface2: #f0f2f5;
+  --ex-border: #e2e6eb;
+  --ex-text: #161a22;
+  --ex-muted: #5a6273;
+  --ex-faint: #8b93a3;
+  --ex-brand-ink: #fff;
+  --ex-font-display: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+  --ex-font-ui: 'Plus Jakarta Sans', 'Noto Sans JP', sans-serif;
+  --ex-font-mono: 'JetBrains Mono', monospace;
+  --ex-h1-weight: 700;
+  --ex-h1-size: 20px;
+  --ex-h1-ls: -0.01em;
+  --ex-shadow: 0 1px 2px rgba(20, 24, 34, 0.06);
+  --ex-card-shadow: 0 1px 2px rgba(20, 24, 34, 0.05);
+  --ex-nav-w: 196px;
+
+  /* sidebar — el-teal (oklch, brighter-than-canvas teal) */
+  --ex-nav-bg: oklch(0.38 0.045 196);
+  --ex-nav-fg: oklch(0.83 0.025 196);
+  --ex-nav-active-bg: oklch(0.46 0.05 196);
+  --ex-nav-active-fg: #fff;
+  --ex-nav-border: oklch(0.45 0.045 196);
+
+  /* brand accent — acc-vt1 (warm vermilion-tangerine, H40) */
+  --ex-brand: oklch(0.625 0.172 40);
+  --ex-brand-weak: oklch(0.95 0.04 40);
+  --ex-brand-weak-bd: oklch(0.88 0.07 40);
+
+  --ex-danger: #d14343;
+}
+
+[data-theme='dark'] {
+  --ex-bg: #0f1722;
+  --ex-surface: #18212e;
+  --ex-surface2: #1e2835;
+  --ex-border: #2b3848;
+  --ex-text: #e9eef4;
+  --ex-muted: #9aa7b8;
+  --ex-faint: #6c7a8b;
+  --ex-brand-weak: oklch(0.34 0.075 40);
+  --ex-brand-weak-bd: oklch(0.44 0.09 40);
+  --ex-card-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  --ex-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  /* deepen the teal sidebar so it recedes below the dark canvas */
+  --ex-nav-bg: oklch(0.14 0.03 196);
+  --ex-nav-fg: oklch(0.68 0.028 196);
+  --ex-nav-active-bg: oklch(0.22 0.045 196);
+  --ex-nav-border: oklch(0.2 0.032 196);
+}
+
+/* ---------------- shell frame ---------------- */
+.ex-frame {
+  display: grid;
+  grid-template-columns: var(--ex-nav-w) 1fr;
+  height: 100vh;
+  background: var(--ex-bg);
+  overflow: hidden;
+  font-family: var(--ex-font-ui);
+  font-size: 13px;
+  color: var(--ex-text);
+  word-break: keep-all;
+  line-break: strict;
+  overflow-wrap: normal;
+  font-feature-settings: 'palt' 1;
+}
+
+/* ---------------- sidebar ---------------- */
+.ex-nav {
+  background: var(--ex-nav-bg);
+  border-right: 1px solid var(--ex-nav-border);
+  display: flex;
+  flex-direction: column;
+  padding: 14px 12px;
+  gap: 2px;
+  min-height: 0;
+}
+.ex-brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 4px 7px 14px;
+}
+.ex-brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.ex-brand-mark svg {
+  width: 16px;
+  height: 16px;
+}
+.ex-brand-name {
+  font-weight: 700;
+  font-size: 14px;
+  letter-spacing: -0.02em;
+  color: #fff;
+}
+.ex-brand-sub {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-top: -2px;
+}
+.ex-brand-text {
+  display: flex;
+  flex-direction: column;
+}
+.ex-navgroup {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ex-faint);
+  padding: 13px 9px 5px;
+}
+.ex-navitem {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--ex-radius);
+  color: var(--ex-nav-fg);
+  font-weight: 550;
+  font-size: 13px;
+  position: relative;
+  text-decoration: none;
+}
+.ex-navitem svg {
+  width: 17px;
+  height: 17px;
+  flex: none;
+}
+/* active — act-accent: faint brand wash + brand left bar */
+.ex-navitem.on {
+  background: color-mix(in srgb, var(--ex-brand) 22%, transparent);
+  color: #fff;
+  font-weight: 650;
+}
+.ex-navitem.on::before {
+  content: '';
+  position: absolute;
+  left: -12px;
+  top: 7px;
+  bottom: 7px;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: var(--ex-brand);
+}
+.ex-navbadge {
+  margin-left: auto;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 5px;
+  border-radius: 999px;
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  display: grid;
+  place-items: center;
+}
+.ex-navspacer {
+  flex: 1;
+}
+.ex-navfoot {
+  margin: 8px 4px 0;
+  padding: 11px;
+  background: color-mix(in srgb, var(--ex-nav-fg) 8%, transparent);
+  border-radius: var(--ex-radius);
+  font-size: 11px;
+  color: var(--ex-nav-fg);
+}
+
+/* ---------------- main + topbar ---------------- */
+.ex-main {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+.ex-topbar {
+  height: 50px;
+  border-bottom: 1px solid var(--ex-border);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 0 var(--ex-pad);
+  background: var(--ex-surface);
+  flex: none;
+}
+.ex-crumb {
+  font-size: 12px;
+  color: var(--ex-muted);
+  font-weight: 500;
+  white-space: nowrap;
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ex-crumb a {
+  color: var(--ex-muted);
+  text-decoration: none;
+}
+.ex-crumb a:hover {
+  text-decoration: underline;
+}
+.ex-crumb .sep {
+  opacity: 0.5;
+}
+.ex-crumb .cur {
+  color: var(--ex-text);
+  font-weight: 700;
+}
+.ex-tspacer {
+  flex: 1;
+}
+.ex-chiprow {
+  display: flex;
+  gap: 7px;
+  align-items: center;
+}
+.ex-ipill {
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ex-radius);
+  border: 1px solid var(--ex-border);
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  background: var(--ex-surface);
+  cursor: pointer;
+}
+.ex-ipill svg {
+  width: 16px;
+  height: 16px;
+}
+.ex-avatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* language toggle (functional, app-specific) */
+.ex-lang {
+  display: inline-flex;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  overflow: hidden;
+}
+.ex-lang button {
+  border: 0;
+  background: var(--ex-surface);
+  color: var(--ex-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 5px 9px;
+  cursor: pointer;
+}
+.ex-lang button.on {
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+}
+
+/* account dropdown (mn-*) */
+.ex-acct-wrap {
+  position: relative;
+}
+.ex-menu-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+.mn-pop {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius-lg);
+  box-shadow: 0 16px 44px rgba(18, 28, 38, 0.2);
+  z-index: 70;
+  overflow: hidden;
+}
+.mn-acct {
+  width: 264px;
+}
+.mn-ahead {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  padding: 14px;
+  border-bottom: 1px solid var(--ex-border);
+}
+.mn-av {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 15px;
+  font-family: var(--ex-font-display);
+  flex: none;
+}
+.mn-ahead .nm {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.mn-ahead .em {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  margin-top: 1px;
+}
+.mn-list {
+  padding: 5px;
+}
+.mn-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border-radius: var(--ex-radius);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ex-text);
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+.mn-item svg {
+  width: 16px;
+  height: 16px;
+  color: var(--ex-muted);
+  flex: none;
+}
+.mn-item .r {
+  margin-left: auto;
+  font-size: 10.5px;
+  color: var(--ex-faint);
+  font-weight: 600;
+}
+.mn-sep {
+  height: 1px;
+  background: var(--ex-border);
+  margin: 5px 0;
+}
+.mn-item.danger {
+  color: var(--ex-danger);
+}
+.mn-item.danger svg {
+  color: var(--ex-danger);
+}
+
+/* ---------------- content + typography ---------------- */
+.ex-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: var(--ex-pad);
+}
+.ex-content:has(> .ex-body, > .fm-body, > .ib-wrap, > .bd-wrap, > .se-wrap) {
+  overflow: hidden;
+  padding: 0;
+}
+.ex-body {
+  padding: var(--ex-pad);
+  overflow-y: auto;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ex-h1 {
+  font-family: var(--ex-font-display);
+  font-weight: var(--ex-h1-weight);
+  font-size: var(--ex-h1-size);
+  letter-spacing: var(--ex-h1-ls);
+  margin: 0;
+  color: var(--ex-text);
+}
+.ex-lead {
+  color: var(--ex-muted);
+  font-size: 12.5px;
+  margin: 5px 0 0;
+}
+.ex-eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--ex-brand);
+  margin-bottom: 7px;
+}
+.ex-row {
+  display: flex;
+  gap: var(--ex-pad);
+}
+.ex-grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.ex-grid2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+/* ---------------- card / stat ---------------- */
+.ex-card {
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius-lg);
+  box-shadow: var(--ex-card-shadow);
+}
+.ex-card-pad {
+  padding: var(--ex-pad);
+}
+.ex-stat .lab {
+  font-size: 11px;
+  color: var(--ex-muted);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.ex-stat .lab svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+}
+.ex-stat .val {
+  font-size: 26px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  margin-top: 6px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.ex-stat .sub {
+  font-size: 10.5px;
+  color: var(--ex-faint);
+  margin-top: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.ex-cardhead {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px var(--ex-pad);
+  border-bottom: 1px solid var(--ex-border);
+}
+.ex-cardhead svg {
+  flex: none;
+}
+.ex-cardhead h3 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ex-cardhead .more {
+  margin-left: auto;
+  font-size: 11.5px;
+  color: var(--ex-brand);
+  font-weight: 600;
+  white-space: nowrap;
+  flex: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+/* ---------------- table ---------------- */
+.ex-tbl {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.ex-tbl td {
+  padding: var(--ex-row-pad);
+  border-bottom: 1px solid var(--ex-border);
+}
+.ex-tbl tr:last-child td {
+  border-bottom: none;
+}
+.ex-tbl .nm {
+  font-weight: 600;
+}
+.ex-tbl .mu {
+  color: var(--ex-muted);
+}
+.ex-tbl .id {
+  font-family: var(--ex-font-mono);
+  font-size: 11px;
+  color: var(--ex-faint);
+}
+
+/* ---------------- badge ---------------- */
+.ex-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+.ex-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.ex-badge.open {
+  background: #fcefda;
+  color: #9a5a08;
+}
+.ex-badge.open .dot {
+  background: #e0922a;
+}
+.ex-badge.prog {
+  background: #def0f4;
+  color: #0c6478;
+}
+.ex-badge.prog .dot {
+  background: #1597b0;
+}
+.ex-badge.done {
+  background: #e0f1e6;
+  color: #1d7a45;
+}
+.ex-badge.done .dot {
+  background: #36a866;
+}
+
+/* ---------------- button ---------------- */
+.ex-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--ex-radius);
+  font-size: 12.5px;
+  font-weight: 650;
+  font-family: inherit;
+  border: 1px solid color-mix(in srgb, var(--ex-brand) 80%, #000 8%);
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  cursor: pointer;
+  white-space: nowrap;
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand) 35%, transparent);
+  text-decoration: none;
+}
+.ex-btn svg {
+  width: 15px;
+  height: 15px;
+}
+.ex-btn.ghost {
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  border-color: var(--ex-border);
+  box-shadow: none;
+}
+
+/* ---------------- checklist / progress / sparkline ---------------- */
+.ex-progress {
+  height: 6px;
+  border-radius: 999px;
+  background: var(--ex-surface2);
+  overflow: hidden;
+  margin-top: 4px;
+}
+.ex-progress > i {
+  display: block;
+  height: 100%;
+  background: var(--ex-brand);
+  border-radius: 999px;
+}
+.ex-spark {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  flex: 1;
+  min-height: 56px;
+  margin-top: 12px;
+}
+.ex-spark > i {
+  flex: 1;
+  background: var(--ex-brand-weak);
+  border-radius: 3px 3px 0 0;
+  min-height: 4px;
+}
+.ex-spark > i.hi {
+  background: var(--ex-brand);
+}
+.ex-sparkcard {
+  display: flex;
+  flex-direction: column;
+}
+.ex-sparkx {
+  display: flex;
+  gap: 5px;
+  margin-top: 7px;
+}
+.ex-sparkx > span {
+  flex: 1;
+  text-align: center;
+  font-size: 9.5px;
+  color: var(--ex-faint);
+  font-variant-numeric: tabular-nums;
+}
+.ex-sparkcard .ex-stat .val {
+  font-size: 22px;
+  margin-top: 4px;
+}
+
+/* status badges → dark-friendly tints */
+[data-theme='dark'] .ex-badge.open {
+  background: #3a2a12;
+  color: #ecba79;
+}
+[data-theme='dark'] .ex-badge.prog {
+  background: #0f2f39;
+  color: #74cfe0;
+}
+[data-theme='dark'] .ex-badge.done {
+  background: #13301e;
+  color: #7ad3a0;
+}
+
+/* ============================================================
+   Pro Console — interactions (hover / focus / motion)
+   ============================================================ */
+.ex-btn,
+.ex-navitem,
+.ex-ipill,
+.ex-avatar,
+.ex-tbl tbody tr,
+.ex-cardhead .more,
+.mn-item {
+  transition:
+    background-color 0.16s ease,
+    color 0.16s ease,
+    border-color 0.16s ease,
+    box-shadow 0.2s ease,
+    transform 0.12s cubic-bezier(0.2, 0.7, 0.3, 1),
+    opacity 0.16s ease;
+}
+.ex-btn:hover {
+  background: color-mix(in srgb, var(--ex-brand) 90%, #000 10%);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ex-brand) 38%, transparent);
+  transform: translateY(-1px);
+}
+.ex-btn:active {
+  transform: translateY(0) scale(0.985);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand) 35%, transparent);
+}
+.ex-btn.ghost:hover {
+  background: var(--ex-surface2);
+  border-color: var(--ex-faint);
+  box-shadow: none;
+  transform: translateY(-1px);
+}
+.ex-btn.ghost:active {
+  transform: translateY(0);
+}
+.ex-navitem:not(.on):hover {
+  background: color-mix(in srgb, var(--ex-nav-fg) 13%, transparent);
+  color: var(--ex-nav-active-fg);
+}
+.ex-ipill:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-text);
+  border-color: var(--ex-faint);
+}
+.ex-avatar:hover {
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.ex-tbl tbody tr:hover {
+  background: color-mix(in srgb, var(--ex-brand) 6%, transparent);
+}
+.ex-cardhead .more:hover {
+  text-decoration: underline;
+}
+.mn-item:hover {
+  background: var(--ex-surface2);
+}
+.mn-item.danger:hover {
+  background: color-mix(in srgb, var(--ex-danger) 10%, transparent);
+}
+.ex-btn:focus-visible,
+.ex-navitem:focus-visible,
+.ex-ipill:focus-visible,
+.ex-avatar:focus-visible,
+.mn-item:focus-visible,
+.ex-lang button:focus-visible {
+  outline: 2px solid var(--ex-brand);
+  outline-offset: 2px;
+}
+@media (prefers-reduced-motion: no-preference) {
+  .mn-pop {
+    animation: nene-mnin 0.15s cubic-bezier(0.2, 0.7, 0.3, 1);
+    transform-origin: top right;
+  }
+  @keyframes nene-mnin {
+    from {
+      transform: translateY(-8px) scale(0.97);
+    }
+  }
+}
