@@ -15,7 +15,7 @@ export function SubmissionsPage(): ReactNode {
   const selectedId = parsed !== null && !Number.isNaN(parsed) ? parsed : null;
 
   return (
-    <div className="ib-wrap">
+    <div className="ib-wrap" data-detail={selectedId !== null ? 'open' : 'closed'}>
       <SubmissionList selectedId={selectedId} />
       {selectedId !== null ? (
         <SubmissionDetail submissionId={selectedId} />

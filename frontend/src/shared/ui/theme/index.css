@@ -3326,7 +3326,9 @@ h3 {
 }
 .ex-grid3 {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* Fluid per reference/app.css .stat-grid: columns auto-fit as width changes
+     (rail/drawer breakpoints shrink the content), instead of a fixed 3-up. */
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 12px;
 }
 .ex-grid2 {
@@ -3947,6 +3949,13 @@ h3 {
   grid-template-columns: 1fr 1.4fr;
   gap: var(--ex-pad);
 }
+/* Collapse the spark + recent split to a single column once it gets cramped,
+   matching the reference's fluid two-card row. */
+@media (max-width: 980px) {
+  .dash-split {
+    grid-template-columns: 1fr;
+  }
+}
 .ex-row .grow {
   flex: 1;
   min-width: 0;
@@ -4119,6 +4128,11 @@ h3 {
   border-radius: var(--ex-radius-lg);
   box-shadow: var(--ex-card-shadow);
   overflow: hidden;
+}
+/* reference/app.css: tables scroll horizontally on narrow widths instead of
+   overflowing the page (cells are nowrap and the card clips). Wrap every table. */
+.tbl-wrap {
+  overflow-x: auto;
 }
 .fm-tbl {
   width: 100%;
@@ -5166,6 +5180,22 @@ a.t:hover {
   min-width: 0;
   min-height: 0;
   background: var(--ex-bg);
+}
+/* Narrow widths: the two-pane becomes a mobile master-detail. With no row
+   selected the list fills the screen (hide the empty hint); with a row selected
+   the detail fills it (hide the list). Mirrors reference/app.css @media 720.
+   Placed AFTER the base .ib-list/.ib-detail rules so the override wins (cascade). */
+@media (max-width: 720px) {
+  .ib-list {
+    width: 100%;
+    border-right: none;
+  }
+  .ib-wrap[data-detail='closed'] .ib-nodetail {
+    display: none;
+  }
+  .ib-wrap[data-detail='open'] .ib-list {
+    display: none;
+  }
 }
 .ib-dhead {
   padding: 16px 24px;

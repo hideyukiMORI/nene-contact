@@ -104,62 +104,64 @@ export function ManageUsers({ currentEmail }: { currentEmail?: string }): ReactN
 
       {users.length > 0 ? (
         <div className="fm-card">
-          <table className="fm-tbl">
-            <thead>
-              <tr>
-                <th>{t('users.column.email')}</th>
-                <th>{t('users.column.role')}</th>
-                <th>{t('users.column.status')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {users.map((user, i) => {
-                const isSelf = currentEmail !== undefined && user.email === currentEmail;
-                const tone = isSelf ? 'brand' : AVATAR_TONES[i % AVATAR_TONES.length];
-                return (
-                  <tr key={user.id}>
-                    <td>
-                      <div className="us-mem">
-                        <span className={`us-av ${tone ?? 'c1'}`}>
-                          {(user.email.at(0) ?? '?').toUpperCase()}
-                        </span>
-                        <div>
-                          <div className="t">
-                            {user.email}
-                            {isSelf ? <span className="us-you">{t('users.you')}</span> : null}
+          <div className="tbl-wrap">
+            <table className="fm-tbl">
+              <thead>
+                <tr>
+                  <th>{t('users.column.email')}</th>
+                  <th>{t('users.column.role')}</th>
+                  <th>{t('users.column.status')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {users.map((user, i) => {
+                  const isSelf = currentEmail !== undefined && user.email === currentEmail;
+                  const tone = isSelf ? 'brand' : AVATAR_TONES[i % AVATAR_TONES.length];
+                  return (
+                    <tr key={user.id}>
+                      <td>
+                        <div className="us-mem">
+                          <span className={`us-av ${tone ?? 'c1'}`}>
+                            {(user.email.at(0) ?? '?').toUpperCase()}
+                          </span>
+                          <div>
+                            <div className="t">
+                              {user.email}
+                              {isSelf ? <span className="us-you">{t('users.you')}</span> : null}
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </td>
-                    <td>
-                      <RoleCell
-                        user={user}
-                        onChange={(nextRole) => {
-                          updateUser(user.id, { role: nextRole });
-                        }}
-                      />
-                    </td>
-                    <td>
-                      <select
-                        className="us-role"
-                        aria-label={t('users.column.status')}
-                        value={user.status}
-                        onChange={(e) => {
-                          updateUser(user.id, { status: e.target.value as UserStatus });
-                        }}
-                      >
-                        {USER_STATUSES.map((status) => (
-                          <option key={status} value={status}>
-                            {t(`user.status.${status}`)}
-                          </option>
-                        ))}
-                      </select>
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
+                      </td>
+                      <td>
+                        <RoleCell
+                          user={user}
+                          onChange={(nextRole) => {
+                            updateUser(user.id, { role: nextRole });
+                          }}
+                        />
+                      </td>
+                      <td>
+                        <select
+                          className="us-role"
+                          aria-label={t('users.column.status')}
+                          value={user.status}
+                          onChange={(e) => {
+                            updateUser(user.id, { status: e.target.value as UserStatus });
+                          }}
+                        >
+                          {USER_STATUSES.map((status) => (
+                            <option key={status} value={status}>
+                              {t(`user.status.${status}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
         </div>
       ) : null}
 

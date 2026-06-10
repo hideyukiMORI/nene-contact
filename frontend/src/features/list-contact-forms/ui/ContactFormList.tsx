@@ -97,92 +97,94 @@ export function ContactFormList({
   return (
     <>
       <div className="fm-card">
-        <table className="fm-tbl">
-          <thead>
-            <tr>
-              <th>{t('contactForms.column.name')}</th>
-              <th>{t('contactForms.column.locales')}</th>
-              <th>{t('contactForms.column.status')}</th>
-              <th className="act" aria-label={t('contactForms.column.actions')} />
-            </tr>
-          </thead>
-          <tbody>
-            {visible.map((form) => (
-              <tr key={form.id}>
-                <td>
-                  <div className="fm-name">
-                    <span className="fm-ic">
-                      <Icon name="forms" size={19} />
-                    </span>
-                    <div>
-                      <Link className="t" to={`/contact-forms/${String(form.id)}`}>
-                        {form.name}
-                      </Link>
-                      <div className="u">
-                        {form.publicFormKey}
-                        <CopyKeyButton value={form.publicFormKey} />
+        <div className="tbl-wrap">
+          <table className="fm-tbl">
+            <thead>
+              <tr>
+                <th>{t('contactForms.column.name')}</th>
+                <th>{t('contactForms.column.locales')}</th>
+                <th>{t('contactForms.column.status')}</th>
+                <th className="act" aria-label={t('contactForms.column.actions')} />
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((form) => (
+                <tr key={form.id}>
+                  <td>
+                    <div className="fm-name">
+                      <span className="fm-ic">
+                        <Icon name="forms" size={19} />
+                      </span>
+                      <div>
+                        <Link className="t" to={`/contact-forms/${String(form.id)}`}>
+                          {form.name}
+                        </Link>
+                        <div className="u">
+                          {form.publicFormKey}
+                          <CopyKeyButton value={form.publicFormKey} />
+                        </div>
                       </div>
                     </div>
-                  </div>
-                </td>
-                <td>
-                  <span className="fm-langs">
-                    {form.locales.map((locale) => (
-                      <span key={locale} className="fm-lang">
-                        {locale}
+                  </td>
+                  <td>
+                    <span className="fm-langs">
+                      {form.locales.map((locale) => (
+                        <span key={locale} className="fm-lang">
+                          {locale}
+                        </span>
+                      ))}
+                    </span>
+                  </td>
+                  <td>
+                    {form.status === 'active' ? (
+                      <span className="fm-st live">
+                        <span className="d" />
+                        {t('contactForms.status.active')}
                       </span>
-                    ))}
-                  </span>
-                </td>
-                <td>
-                  {form.status === 'active' ? (
-                    <span className="fm-st live">
-                      <span className="d" />
-                      {t('contactForms.status.active')}
-                    </span>
-                  ) : (
-                    <span className="fm-st ended">
-                      <span className="d" />
-                      {t('contactForms.status.disabled')}
-                    </span>
-                  )}
-                </td>
-                <td>
-                  <div className="fm-actions">
-                    <button
-                      type="button"
-                      className="fm-gbtn"
-                      onClick={() => {
-                        setEmbedForm(form);
-                      }}
-                    >
-                      <Icon name="code" size={14} />
-                      {t('contactForms.embed')}
-                    </button>
-                    <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/edit`}>
-                      <Icon name="edit" size={14} />
-                      {t('contactForms.edit')}
-                    </Link>
-                    <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/channels`}>
-                      <Icon name="bell" size={14} />
-                      {t('contactForms.notify')}
-                    </Link>
-                    <button
-                      type="button"
-                      className="fm-kbtn"
-                      aria-label={t('contactForms.delete')}
-                      onClick={() => {
-                        setDeleteForm(form);
-                      }}
-                    >
-                      <Icon name="trash" size={16} />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                    ) : (
+                      <span className="fm-st ended">
+                        <span className="d" />
+                        {t('contactForms.status.disabled')}
+                      </span>
+                    )}
+                  </td>
+                  <td>
+                    <div className="fm-actions">
+                      <button
+                        type="button"
+                        className="fm-gbtn"
+                        onClick={() => {
+                          setEmbedForm(form);
+                        }}
+                      >
+                        <Icon name="code" size={14} />
+                        {t('contactForms.embed')}
+                      </button>
+                      <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/edit`}>
+                        <Icon name="edit" size={14} />
+                        {t('contactForms.edit')}
+                      </Link>
+                      <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/channels`}>
+                        <Icon name="bell" size={14} />
+                        {t('contactForms.notify')}
+                      </Link>
+                      <button
+                        type="button"
+                        className="fm-kbtn"
+                        aria-label={t('contactForms.delete')}
+                        onClick={() => {
+                          setDeleteForm(form);
+                        }}
+                      >
+                        <Icon name="trash" size={16} />
+                      </button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {embedForm !== null ? (
