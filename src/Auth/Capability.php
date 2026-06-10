@@ -17,4 +17,5 @@ enum Capability
     case ManageSettings;
     case ViewSubmissions;
     case ManageSubmissions;
+    case ViewAuditLog;
 }

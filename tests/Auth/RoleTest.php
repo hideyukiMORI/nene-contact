@@ -23,6 +23,7 @@ final class RoleTest extends TestCase
         self::assertTrue(Role::Admin->hasCapability(Capability::ManageForms));
         self::assertTrue(Role::Admin->hasCapability(Capability::ManageUsers));
         self::assertTrue(Role::Admin->hasCapability(Capability::ManageSubmissions));
+        self::assertTrue(Role::Admin->hasCapability(Capability::ViewAuditLog));
     }
 
     public function test_editor_can_only_operate_submissions(): void
@@ -32,5 +33,6 @@ final class RoleTest extends TestCase
         self::assertFalse(Role::Editor->hasCapability(Capability::ManageForms));
         self::assertFalse(Role::Editor->hasCapability(Capability::ManageOrganizations));
         self::assertFalse(Role::Editor->hasCapability(Capability::ManageUsers));
+        self::assertFalse(Role::Editor->hasCapability(Capability::ViewAuditLog));
     }
 }

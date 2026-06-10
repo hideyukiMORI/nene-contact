@@ -19,6 +19,7 @@ tags:
   - name: ContactForm
   - name: NotificationChannel
   - name: Submission
+  - name: Audit
   - name: Attachment
   - name: Handoff
   - name: Records
@@ -316,6 +317,28 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/audit-events:
+    get:
+      tags: [Audit]
+      operationId: listAuditEvents
+      summary: List the organization's audit trail
+      description: >-
+        Append-only record of every mutation (ADR 0013): who (actor_user_id), what
+        (action / entity_type / entity_id) and the sanitized before/after snapshots.
+        Scoped to the resolved organization; requires the ViewAuditLog capability
+        (admin / superadmin). Ordered newest first.
+      parameters:
+        - { $ref: '#/components/parameters/Limit' }
+        - { $ref: '#/components/parameters/Offset' }
+      responses:
+        '200':
+          description: Audit event list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuditEventListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
 
   /admin/submissions:
     get:
@@ -1300,6 +1323,37 @@ components:
           type: object
           description: Per-status totals for the current query/form/date filter (status filter ignored).
           additionalProperties: { type: integer }
+
+    AuditEventResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        actor_user_id: { type: integer, nullable: true, description: User who performed the change; null for system/CLI actions. }
+        organization_id: { type: integer, nullable: true }
+        action: { type: string, description: 'e.g. submission.status_updated, contact_form.updated, organization.created' }
+        entity_type: { type: string }
+        entity_id: { type: integer, nullable: true }
+        before:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Sanitized snapshot before the change (null for creates).
+        after:
+          type: object
+          nullable: true
+          additionalProperties: true
+          description: Sanitized snapshot after the change (null for deletes).
+        created_at: { type: string, nullable: true }
+
+    AuditEventListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/AuditEventResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
 
     UpdateSubmissionStatusRequest:
       type: object

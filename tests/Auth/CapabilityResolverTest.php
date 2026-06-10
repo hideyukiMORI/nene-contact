@@ -17,6 +17,7 @@ final class CapabilityResolverTest extends TestCase
         self::assertSame(Capability::ManageForms, CapabilityResolver::resolve('/admin/contact-forms', 'PATCH'));
         self::assertSame(Capability::ManageChannels, CapabilityResolver::resolve('/admin/notification-channels', 'POST'));
         self::assertSame(Capability::ManageSettings, CapabilityResolver::resolve('/admin/settings', 'PUT'));
+        self::assertSame(Capability::ViewAuditLog, CapabilityResolver::resolve('/admin/audit-events', 'GET'));
     }
 
     public function test_submissions_read_vs_write(): void
