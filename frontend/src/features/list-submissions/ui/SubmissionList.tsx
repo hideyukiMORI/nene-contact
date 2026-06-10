@@ -2,15 +2,20 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import { Icon } from '@/shared/ui';
+import { Icon, Pager } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
-import { SUBMISSION_STATUSES } from '@/entities/submission';
-import type { Submission, SubmissionListParams, SubmissionStatus } from '@/entities/submission';
+import { SUBMISSION_STATUSES, SUBMISSION_SORTS } from '@/entities/submission';
+import type {
+  Submission,
+  SubmissionListParams,
+  SubmissionSort,
+  SubmissionStatus,
+} from '@/entities/submission';
 import { useSubmissions } from '@/features/list-submissions/hooks/use-submissions';
 
-// The inbox is a conversation list; we load a generous window and let it scroll
-// (the design list pane has no pager). Status + cross-field search run server-side.
-const WINDOW = 100;
+// Server-paginated conversation list: status / sort / cross-field search all run
+// server-side (the list is masked, so PII is never searched or held in bulk).
+const PAGE = 20;
 
 type StatusFilter = 'all' | SubmissionStatus;
 
@@ -63,13 +68,16 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
   const forms = formsQuery.data?.items ?? [];
 
   const [status, setStatus] = useState<StatusFilter>('all');
+  const [sort, setSort] = useState<SubmissionSort>('date_desc');
+  const [page, setPage] = useState(0);
   const [qInput, setQInput] = useState('');
   const [q, setQ] = useState('');
 
-  // Debounce the search box.
+  // Debounce the search box; a new query resets to the first page.
   useEffect(() => {
     const id = window.setTimeout(() => {
       setQ(qInput);
+      setPage(0);
     }, 300);
     return () => {
       window.clearTimeout(id);
@@ -77,13 +85,17 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
   }, [qInput]);
 
   const params: SubmissionListParams = {
-    limit: WINDOW,
-    offset: 0,
+    limit: PAGE,
+    offset: page * PAGE,
+    sort,
     ...(status !== 'all' ? { status } : {}),
     ...(q !== '' ? { q } : {}),
   };
 
-  const { submissions, statusCounts, isLoading, error, refetch } = useSubmissions(params);
+  const { submissions, total, statusCounts, isLoading, error, refetch } = useSubmissions(params);
+  // Unfiltered grand total (cached) for the "matched / of total" header.
+  const grand = useSubmissions({ limit: 1, offset: 0 });
+  const grandTotal = grand.total;
 
   const formName = (id: number): string => {
     const match = forms.find((f) => f.id === id);
@@ -91,23 +103,22 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
   };
 
   const allCount = Object.values(statusCounts).reduce((sum, n) => sum + n, 0);
-  const openCount = statusCounts.open ?? 0;
+  const pageCount = Math.max(1, Math.ceil(total / PAGE));
+  const currentPage = page < pageCount ? page : pageCount - 1;
 
-  const tabs: { key: StatusFilter; label: string; count: number }[] = [
-    { key: 'all', label: t('inbox.tab.all'), count: allCount },
-    ...SUBMISSION_STATUSES.map((s) => ({
-      key: s,
-      label: t(`submission.status.${s}`),
-      count: statusCounts[s] ?? 0,
-    })),
-  ];
+  const statusLabel = (key: StatusFilter): string =>
+    key === 'all' ? t('inbox.tab.all') : t(`submission.status.${key}`);
 
   return (
     <div className="ib-list">
       <div className="ib-listhead">
         <div className="ib-htitle">
           <h1>{t('inbox.title')}</h1>
-          <span className="c">{t('inbox.unhandled', { n: String(openCount) })}</span>
+          <span className="c">
+            {total !== grandTotal
+              ? t('inbox.count.filtered', { filtered: String(total), total: String(grandTotal) })
+              : t('inbox.count.total', { total: String(total) })}
+          </span>
         </div>
         <div className="ib-search">
           <Icon name="search" size={15} />
@@ -121,20 +132,42 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
             }}
           />
         </div>
-        <div className="ib-tabs">
-          {tabs.map((tab) => (
-            <button
-              key={tab.key}
-              type="button"
-              className={'ib-tab' + (status === tab.key ? ' on' : '')}
-              onClick={() => {
-                setStatus(tab.key);
+        <div className="ib-controls">
+          <label className="ib-ctl">
+            <span>{t('inbox.ctl.status')}</span>
+            <select
+              className="select"
+              value={status}
+              onChange={(e) => {
+                setStatus(e.target.value as StatusFilter);
+                setPage(0);
               }}
             >
-              {tab.label}
-              <span className="n">{tab.count}</span>
-            </button>
-          ))}
+              <option value="all">{`${statusLabel('all')}（${String(allCount)}）`}</option>
+              {SUBMISSION_STATUSES.map((s) => (
+                <option key={s} value={s}>
+                  {`${statusLabel(s)}（${String(statusCounts[s] ?? 0)}）`}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="ib-ctl">
+            <span>{t('inbox.ctl.sort')}</span>
+            <select
+              className="select"
+              value={sort}
+              onChange={(e) => {
+                setSort(e.target.value as SubmissionSort);
+                setPage(0);
+              }}
+            >
+              {SUBMISSION_SORTS.map((s) => (
+                <option key={s} value={s}>
+                  {t(`inbox.sort.${s}`)}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
       </div>
 
@@ -187,6 +220,16 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
           })
         )}
       </div>
+
+      {!isLoading && error === null ? (
+        <Pager
+          page={currentPage}
+          pages={pageCount}
+          onPage={(p) => {
+            setPage(p);
+          }}
+        />
+      ) : null}
     </div>
   );
 }

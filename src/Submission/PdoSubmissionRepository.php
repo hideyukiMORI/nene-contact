@@ -119,7 +119,8 @@ final readonly class PdoSubmissionRepository implements
         $params[] = $offset;
 
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE ' . $where . ' ORDER BY id DESC LIMIT ? OFFSET ?',
+            'SELECT ' . self::COLUMNS . ' FROM submissions WHERE ' . $where
+            . ' ORDER BY ' . self::orderBy($filter->sort) . ' LIMIT ? OFFSET ?',
             $params,
         );
 
@@ -132,6 +133,20 @@ final readonly class PdoSubmissionRepository implements
         $row = $this->query->fetchOne('SELECT COUNT(*) AS cnt FROM submissions WHERE ' . $where, $params);
 
         return $row !== null ? (int) $row['cnt'] : 0;
+    }
+
+    /**
+     * Maps the inbox sort key to a fixed ORDER BY fragment. The result is never built from
+     * user input (allowlisted), so it is safe to interpolate; unknown keys fall back to newest.
+     */
+    private static function orderBy(?string $sort): string
+    {
+        return match ($sort) {
+            'date_asc' => 'id ASC',
+            'status' => "FIELD(status, 'open', 'in_progress', 'resolved', 'spam'), id DESC",
+            'form' => '(SELECT name FROM contact_forms WHERE contact_forms.id = submissions.contact_form_id) ASC, id DESC',
+            default => 'id DESC',
+        };
     }
 
     public function statusCounts(SubmissionFilter $filter): array
