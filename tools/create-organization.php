@@ -48,6 +48,7 @@ if ($existing !== null) {
 $useCase = $container->get(CreateOrganizationUseCaseInterface::class);
 assert($useCase instanceof CreateOrganizationUseCaseInterface);
 
-$output = $useCase->execute(new CreateOrganizationInput(name: $name, slug: $slug, plan: $plan));
+// CLI provisioning has no authenticated operator; the audit trail records actor=null.
+$output = $useCase->execute(null, new CreateOrganizationInput(name: $name, slug: $slug, plan: $plan));
 
 fwrite(STDOUT, "Created organization #{$output->id} '{$output->name}' slug={$output->slug} plan={$output->plan}\n");
