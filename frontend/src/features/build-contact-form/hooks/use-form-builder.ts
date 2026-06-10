@@ -50,7 +50,7 @@ export interface FormBuilder {
   setConsentLabel: (locale: string, value: string) => void;
   setRetentionDays: (days: number | null) => void;
   setAllowedOrigins: (origins: string[]) => void;
-  addField: (fieldType: string) => void;
+  addField: (fieldType: string) => string;
   removeField: (id: string) => void;
   moveField: (fromId: string, toId: string) => void;
   updateField: (id: string, patch: Partial<Omit<DraftField, 'id'>>) => void;
@@ -113,7 +113,9 @@ export function useFormBuilder(seed?: ContactFormDraft): FormBuilder {
       setDraft((d) => ({ ...d, allowedOrigins: origins }));
     },
     addField: (fieldType) => {
-      setDraft((d) => ({ ...d, fields: [...d.fields, newField(fieldType)] }));
+      const field = newField(fieldType);
+      setDraft((d) => ({ ...d, fields: [...d.fields, field] }));
+      return field.id;
     },
     removeField: (id) => {
       setDraft((d) => ({ ...d, fields: d.fields.filter((f) => f.id !== id) }));

@@ -37,10 +37,10 @@ describe('FormBuilder', () => {
     renderWithProviders(<FormBuilder onCreated={onCreated} />);
 
     await user.type(screen.getByLabelText('フォーム名'), 'Sales');
-    await user.click(screen.getByRole('button', { name: '+ メール' }));
+    await user.click(screen.getByRole('button', { name: 'メール' }));
     await user.type(screen.getByLabelText('フィールド名'), 'email');
     await user.type(screen.getByLabelText('ラベル（ja）'), 'メール');
-    await user.click(screen.getByRole('button', { name: '作成' }));
+    await user.click(screen.getByRole('button', { name: '保存して公開' }));
 
     await waitFor(() => {
       expect(onCreated).toHaveBeenCalledOnce();
@@ -57,7 +57,7 @@ describe('FormBuilder', () => {
 
     renderWithProviders(<FormBuilder onCreated={onCreated} />);
 
-    await user.click(screen.getByRole('button', { name: '作成' }));
+    await user.click(screen.getByRole('button', { name: '保存して公開' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('フォーム名と1つ以上のフィールド');
     expect(onCreated).not.toHaveBeenCalled();

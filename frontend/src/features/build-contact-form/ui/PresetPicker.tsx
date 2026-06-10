@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import { Button } from '@/shared/ui';
+import { Icon } from '@/shared/ui';
 import { FORM_PRESETS, type FormPreset } from '@/features/build-contact-form/presets';
 
 /**
@@ -11,23 +11,23 @@ export function PresetPicker({ onPick }: { onPick: (preset: FormPreset) => void 
   const { t } = useI18n();
 
   return (
-    <div className="nc-section">
-      <p className="nc-muted">{t('preset.pick.subtitle')}</p>
-      <ul className="nc-list-reset nc-section">
-        {FORM_PRESETS.map((preset) => (
-          <li key={preset.id} className="nc-fieldset">
-            <strong>{t(preset.nameKey)}</strong>
-            <span className="nc-muted">{t(preset.descKey)}</span>
-            <Button
-              onClick={() => {
-                onPick(preset);
-              }}
-            >
-              {t('preset.pick.use')}
-            </Button>
-          </li>
-        ))}
-      </ul>
+    <div className="bd-presets">
+      {FORM_PRESETS.map((preset) => (
+        <button
+          key={preset.id}
+          type="button"
+          className="bd-preset"
+          onClick={() => {
+            onPick(preset);
+          }}
+        >
+          <span className="pic">
+            <Icon name={preset.id === 'blank' ? 'sparkle' : 'forms'} size={18} />
+          </span>
+          <span className="pt">{t(preset.nameKey)}</span>
+          <span className="pd">{t(preset.descKey)}</span>
+        </button>
+      ))}
     </div>
   );
 }
