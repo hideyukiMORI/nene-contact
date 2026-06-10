@@ -2796,7 +2796,7 @@ h3 {
   --ex-h1-ls: -0.01em;
   --ex-shadow: 0 1px 2px rgba(20, 24, 34, 0.06);
   --ex-card-shadow: 0 1px 2px rgba(20, 24, 34, 0.05);
-  --ex-nav-w: 196px;
+  --ex-nav-w: 244px;
 
   /* canvas behind the centered app window (wide-screen framing) */
   --app-canvas: #eef0f2;
@@ -2839,26 +2839,15 @@ h3 {
 }
 
 /* ---------------- shell frame ----------------
-   The authenticated app renders as a centered, max-width window on a neutral
-   canvas (確定版). Narrow viewports fall back to full-bleed. (Auth is full-bleed
-   and is NOT wrapped in .app-canvas.) */
-.app-canvas {
-  height: 100vh;
-  background: var(--app-canvas);
-  display: grid;
-  place-items: center;
-  padding: 28px;
-  box-sizing: border-box;
-}
+   Full-bleed, no fixed-width window (reference/app.css). The sidebar steps down
+   from full → icon rail (≤1200) → off-canvas drawer (≤860). */
 .ex-frame {
   display: grid;
   grid-template-columns: var(--ex-nav-w) 1fr;
-  width: min(1240px, 100%);
-  height: 100%;
+  width: 100%;
+  height: 100vh;
   background: var(--ex-bg);
-  border-radius: 14px;
   overflow: hidden;
-  box-shadow: var(--app-window-shadow);
   font-family: var(--ex-font-ui);
   font-size: 13px;
   color: var(--ex-text);
@@ -2867,15 +2856,31 @@ h3 {
   overflow-wrap: normal;
   font-feature-settings: 'palt' 1;
 }
-@media (max-width: 900px) {
-  .app-canvas {
-    padding: 0;
-  }
-  .ex-frame {
-    width: 100%;
-    border-radius: 0;
-    box-shadow: none;
-  }
+/* drawer scrim (shown only when the drawer is open at ≤860) */
+.ex-scrim {
+  display: none;
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  border: 0;
+  background: rgba(10, 14, 20, 0.45);
+  cursor: default;
+}
+/* hamburger — hidden until the sidebar becomes a drawer (≤860) */
+.ex-hamburger {
+  display: none;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  background: var(--ex-surface);
+  place-items: center;
+  color: var(--ex-muted);
+  flex: none;
+}
+.ex-hamburger svg {
+  width: 18px;
+  height: 18px;
 }
 
 /* ---------------- sidebar ---------------- */
@@ -2895,18 +2900,13 @@ h3 {
   padding: 4px 7px 14px;
 }
 .ex-brand-mark {
-  width: 28px;
-  height: 28px;
-  border-radius: 7px;
-  background: var(--ex-brand);
-  color: var(--ex-brand-ink);
-  display: grid;
-  place-items: center;
+  width: 34px;
+  height: 34px;
   flex: none;
+  display: block;
 }
 .ex-brand-mark svg {
-  width: 16px;
-  height: 16px;
+  display: block;
 }
 .ex-brand-name {
   font-weight: 700;
@@ -2987,6 +2987,94 @@ h3 {
   border-radius: var(--ex-radius);
   font-size: 11px;
   color: var(--ex-nav-fg);
+}
+
+/* ── responsive sidebar (placed after the base nav rules so it wins the cascade) ──
+   mid: collapse to an icon rail; narrow: off-canvas drawer. (reference/app.css) */
+@media (max-width: 1200px) {
+  .ex-frame {
+    --ex-nav-w: 72px;
+  }
+  .ex-nav {
+    align-items: center;
+    padding: 16px 8px;
+  }
+  .ex-brand {
+    justify-content: center;
+    padding: 4px 0 16px;
+  }
+  .ex-brand-text,
+  .ex-navgroup,
+  .ex-navfoot,
+  .ex-navlabel {
+    display: none;
+  }
+  .ex-navitem {
+    justify-content: center;
+    padding: 11px;
+  }
+  .ex-navitem.on::before {
+    display: none;
+  }
+  .ex-navbadge {
+    position: absolute;
+    top: 1px;
+    right: 4px;
+    margin: 0;
+    min-width: 16px;
+    height: 16px;
+    font-size: 9.5px;
+  }
+}
+@media (max-width: 860px) {
+  .ex-frame {
+    grid-template-columns: 1fr;
+  }
+  .ex-nav {
+    position: fixed;
+    left: 0;
+    top: 0;
+    z-index: 50;
+    width: 248px;
+    height: 100vh;
+    transform: translateX(-100%);
+    transition: transform 0.22s ease;
+    align-items: stretch;
+    padding: 16px 12px;
+    box-shadow: 0 16px 44px rgba(18, 28, 38, 0.32);
+  }
+  .ex-brand {
+    justify-content: flex-start;
+  }
+  .ex-brand-text,
+  .ex-navgroup,
+  .ex-navfoot,
+  .ex-navlabel {
+    display: revert;
+  }
+  .ex-navitem {
+    justify-content: flex-start;
+    padding: 8px 10px;
+  }
+  .ex-navitem.on::before {
+    display: block;
+  }
+  .ex-navbadge {
+    position: static;
+    margin-left: auto;
+    min-width: 18px;
+    height: 18px;
+    font-size: 10.5px;
+  }
+  .ex-frame[data-drawer='open'] .ex-nav {
+    transform: none;
+  }
+  .ex-frame[data-drawer='open'] .ex-scrim {
+    display: block;
+  }
+  .ex-hamburger {
+    display: grid;
+  }
 }
 
 /* ---------------- main + topbar ---------------- */
@@ -3201,12 +3289,15 @@ h3 {
   padding: 0;
 }
 .ex-body {
-  padding: var(--ex-pad);
+  padding: clamp(18px, 3vw, 40px);
   overflow-y: auto;
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
 }
 .ex-h1 {
   font-family: var(--ex-font-display);
@@ -3600,15 +3691,11 @@ h3 {
 .au-mk {
   width: 34px;
   height: 34px;
-  border-radius: 9px;
-  background: var(--ex-brand);
-  display: grid;
-  place-items: center;
-  color: #fff;
+  flex: none;
+  display: block;
 }
 .au-mk svg {
-  width: 18px;
-  height: 18px;
+  display: block;
 }
 .au-name {
   font-weight: 700;
@@ -3931,12 +4018,15 @@ h3 {
 .fm-body {
   flex: 1;
   min-height: 0;
-  padding: 22px 26px;
+  padding: clamp(18px, 3vw, 40px);
   display: flex;
   flex-direction: column;
   gap: 18px;
   background: var(--ex-bg);
   overflow-y: auto;
+  width: 100%;
+  max-width: 1600px;
+  margin-inline: auto;
 }
 .fm-head {
   display: flex;
