@@ -10,6 +10,7 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Http\JsonResponseFactory;
+use NeneContact\Audit\AuditRecorderInterface;
 use Psr\Container\ContainerInterface;
 
 final readonly class OrganizationServiceProvider implements ServiceProviderInterface
@@ -62,7 +63,13 @@ final readonly class OrganizationServiceProvider implements ServiceProviderInter
                         throw new LogicException('Organization repository service is invalid.');
                     }
 
-                    return new CreateOrganizationUseCase($repo);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new CreateOrganizationUseCase($repo, $audit);
                 },
             )
             ->set(

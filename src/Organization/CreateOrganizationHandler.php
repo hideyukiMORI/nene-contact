@@ -55,7 +55,10 @@ final readonly class CreateOrganizationHandler implements RequestHandlerInterfac
             throw new ValidationException($errors);
         }
 
-        $output = $this->useCase->execute(new CreateOrganizationInput(
+        $claims = $request->getAttribute('nene2.auth.claims');
+        $actorUserId = is_array($claims) && isset($claims['uid']) && is_int($claims['uid']) ? $claims['uid'] : null;
+
+        $output = $this->useCase->execute($actorUserId, new CreateOrganizationInput(
             name: $name,
             slug: $slug,
             plan: $plan,
