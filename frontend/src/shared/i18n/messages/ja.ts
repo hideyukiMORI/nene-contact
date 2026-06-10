@@ -190,7 +190,13 @@ export const ja = {
   'contactForms.new': '新規フォーム',
   'contactForms.channels': 'チャネル',
   'contactForms.code': 'コード',
+  'contactForms.embed': '埋め込み',
   'contactForms.notify': '通知',
+  'contactForms.count': '{n} 件',
+  'contactForms.tabs.all': 'すべて',
+  'contactForms.tabs.active': '公開中',
+  'contactForms.tabs.disabled': '停止',
+  'contactForms.searchPh': 'フォーム名で検索',
   'embed.title': 'サイトに埋め込む',
   'embed.intro':
     'このコードをサイトに1行貼るだけで公開できます。下の見た目を選ぶと、コードが自動で変わります。',
