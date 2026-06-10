@@ -4,35 +4,37 @@ import { Icon } from '@/shared/ui';
 import { AuditLogList, AuditLogDetail, useAuditEvents } from '@/features/list-audit-events';
 
 // The audit log is the same two-pane as the inbox: an event list on the left and the
-// selected event's before/after detail on the right. The list already carries the full
+// selected event's before/after on the right. The list already carries the full
 // before/after snapshots, so selecting a row is local state — no second fetch.
 export function AuditLogPage(): ReactNode {
   const { t } = useI18n();
-  const { events, total, page, pageCount, setPage, isLoading, error, refetch } = useAuditEvents();
+  const audit = useAuditEvents();
   const [selectedId, setSelectedId] = useState<number | null>(null);
 
-  const selected = events.find((e) => e.id === selectedId) ?? null;
+  const selected = audit.events.find((e) => e.id === selectedId) ?? null;
 
   return (
     <div className="ib-wrap" data-detail={selected !== null ? 'open' : 'closed'}>
       <AuditLogList
-        events={events}
-        total={total}
-        page={page}
-        pageCount={pageCount}
-        isLoading={isLoading}
-        error={error !== null}
+        events={audit.events}
+        total={audit.total}
+        matched={audit.matched}
+        page={audit.page}
+        pageCount={audit.pageCount}
+        isLoading={audit.isLoading}
+        error={audit.error !== null}
+        q={audit.q}
+        period={audit.period}
+        from={audit.from}
+        to={audit.to}
         selectedId={selectedId}
         onSelect={setSelectedId}
-        onPrev={() => {
-          setSelectedId(null);
-          setPage(Math.max(0, page - 1));
-        }}
-        onNext={() => {
-          setSelectedId(null);
-          setPage(page + 1);
-        }}
-        onRetry={refetch}
+        onSearch={audit.setQ}
+        onPeriod={audit.setPeriod}
+        onFrom={audit.setFrom}
+        onTo={audit.setTo}
+        onPage={audit.setPage}
+        onRetry={audit.refetch}
       />
       {selected !== null ? (
         <AuditLogDetail event={selected} />

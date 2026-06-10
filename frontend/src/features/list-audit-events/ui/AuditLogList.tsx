@@ -1,52 +1,126 @@
 import type { ReactNode } from 'react';
 import type { AuditEvent } from '@/entities/audit-event';
 import { useI18n } from '@/shared/i18n';
-import { Icon } from '@/shared/ui';
+import { Icon, Pager } from '@/shared/ui';
 import { actorLabel } from '@/features/list-audit-events/lib/labels';
+import {
+  AUDIT_PERIODS,
+  type AuditPeriod,
+} from '@/features/list-audit-events/hooks/use-audit-events';
+
+const TODAY = new Date().toISOString().slice(0, 10);
 
 function shortTime(value: string | null): string {
   if (value === null) {
     return '';
   }
-  // Stored as "YYYY-MM-DD HH:MM:SS"; show "MM-DD HH:MM" (chars 5..15).
+  // "YYYY-MM-DD HH:MM:SS" → "MM-DD HH:MM" (chars 5..15).
   return /^\d{4}-\d{2}-\d{2}[ T]\d{2}:\d{2}/.test(value) ? value.slice(5, 16) : value;
 }
 
-export function AuditLogList({
-  events,
-  total,
-  page,
-  pageCount,
-  isLoading,
-  error,
-  selectedId,
-  onSelect,
-  onPrev,
-  onNext,
-  onRetry,
-}: {
+export interface AuditLogListProps {
   events: AuditEvent[];
   total: number;
+  matched: number;
   page: number;
   pageCount: number;
   isLoading: boolean;
   error: boolean;
+  q: string;
+  period: AuditPeriod;
+  from: string;
+  to: string;
   selectedId: number | null;
   onSelect: (id: number) => void;
-  onPrev: () => void;
-  onNext: () => void;
+  onSearch: (q: string) => void;
+  onPeriod: (p: AuditPeriod) => void;
+  onFrom: (v: string) => void;
+  onTo: (v: string) => void;
+  onPage: (page: number) => void;
   onRetry: () => void;
-}): ReactNode {
+}
+
+export function AuditLogList(props: AuditLogListProps): ReactNode {
   const { t } = useI18n();
+  const {
+    events,
+    total,
+    matched,
+    page,
+    pageCount,
+    isLoading,
+    error,
+    q,
+    period,
+    from,
+    to,
+    selectedId,
+  } = props;
 
   return (
     <div className="ib-list">
       <div className="ib-listhead">
         <div className="ib-htitle">
           <h1>{t('audit.title')}</h1>
-          <span className="c">{t('audit.count', { n: String(total) })}</span>
+          <span className="c">
+            {matched !== total
+              ? t('audit.countOf', { n: String(matched), total: String(total) })
+              : t('audit.count', { n: String(total) })}
+          </span>
         </div>
         <p className="al-lead">{t('audit.lead')}</p>
+        <div className="ib-search">
+          <Icon name="search" size={15} />
+          <input
+            type="search"
+            placeholder={t('audit.search')}
+            aria-label={t('audit.search')}
+            value={q}
+            onChange={(e) => {
+              props.onSearch(e.target.value);
+            }}
+          />
+        </div>
+        <div className="al-period">
+          <div className="seg">
+            {AUDIT_PERIODS.map((p) => (
+              <button
+                key={p}
+                type="button"
+                className={period === p ? 'on' : ''}
+                onClick={() => {
+                  props.onPeriod(p);
+                }}
+              >
+                {t(`audit.period.${p}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        {period === 'custom' ? (
+          <div className="al-range">
+            <input
+              type="date"
+              value={from}
+              max={to || TODAY}
+              aria-label={t('audit.from')}
+              onChange={(e) => {
+                props.onFrom(e.target.value);
+              }}
+            />
+            <span className="to">〜</span>
+            <input
+              type="date"
+              value={to}
+              min={from}
+              max={TODAY}
+              aria-label={t('audit.to')}
+              onChange={(e) => {
+                props.onTo(e.target.value);
+              }}
+            />
+          </div>
+        ) : null}
       </div>
 
       <div className="ib-rows">
@@ -57,7 +131,7 @@ export function AuditLogList({
             <div className="au-note" role="alert">
               {t('audit.error')}
             </div>
-            <button type="button" className="ex-btn ghost" onClick={onRetry}>
+            <button type="button" className="ex-btn ghost" onClick={props.onRetry}>
               {t('common.retry')}
             </button>
           </div>
@@ -70,7 +144,7 @@ export function AuditLogList({
               type="button"
               className={'ib-row' + (e.id === selectedId ? ' on' : '')}
               onClick={() => {
-                onSelect(e.id);
+                props.onSelect(e.id);
               }}
             >
               <div className="r1">
@@ -86,26 +160,7 @@ export function AuditLogList({
         )}
       </div>
 
-      {!isLoading && !error && pageCount > 1 ? (
-        <div className="al-pager">
-          <button type="button" className="ex-btn ghost" disabled={page === 0} onClick={onPrev}>
-            <Icon name="chevLeft" size={14} />
-            {t('common.prev')}
-          </button>
-          <span className="al-pageinfo">
-            {t('audit.page', { page: String(page + 1), pages: String(pageCount) })}
-          </span>
-          <button
-            type="button"
-            className="ex-btn ghost"
-            disabled={page + 1 >= pageCount}
-            onClick={onNext}
-          >
-            {t('common.next')}
-            <Icon name="chevRight" size={14} />
-          </button>
-        </div>
-      ) : null}
+      {!isLoading && !error ? <Pager page={page} pages={pageCount} onPage={props.onPage} /> : null}
     </div>
   );
 }

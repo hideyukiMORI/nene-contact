@@ -4,68 +4,83 @@ import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import { actorLabel } from '@/features/list-audit-events/lib/labels';
 import { diffRows } from '@/features/list-audit-events/lib/format';
+import { kindOf, kindLabelKey, diffLabelKey } from '@/features/list-audit-events/lib/kind';
 
 export function AuditLogDetail({ event }: { event: AuditEvent }): ReactNode {
   const { t } = useI18n();
+  const kind = kindOf(event.action);
   const rows = diffRows(event);
-  const isCreate = event.before === null;
-  const isDelete = event.after === null;
+  const target = `${event.entityType}${event.entityId !== null ? ` #${String(event.entityId)}` : ''}`;
+  const noChange = event.action.endsWith('.exported')
+    ? t('audit.noChangeExport')
+    : t('audit.noChangeRead');
 
   return (
-    <div className="ib-detail">
+    <div className="ib-detail al-detail">
       <div className="ib-dhead">
         <span className="ib-av">
           <Icon name="shield" size={18} />
         </span>
         <div className="ib-who">
           <div className="nm al-action">{event.action}</div>
-          <div className="sub">
-            {event.entityType}
-            {event.entityId !== null ? ` #${String(event.entityId)}` : ''}
-          </div>
+          <div className="sub">{target}</div>
+        </div>
+        <div className="ib-acts">
+          <span className={`al-kind ${kind}`}>
+            <span className="d" />
+            {t(kindLabelKey(kind))}
+          </span>
         </div>
       </div>
 
       <div className="ib-dbody">
-        <dl className="ib-meta">
-          <dt>{t('audit.field.actor')}</dt>
-          <dd>{actorLabel(event, t)}</dd>
-          <dt>{t('audit.field.entity')}</dt>
-          <dd>
-            {event.entityType}
-            {event.entityId !== null ? ` #${String(event.entityId)}` : ''}
-          </dd>
-          <dt>{t('audit.field.at')}</dt>
-          <dd>{event.createdAt ?? '—'}</dd>
-        </dl>
+        <div className="al-grid">
+          <div className="al-main">
+            <div className="al-difflab">{t(diffLabelKey(kind))}</div>
+            {rows.length === 0 ? (
+              <div className="al-nodiff">{noChange}</div>
+            ) : (
+              <ul className="al-diff">
+                {rows.map((row) => (
+                  <li key={row.key} className={`al-drow ${row.kind}`}>
+                    <span className="al-dkey">{row.key}</span>
+                    <span className="al-dval">
+                      {row.kind === 'added' ? (
+                        <span className="al-after">{row.after}</span>
+                      ) : row.kind === 'removed' ? (
+                        <span className="al-before">{row.before}</span>
+                      ) : (
+                        <>
+                          <span className="al-before">{row.before}</span>
+                          <Icon name="chevRight" size={13} />
+                          <span className="al-after">{row.after}</span>
+                        </>
+                      )}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
 
-        <div className="ib-msg-lab">
-          {isCreate ? t('audit.created') : isDelete ? t('audit.deleted') : t('audit.changed')}
+          <div className="al-rail">
+            <div className="al-rail-lab">{t('audit.eventInfo')}</div>
+            <dl className="ib-meta">
+              <dt>{t('audit.field.actor')}</dt>
+              <dd>{actorLabel(event, t)}</dd>
+              <dt>{t('audit.field.entity')}</dt>
+              <dd>{target}</dd>
+              <dt>{t('audit.field.at')}</dt>
+              <dd>{event.createdAt ?? '—'}</dd>
+              <dt>{t('audit.field.eventId')}</dt>
+              <dd>#{event.id}</dd>
+            </dl>
+            <p className="audit-note">
+              <Icon name="lock" size={11} />
+              {t('audit.immutable')}
+            </p>
+          </div>
         </div>
-        {rows.length === 0 ? (
-          <div className="al-nodiff">{t('audit.noDiff')}</div>
-        ) : (
-          <ul className="al-diff">
-            {rows.map((row) => (
-              <li key={row.key} className={`al-drow ${row.kind}`}>
-                <span className="al-dkey">{row.key}</span>
-                <span className="al-dval">
-                  {row.kind === 'added' ? (
-                    <span className="al-after">{row.after}</span>
-                  ) : row.kind === 'removed' ? (
-                    <span className="al-before">{row.before}</span>
-                  ) : (
-                    <>
-                      <span className="al-before">{row.before}</span>
-                      <Icon name="chevRight" size={13} />
-                      <span className="al-after">{row.after}</span>
-                    </>
-                  )}
-                </span>
-              </li>
-            ))}
-          </ul>
-        )}
       </div>
     </div>
   );

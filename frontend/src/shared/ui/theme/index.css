@@ -5477,23 +5477,91 @@ a.t:hover {
 }
 
 /* ============================================================
-   Pro Console — audit log (al-*), reuses the inbox two-pane shell
+   Pro Console — audit log (al-*), reuses the inbox two-pane shell.
+   Matches the nc04 design: list-head search + period filter, a
+   numbered pager with page-jump, and a 2-col detail (diff + rail).
    ============================================================ */
 .al-lead {
-  margin: 0;
-  font-size: 11.5px;
+  margin: 2px 0 0;
+  font-size: 12.5px;
   color: var(--ex-muted);
-  line-height: 1.5;
+  line-height: 1.55;
 }
 .al-action {
   font-family: var(--ex-font-mono);
   font-size: 12.5px;
   letter-spacing: -0.01em;
+  font-weight: 650;
 }
 .ib-row .al-action {
-  font-weight: 650;
   color: var(--ex-text);
 }
+
+/* period filter (segmented) + custom date range */
+.al-period {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+.al-period .seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  border-radius: 14px;
+  padding: 2px;
+  gap: 2px;
+}
+.al-period .seg button {
+  border: none;
+  background: none;
+  padding: 5px 11px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  font-family: inherit;
+}
+.al-period .seg button.on {
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  box-shadow: var(--ex-card-shadow);
+}
+.al-range {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.al-range input[type='date'] {
+  padding: 6px 9px;
+  border: 1px solid var(--ex-border-strong);
+  border-radius: var(--ex-radius);
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  color-scheme: light;
+}
+[data-theme='dark'] .al-range input[type='date'] {
+  color-scheme: dark;
+}
+.al-range input[type='date']:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ex-brand) 24%, transparent);
+}
+.al-range .to {
+  font-size: 12px;
+  color: var(--ex-faint);
+}
+
+/* numbered pager + page-jump (shared with the inbox) */
 .al-pager {
   border-top: 1px solid var(--ex-border);
   background: var(--ex-surface);
@@ -5504,10 +5572,176 @@ a.t:hover {
   gap: 8px;
   flex: none;
 }
-.al-pageinfo {
+.al-pages {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+.al-pg {
+  min-width: 30px;
+  height: 30px;
+  padding: 0 8px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  border-radius: var(--ex-radius);
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  cursor: pointer;
+  font-variant-numeric: tabular-nums;
+  font-family: inherit;
+}
+.al-pg:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-text);
+}
+.al-pg.on {
+  background: var(--ex-brand);
+  border-color: var(--ex-brand);
+  color: var(--ex-brand-ink);
+}
+.al-pg.nav {
+  color: var(--ex-faint);
+  display: grid;
+  place-items: center;
+  padding: 0;
+}
+.al-pg.nav:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.al-pg.gap {
+  border: none;
+  background: none;
+  cursor: default;
+  color: var(--ex-faint);
+  min-width: 18px;
+}
+.al-pg.gap:hover {
+  background: none;
+}
+.al-jump {
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px 11px;
   font-size: 11.5px;
   color: var(--ex-faint);
+  font-weight: 600;
+}
+.al-jump input {
+  width: 54px;
+  padding: 5px 8px;
+  border: 1px solid var(--ex-border-strong);
+  border-radius: var(--ex-radius);
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  font-family: inherit;
+  font-size: 12.5px;
+  text-align: center;
   font-variant-numeric: tabular-nums;
+}
+.al-jump input:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ex-brand) 24%, transparent);
+}
+
+/* detail: 2-col (diff + event-info rail), switched by the pane's own width */
+.al-detail {
+  container-type: inline-size;
+  container-name: audit;
+}
+.al-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.al-grid .al-rail {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  border-top: 1px solid var(--ex-border);
+  padding-top: 18px;
+}
+.al-rail-lab {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ex-faint);
+}
+.al-rail .ib-meta dt {
+  white-space: nowrap;
+}
+@container audit (min-width: 880px) {
+  .al-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 32px;
+  }
+  .al-grid .al-rail {
+    border-top: none;
+    padding-top: 0;
+    border-left: 1px solid var(--ex-border);
+    padding-left: 28px;
+  }
+}
+
+/* kind badge */
+.al-kind {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.al-kind .d {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.al-kind.created {
+  background: var(--st-done-bg);
+  color: var(--st-done-fg);
+}
+.al-kind.created .d {
+  background: var(--st-done-dot);
+}
+.al-kind.updated {
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+}
+.al-kind.updated .d {
+  background: var(--ex-brand);
+}
+.al-kind.deleted {
+  background: var(--st-spam-bg);
+  color: var(--st-spam-fg);
+}
+.al-kind.deleted .d {
+  background: var(--st-spam-dot);
+}
+.al-kind.read {
+  background: var(--ex-surface2);
+  color: var(--ex-muted);
+}
+.al-kind.read .d {
+  background: var(--ex-faint);
+}
+
+.al-difflab {
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--ex-faint);
+  margin: 4px 0 10px;
+  letter-spacing: 0.02em;
 }
 .al-diff {
   list-style: none;
@@ -5529,10 +5763,10 @@ a.t:hover {
   background: var(--ex-surface);
 }
 .al-drow.added {
-  border-left-color: var(--st-done-dot, #6a9067);
+  border-left-color: var(--st-done-dot);
 }
 .al-drow.removed {
-  border-left-color: #b6788a;
+  border-left-color: var(--st-spam-dot);
 }
 .al-drow.changed {
   border-left-color: var(--ex-brand);
@@ -5546,7 +5780,7 @@ a.t:hover {
 }
 .al-dval {
   display: flex;
-  align-items: center;
+  align-items: baseline;
   gap: 8px;
   flex-wrap: wrap;
   font-size: 13px;
@@ -5560,19 +5794,43 @@ a.t:hover {
   color: var(--ex-muted);
   text-decoration: line-through;
   text-decoration-color: color-mix(in srgb, var(--ex-muted) 50%, transparent);
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 .al-after {
   color: var(--ex-text);
   font-weight: 550;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  min-width: 0;
 }
 .al-drow.added .al-after {
-  color: var(--st-done-fg, #4f6d4d);
+  color: var(--st-done-fg);
 }
 .al-nodiff {
   font-size: 12.5px;
   color: var(--ex-faint);
+  padding: 4px 0;
+}
+.audit-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ex-faint);
+  line-height: 1.55;
+  margin: 6px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--ex-border);
+}
+.audit-note svg {
+  flex: none;
+  margin-top: 2px;
+}
+@media (max-width: 560px) {
+  .al-drow {
+    grid-template-columns: 1fr;
+    gap: 3px;
+  }
 }
 
 /* ============================================================
