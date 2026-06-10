@@ -3812,3 +3812,76 @@ h3 {
     display: none;
   }
 }
+
+/* ============================================================
+   Pro Console — dashboard helpers
+   ============================================================ */
+.dash-split {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr;
+  gap: var(--ex-pad);
+}
+.ex-row .grow {
+  flex: 1;
+  min-width: 0;
+}
+.ex-badge.spam {
+  background: #f0e1e3;
+  color: #9c5460;
+}
+.ex-badge.spam .dot {
+  background: #b6788a;
+}
+[data-theme='dark'] .ex-badge.spam {
+  background: #34161f;
+  color: #e89aa6;
+}
+.ex-stat.accent .val {
+  color: var(--ex-brand);
+}
+.ex-stat.accent .lab svg {
+  color: var(--ex-brand);
+}
+/* discrete sparkline bar heights (class-only; the trend itself is illustrative) */
+.ex-spark > i.spk-1 {
+  height: 16%;
+}
+.ex-spark > i.spk-2 {
+  height: 30%;
+}
+.ex-spark > i.spk-3 {
+  height: 44%;
+}
+.ex-spark > i.spk-4 {
+  height: 58%;
+}
+.ex-spark > i.spk-5 {
+  height: 72%;
+}
+.ex-spark > i.spk-6 {
+  height: 86%;
+}
+.ex-spark > i.spk-7 {
+  height: 100%;
+}
+.ex-recent-empty {
+  padding: 22px var(--ex-pad);
+  text-align: center;
+  color: var(--ex-faint);
+  font-size: 12px;
+}
+.ex-tbl td.right {
+  text-align: right;
+}
+.ex-tbl .ex-time {
+  color: var(--ex-faint);
+  font-size: 11px;
+  white-space: nowrap;
+}
+.ex-tbl a.nm {
+  color: var(--ex-text);
+  text-decoration: none;
+}
+.ex-tbl a.nm:hover {
+  color: var(--ex-brand);
+}
