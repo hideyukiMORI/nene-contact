@@ -60,39 +60,41 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
         ) : channels.length === 0 ? (
           <div className="fm-state">{t('channels.empty')}</div>
         ) : (
-          <table className="fm-tbl">
-            <thead>
-              <tr>
-                <th>{t('channels.column.type')}</th>
-                <th>{t('channels.column.enabled')}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {channels.map((channel) => (
-                <tr key={channel.id}>
-                  <td>
-                    <span className="ch-type">
-                      <Icon name={TYPE_ICON[channel.channelType]} size={16} />
-                      {t(`channel.type.${channel.channelType}`)}
-                    </span>
-                  </td>
-                  <td>
-                    {channel.isEnabled ? (
-                      <span className="ex-badge done">
-                        <span className="dot" />
-                        {t('channels.on')}
-                      </span>
-                    ) : (
-                      <span className="fm-st ended">
-                        <span className="d" />
-                        {t('channels.off')}
-                      </span>
-                    )}
-                  </td>
+          <div className="tbl-wrap">
+            <table className="fm-tbl">
+              <thead>
+                <tr>
+                  <th>{t('channels.column.type')}</th>
+                  <th>{t('channels.column.enabled')}</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {channels.map((channel) => (
+                  <tr key={channel.id}>
+                    <td>
+                      <span className="ch-type">
+                        <Icon name={TYPE_ICON[channel.channelType]} size={16} />
+                        {t(`channel.type.${channel.channelType}`)}
+                      </span>
+                    </td>
+                    <td>
+                      {channel.isEnabled ? (
+                        <span className="ex-badge done">
+                          <span className="dot" />
+                          {t('channels.on')}
+                        </span>
+                      ) : (
+                        <span className="fm-st ended">
+                          <span className="d" />
+                          {t('channels.off')}
+                        </span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 

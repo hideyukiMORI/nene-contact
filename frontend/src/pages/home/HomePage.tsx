@@ -140,28 +140,30 @@ export function HomePage(): ReactNode {
           {recent.length === 0 ? (
             <div className="ex-recent-empty">{t('home.recent.empty')}</div>
           ) : (
-            <table className="ex-tbl">
-              <tbody>
-                {recent.map((s) => (
-                  <tr key={s.id}>
-                    <td>
-                      <Link className="nm" to={`/submissions/${String(s.id)}`}>
-                        {formName(s.contactFormId)}
-                      </Link>
-                    </td>
-                    <td>
-                      <span className={`ex-badge ${BADGE_CLASS[s.status]}`}>
-                        <span className="dot" />
-                        {t(`submission.status.${s.status}`)}
-                      </span>
-                    </td>
-                    <td className="right">
-                      <span className="ex-time">{s.submittedAt ?? '—'}</span>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="tbl-wrap">
+              <table className="ex-tbl">
+                <tbody>
+                  {recent.map((s) => (
+                    <tr key={s.id}>
+                      <td>
+                        <Link className="nm" to={`/submissions/${String(s.id)}`}>
+                          {formName(s.contactFormId)}
+                        </Link>
+                      </td>
+                      <td>
+                        <span className={`ex-badge ${BADGE_CLASS[s.status]}`}>
+                          <span className="dot" />
+                          {t(`submission.status.${s.status}`)}
+                        </span>
+                      </td>
+                      <td className="right">
+                        <span className="ex-time">{s.submittedAt ?? '—'}</span>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
       </div>
