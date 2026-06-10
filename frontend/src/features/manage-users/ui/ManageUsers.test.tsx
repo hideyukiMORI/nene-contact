@@ -32,6 +32,8 @@ describe('ManageUsers', () => {
 
     expect(await screen.findByText('admin@example.com')).toBeInTheDocument();
 
+    // Adding a member happens through the invite modal.
+    await user.click(screen.getByRole('button', { name: 'メンバーを招待' }));
     await user.type(screen.getByLabelText('メールアドレス'), 'editor@example.com');
     await user.type(screen.getByLabelText('パスワード'), 'password123');
     await user.click(screen.getByRole('button', { name: 'ユーザーを追加' }));

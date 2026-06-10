@@ -5045,3 +5045,268 @@ h3 {
   gap: 12px;
   align-items: flex-start;
 }
+
+/* ============================================================
+   Pro Console — members (users) + modal dialog (md-*)
+   ============================================================ */
+.us-mem {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+}
+.us-av {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 14px;
+  font-family: var(--ex-font-display);
+}
+.us-av.brand {
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+}
+.us-av.c1 {
+  background: oklch(0.93 0.045 196);
+  color: oklch(0.48 0.11 196);
+}
+.us-av.c2 {
+  background: oklch(0.93 0.045 290);
+  color: oklch(0.5 0.12 290);
+}
+.us-av.c3 {
+  background: oklch(0.93 0.045 150);
+  color: oklch(0.48 0.11 150);
+}
+.us-mem .t {
+  font-weight: 650;
+  font-size: 13.5px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.us-you {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--ex-brand);
+  background: var(--ex-brand-weak);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+.us-role {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 10px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  font-size: 12.5px;
+  font-weight: 650;
+  font-family: inherit;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  white-space: nowrap;
+  cursor: pointer;
+}
+.us-role.locked {
+  border-color: transparent;
+  background: transparent;
+  padding-left: 0;
+  color: var(--ex-muted);
+}
+.us-role.locked svg {
+  width: 14px;
+  height: 14px;
+  color: var(--ex-brand);
+}
+
+/* modal dialog */
+.md-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(16, 22, 30, 0.42);
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  box-sizing: border-box;
+}
+.md-scrim {
+  position: fixed;
+  inset: 0;
+  border: 0;
+  background: transparent;
+  cursor: default;
+}
+.md-dialog {
+  position: relative;
+  width: 540px;
+  max-width: 100%;
+  max-height: 100%;
+  background: var(--ex-surface);
+  border-radius: 16px;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.34);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.md-dialog.wide {
+  width: 640px;
+}
+.md-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 20px 22px 4px;
+}
+.md-head .mi {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+}
+.md-head .mi svg {
+  width: 19px;
+  height: 19px;
+}
+.md-htext {
+  min-width: 0;
+}
+.md-head .ti {
+  font-family: var(--ex-font-display);
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--ex-text);
+  letter-spacing: -0.01em;
+}
+.md-head .ds {
+  font-size: 12.5px;
+  color: var(--ex-muted);
+  margin-top: 3px;
+  line-height: 1.55;
+}
+.md-x {
+  margin-left: auto;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--ex-radius);
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  flex: none;
+  cursor: pointer;
+}
+.md-x svg {
+  width: 15px;
+  height: 15px;
+}
+.md-body {
+  padding: 16px 22px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow: auto;
+}
+.md-field .l {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  margin-bottom: 6px;
+}
+.md-field input,
+.md-field select {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  padding: 10px 12px;
+  font-size: 13px;
+  font-family: inherit;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+}
+.md-field input:focus,
+.md-field select:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.md-note {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 12px;
+  color: var(--ex-muted);
+  background: var(--ex-surface2);
+  border-radius: var(--ex-radius);
+  padding: 10px 12px;
+}
+.md-note svg {
+  width: 15px;
+  height: 15px;
+  color: var(--ex-brand);
+  flex: none;
+}
+.md-note .u {
+  font-family: var(--ex-font-mono);
+  color: var(--ex-text);
+}
+.md-code {
+  background: #12151c;
+  border-radius: 11px;
+  padding: 15px 16px;
+  position: relative;
+}
+.md-code code {
+  display: block;
+  font-family: var(--ex-font-mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: #c5cdda;
+  white-space: pre-wrap;
+  word-break: break-all;
+  padding-right: 64px;
+}
+.md-copy {
+  position: absolute;
+  top: 11px;
+  right: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  color: #e6ebf2;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+}
+.md-copy svg {
+  width: 12px;
+  height: 12px;
+}
+.md-foot {
+  padding: 14px 22px;
+  border-top: 1px solid var(--ex-border);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  justify-content: flex-end;
+}
+.md-foot .sp {
+  flex: 1;
+}
