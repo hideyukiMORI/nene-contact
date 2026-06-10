@@ -14,6 +14,7 @@ use NeneContact\Api\ApiServiceProvider;
 use NeneContact\Attachment\AttachmentNotFoundExceptionHandler;
 use NeneContact\Attachment\AttachmentRouteRegistrar;
 use NeneContact\Attachment\AttachmentServiceProvider;
+use NeneContact\Audit\AuditRouteRegistrar;
 use NeneContact\Audit\AuditServiceProvider;
 use NeneContact\Auth\AuthRouteRegistrar;
 use NeneContact\Auth\AuthServiceProvider;
@@ -90,6 +91,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $api = $container->get(ApiRouteRegistrar::class);
                     $records = $container->get(RecordsRouteRegistrar::class);
                     $notificationChannel = $container->get(NotificationChannelRouteRegistrar::class);
+                    $audit = $container->get(AuditRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
                         throw new LogicException('Auth route registrar service is invalid.');
@@ -131,6 +133,10 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Notification channel route registrar service is invalid.');
                     }
 
+                    if (!$audit instanceof AuditRouteRegistrar) {
+                        throw new LogicException('Audit route registrar service is invalid.');
+                    }
+
                     return [
                         $auth,
                         $userAdmin,
@@ -142,6 +148,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $handoff,
                         $api,
                         $records,
+                        $audit,
                     ];
                 },
             )

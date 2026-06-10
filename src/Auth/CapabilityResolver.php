@@ -38,6 +38,10 @@ final class CapabilityResolver
             return self::isMutationMethod($method) ? Capability::ManageSubmissions : Capability::ViewSubmissions;
         }
 
+        if (str_starts_with($path, '/admin/audit-events')) {
+            return Capability::ViewAuditLog;
+        }
+
         return null;
     }
 

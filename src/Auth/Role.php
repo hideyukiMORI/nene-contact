@@ -26,7 +26,8 @@ enum Role: string
                 Capability::ManageUsers,
                 Capability::ManageForms,
                 Capability::ManageChannels,
-                Capability::ManageSettings => false,
+                Capability::ManageSettings,
+                Capability::ViewAuditLog => false,
             },
         };
     }

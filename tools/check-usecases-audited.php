@@ -26,6 +26,7 @@ $root = dirname(__DIR__) . '/src';
  */
 const READ_ONLY_USE_CASES = [
     'Api/ListAgentFormsUseCase.php' => 'lists forms for an agent (read)',
+    'Audit/ListAuditEventsUseCase.php' => 'lists audit events for the org (read)',
     'Auth/GetUserByIdUseCase.php' => 'fetches one user (read)',
     'Auth/ListUsersUseCase.php' => 'lists users (read)',
     'Auth/LoginUseCase.php' => 'verifies credentials and issues a token; no domain write',
