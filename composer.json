@@ -34,6 +34,7 @@
         "openapi": "php tools/validate-openapi.php",
         "mcp": "php tools/validate-mcp-tools.php",
         "no-physical-delete": "php tools/check-no-physical-delete.php",
+        "usecases-audited": "php tools/check-usecases-audited.php",
         "migrations:status": "phinx status -c phinx.php",
         "migrations:migrate": "phinx migrate -c phinx.php",
         "migrations:rollback": "phinx rollback -c phinx.php",
@@ -43,7 +44,8 @@
             "@cs",
             "@openapi",
             "@mcp",
-            "@no-physical-delete"
+            "@no-physical-delete",
+            "@usecases-audited"
         ]
     },
     "config": {
