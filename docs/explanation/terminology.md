@@ -114,6 +114,7 @@ Forbidden suffixes: `Controller`, `Service`, `Manager`, `Repo`.
 | `textarea` | Multi line |
 | `select` | Options list (`options_json`) |
 | `checkbox` | Boolean consent or flag |
+| `date` | Calendar date (`<input type="date">`) |
 | `file` | Attachment (bounded) |
 | `honeypot` | Anti-spam hidden field |
 

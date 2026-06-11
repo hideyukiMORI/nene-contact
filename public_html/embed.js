@@ -192,7 +192,8 @@
       } else if (field.field_type === 'file') {
         input = el('input', { type: 'file', 'class': 'nene-contact-input', name: field.name });
       } else {
-        input = el('input', { type: field.field_type === 'email' ? 'email' : 'text', 'class': 'nene-contact-input', name: field.name });
+        var inputType = field.field_type === 'email' ? 'email' : field.field_type === 'date' ? 'date' : 'text';
+        input = el('input', { type: inputType, 'class': 'nene-contact-input', name: field.name });
       }
       wrap.appendChild(input);
       var err = el('div', { 'class': 'nene-contact-error' });

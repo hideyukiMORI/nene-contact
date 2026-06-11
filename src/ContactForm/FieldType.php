@@ -21,6 +21,7 @@ enum FieldType: string
     case Textarea = 'textarea';
     case Select = 'select';
     case Checkbox = 'checkbox';
+    case Date = 'date';
     case File = 'file';
     case Honeypot = 'honeypot';
 
