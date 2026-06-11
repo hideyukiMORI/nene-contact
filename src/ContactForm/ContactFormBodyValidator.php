@@ -97,6 +97,9 @@ final readonly class ContactFormBodyValidator
             $required = (bool) ($raw['required'] ?? false);
             /** @var list<array<string, mixed>>|null $options */
             $options = is_array($raw['options'] ?? null) ? array_values(array_filter($raw['options'], 'is_array')) : null;
+            // Optional placeholder (hint text); blank collapses to null, capped to the column width.
+            $placeholder = is_string($raw['placeholder'] ?? null) ? trim((string) $raw['placeholder']) : '';
+            $placeholder = $placeholder === '' ? null : mb_substr($placeholder, 0, 255);
 
             if (FieldType::isProhibited($fieldType)) {
                 $errors[] = new ValidationError("fields.{$i}.field_type", "Field type '{$fieldType}' is prohibited (APPI compliance, charter §8).", 'prohibited');
@@ -126,6 +129,7 @@ final readonly class ContactFormBodyValidator
                 required: $required,
                 sortOrder: $sort++,
                 options: $options,
+                placeholder: $placeholder,
             );
         }
 

@@ -26,6 +26,7 @@ export interface DraftField {
   fieldType: string;
   name: string;
   label: Record<string, string>;
+  placeholder: string;
   required: boolean;
   options: DraftFieldOption[] | null;
 }

@@ -150,6 +150,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `purged_at` | `submission` | PII erased in place after grace (ADR 0016, charter §5) |
 | `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
 | `options_json` | `form_field` | per-locale option labels |
+| `placeholder` | `form_field` | optional input hint text shown in the embed (builder spec v1.0) |
 | `config_json` | `notification_channel` | encrypted at rest |
 | `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
 | `attachment_id` | `submission_link` | per-attachment targets (Vault) set this; submission-level targets (Deal) leave it null |

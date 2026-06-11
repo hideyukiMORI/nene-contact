@@ -16,7 +16,7 @@ use Nene2\Http\RequestScopedHolder;
 final readonly class PdoContactFormRepository implements ContactFormRepositoryInterface
 {
     private const FORM_COLUMNS = 'id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at';
-    private const FIELD_COLUMNS = 'id, contact_form_id, field_type, name, label_json, required, options_json, sort_order';
+    private const FIELD_COLUMNS = 'id, contact_form_id, field_type, name, placeholder, label_json, required, options_json, sort_order';
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -58,12 +58,13 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
             foreach ($form->fields as $field) {
                 $q->execute(
-                    'INSERT INTO form_fields (contact_form_id, field_type, name, label_json, required, options_json, sort_order, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    'INSERT INTO form_fields (contact_form_id, field_type, name, placeholder, label_json, required, options_json, sort_order, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     [
                         $formId,
                         $field->fieldType,
                         $field->name,
+                        $field->placeholder,
                         self::encode($field->label),
                         $field->required ? 1 : 0,
                         $field->options !== null ? self::encode($field->options) : null,
@@ -115,12 +116,13 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
             foreach ($form->fields as $field) {
                 $q->execute(
-                    'INSERT INTO form_fields (contact_form_id, field_type, name, label_json, required, options_json, sort_order, created_at, updated_at)
-                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                    'INSERT INTO form_fields (contact_form_id, field_type, name, placeholder, label_json, required, options_json, sort_order, created_at, updated_at)
+                     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                     [
                         $formId,
                         $field->fieldType,
                         $field->name,
+                        $field->placeholder,
                         self::encode($field->label),
                         $field->required ? 1 : 0,
                         $field->options !== null ? self::encode($field->options) : null,
@@ -209,6 +211,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
                 required: (bool) $row['required'],
                 sortOrder: (int) $row['sort_order'],
                 options: $options,
+                placeholder: isset($row['placeholder']) ? (string) $row['placeholder'] : null,
                 id: (int) $row['id'],
                 contactFormId: (int) $row['contact_form_id'],
             );

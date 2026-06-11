@@ -48,6 +48,7 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
     fieldType: field.field_type,
     name: field.name,
     label: field.label,
+    placeholder: field.placeholder ?? '',
     required: field.required ?? false,
     options: field.options != null ? field.options.map((option) => toDraftOption(option)) : null,
   }));
@@ -89,6 +90,7 @@ export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFo
       field_type: field.fieldType as CreateContactFormDto['fields'][number]['field_type'],
       name: field.name,
       label: field.label,
+      ...(field.placeholder.trim() !== '' ? { placeholder: field.placeholder } : {}),
       required: field.required,
       ...(field.options !== null
         ? { options: field.options.map((option) => ({ value: option.value, label: option.label })) }

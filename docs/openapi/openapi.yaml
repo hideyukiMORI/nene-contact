@@ -1101,6 +1101,7 @@ components:
             要配慮個人情報 is never a default (APPI charter §8, Definition of Done A4).
         name: { type: string }
         label: { $ref: '#/components/schemas/LocaleMap' }
+        placeholder: { type: [string, 'null'], description: 'Optional input hint text shown in the embed.' }
         required: { type: boolean }
         options: { type: [array, 'null'], items: { type: object, additionalProperties: true } }
         sort_order: { type: integer }
@@ -1156,6 +1157,7 @@ components:
               field_type: { type: string, enum: [text, email, textarea, select, checkbox, date, file, honeypot] }
               name: { type: string }
               label: { $ref: '#/components/schemas/LocaleMap' }
+              placeholder: { type: string, description: 'Optional input hint text shown in the embed.' }
               required: { type: boolean }
               options: { type: array, items: { type: object, additionalProperties: true } }
             required: [field_type, name, label]

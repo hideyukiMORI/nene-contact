@@ -29,7 +29,7 @@ function field(
   required: boolean,
   options: DraftFieldOption[] | null = null,
 ): DraftField {
-  return { id: crypto.randomUUID(), fieldType, name, label, required, options };
+  return { id: crypto.randomUUID(), fieldType, name, label, placeholder: '', required, options };
 }
 
 /** Spam-protection honeypot included on every preset (ADR 0010). */

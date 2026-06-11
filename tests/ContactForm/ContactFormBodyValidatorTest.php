@@ -52,6 +52,17 @@ final class ContactFormBodyValidatorTest extends TestCase
         self::assertNull($blank->description);
     }
 
+    public function test_field_placeholder_is_parsed_and_blank_collapses_to_null(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            ['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true, 'placeholder' => ' 例：山田 太郎 '],
+            ['field_type' => 'email', 'name' => 'email', 'label' => ['ja' => 'メール'], 'required' => false, 'placeholder' => '   '],
+        ]));
+
+        self::assertSame('例：山田 太郎', $input->fields[0]->placeholder);
+        self::assertNull($input->fields[1]->placeholder);
+    }
+
     public function test_non_honeypot_field_still_requires_a_default_locale_label(): void
     {
         $this->expectException(ValidationException::class);

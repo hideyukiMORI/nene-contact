@@ -30,6 +30,7 @@ final readonly class PublicFormSchemaResponse
                     'field_type' => $f->fieldType,
                     'name' => $f->name,
                     'label' => $f->label,
+                    'placeholder' => $f->placeholder,
                     'required' => $f->required,
                     'options' => $f->options,
                     'sort_order' => $f->sortOrder,
