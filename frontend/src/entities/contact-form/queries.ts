@@ -15,13 +15,18 @@ export function useContactFormsQuery(): UseQueryResult<ContactFormList, AppError
 }
 
 // Fetches one full form — used by the read-only detail view and as the builder edit seed
-// (ContactFormDetail is a structural superset of ContactFormDraft).
-export function useContactFormQuery(id: number): UseQueryResult<ContactFormDetail, AppError> {
+// (ContactFormDetail is a structural superset of ContactFormDraft). `enabled` lets callers
+// defer the fetch until the form id is known (e.g. the submission detail resolves it first).
+export function useContactFormQuery(
+  id: number,
+  enabled = true,
+): UseQueryResult<ContactFormDetail, AppError> {
   return useQuery<ContactFormDetail, AppError>({
     queryKey: contactFormKeys.detail(id),
     queryFn: async () =>
       toContactFormDetail(
         await apiClient.get<ContactFormDto>(`/admin/contact-forms/${String(id)}`),
       ),
+    enabled: enabled && id > 0,
   });
 }

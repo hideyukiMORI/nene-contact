@@ -46,6 +46,13 @@ data (consistent with the masked-list reasoning in ADR 0017).
 `source_url` is the embed host page URL. A page URL is not, in itself, personal data; it is
 treated as safe meta. (Operators remain the controller for what their own page URLs contain.)
 
+> **Presentation note (detail spec v1.0, #237):** the inquiry-detail design groups `source_url`
+> (送信元ページ) visually inside the collapsible *技術情報* section alongside IP/UA, rather than in
+> the always-visible reception-meta rail. This is a layout choice only — `source_url` stays in
+> the **non-audited** `toArray()` payload and is not gated behind the audited endpoint; opening
+> the section does not change what is disclosed about it. The grouping is more conservative, not
+> less, so it stays within this ADR.
+
 ### 2. Technical info (IP / User-Agent) — disclosed on demand, audited
 
 IP and User-Agent are **excluded from every default payload** — the detail response, the list,

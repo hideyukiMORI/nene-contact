@@ -25,6 +25,7 @@ export function toSubmissionDetail(dto: SubmissionDto): SubmissionDetail {
     ...toSubmission(dto),
     source: dto.source ?? 'form',
     sourceUrl: dto.source_url ?? null,
+    locale: dto.locale ?? null,
     consentLabel: dto.consent_label ?? null,
     consentGivenAt: dto.consent_given_at ?? null,
   };

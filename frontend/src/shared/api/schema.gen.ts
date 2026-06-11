@@ -738,6 +738,8 @@ export interface components {
             source?: string;
             /** @description embed host page the form was submitted from (referer); safe reception meta (ADR 0018) */
             source_url?: string | null;
+            /** @description locale the visitor submitted in (one of the form's locales); safe reception meta */
+            locale?: string | null;
             field_values?: {
                 [key: string]: unknown;
             };

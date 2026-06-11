@@ -38,6 +38,7 @@ export interface SubmissionDetail extends Submission {
   // Safe reception meta shown by default (ADR 0018).
   source: string;
   sourceUrl: string | null;
+  locale: string | null;
   consentLabel: Record<string, string> | null;
   consentGivenAt: string | null;
 }
