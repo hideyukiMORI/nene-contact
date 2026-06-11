@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { AuditEvent } from '@/entities/audit-event';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import { actorLabel } from '@/features/list-audit-events/lib/labels';
+import { actionLabel, actorLabel } from '@/features/list-audit-events/lib/labels';
 import { diffRows } from '@/features/list-audit-events/lib/format';
 import { kindOf, kindLabelKey, diffLabelKey } from '@/features/list-audit-events/lib/kind';
 
@@ -22,7 +22,7 @@ export function AuditLogDetail({ event }: { event: AuditEvent }): ReactNode {
           <Icon name="shield" size={18} />
         </span>
         <div className="ib-who">
-          <div className="nm al-action">{event.action}</div>
+          <div className="nm">{actionLabel(event.action, t)}</div>
           <div className="sub">{target}</div>
         </div>
         <div className="ib-acts">
@@ -66,6 +66,8 @@ export function AuditLogDetail({ event }: { event: AuditEvent }): ReactNode {
           <div className="rail al-rail">
             <div className="rail-lab">{t('audit.eventInfo')}</div>
             <dl className="meta">
+              <dt>{t('audit.field.action')}</dt>
+              <dd className="mono">{event.action}</dd>
               <dt>{t('audit.field.actor')}</dt>
               <dd>{actorLabel(event, t)}</dd>
               <dt>{t('audit.field.entity')}</dt>

@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import type { AuditEvent } from '@/entities/audit-event';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Pager } from '@/shared/ui';
-import { actorLabel } from '@/features/list-audit-events/lib/labels';
+import { actionLabel, actorLabel } from '@/features/list-audit-events/lib/labels';
 import {
   AUDIT_PERIODS,
   type AuditPeriod,
@@ -148,7 +148,7 @@ export function AuditLogList(props: AuditLogListProps): ReactNode {
               }}
             >
               <div className="r1">
-                <span className="nm al-action">{e.action}</span>
+                <span className="nm">{actionLabel(e.action, t)}</span>
                 <span className="time">{shortTime(e.createdAt)}</span>
               </div>
               <div className="snip">
