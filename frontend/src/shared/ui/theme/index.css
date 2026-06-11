@@ -5187,6 +5187,9 @@ a.t:hover {
   min-width: 0;
   min-height: 0;
   background: var(--ex-bg);
+  /* The 2-col detail switches on the pane's own width, not the viewport (spec §07). */
+  container-type: inline-size;
+  container-name: detail;
 }
 /* Narrow widths: the two-pane becomes a mobile master-detail. With no row
    selected the list fills the screen (hide the empty hint); with a row selected
@@ -5492,6 +5495,263 @@ a.t:hover {
   flex-direction: column;
   gap: 12px;
   align-items: flex-start;
+}
+
+/* ============================================================
+   Inquiry detail content (実装指示書 v1.0): scrolling body with a
+   field-driven center (.kv) and a reception/notes/technical rail.
+   The 2-col split is a container query on the detail pane's width.
+   ============================================================ */
+.ib-body {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: clamp(18px, 2.5vw, 28px);
+}
+.ib-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+.ib-grid .rail {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  border-top: 1px solid var(--ex-border);
+  padding-top: 18px;
+}
+@container detail (min-width: 880px) {
+  .ib-grid {
+    grid-template-columns: minmax(0, 1fr) 320px;
+    gap: 32px;
+  }
+  .ib-grid .rail {
+    border-top: none;
+    padding-top: 0;
+    border-left: 1px solid var(--ex-border);
+    padding-left: 28px;
+  }
+}
+.ib-center {
+  min-width: 0;
+}
+/* ── 送信内容（項目／値）── */
+.kv .kv-row {
+  display: grid;
+  grid-template-columns: minmax(120px, 200px) 1fr;
+  gap: 14px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--ex-border);
+  align-items: start;
+}
+.kv .kv-row:last-child {
+  border-bottom: none;
+}
+.kv .k {
+  display: flex;
+  gap: 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  min-width: 0;
+}
+.kv .k .fi {
+  width: 24px;
+  height: 24px;
+  flex: none;
+  border-radius: 6px;
+  background: var(--ex-surface2);
+  color: var(--ex-brand);
+  display: grid;
+  place-items: center;
+}
+.kv .k .ty {
+  font-weight: 600;
+  color: var(--ex-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.kv .v {
+  font-size: 13.5px;
+  color: var(--ex-text);
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.kv .v.empty {
+  color: var(--ex-faint);
+}
+@media (max-width: 560px) {
+  .kv .kv-row {
+    grid-template-columns: 1fr;
+    gap: 4px;
+  }
+}
+.file-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  padding: 6px 10px;
+  font-size: 12.5px;
+}
+.file-chip .fn {
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.file-chip .fs {
+  color: var(--ex-faint);
+  font-size: 11px;
+}
+/* ── レール共通 ── */
+.rail-lab {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ex-faint);
+}
+.rail-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 4px;
+}
+.rm {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  font-size: 12.5px;
+  align-items: baseline;
+}
+.rm > span {
+  color: var(--ex-faint);
+  font-weight: 600;
+  white-space: nowrap;
+  flex: none;
+}
+.rm > b {
+  font-weight: 600;
+  text-align: right;
+  overflow-wrap: anywhere;
+  min-width: 0;
+}
+.rm > b.mono {
+  font-family: var(--ex-font-mono);
+}
+.rm > b.ua {
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.5;
+  text-align: left;
+}
+/* ── メモ ── */
+.memo-list {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 14px;
+}
+.memo-item {
+  padding: 11px 0;
+  border-bottom: 1px solid var(--ex-border);
+  font-size: 13px;
+  line-height: 1.6;
+}
+.memo-item:last-child {
+  border-bottom: none;
+}
+.memo-item .at {
+  display: block;
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 3px;
+}
+.memo-empty {
+  font-size: 12.5px;
+  color: var(--ex-faint);
+  padding: 6px 0 12px;
+}
+.memo-add {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.memo-add textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 64px;
+  padding: 9px 11px;
+  border: 1px solid var(--ex-border-strong);
+  border-radius: var(--ex-radius);
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  font-family: inherit;
+  font-size: 13px;
+  resize: vertical;
+}
+.memo-add textarea:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+/* ── 技術情報（折りたたみ）── */
+.tech {
+  margin-top: 14px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  overflow: hidden;
+}
+.tech > summary {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 10px 12px;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  cursor: pointer;
+  list-style: none;
+  background: var(--ex-surface2);
+}
+.tech > summary::-webkit-details-marker {
+  display: none;
+}
+.tech[open] > summary {
+  border-bottom: 1px solid var(--ex-border);
+}
+.tech-body {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.tech-body .rm {
+  flex-direction: column;
+  gap: 2px;
+  align-items: stretch;
+}
+.tech-body .rm > b {
+  font-size: 11px;
+  text-align: left;
+}
+.audit-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  font-size: 11px;
+  color: var(--ex-faint);
+  line-height: 1.55;
+  margin: 6px 0 0;
+  padding-top: 8px;
+  border-top: 1px solid var(--ex-border);
+}
+.audit-note svg {
+  flex: none;
+  margin-top: 2px;
 }
 
 /* ============================================================
