@@ -1188,6 +1188,7 @@ components:
         status: { type: string, enum: [open, in_progress, resolved, spam] }
         source: { type: string, description: "origin: form (public/embed) or service (concierge/import/api)" }
         source_url: { type: [string, 'null'], description: "embed host page the form was submitted from (referer); safe reception meta (ADR 0018)" }
+        locale: { type: [string, 'null'], description: "locale the visitor submitted in (one of the form's locales); safe reception meta" }
         field_values: { type: object, additionalProperties: true }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         consent_given_at: { type: [string, 'null'], format: date-time }

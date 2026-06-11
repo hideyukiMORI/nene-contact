@@ -101,7 +101,7 @@ final class SubmitPublicFormUseCaseTest extends TestCase
         };
 
         $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($auditRepo), $notifier);
-        $submission = $useCase->execute($form, ['email' => 'visitor@example.com'], '203.0.113.9', 'curl/8', 'https://shop.example.com/contact');
+        $submission = $useCase->execute($form, ['email' => 'visitor@example.com'], '203.0.113.9', 'curl/8', 'https://shop.example.com/contact', 'ja');
 
         self::assertCount(1, $repo->created);
         self::assertSame(7, $repo->created[0]->organizationId);
@@ -111,6 +111,8 @@ final class SubmitPublicFormUseCaseTest extends TestCase
         // Reception meta (ADR 0018): the embed host page is persisted alongside ip/user-agent.
         self::assertSame('https://shop.example.com/contact', $repo->created[0]->sourceUrl);
         self::assertSame('https://shop.example.com/contact', $submission->sourceUrl);
+        self::assertSame('ja', $repo->created[0]->locale);
+        self::assertSame('ja', $submission->locale);
         // source_url is non-PII and must NOT leak into the redacted audit snapshot.
         self::assertStringNotContainsString('shop.example.com', json_encode($auditRepo->events[0]->after, JSON_THROW_ON_ERROR));
 

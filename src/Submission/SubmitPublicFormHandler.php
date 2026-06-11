@@ -103,7 +103,10 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
         // widget sends `source_url`; fall back to the Referer header when it is absent.
         $sourceUrl = $this->sourceUrl($body['source_url'] ?? null, $request->getHeaderLine('Referer'));
 
-        $submission = $this->useCase->execute($form, $values, $ip, $userAgent, $sourceUrl);
+        // Locale the visitor submitted in — accepted only when it is one of the form's locales.
+        $locale = $this->locale($body['locale'] ?? null, $form);
+
+        $submission = $this->useCase->execute($form, $values, $ip, $userAgent, $sourceUrl, $locale);
 
         // Link any attachments uploaded for this form to the new submission (D12). Invalid
         // or already-linked ids are ignored — they never fail the submission.
@@ -137,6 +140,15 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
         }
 
         return mb_substr($candidate, 0, 1024);
+    }
+
+    /**
+     * Accepts the submitted locale only when it is one of the form's declared locales;
+     * anything else (unknown, spoofed, absent) is dropped to null.
+     */
+    private function locale(mixed $value, ContactForm $form): ?string
+    {
+        return is_string($value) && in_array($value, $form->locales, true) ? $value : null;
     }
 
     private function originAllowed(ServerRequestInterface $request, ContactForm $form): bool

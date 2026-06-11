@@ -22,7 +22,7 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
     /**
      * @param array<string, mixed> $fieldValues
      */
-    public function execute(ContactForm $form, array $fieldValues, ?string $ip, ?string $userAgent, ?string $sourceUrl = null): Submission
+    public function execute(ContactForm $form, array $fieldValues, ?string $ip, ?string $userAgent, ?string $sourceUrl = null, ?string $locale = null): Submission
     {
         if ($form->id === null) {
             throw new LogicException('Cannot submit against an unsaved form.');
@@ -42,6 +42,7 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             ip: $ip,
             userAgent: $userAgent,
             sourceUrl: $sourceUrl,
+            locale: $locale,
             consentLabel: $consentLabel,
             consentGivenAt: $consentGivenAt,
         ));
@@ -54,6 +55,7 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             ip: $ip,
             userAgent: $userAgent,
             sourceUrl: $sourceUrl,
+            locale: $locale,
             consentLabel: $consentLabel,
             consentGivenAt: $consentGivenAt,
             id: $id,

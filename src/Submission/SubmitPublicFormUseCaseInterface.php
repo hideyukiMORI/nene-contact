@@ -11,5 +11,5 @@ interface SubmitPublicFormUseCaseInterface
     /**
      * @param array<string, mixed> $fieldValues
      */
-    public function execute(ContactForm $form, array $fieldValues, ?string $ip, ?string $userAgent, ?string $sourceUrl = null): Submission;
+    public function execute(ContactForm $form, array $fieldValues, ?string $ip, ?string $userAgent, ?string $sourceUrl = null, ?string $locale = null): Submission;
 }
