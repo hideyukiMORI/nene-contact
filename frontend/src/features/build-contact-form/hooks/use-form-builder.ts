@@ -17,6 +17,7 @@ function newField(fieldType: string): DraftField {
     // one so submissions/embeds have a usable name without the operator managing it.
     name: `field_${id.slice(0, 8)}`,
     label: {},
+    placeholder: '',
     required: false,
     options: fieldType === 'select' ? [] : null,
   };

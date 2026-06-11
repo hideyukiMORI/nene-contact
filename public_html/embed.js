@@ -181,9 +181,11 @@
       }
       wrap.appendChild(label);
 
+      var ph = typeof field.placeholder === 'string' ? field.placeholder : '';
       var input;
       if (field.field_type === 'textarea') {
         input = el('textarea', { 'class': 'nene-contact-textarea', name: field.name });
+        if (ph) { input.setAttribute('placeholder', ph); }
       } else if (field.field_type === 'select') {
         input = el('select', { 'class': 'nene-contact-select', name: field.name });
         input.appendChild(el('option', { value: '' }, ''));
@@ -199,6 +201,7 @@
       } else {
         var inputType = field.field_type === 'email' ? 'email' : field.field_type === 'date' ? 'date' : 'text';
         input = el('input', { type: inputType, 'class': 'nene-contact-input', name: field.name });
+        if (ph) { input.setAttribute('placeholder', ph); }
       }
       wrap.appendChild(input);
       var err = el('div', { 'class': 'nene-contact-error' });

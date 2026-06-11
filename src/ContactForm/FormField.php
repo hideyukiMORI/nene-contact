@@ -17,6 +17,7 @@ final readonly class FormField
         public bool $required,
         public int $sortOrder,
         public ?array $options = null,
+        public ?string $placeholder = null,
         public ?int $id = null,
         public ?int $contactFormId = null,
     ) {

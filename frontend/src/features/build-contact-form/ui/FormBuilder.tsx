@@ -52,9 +52,8 @@ export function FormBuilder({
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  // Preview-only state — the API has no column for these yet, so they drive the live canvas
-  // but are not persisted on save (per-field placeholder, public path).
-  const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
+  // Preview-only state — the API has no column for the public path yet, so it drives the
+  // live canvas but is not persisted on save.
   const [publicPath, setPublicPath] = useState('');
 
   const sensors = useSensors(
@@ -74,7 +73,7 @@ export function FormBuilder({
     const keys = FIELD_DEFAULT_KEYS[fieldType];
     if (keys !== undefined) {
       builder.setFieldLabel(id, locale, t(keys.label));
-      setPlaceholders((p) => ({ ...p, [id]: t(keys.placeholder) }));
+      builder.updateField(id, { placeholder: t(keys.placeholder) });
     }
     setSelectedId(id);
   };
@@ -82,7 +81,6 @@ export function FormBuilder({
   const deleteField = (id: string): void => {
     const remaining = draft.fields.filter((f) => f.id !== id);
     builder.removeField(id);
-    setPlaceholders((p) => Object.fromEntries(Object.entries(p).filter(([key]) => key !== id)));
     if (selectedId === id) {
       setSelectedId(remaining[0]?.id ?? null);
     }
@@ -108,7 +106,7 @@ export function FormBuilder({
       : t(`builder.type.${field.fieldType}` as MessageKey);
   };
   const fieldPlaceholder = (field: DraftField): string =>
-    placeholders[field.id] ?? defaultPlaceholder(field.fieldType, t);
+    field.placeholder !== '' ? field.placeholder : defaultPlaceholder(field.fieldType, t);
 
   return (
     <div className="fb-page">
@@ -220,7 +218,7 @@ export function FormBuilder({
           <SelectedFieldCard
             field={selected}
             locale={locale}
-            placeholder={selected !== null ? fieldPlaceholder(selected) : ''}
+            placeholder={selected?.placeholder ?? ''}
             onLabel={(v) => {
               if (selected !== null) {
                 builder.setFieldLabel(selected.id, locale, v);
@@ -228,7 +226,7 @@ export function FormBuilder({
             }}
             onPlaceholder={(v) => {
               if (selected !== null) {
-                setPlaceholders((p) => ({ ...p, [selected.id]: v }));
+                builder.updateField(selected.id, { placeholder: v });
               }
             }}
             onRequired={(v) => {

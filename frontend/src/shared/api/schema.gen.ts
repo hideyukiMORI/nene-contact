@@ -665,6 +665,8 @@ export interface components {
             field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
             name: string;
             label: components["schemas"]["LocaleMap"];
+            /** @description Optional input hint text shown in the embed. */
+            placeholder?: string | null;
             required?: boolean;
             options?: {
                 [key: string]: unknown;
@@ -713,6 +715,8 @@ export interface components {
                 field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
                 name: string;
                 label: components["schemas"]["LocaleMap"];
+                /** @description Optional input hint text shown in the embed. */
+                placeholder?: string;
                 required?: boolean;
                 options?: {
                     [key: string]: unknown;
