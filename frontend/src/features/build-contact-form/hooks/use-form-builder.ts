@@ -8,23 +8,14 @@ import type { AppError } from '@/shared/api/errors';
 import type { ContactForm, ContactFormDraft, DraftField } from '@/entities/contact-form';
 import type { SupportedLocale } from '@/shared/i18n/locales';
 
-// Field types offered by the palette — the closed allowlist (the API rejects others; My
-// Number / card types are structurally absent, charter §8 / ADR 0016).
-export const PALETTE_FIELD_TYPES = [
-  'text',
-  'email',
-  'textarea',
-  'select',
-  'checkbox',
-  'file',
-  'honeypot',
-] as const;
-
 function newField(fieldType: string): DraftField {
+  const id = crypto.randomUUID();
   return {
-    id: crypto.randomUUID(),
+    id,
     fieldType,
-    name: '',
+    // The builder UI no longer exposes the field key (spec v1.0); generate a stable, unique
+    // one so submissions/embeds have a usable name without the operator managing it.
+    name: `field_${id.slice(0, 8)}`,
     label: {},
     required: false,
     options: fieldType === 'select' ? [] : null,

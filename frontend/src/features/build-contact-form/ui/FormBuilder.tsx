@@ -13,29 +13,25 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { useState, type ReactNode } from 'react';
-import { SUPPORTED_LOCALES, type SupportedLocale } from '@/shared/i18n/locales';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import type { IconName } from '@/shared/ui';
-import type { ContactFormDraft, DraftField } from '@/entities/contact-form';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import {
-  PALETTE_FIELD_TYPES,
-  useFormBuilder,
-} from '@/features/build-contact-form/hooks/use-form-builder';
+import type { ContactFormDraft, DraftField } from '@/entities/contact-form';
+import { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
 import { SortableFieldCard } from '@/features/build-contact-form/ui/SortableFieldCard';
+import {
+  FIELD_DEFAULT_KEYS,
+  FIELD_TYPE_ICON,
+  PALETTE,
+} from '@/features/build-contact-form/lib/field-types';
 
-const TYPE_ICON: Record<string, IconName> = {
-  text: 'text',
-  email: 'mail',
-  textarea: 'lines',
-  select: 'list',
-  checkbox: 'check',
-  file: 'file',
-  honeypot: 'lock',
-};
+type Builder = ReturnType<typeof useFormBuilder>;
+type Translate = (key: MessageKey, params?: Record<string, string>) => string;
 
-type PanelTab = 'field' | 'form';
+function defaultPlaceholder(fieldType: string, t: Translate): string {
+  const keys = FIELD_DEFAULT_KEYS[fieldType];
+  return keys !== undefined ? t(keys.placeholder) : '';
+}
 
 export function FormBuilder({
   onCreated,
@@ -52,9 +48,15 @@ export function FormBuilder({
   const builder = useFormBuilder(initialDraft, formId);
   const isEditing = formId !== undefined;
   const { draft } = builder;
+  const locale = draft.defaultLocale;
+
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [panelTab, setPanelTab] = useState<PanelTab>('field');
+  // Preview-only state — the API has no column for these yet, so they drive the live canvas
+  // but are not persisted on save (form description, per-field placeholder, public path).
+  const [description, setDescription] = useState('');
+  const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
+  const [publicPath, setPublicPath] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -70,8 +72,21 @@ export function FormBuilder({
 
   const addField = (fieldType: string): void => {
     const id = builder.addField(fieldType);
+    const keys = FIELD_DEFAULT_KEYS[fieldType];
+    if (keys !== undefined) {
+      builder.setFieldLabel(id, locale, t(keys.label));
+      setPlaceholders((p) => ({ ...p, [id]: t(keys.placeholder) }));
+    }
     setSelectedId(id);
-    setPanelTab('field');
+  };
+
+  const deleteField = (id: string): void => {
+    const remaining = draft.fields.filter((f) => f.id !== id);
+    builder.removeField(id);
+    setPlaceholders((p) => Object.fromEntries(Object.entries(p).filter(([key]) => key !== id)));
+    if (selectedId === id) {
+      setSelectedId(remaining[0]?.id ?? null);
+    }
   };
 
   const onSubmit = (): void => {
@@ -87,38 +102,36 @@ export function FormBuilder({
 
   const selected = draft.fields.find((f) => f.id === selectedId) ?? null;
 
+  const fieldLabel = (field: DraftField): string => {
+    const raw = field.label[locale];
+    return raw !== undefined && raw.trim() !== ''
+      ? raw
+      : t(`builder.type.${field.fieldType}` as MessageKey);
+  };
+  const fieldPlaceholder = (field: DraftField): string =>
+    placeholders[field.id] ?? defaultPlaceholder(field.fieldType, t);
+
   return (
-    <div className="bd-editor">
-      <div className="bd-toolbar">
-        <button
-          type="button"
-          className="bd-back"
-          aria-label={t('builder.changeTemplate')}
-          onClick={onBack}
-        >
-          <Icon name="arrowLeft" size={16} />
+    <div className="fb-page">
+      <button type="button" className="back-link" onClick={onBack}>
+        <Icon name="chevLeft" size={15} />
+        {t('builder.backToList')}
+      </button>
+
+      <div className="page-head">
+        <div style={{ flex: 1, minWidth: '180px' }}>
+          <h1>{isEditing ? t('builder.editForm') : t('builder.newForm')}</h1>
+          <p className="lead">{t('builder.lead')}</p>
+        </div>
+        <button type="button" className="ex-btn ghost" onClick={onBack}>
+          {t('builder.cancel')}
         </button>
-        <span className="bd-tcrumb">{t('builder.formCrumb')} ›</span>
-        <input
-          className="bd-tname"
-          aria-label={t('builder.formName')}
-          value={draft.name}
-          placeholder={t('builder.untitled')}
-          onChange={(e) => {
-            builder.setName(e.target.value);
-          }}
-        />
-        <span className="fm-st ended">
-          <span className="d" />
-          {t('builder.statusDraft')}
-        </span>
-        <span className="sp" />
         <span className="ex-btn ghost">
-          <Icon name="eye" size={14} />
+          <Icon name="eye" size={15} />
           {t('builder.preview')}
         </span>
         <button type="button" className="ex-btn" disabled={builder.isPending} onClick={onSubmit}>
-          <Icon name="check" size={14} />
+          <Icon name="check" size={15} />
           {builder.isPending
             ? t('builder.creating')
             : isEditing
@@ -127,13 +140,40 @@ export function FormBuilder({
         </button>
       </div>
 
-      <div className="bd-wrap">
-        <div className="bd-canvas">
-          <div className="bd-sheet">
-            <div className="bd-sheethead">
-              <div className="bd-ftitle">
-                {draft.name.trim() === '' ? t('builder.untitled') : draft.name}
-              </div>
+      {validationMessage !== null ? (
+        <div className="au-note" role="alert" style={{ marginBottom: '16px' }}>
+          {validationMessage}
+        </div>
+      ) : null}
+      {builder.error !== null ? (
+        <div className="au-note" role="alert" style={{ marginBottom: '16px' }}>
+          {t('builder.error')}
+        </div>
+      ) : null}
+
+      <div className="fb-grid">
+        <div className="fb-canvas">
+          <div className="fb-sheet">
+            <div className="fb-sheet-head">
+              <input
+                className="fb-title-in"
+                aria-label={t('builder.formName')}
+                value={draft.name}
+                placeholder={t('builder.untitled')}
+                onChange={(e) => {
+                  builder.setName(e.target.value);
+                }}
+              />
+              <textarea
+                className="fb-desc-in"
+                rows={1}
+                aria-label={t('builder.description')}
+                value={description}
+                placeholder={t('builder.descPlaceholder')}
+                onChange={(e) => {
+                  setDescription(e.target.value);
+                }}
+              />
             </div>
 
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -145,11 +185,14 @@ export function FormBuilder({
                   <SortableFieldCard
                     key={field.id}
                     field={field}
-                    defaultLocale={draft.defaultLocale}
+                    label={fieldLabel(field)}
+                    placeholder={fieldPlaceholder(field)}
                     selected={field.id === selectedId}
                     onSelect={() => {
                       setSelectedId(field.id);
-                      setPanelTab('field');
+                    }}
+                    onDelete={() => {
+                      deleteField(field.id);
                     }}
                   />
                 ))}
@@ -158,7 +201,7 @@ export function FormBuilder({
 
             <button
               type="button"
-              className="bd-add"
+              className="fb-add"
               onClick={() => {
                 addField('text');
               }}
@@ -166,171 +209,199 @@ export function FormBuilder({
               <Icon name="plus" size={15} />
               {t('builder.addField')}
             </button>
-
-            {validationMessage !== null ? (
-              <div className="au-note" role="alert">
-                {validationMessage}
-              </div>
-            ) : null}
-            {builder.error !== null ? (
-              <div className="au-note" role="alert">
-                {t('builder.error')}
-              </div>
-            ) : null}
           </div>
         </div>
 
-        <div className="bd-panel">
-          <div className="bd-ptabs">
-            <button
-              type="button"
-              className={'bd-ptab' + (panelTab === 'field' ? ' on' : '')}
-              onClick={() => {
-                setPanelTab('field');
-              }}
-            >
-              {t('builder.fieldSettings')}
-            </button>
-            <button
-              type="button"
-              className={'bd-ptab' + (panelTab === 'form' ? ' on' : '')}
-              onClick={() => {
-                setPanelTab('form');
-              }}
-            >
-              {t('builder.formSettings')}
-            </button>
-          </div>
-
-          <div className="bd-psecs">
-            {panelTab === 'field' ? (
-              <>
-                {selected !== null ? (
-                  <FieldSettings
-                    field={selected}
-                    locales={draft.locales}
-                    onName={(v) => {
-                      builder.updateField(selected.id, { name: v });
-                    }}
-                    onLabel={(loc, v) => {
-                      builder.setFieldLabel(selected.id, loc, v);
-                    }}
-                    onRequired={(v) => {
-                      builder.updateField(selected.id, { required: v });
-                    }}
-                    onOptions={(values) => {
-                      builder.setFieldOptionValues(selected.id, values);
-                    }}
-                    onRemove={() => {
-                      builder.removeField(selected.id);
-                      setSelectedId(null);
-                    }}
-                  />
-                ) : (
-                  <div className="bd-psec">
-                    <h4>{t('builder.selectedField')}</h4>
-                    <p className="bd-hint">{t('builder.noSelection')}</p>
-                  </div>
-                )}
-                <div className="bd-psec">
-                  <h4>{t('builder.addField')}</h4>
-                  <div className="bd-pal">
-                    {PALETTE_FIELD_TYPES.map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        className="bd-palitem"
-                        onClick={() => {
-                          addField(type);
-                        }}
-                      >
-                        <Icon name={TYPE_ICON[type] ?? 'text'} size={16} />
-                        {t(`builder.type.${type}`)}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              </>
-            ) : (
-              <FormSettings builder={builder} />
-            )}
-          </div>
+        <div className="fb-panel">
+          <FormSettingsCard
+            builder={builder}
+            publicPath={publicPath}
+            onPublicPath={setPublicPath}
+          />
+          <SelectedFieldCard
+            field={selected}
+            locale={locale}
+            placeholder={selected !== null ? fieldPlaceholder(selected) : ''}
+            onLabel={(v) => {
+              if (selected !== null) {
+                builder.setFieldLabel(selected.id, locale, v);
+              }
+            }}
+            onPlaceholder={(v) => {
+              if (selected !== null) {
+                setPlaceholders((p) => ({ ...p, [selected.id]: v }));
+              }
+            }}
+            onRequired={(v) => {
+              if (selected !== null) {
+                builder.updateField(selected.id, { required: v });
+              }
+            }}
+            onOptions={(values) => {
+              if (selected !== null) {
+                builder.setFieldOptionValues(selected.id, values);
+              }
+            }}
+          />
+          <PaletteCard onAdd={addField} />
         </div>
       </div>
     </div>
   );
 }
 
-function FieldSettings({
-  field,
-  locales,
-  onName,
-  onLabel,
-  onRequired,
-  onOptions,
-  onRemove,
+function Switch({
+  on,
+  label,
+  onToggle,
 }: {
-  field: DraftField;
-  locales: SupportedLocale[];
-  onName: (v: string) => void;
-  onLabel: (locale: string, v: string) => void;
-  onRequired: (v: boolean) => void;
-  onOptions: (values: string[]) => void;
-  onRemove: () => void;
+  on: boolean;
+  label: string;
+  onToggle: () => void;
+}): ReactNode {
+  return (
+    <button
+      type="button"
+      className={'switch' + (on ? '' : ' off')}
+      role="switch"
+      aria-checked={on}
+      aria-label={label}
+      onClick={onToggle}
+    />
+  );
+}
+
+function FormSettingsCard({
+  builder,
+  publicPath,
+  onPublicPath,
+}: {
+  builder: Builder;
+  publicPath: string;
+  onPublicPath: (v: string) => void;
 }): ReactNode {
   const { t } = useI18n();
-  const isHoneypot = field.fieldType === 'honeypot';
+  const { draft } = builder;
 
   return (
-    <div className="bd-psec">
-      <h4>{t('builder.selectedField')}</h4>
-      <div className="bd-frow">
-        <span className="l">{t('builder.fieldType')}</span>
-        <span className="bd-typechip">
-          <Icon name={TYPE_ICON[field.fieldType] ?? 'text'} size={15} />
-          {t(`builder.type.${field.fieldType}` as MessageKey)}
-        </span>
+    <div className="card card-pad">
+      <h4 className="fb-psec-h">
+        <Icon name="settings" size={15} />
+        {t('builder.formSettings')}
+      </h4>
+      <div className="fb-frow">
+        <label className="l" htmlFor="fb-form-name">
+          {t('builder.formName')}
+        </label>
+        <input
+          id="fb-form-name"
+          className="input"
+          value={draft.name}
+          onChange={(e) => {
+            builder.setName(e.target.value);
+          }}
+        />
       </div>
+      <div className="fb-frow">
+        <span className="l">{t('builder.publicPath')}</span>
+        <div className="fb-affix">
+          <span className="pre">{t('builder.publicPathPrefix')}</span>
+          <input
+            aria-label={t('builder.publicPath')}
+            value={publicPath}
+            onChange={(e) => {
+              onPublicPath(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''));
+            }}
+          />
+        </div>
+      </div>
+      <div className="fb-frow">
+        <div className="fb-toggle-row">
+          <div className="info">
+            <div className="t">{t('builder.consentTitle')}</div>
+            <div className="d">{t('builder.consentDesc')}</div>
+          </div>
+          <Switch
+            on={draft.consentRequired}
+            label={t('builder.consentTitle')}
+            onToggle={builder.toggleConsent}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}
 
-      {isHoneypot ? (
-        <p className="bd-hint">{t('builder.type.honeypot')}</p>
+function SelectedFieldCard({
+  field,
+  locale,
+  placeholder,
+  onLabel,
+  onPlaceholder,
+  onRequired,
+  onOptions,
+}: {
+  field: DraftField | null;
+  locale: string;
+  placeholder: string;
+  onLabel: (v: string) => void;
+  onPlaceholder: (v: string) => void;
+  onRequired: (v: boolean) => void;
+  onOptions: (values: string[]) => void;
+}): ReactNode {
+  const { t } = useI18n();
+
+  return (
+    <div className="card card-pad">
+      <h4 className="fb-psec-h">
+        <Icon name="edit" size={15} />
+        {t('builder.selectedField')}
+      </h4>
+      {field === null ? (
+        <p className="fb-empty-sel">{t('builder.noSelection')}</p>
       ) : (
         <>
-          <div className="bd-frow">
-            <label className="l" htmlFor={`f-name-${field.id}`}>
-              {t('builder.fieldName')}
+          <div className="fb-frow">
+            <span className="l">{t('builder.fieldType')}</span>
+            <span className="fb-typechip">
+              <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={15} />
+              {t(`builder.type.${field.fieldType}` as MessageKey)}
+            </span>
+          </div>
+          <div className="fb-frow">
+            <label className="l" htmlFor="fb-field-label">
+              {t('builder.fieldLabel')}
             </label>
             <input
-              id={`f-name-${field.id}`}
-              value={field.name}
+              id="fb-field-label"
+              className="input"
+              value={field.label[locale] ?? ''}
               onChange={(e) => {
-                onName(e.target.value);
+                onLabel(e.target.value);
               }}
             />
           </div>
-
-          {locales.map((locale) => (
-            <div className="bd-frow" key={locale}>
-              <label className="l" htmlFor={`f-label-${field.id}-${locale}`}>
-                {t('builder.label', { locale })}
-              </label>
-              <input
-                id={`f-label-${field.id}-${locale}`}
-                value={field.label[locale] ?? ''}
-                onChange={(e) => {
-                  onLabel(locale, e.target.value);
-                }}
-              />
-            </div>
-          ))}
-
+          <div className="fb-frow">
+            <label className="l" htmlFor="fb-field-ph">
+              {t('builder.placeholder')}
+            </label>
+            <input
+              id="fb-field-ph"
+              className="input"
+              value={placeholder}
+              onChange={(e) => {
+                onPlaceholder(e.target.value);
+              }}
+            />
+          </div>
           {field.fieldType === 'select' ? (
-            <div className="bd-frow">
-              <label className="l" htmlFor={`f-opts-${field.id}`}>
+            <div className="fb-frow">
+              <label className="l" htmlFor="fb-field-opts">
                 {t('builder.options')}
               </label>
               <textarea
-                id={`f-opts-${field.id}`}
+                id="fb-field-opts"
+                className="input"
                 value={(field.options ?? []).map((o) => o.value).join('\n')}
                 onChange={(e) => {
                   onOptions(
@@ -343,19 +414,15 @@ function FieldSettings({
               />
             </div>
           ) : null}
-
-          <div className="bd-frow">
-            <div className="bd-toggle">
-              <div>
-                <div className="tl">{t('builder.required')}</div>
+          <div className="fb-frow">
+            <div className="fb-toggle-row">
+              <div className="info">
+                <div className="t">{t('builder.required')}</div>
               </div>
-              <button
-                type="button"
-                className={'bd-switch' + (field.required ? '' : ' off')}
-                role="switch"
-                aria-checked={field.required}
-                aria-label={t('builder.required')}
-                onClick={() => {
+              <Switch
+                on={field.required}
+                label={t('builder.required')}
+                onToggle={() => {
                   onRequired(!field.required);
                 }}
               />
@@ -363,104 +430,32 @@ function FieldSettings({
           </div>
         </>
       )}
-
-      <button type="button" className="bd-rm" onClick={onRemove}>
-        {t('builder.remove')}
-      </button>
     </div>
   );
 }
 
-function FormSettings({ builder }: { builder: ReturnType<typeof useFormBuilder> }): ReactNode {
+function PaletteCard({ onAdd }: { onAdd: (fieldType: string) => void }): ReactNode {
   const { t } = useI18n();
-  const { draft } = builder;
-
   return (
-    <div className="bd-psec">
-      <h4>{t('builder.formSettings')}</h4>
-
-      <div className="bd-frow">
-        <span className="l">{t('builder.locales')}</span>
-        {SUPPORTED_LOCALES.map((locale: SupportedLocale) => (
-          <label key={locale} className="bd-toggle">
-            <input
-              type="checkbox"
-              checked={draft.locales.includes(locale)}
-              onChange={() => {
-                builder.toggleLocale(locale);
-              }}
-            />
-            <span className="tl">{locale}</span>
-            <span className="sp" />
-            <input
-              type="radio"
-              name="default-locale"
-              aria-label={t('builder.defaultLocale')}
-              checked={draft.defaultLocale === locale}
-              disabled={!draft.locales.includes(locale)}
-              onChange={() => {
-                builder.setDefaultLocale(locale);
-              }}
-            />
-          </label>
+    <div className="card card-pad">
+      <h4 className="fb-psec-h">
+        <Icon name="plus" size={15} />
+        {t('builder.addField')}
+      </h4>
+      <div className="fb-pal">
+        {PALETTE.map((type) => (
+          <button
+            key={type}
+            type="button"
+            className="fb-palitem"
+            onClick={() => {
+              onAdd(type);
+            }}
+          >
+            <Icon name={FIELD_TYPE_ICON[type] ?? 'text'} size={16} />
+            {t(`builder.type.${type}` as MessageKey)}
+          </button>
         ))}
-      </div>
-
-      <div className="bd-frow">
-        <label className="bd-toggle">
-          <input type="checkbox" checked={draft.consentRequired} onChange={builder.toggleConsent} />
-          <span className="tl">{t('builder.consentRequired')}</span>
-        </label>
-      </div>
-      {draft.consentRequired
-        ? draft.locales.map((locale) => (
-            <div className="bd-frow" key={locale}>
-              <label className="l" htmlFor={`consent-${locale}`}>
-                {t('builder.consentLabel', { locale })}
-              </label>
-              <input
-                id={`consent-${locale}`}
-                value={draft.consentLabel?.[locale] ?? ''}
-                onChange={(e) => {
-                  builder.setConsentLabel(locale, e.target.value);
-                }}
-              />
-            </div>
-          ))
-        : null}
-
-      <div className="bd-frow">
-        <label className="l" htmlFor="retention-days">
-          {t('builder.retentionDays')}
-        </label>
-        <input
-          id="retention-days"
-          type="number"
-          min="1"
-          value={draft.retentionDays ?? ''}
-          onChange={(e) => {
-            const n = Number.parseInt(e.target.value, 10);
-            builder.setRetentionDays(Number.isNaN(n) ? null : n);
-          }}
-        />
-      </div>
-
-      <div className="bd-frow">
-        <label className="l" htmlFor="allowed-origins">
-          {t('builder.allowedOrigins')}
-        </label>
-        <textarea
-          id="allowed-origins"
-          value={draft.allowedOrigins.join('\n')}
-          onChange={(e) => {
-            builder.setAllowedOrigins(
-              e.target.value
-                .split('\n')
-                .map((line) => line.trim())
-                .filter((line) => line !== ''),
-            );
-          }}
-        />
       </div>
     </div>
   );
