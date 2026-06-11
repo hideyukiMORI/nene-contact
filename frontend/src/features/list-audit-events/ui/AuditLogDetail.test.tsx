@@ -23,7 +23,8 @@ describe('AuditLogDetail', () => {
   it('renders an updated event as a before → after diff in the shared skeleton', () => {
     renderWithProviders(<AuditLogDetail event={event()} />);
 
-    // Header: action name + kind badge + target.
+    // Header shows the humanized action; the raw action stays in the rail (mono) for precision.
+    expect(screen.getByText('問い合わせフォームを更新')).toBeInTheDocument();
     expect(screen.getByText('contact_form.updated')).toBeInTheDocument();
     expect(screen.getByText('更新')).toBeInTheDocument();
     expect(screen.getByText('変更内容')).toBeInTheDocument();
