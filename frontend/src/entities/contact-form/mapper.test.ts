@@ -39,6 +39,7 @@ describe('contact-form mappers', () => {
     const dto = toCreateContactFormDto({
       name: 'Contact us',
       description: '',
+      publicFormKey: '',
       defaultLocale: 'ja',
       locales: ['ja'],
       allowedOrigins: ['https://example.com'],

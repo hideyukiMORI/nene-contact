@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\Tests\ContactForm;
 
 use Nene2\Http\RequestScopedHolder;
+use Nene2\Validation\ValidationException;
 use NeneContact\Audit\AuditEvent;
 use NeneContact\Audit\AuditEventRepositoryInterface;
 use NeneContact\Audit\AuditRecorder;
@@ -57,6 +58,11 @@ final class CreateContactFormUseCaseTest extends TestCase
             public function findById(int $id): ?ContactForm
             {
                 return $this->byId[$id] ?? null;
+            }
+
+            public function publicFormKeyExists(string $publicFormKey): bool
+            {
+                return false;
             }
 
             public function findByPublicFormKey(string $publicFormKey): ?ContactForm
@@ -126,5 +132,104 @@ final class CreateContactFormUseCaseTest extends TestCase
         self::assertSame(7, $event->organizationId);
         self::assertNull($event->before);
         self::assertNotNull($event->after);
+    }
+
+    public function test_uses_a_provided_unique_public_key_but_rejects_a_taken_one(): void
+    {
+        $repo = new class () implements ContactFormRepositoryInterface {
+            /** @var array<int, ContactForm> */
+            public array $byId = [];
+            private int $next = 1;
+
+            public function save(ContactForm $form): int
+            {
+                $id = $this->next++;
+                $this->byId[$id] = new ContactForm(
+                    organizationId: $form->organizationId,
+                    name: $form->name,
+                    publicFormKey: $form->publicFormKey,
+                    defaultLocale: $form->defaultLocale,
+                    locales: $form->locales,
+                    allowedOrigins: $form->allowedOrigins,
+                    fields: $form->fields,
+                    status: $form->status,
+                    id: $id,
+                );
+
+                return $id;
+            }
+
+            public function update(ContactForm $form): void
+            {
+            }
+
+            public function softDelete(int $id): void
+            {
+            }
+
+            public function findById(int $id): ?ContactForm
+            {
+                return $this->byId[$id] ?? null;
+            }
+
+            public function publicFormKeyExists(string $publicFormKey): bool
+            {
+                return $publicFormKey === 'taken-slug';
+            }
+
+            public function findByPublicFormKey(string $publicFormKey): ?ContactForm
+            {
+                return null;
+            }
+
+            /** @return list<ContactForm> */
+            public function findAll(int $limit, int $offset): array
+            {
+                return array_values($this->byId);
+            }
+
+            public function count(): int
+            {
+                return count($this->byId);
+            }
+        };
+
+        $audit = new AuditRecorder(new class () implements AuditEventRepositoryInterface {
+            public function append(AuditEvent $event): int
+            {
+                return 1;
+            }
+
+            /** @return list<AuditEvent> */
+            public function findAll(int $limit, int $offset): array
+            {
+                return [];
+            }
+
+            public function count(): int
+            {
+                return 0;
+            }
+        });
+
+        /** @var RequestScopedHolder<int> $holder */
+        $holder = new RequestScopedHolder();
+        $holder->set(7);
+        $useCase = new CreateContactFormUseCase($repo, $audit, $holder);
+
+        $input = static fn (string $key): CreateContactFormInput => new CreateContactFormInput(
+            name: 'Contact us',
+            defaultLocale: 'ja',
+            locales: ['ja'],
+            allowedOrigins: [],
+            fields: [new FormField(fieldType: 'email', name: 'email', label: ['ja' => 'メール'], required: true, sortOrder: 0)],
+            publicFormKey: $key,
+        );
+
+        $created = $useCase->execute(5, $input('my-form'));
+        self::assertSame('my-form', $created->publicFormKey);
+
+        $this->expectException(ValidationException::class);
+        $useCase->execute(5, $input('taken-slug'));
     }
 }

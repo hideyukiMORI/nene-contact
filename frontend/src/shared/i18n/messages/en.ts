@@ -363,6 +363,7 @@ export const en: Partial<MessageCatalog> = {
   'builder.descPlaceholder': 'Form description (optional)',
   'builder.publicPath': 'Public path',
   'builder.publicPathPrefix': 'nene.app/',
+  'builder.publicPathAuto': 'auto-generated (optional)',
   'builder.consentTitle': 'Require consent',
   'builder.consentDesc': 'Ask for agreement to the privacy policy before submitting.',
   'builder.fieldLabel': 'Label',

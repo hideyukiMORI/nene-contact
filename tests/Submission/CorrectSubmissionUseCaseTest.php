@@ -99,6 +99,11 @@ final class CorrectSubmissionUseCaseTest extends TestCase
                 return $this->form;
             }
 
+            public function publicFormKeyExists(string $publicFormKey): bool
+            {
+                return false;
+            }
+
             public function findByPublicFormKey(string $publicFormKey): ?ContactForm
             {
                 return $this->form;

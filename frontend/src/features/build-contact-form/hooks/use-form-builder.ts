@@ -26,6 +26,7 @@ function newField(fieldType: string): DraftField {
 const initialDraft: ContactFormDraft = {
   name: '',
   description: '',
+  publicFormKey: '',
   defaultLocale: 'ja',
   locales: ['ja'],
   allowedOrigins: [],
@@ -41,6 +42,7 @@ export interface FormBuilder {
   isPending: boolean;
   setName: (name: string) => void;
   setDescription: (description: string) => void;
+  setPublicFormKey: (publicFormKey: string) => void;
   toggleLocale: (locale: SupportedLocale) => void;
   setDefaultLocale: (locale: SupportedLocale) => void;
   toggleConsent: () => void;
@@ -81,6 +83,9 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
     },
     setDescription: (description) => {
       setDraft((d) => ({ ...d, description }));
+    },
+    setPublicFormKey: (publicFormKey) => {
+      setDraft((d) => ({ ...d, publicFormKey }));
     },
     toggleLocale: (locale) => {
       setDraft((d) => {

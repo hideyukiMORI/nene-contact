@@ -19,6 +19,12 @@ interface ContactFormRepositoryInterface
 
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm;
 
+    /**
+     * True when any form (any tenant, including soft-deleted) already uses this public key.
+     * The public form URL is global, so a custom key must be globally unique.
+     */
+    public function publicFormKeyExists(string $publicFormKey): bool;
+
     /** @return list<ContactForm> */
     public function findAll(int $limit, int $offset): array;
 

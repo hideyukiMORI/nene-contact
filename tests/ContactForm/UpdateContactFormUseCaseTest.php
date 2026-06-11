@@ -60,6 +60,11 @@ final class UpdateContactFormUseCaseTest extends TestCase
                 return $this->byId[$id] ?? null;
             }
 
+            public function publicFormKeyExists(string $publicFormKey): bool
+            {
+                return false;
+            }
+
             public function findByPublicFormKey(string $publicFormKey): ?ContactForm
             {
                 return null;

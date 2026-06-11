@@ -170,6 +170,18 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
         return $this->mapForm($row, $this->loadFields((int) $row['id']));
     }
 
+    public function publicFormKeyExists(string $publicFormKey): bool
+    {
+        // Global (no org scope, includes soft-deleted): the public URL is shared across tenants
+        // and a retired form's key must not be silently reused.
+        $row = $this->query->fetchOne(
+            'SELECT 1 AS hit FROM contact_forms WHERE public_form_key = ? LIMIT 1',
+            [$publicFormKey],
+        );
+
+        return $row !== null;
+    }
+
     /** @return list<ContactForm> */
     public function findAll(int $limit, int $offset): array
     {

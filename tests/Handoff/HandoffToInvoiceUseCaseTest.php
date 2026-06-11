@@ -97,6 +97,11 @@ final class HandoffToInvoiceUseCaseTest extends TestCase
                 );
             }
 
+            public function publicFormKeyExists(string $publicFormKey): bool
+            {
+                return false;
+            }
+
             public function findByPublicFormKey(string $publicFormKey): ?ContactForm
             {
                 return null;
