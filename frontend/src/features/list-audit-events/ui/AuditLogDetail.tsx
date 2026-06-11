@@ -16,7 +16,7 @@ export function AuditLogDetail({ event }: { event: AuditEvent }): ReactNode {
     : t('audit.noChangeRead');
 
   return (
-    <div className="ib-detail al-detail">
+    <div className="ib-detail">
       <div className="ib-dhead">
         <span className="ib-av">
           <Icon name="shield" size={18} />
@@ -33,9 +33,9 @@ export function AuditLogDetail({ event }: { event: AuditEvent }): ReactNode {
         </div>
       </div>
 
-      <div className="ib-dbody">
-        <div className="al-grid">
-          <div className="al-main">
+      <div className="ib-body">
+        <div className="ib-grid">
+          <div className="ib-center">
             <div className="al-difflab">{t(diffLabelKey(kind))}</div>
             {rows.length === 0 ? (
               <div className="al-nodiff">{noChange}</div>
@@ -63,17 +63,17 @@ export function AuditLogDetail({ event }: { event: AuditEvent }): ReactNode {
             )}
           </div>
 
-          <div className="al-rail">
-            <div className="al-rail-lab">{t('audit.eventInfo')}</div>
-            <dl className="ib-meta">
+          <div className="rail al-rail">
+            <div className="rail-lab">{t('audit.eventInfo')}</div>
+            <dl className="meta">
               <dt>{t('audit.field.actor')}</dt>
               <dd>{actorLabel(event, t)}</dd>
               <dt>{t('audit.field.entity')}</dt>
               <dd>{target}</dd>
               <dt>{t('audit.field.at')}</dt>
-              <dd>{event.createdAt ?? '—'}</dd>
+              <dd className="mono">{event.createdAt ?? '—'}</dd>
               <dt>{t('audit.field.eventId')}</dt>
-              <dd>#{event.id}</dd>
+              <dd className="mono">#{event.id}</dd>
             </dl>
             <p className="audit-note">
               <Icon name="lock" size={11} />
