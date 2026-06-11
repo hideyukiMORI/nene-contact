@@ -251,7 +251,7 @@
 
     uploadFiles(controls)
       .then(function (attachmentIds) {
-        var payload = { attachment_ids: attachmentIds };
+        var payload = { attachment_ids: attachmentIds, source_url: location.href };
         if (schema.consent_required) {
           payload.consent = !!(consentInput && consentInput.checked);
         }

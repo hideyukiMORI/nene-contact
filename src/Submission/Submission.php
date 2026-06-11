@@ -20,6 +20,9 @@ final readonly class Submission
         public string $source = 'form',
         public ?string $ip = null,
         public ?string $userAgent = null,
+        // Embed host page the form was submitted from (referer). Non-PII reception meta
+        // shown by default (ADR 0018); null for service ingest.
+        public ?string $sourceUrl = null,
         public ?array $consentLabel = null,
         public ?string $consentGivenAt = null,
         public ?int $id = null,

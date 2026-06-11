@@ -37,6 +37,34 @@ final class SubmissionListMaskingTest extends TestCase
         self::assertArrayNotHasKey('consent_label', $item);
     }
 
+    public function testDetailExposesSafeReceptionMetaButNeverIpOrUserAgent(): void
+    {
+        $submission = new Submission(
+            organizationId: 1,
+            contactFormId: 3,
+            fieldValues: ['email' => 'john.doe@example.com'],
+            status: 'open',
+            source: 'form',
+            ip: '203.0.113.9',
+            userAgent: 'curl/8',
+            sourceUrl: 'https://shop.example.com/contact',
+            id: 9,
+            submittedAt: '2026-06-04 00:00:00',
+        );
+
+        $detail = SubmissionResponse::toArray($submission);
+
+        // Safe reception meta is shown by default (ADR 0018).
+        self::assertSame('form', $detail['source']);
+        self::assertSame('https://shop.example.com/contact', $detail['source_url']);
+        self::assertSame('2026-06-04 00:00:00', $detail['submitted_at']);
+        // IP / User-Agent are abuse-investigation only — never in the default payload (charter §2/§11).
+        self::assertArrayNotHasKey('ip', $detail);
+        self::assertArrayNotHasKey('user_agent', $detail);
+        self::assertStringNotContainsString('203.0.113.9', json_encode($detail, JSON_THROW_ON_ERROR));
+        self::assertStringNotContainsString('curl/8', json_encode($detail, JSON_THROW_ON_ERROR));
+    }
+
     public function testUseCasePassesFilterAndReturnsStatusCounts(): void
     {
         $repo = new class () implements SubmissionSearchRepositoryInterface {
