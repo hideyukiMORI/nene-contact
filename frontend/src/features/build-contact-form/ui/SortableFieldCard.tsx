@@ -5,43 +5,46 @@ import type { DraftField } from '@/entities/contact-form';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import type { IconName } from '@/shared/ui';
+import { FIELD_TYPE_ICON } from '@/features/build-contact-form/lib/field-types';
 
-const TYPE_ICON: Record<string, IconName> = {
-  text: 'text',
-  email: 'mail',
-  textarea: 'lines',
-  select: 'list',
-  checkbox: 'check',
-  file: 'file',
-  honeypot: 'lock',
-};
-
-function Preview({ field }: { field: DraftField }): ReactNode {
+// Type-specific preview input on the canvas (spec §03). The placeholder text is the gray hint.
+function FieldInput({ field, placeholder }: { field: DraftField; placeholder: string }): ReactNode {
   if (field.fieldType === 'textarea') {
-    return <div className="bd-input area" />;
+    return <div className="fb-finput area">{placeholder}</div>;
   }
   if (field.fieldType === 'select') {
     return (
-      <div className="bd-input sel-input">
-        <span />
+      <div className="fb-finput sel-in">
+        <span>{placeholder}</span>
         <Icon name="chevDown" size={15} />
       </div>
     );
   }
-  return <div className="bd-input" />;
+  if (field.fieldType === 'file') {
+    return (
+      <div className="fb-finput file-in">
+        <Icon name="file" size={15} />
+        {placeholder}
+      </div>
+    );
+  }
+  return <div className="fb-finput">{placeholder}</div>;
 }
 
 export function SortableFieldCard({
   field,
-  defaultLocale,
+  label,
+  placeholder,
   selected,
   onSelect,
+  onDelete,
 }: {
   field: DraftField;
-  defaultLocale: string;
+  label: string;
+  placeholder: string;
   selected: boolean;
   onSelect: () => void;
+  onDelete: () => void;
 }): ReactNode {
   const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -54,14 +57,12 @@ export function SortableFieldCard({
   };
 
   const typeLabel = t(`builder.type.${field.fieldType}` as MessageKey);
-  const heading = field.label[defaultLocale]?.trim() ?? '';
-  const display = heading !== '' ? heading : field.name !== '' ? field.name : typeLabel;
 
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className={'bd-field' + (selected ? ' sel' : '')}
+      className={'fb-field' + (selected ? ' sel' : '')}
       role="button"
       tabIndex={0}
       onClick={onSelect}
@@ -74,7 +75,7 @@ export function SortableFieldCard({
     >
       <button
         type="button"
-        className="bd-grip"
+        className="fb-grip"
         aria-label={t('builder.drag')}
         onClick={(e) => {
           e.stopPropagation();
@@ -84,17 +85,28 @@ export function SortableFieldCard({
       >
         <Icon name="drag" size={16} />
       </button>
-      <div className="main">
-        <div className="bd-flabel">
-          {display}
+      <div className="fb-fmain">
+        <div className="fb-flabel">
+          {label}
           {field.required ? <span className="req">＊</span> : null}
         </div>
-        <Preview field={field} />
+        <FieldInput field={field} placeholder={placeholder} />
       </div>
-      <span className="bd-ftype">
-        <Icon name={TYPE_ICON[field.fieldType] ?? 'text'} size={11} />
+      <span className="fb-ftype">
+        <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={11} />
         {typeLabel}
       </span>
+      <button
+        type="button"
+        className="fb-fdel"
+        aria-label={t('builder.removeField')}
+        onClick={(e) => {
+          e.stopPropagation();
+          onDelete();
+        }}
+      >
+        <Icon name="trash" size={15} />
+      </button>
     </div>
   );
 }

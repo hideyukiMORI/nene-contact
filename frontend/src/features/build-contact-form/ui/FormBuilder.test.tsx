@@ -12,7 +12,7 @@ describe('FormBuilder', () => {
   it('builds a form and posts it, then signals creation', async () => {
     interface PostedForm {
       name?: string;
-      fields?: { field_type: string; name: string }[];
+      fields?: { field_type: string; name: string; label: Record<string, string> }[];
     }
     const captured: { value: PostedForm | null } = { value: null };
     server.use(
@@ -36,19 +36,26 @@ describe('FormBuilder', () => {
 
     renderWithProviders(<FormBuilder onCreated={onCreated} />);
 
-    await user.type(screen.getByLabelText('フォーム名'), 'Sales');
+    // The form name is editable both on the canvas title and in the settings card (synced).
+    const titleInputs = screen.getAllByLabelText('フォーム名');
+    await user.type(titleInputs[0] as HTMLElement, 'Sales');
+    // Adding from the palette appends the field, auto-selects it, and seeds a default label.
     await user.click(screen.getByRole('button', { name: 'メール' }));
-    await user.type(screen.getByLabelText('フィールド名'), 'email');
-    await user.type(screen.getByLabelText('ラベル（ja）'), 'メール');
+    const labelInput = screen.getByLabelText('ラベル');
+    await user.clear(labelInput);
+    await user.type(labelInput, 'メール');
     await user.click(screen.getByRole('button', { name: '保存して公開' }));
 
     await waitFor(() => {
       expect(onCreated).toHaveBeenCalledOnce();
     });
     expect(captured.value?.name).toBe('Sales');
-    expect(captured.value?.fields).toEqual([
-      expect.objectContaining({ field_type: 'email', name: 'email' }),
-    ]);
+    // The field key is auto-generated (the spec hides it); the type + label are what matter.
+    expect(captured.value?.fields).toHaveLength(1);
+    expect(captured.value?.fields?.[0]).toEqual(
+      expect.objectContaining({ field_type: 'email', label: { ja: 'メール' } }),
+    );
+    expect(captured.value?.fields?.[0]?.name).toMatch(/^field_/);
   });
 
   it('blocks creation without a name or fields', async () => {
