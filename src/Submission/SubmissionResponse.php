@@ -38,6 +38,8 @@ final readonly class SubmissionResponse
             'contact_form_id' => $submission->contactFormId,
             'status' => $submission->status,
             'source' => $submission->source,
+            // Safe reception meta shown by default (ADR 0018); IP/UA stay out of this payload.
+            'source_url' => $submission->sourceUrl,
             'field_values' => $submission->fieldValues,
             // Consent evidence for the disclosure right (charter §3/§4); immutable once stored.
             'consent_label' => $submission->consentLabel,

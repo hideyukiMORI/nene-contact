@@ -16,7 +16,7 @@ final readonly class PdoSubmissionRepository implements
     SubmissionRepositoryInterface,
     SubmissionSearchRepositoryInterface
 {
-    private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, submitted_at, created_at, updated_at';
+    private const COLUMNS = 'id, organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, source_url, submitted_at, created_at, updated_at';
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -32,8 +32,8 @@ final readonly class PdoSubmissionRepository implements
         $now = date('Y-m-d H:i:s');
 
         $this->query->execute(
-            'INSERT INTO submissions (organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, submitted_at, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+            'INSERT INTO submissions (organization_id, contact_form_id, field_values_json, consent_label_json, consent_given_at, status, source, ip, user_agent, source_url, submitted_at, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
             [
                 $submission->organizationId,
                 $submission->contactFormId,
@@ -44,6 +44,7 @@ final readonly class PdoSubmissionRepository implements
                 $submission->source,
                 $submission->ip,
                 $submission->userAgent,
+                $submission->sourceUrl,
                 $now,
                 $now,
                 $now,
@@ -228,6 +229,7 @@ final readonly class PdoSubmissionRepository implements
             source: isset($row['source']) ? (string) $row['source'] : 'form',
             ip: isset($row['ip']) ? (string) $row['ip'] : null,
             userAgent: isset($row['user_agent']) ? (string) $row['user_agent'] : null,
+            sourceUrl: isset($row['source_url']) ? (string) $row['source_url'] : null,
             consentLabel: is_array($consentLabel) ? $consentLabel : null,
             consentGivenAt: isset($row['consent_given_at']) ? (string) $row['consent_given_at'] : null,
             id: (int) $row['id'],

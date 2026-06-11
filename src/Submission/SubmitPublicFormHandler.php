@@ -99,7 +99,11 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
         $ip = isset($serverParams['REMOTE_ADDR']) ? (string) $serverParams['REMOTE_ADDR'] : null;
         $userAgent = $request->getHeaderLine('User-Agent') !== '' ? $request->getHeaderLine('User-Agent') : null;
 
-        $submission = $this->useCase->execute($form, $values, $ip, $userAgent);
+        // Reception meta (ADR 0018): the embed host page the form was submitted from. The
+        // widget sends `source_url`; fall back to the Referer header when it is absent.
+        $sourceUrl = $this->sourceUrl($body['source_url'] ?? null, $request->getHeaderLine('Referer'));
+
+        $submission = $this->useCase->execute($form, $values, $ip, $userAgent, $sourceUrl);
 
         // Link any attachments uploaded for this form to the new submission (D12). Invalid
         // or already-linked ids are ignored — they never fail the submission.
@@ -117,6 +121,22 @@ final readonly class SubmitPublicFormHandler implements RequestHandlerInterface
         }
 
         return $this->response->create(['id' => $submission->id, 'status' => $submission->status], 201);
+    }
+
+    /**
+     * Normalises the submitted source URL: prefers the client-sent value, falls back to the
+     * Referer header. Only http(s) URLs are accepted and the result is capped to the column
+     * width (1024); anything else is dropped to null.
+     */
+    private function sourceUrl(mixed $bodyValue, string $referer): ?string
+    {
+        $candidate = is_string($bodyValue) && trim($bodyValue) !== '' ? trim($bodyValue) : trim($referer);
+
+        if ($candidate === '' || !str_starts_with($candidate, 'http')) {
+            return null;
+        }
+
+        return mb_substr($candidate, 0, 1024);
     }
 
     private function originAllowed(ServerRequestInterface $request, ContactForm $form): bool
