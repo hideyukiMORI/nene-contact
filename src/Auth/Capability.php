@@ -17,5 +17,8 @@ enum Capability
     case ManageSettings;
     case ViewSubmissions;
     case ManageSubmissions;
+    // Disclose a submission's IP / User-Agent (abuse investigation, ADR 0018). Higher bar
+    // than ViewSubmissions: admin + superadmin only, and the disclosure is audited.
+    case ViewSubmissionTechnicalMeta;
     case ViewAuditLog;
 }

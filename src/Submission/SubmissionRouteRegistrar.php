@@ -14,6 +14,7 @@ final readonly class SubmissionRouteRegistrar
         private SubmitPublicFormHandler $submitHandler,
         private ListSubmissionsHandler $listHandler,
         private GetSubmissionByIdHandler $getHandler,
+        private GetSubmissionTechnicalMetaHandler $technicalMetaHandler,
         private UpdateSubmissionStatusHandler $updateStatusHandler,
         private DeleteSubmissionHandler $deleteHandler,
         private CorrectSubmissionHandler $correctHandler,
@@ -29,6 +30,7 @@ final readonly class SubmissionRouteRegistrar
         $submit = $this->submitHandler;
         $list = $this->listHandler;
         $get = $this->getHandler;
+        $technicalMeta = $this->technicalMetaHandler;
         $updateStatus = $this->updateStatusHandler;
         $delete = $this->deleteHandler;
         $correct = $this->correctHandler;
@@ -44,6 +46,8 @@ final readonly class SubmissionRouteRegistrar
         $router->get('/admin/submissions/export', static fn (ServerRequestInterface $r) => $export->handle($r));
         $router->get('/admin/submissions', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->get('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
+        // Audited IP/UA disclosure (ADR 0018); gated by ViewSubmissionTechnicalMeta.
+        $router->get('/admin/submissions/{id}/technical-meta', static fn (ServerRequestInterface $r) => $technicalMeta->handle($r));
         $router->patch('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $updateStatus->handle($r));
         $router->delete('/admin/submissions/{id}', static fn (ServerRequestInterface $r) => $delete->handle($r));
         $router->patch('/admin/submissions/{id}/field-values', static fn (ServerRequestInterface $r) => $correct->handle($r));

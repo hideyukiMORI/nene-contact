@@ -49,6 +49,22 @@ final readonly class SubmissionResponse
     }
 
     /**
+     * Technical reception metadata (IP / User-Agent) for abuse investigation. Returned **only**
+     * by the dedicated audited disclosure endpoint (ADR 0018) — never by the default detail,
+     * list, MCP, or export surfaces (charter §2/§11).
+     *
+     * @return array<string, mixed>
+     */
+    public static function toTechnicalMeta(Submission $submission): array
+    {
+        return [
+            'id' => $submission->id,
+            'ip' => $submission->ip,
+            'user_agent' => $submission->userAgent,
+        ];
+    }
+
+    /**
      * Redacted snapshot for the audit trail: no raw field values (PII), no IP/UA.
      *
      * @return array<string, mixed>

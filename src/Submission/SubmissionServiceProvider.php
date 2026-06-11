@@ -230,6 +230,40 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 },
             )
             ->set(
+                GetSubmissionTechnicalMetaUseCaseInterface::class,
+                static function (ContainerInterface $c): GetSubmissionTechnicalMetaUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new GetSubmissionTechnicalMetaUseCase($repo, $audit);
+                },
+            )
+            ->set(
+                GetSubmissionTechnicalMetaHandler::class,
+                static function (ContainerInterface $c): GetSubmissionTechnicalMetaHandler {
+                    $uc = $c->get(GetSubmissionTechnicalMetaUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof GetSubmissionTechnicalMetaUseCaseInterface) {
+                        throw new LogicException('GetSubmissionTechnicalMeta use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new GetSubmissionTechnicalMetaHandler($uc, $json);
+                },
+            )
+            ->set(
                 SubmissionNoteRepositoryInterface::class,
                 static function (ContainerInterface $c): SubmissionNoteRepositoryInterface {
                     $query = $c->get(DatabaseQueryExecutorInterface::class);
@@ -486,6 +520,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $submit = $c->get(SubmitPublicFormHandler::class);
                     $list = $c->get(ListSubmissionsHandler::class);
                     $get = $c->get(GetSubmissionByIdHandler::class);
+                    $technicalMeta = $c->get(GetSubmissionTechnicalMetaHandler::class);
                     $updateStatus = $c->get(UpdateSubmissionStatusHandler::class);
                     $delete = $c->get(DeleteSubmissionHandler::class);
                     $correct = $c->get(CorrectSubmissionHandler::class);
@@ -507,6 +542,10 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
 
                     if (!$get instanceof GetSubmissionByIdHandler) {
                         throw new LogicException('Get submission handler service is invalid.');
+                    }
+
+                    if (!$technicalMeta instanceof GetSubmissionTechnicalMetaHandler) {
+                        throw new LogicException('Get submission technical-meta handler service is invalid.');
                     }
 
                     if (!$updateStatus instanceof UpdateSubmissionStatusHandler) {
@@ -533,7 +572,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Export submissions handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $updateStatus, $delete, $correct, $addNote, $listNotes, $export);
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $technicalMeta, $updateStatus, $delete, $correct, $addNote, $listNotes, $export);
                 },
             );
     }

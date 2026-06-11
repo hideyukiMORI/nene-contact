@@ -34,6 +34,10 @@ final class CapabilityResolver
             return Capability::ManageSettings;
         }
 
+        if (str_starts_with($path, '/admin/submissions') && str_ends_with($path, '/technical-meta')) {
+            return Capability::ViewSubmissionTechnicalMeta;
+        }
+
         if (str_starts_with($path, '/admin/submissions')) {
             return self::isMutationMethod($method) ? Capability::ManageSubmissions : Capability::ViewSubmissions;
         }

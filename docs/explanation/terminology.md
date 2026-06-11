@@ -70,7 +70,8 @@ comment overrides it.
 | Request attribute — org slug | `nene2.org.slug` | set by `OrgResolverMiddleware` |
 
 Capabilities (`Capability` enum cases): `ManageOrganizations`, `ManageUsers`,
-`ManageForms`, `ManageChannels`, `ManageSettings`, `ViewSubmissions`, `ManageSubmissions`.
+`ManageForms`, `ManageChannels`, `ManageSettings`, `ViewSubmissions`, `ManageSubmissions`,
+`ViewSubmissionTechnicalMeta` (disclose IP/UA, admin+; ADR 0018), `ViewAuditLog`.
 
 Public embed routes resolve organization via `public_form_key`; `/api/*` via the org-scoped
 service token (ADR 0014) — not a role.
@@ -165,7 +166,9 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
 `deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`.
 
-Examples: `submission.viewed`, `submission.exported`, `submission.deleted` (soft-delete),
+Examples: `submission.viewed`, `submission.exported`,
+`submission_technical_meta.viewed` (audited IP/UA disclosure, entity type `submission`; ADR 0018),
+`submission.deleted` (soft-delete),
 `submission.corrected` (data-subject correction, §4), `submission.expired` (retention
 soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
 `contact_form.updated`, `notification_channel.created`, `handoff.created` (first sibling
@@ -293,8 +296,8 @@ camelCase `{verb}{Resource}`, stable (never renamed after release). Registered:
 `getHealth`, `login`, `listOrganizations`, `createOrganization`, `getOrganizationById`,
 `listContactForms`, `createContactForm`, `getContactFormById`, `listNotificationChannels`,
 `createNotificationChannel`, `listSubmissions`, `exportSubmissions`, `getSubmissionById`,
-`updateSubmissionStatus`, `listSubmissionNotes`, `addSubmissionNote`, `getPublicFormSchema`,
-`submitPublicForm`. Validated by `composer openapi`.
+`updateSubmissionStatus`, `getSubmissionTechnicalMeta`, `listSubmissionNotes`,
+`addSubmissionNote`, `getPublicFormSchema`, `submitPublicForm`. Validated by `composer openapi`.
 
 ---
 

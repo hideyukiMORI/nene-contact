@@ -80,6 +80,7 @@ unresolved → `404 org-not-resolved`. **Bypass prefixes** (no org context):
 | `ManageSettings` | Org settings |
 | `ViewSubmissions` | Read submissions inbox |
 | `ManageSubmissions` | Status, notes, delete, export, handoff retry |
+| `ViewSubmissionTechnicalMeta` | Disclose a submission's IP / User-Agent (audited; abuse investigation, ADR 0018) |
 
 Role → capability matrix (`Role::hasCapability()`):
 
@@ -88,6 +89,7 @@ Role → capability matrix (`Role::hasCapability()`):
 | ManageOrganizations | ✓ | ✗ | ✗ |
 | ManageUsers / ManageForms / ManageChannels / ManageSettings | ✓ | ✓ | ✗ |
 | ViewSubmissions / ManageSubmissions | ✓ | ✓ | ✓ |
+| ViewSubmissionTechnicalMeta | ✓ | ✓ | ✗ |
 
 `CapabilityResolver::resolve(path, method)` maps each admin route + method to the required
 `Capability`; `CapabilityMiddleware` (after auth) returns `403 forbidden` when the role

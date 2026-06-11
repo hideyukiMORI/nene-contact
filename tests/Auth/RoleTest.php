@@ -23,6 +23,7 @@ final class RoleTest extends TestCase
         self::assertTrue(Role::Admin->hasCapability(Capability::ManageForms));
         self::assertTrue(Role::Admin->hasCapability(Capability::ManageUsers));
         self::assertTrue(Role::Admin->hasCapability(Capability::ManageSubmissions));
+        self::assertTrue(Role::Admin->hasCapability(Capability::ViewSubmissionTechnicalMeta));
         self::assertTrue(Role::Admin->hasCapability(Capability::ViewAuditLog));
     }
 
@@ -33,6 +34,8 @@ final class RoleTest extends TestCase
         self::assertFalse(Role::Editor->hasCapability(Capability::ManageForms));
         self::assertFalse(Role::Editor->hasCapability(Capability::ManageOrganizations));
         self::assertFalse(Role::Editor->hasCapability(Capability::ManageUsers));
+        // IP/UA disclosure is admin+ only — an editor operating the inbox cannot reveal it.
+        self::assertFalse(Role::Editor->hasCapability(Capability::ViewSubmissionTechnicalMeta));
         self::assertFalse(Role::Editor->hasCapability(Capability::ViewAuditLog));
     }
 }

@@ -471,6 +471,29 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /admin/submissions/{id}/technical-meta:
+    get:
+      tags: [Submission]
+      operationId: getSubmissionTechnicalMeta
+      summary: Disclose a submission's technical reception metadata (IP / User-Agent)
+      description: >
+        Discloses the submission's IP and User-Agent for abuse investigation (ADR 0018).
+        These are excluded from every default payload (charter §2/§11); this endpoint is the
+        only disclosure path and **records an audit event** (`submission_technical_meta.viewed`)
+        before returning. Gated by the `ViewSubmissionTechnicalMeta` capability (admin +
+        superadmin). Not exposed via MCP.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '200':
+          description: Technical reception metadata
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/SubmissionTechnicalMetaResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /admin/submissions/{id}/field-values:
     patch:
       tags: [Submission]
@@ -1170,6 +1193,17 @@ components:
         consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
+
+    SubmissionTechnicalMetaResponse:
+      type: object
+      description: >
+        Technical reception metadata disclosed only by the audited disclosure endpoint
+        (ADR 0018); never present in any default payload (charter §2/§11).
+      properties:
+        id: { type: integer }
+        ip: { type: [string, 'null'], description: "request IP (abuse investigation only)" }
+        user_agent: { type: [string, 'null'], description: "request User-Agent (abuse investigation only)" }
+      required: [id]
 
     RecordsOptionsResponse:
       type: object

@@ -27,6 +27,7 @@ enum Role: string
                 Capability::ManageForms,
                 Capability::ManageChannels,
                 Capability::ManageSettings,
+                Capability::ViewSubmissionTechnicalMeta,
                 Capability::ViewAuditLog => false,
             },
         };
