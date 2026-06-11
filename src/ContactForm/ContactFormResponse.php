@@ -16,6 +16,7 @@ final readonly class ContactFormResponse
         return [
             'id' => $form->id,
             'name' => $form->name,
+            'description' => $form->description,
             'public_form_key' => $form->publicFormKey,
             'default_locale' => $form->defaultLocale,
             'locales' => $form->locales,

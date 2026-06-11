@@ -54,6 +54,7 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
 
   return {
     name: dto.name,
+    description: dto.description ?? '',
     defaultLocale: dto.default_locale,
     locales: dto.locales,
     allowedOrigins: dto.allowed_origins ?? [],
@@ -77,6 +78,7 @@ export function toContactFormDetail(dto: ContactFormDto): ContactFormDetail {
 export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFormDto {
   return {
     name: draft.name,
+    ...(draft.description.trim() !== '' ? { description: draft.description } : {}),
     default_locale: draft.defaultLocale,
     locales: draft.locales,
     allowed_origins: draft.allowedOrigins,

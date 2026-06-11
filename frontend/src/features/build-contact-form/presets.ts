@@ -40,6 +40,7 @@ function honeypot(): DraftField {
 function draft(fields: DraftField[], consentRequired: boolean): ContactFormDraft {
   return {
     name: '',
+    description: '',
     defaultLocale: 'ja',
     locales: ['ja', 'en'],
     allowedOrigins: [],

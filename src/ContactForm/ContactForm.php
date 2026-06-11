@@ -20,6 +20,7 @@ final readonly class ContactForm
         public array $locales,
         public array $allowedOrigins,
         public array $fields,
+        public ?string $description = null,
         public string $status = 'active',
         public bool $consentRequired = false,
         public ?array $consentLabel = null,

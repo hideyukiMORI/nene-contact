@@ -53,8 +53,7 @@ export function FormBuilder({
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   // Preview-only state — the API has no column for these yet, so they drive the live canvas
-  // but are not persisted on save (form description, per-field placeholder, public path).
-  const [description, setDescription] = useState('');
+  // but are not persisted on save (per-field placeholder, public path).
   const [placeholders, setPlaceholders] = useState<Record<string, string>>({});
   const [publicPath, setPublicPath] = useState('');
 
@@ -168,10 +167,10 @@ export function FormBuilder({
                 className="fb-desc-in"
                 rows={1}
                 aria-label={t('builder.description')}
-                value={description}
+                value={draft.description}
                 placeholder={t('builder.descPlaceholder')}
                 onChange={(e) => {
-                  setDescription(e.target.value);
+                  builder.setDescription(e.target.value);
                 }}
               />
             </div>

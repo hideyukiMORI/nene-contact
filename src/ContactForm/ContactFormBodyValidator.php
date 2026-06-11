@@ -49,6 +49,11 @@ final readonly class ContactFormBodyValidator
 
         $allowedOrigins = self::stringList($body['allowed_origins'] ?? []);
 
+        // Optional form description (builder spec v1.0): blank collapses to null, capped so the
+        // embed intro stays bounded.
+        $description = is_string($body['description'] ?? null) ? trim((string) $body['description']) : '';
+        $description = $description === '' ? null : mb_substr($description, 0, 2000);
+
         // Consent (charter §3): when required, a per-locale label for the default locale is
         // mandatory, and labels are restricted to {ja, en} (ADR 0011).
         $consentRequired = (bool) ($body['consent_required'] ?? false);
@@ -134,6 +139,7 @@ final readonly class ContactFormBodyValidator
             locales: $locales,
             allowedOrigins: $allowedOrigins,
             fields: $fields,
+            description: $description,
             consentRequired: $consentRequired,
             consentLabel: $consentLabel === [] ? null : $consentLabel,
             retentionDays: $retentionDays,

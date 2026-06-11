@@ -662,7 +662,7 @@ export interface components {
              * @description Closed allowlist (single source of truth: NeneContact\ContactForm\FieldType). My Number and raw payment card numbers are prohibited as any field type and 要配慮個人情報 is never a default (APPI charter §8, Definition of Done A4).
              * @enum {string}
              */
-            field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "file" | "honeypot";
+            field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
             name: string;
             label: components["schemas"]["LocaleMap"];
             required?: boolean;
@@ -674,6 +674,8 @@ export interface components {
         ContactFormResponse: {
             id: number;
             name: string;
+            /** @description Optional form description shown above the fields in the embed. */
+            description?: string | null;
             public_form_key: string;
             /** @enum {string} */
             default_locale: "ja" | "en";
@@ -694,6 +696,8 @@ export interface components {
         };
         CreateContactFormRequest: {
             name: string;
+            /** @description Optional form description shown above the fields in the embed. */
+            description?: string;
             /** @enum {string} */
             default_locale: "ja" | "en";
             locales: ("ja" | "en")[];
@@ -706,7 +710,7 @@ export interface components {
             retention_days?: number;
             fields: {
                 /** @enum {string} */
-                field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "file" | "honeypot";
+                field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
                 name: string;
                 label: components["schemas"]["LocaleMap"];
                 required?: boolean;
@@ -718,6 +722,8 @@ export interface components {
         PublicFormSchema: {
             public_form_key: string;
             name: string;
+            /** @description Optional form description shown above the fields in the embed. */
+            description?: string | null;
             /** @enum {string} */
             default_locale: "ja" | "en";
             locales: ("ja" | "en")[];

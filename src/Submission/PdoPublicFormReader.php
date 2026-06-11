@@ -18,7 +18,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm
     {
         $row = $this->query->fetchOne(
-            'SELECT id, organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, created_at, updated_at
+            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, created_at, updated_at
              FROM contact_forms WHERE public_form_key = ?',
             [$publicFormKey],
         );
@@ -65,6 +65,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         return new ContactForm(
             organizationId: (int) $row['organization_id'],
             name: (string) $row['name'],
+            description: isset($row['description']) ? (string) $row['description'] : null,
             publicFormKey: (string) $row['public_form_key'],
             defaultLocale: (string) $row['default_locale'],
             locales: $locales,

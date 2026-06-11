@@ -38,6 +38,7 @@ describe('contact-form mappers', () => {
   it('maps a draft to the create request, omitting empty optionals', () => {
     const dto = toCreateContactFormDto({
       name: 'Contact us',
+      description: '',
       defaultLocale: 'ja',
       locales: ['ja'],
       allowedOrigins: ['https://example.com'],

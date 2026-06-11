@@ -32,6 +32,7 @@ export interface DraftField {
 
 export interface ContactFormDraft {
   name: string;
+  description: string;
   defaultLocale: SupportedLocale;
   locales: SupportedLocale[];
   allowedOrigins: string[];

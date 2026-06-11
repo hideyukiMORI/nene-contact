@@ -18,6 +18,7 @@ final readonly class CreateContactFormInput
         public array $locales,
         public array $allowedOrigins,
         public array $fields,
+        public ?string $description = null,
         public bool $consentRequired = false,
         public ?array $consentLabel = null,
         public ?int $retentionDays = null,
