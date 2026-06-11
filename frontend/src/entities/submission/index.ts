@@ -1,12 +1,22 @@
-export { useSubmissionsQuery, useSubmissionQuery } from '@/entities/submission/queries';
+export {
+  useSubmissionsQuery,
+  useSubmissionQuery,
+  useSubmissionTechnicalMetaQuery,
+} from '@/entities/submission/queries';
 export { useUpdateSubmissionStatusMutation } from '@/entities/submission/mutations';
-export { toSubmission, toSubmissionDetail, toSubmissionList } from '@/entities/submission/mapper';
+export {
+  toSubmission,
+  toSubmissionDetail,
+  toSubmissionList,
+  toSubmissionTechnicalMeta,
+} from '@/entities/submission/mapper';
 export { submissionKeys } from '@/entities/submission/query-keys';
 export {
   SUBMISSION_STATUSES,
   SUBMISSION_SORTS,
   type Submission,
   type SubmissionDetail,
+  type SubmissionTechnicalMeta,
   type SubmissionList,
   type SubmissionListParams,
   type SubmissionStatus,

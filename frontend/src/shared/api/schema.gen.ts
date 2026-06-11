@@ -249,6 +249,26 @@ export interface paths {
         patch: operations["updateSubmissionStatus"];
         trace?: never;
     };
+    "/admin/submissions/{id}/technical-meta": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Disclose a submission's technical reception metadata (IP / User-Agent)
+         * @description Discloses the submission's IP and User-Agent for abuse investigation (ADR 0018). These are excluded from every default payload (charter §2/§11); this endpoint is the only disclosure path and **records an audit event** (`submission_technical_meta.viewed`) before returning. Gated by the `ViewSubmissionTechnicalMeta` capability (admin + superadmin). Not exposed via MCP.
+         */
+        get: operations["getSubmissionTechnicalMeta"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/submissions/{id}/field-values": {
         parameters: {
             query?: never;
@@ -716,6 +736,8 @@ export interface components {
             status: "open" | "in_progress" | "resolved" | "spam";
             /** @description origin: form (public/embed) or service (concierge/import/api) */
             source?: string;
+            /** @description embed host page the form was submitted from (referer); safe reception meta (ADR 0018) */
+            source_url?: string | null;
             field_values?: {
                 [key: string]: unknown;
             };
@@ -723,6 +745,14 @@ export interface components {
             /** Format: date-time */
             consent_given_at?: string | null;
             submitted_at?: string | null;
+        };
+        /** @description Technical reception metadata disclosed only by the audited disclosure endpoint (ADR 0018); never present in any default payload (charter §2/§11). */
+        SubmissionTechnicalMetaResponse: {
+            id: number;
+            /** @description request IP (abuse investigation only) */
+            ip?: string | null;
+            /** @description request User-Agent (abuse investigation only) */
+            user_agent?: string | null;
         };
         RecordsOptionsResponse: {
             source?: string;
@@ -1380,6 +1410,12 @@ export interface operations {
             query?: {
                 limit?: components["parameters"]["Limit"];
                 offset?: components["parameters"]["Offset"];
+                /** @description Free-text match over action / entity type / "entity_type */
+                q?: string;
+                /** @description Inclusive lower bound on created_at (YYYY-MM-DD). */
+                from?: string;
+                /** @description Inclusive upper bound on created_at (YYYY-MM-DD). */
+                to?: string;
             };
             header?: never;
             path?: never;
@@ -1413,6 +1449,8 @@ export interface operations {
                 to?: string;
                 /** @description Free-text match over submitted content (matched server-side; raw values are not returned). */
                 q?: string;
+                /** @description Row order. Defaults to newest first. */
+                sort?: "date_desc" | "date_asc" | "status" | "form";
             };
             header?: never;
             path?: never;
@@ -1531,6 +1569,31 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
+        };
+    };
+    getSubmissionTechnicalMeta: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Technical reception metadata */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["SubmissionTechnicalMetaResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
         };
     };
     correctSubmission: {

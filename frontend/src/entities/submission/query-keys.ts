@@ -4,4 +4,5 @@ export const submissionKeys = {
   all: ['submissions'] as const,
   list: (params: SubmissionListParams) => [...submissionKeys.all, 'list', params] as const,
   detail: (id: number) => [...submissionKeys.all, 'detail', id] as const,
+  technicalMeta: (id: number) => [...submissionKeys.all, 'technical-meta', id] as const,
 };
