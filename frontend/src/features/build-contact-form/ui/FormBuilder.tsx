@@ -52,9 +52,6 @@ export function FormBuilder({
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  // Preview-only state — the API has no column for the public path yet, so it drives the
-  // live canvas but is not persisted on save.
-  const [publicPath, setPublicPath] = useState('');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -210,11 +207,7 @@ export function FormBuilder({
         </div>
 
         <div className="fb-panel">
-          <FormSettingsCard
-            builder={builder}
-            publicPath={publicPath}
-            onPublicPath={setPublicPath}
-          />
+          <FormSettingsCard builder={builder} readOnlyKey={isEditing} />
           <SelectedFieldCard
             field={selected}
             locale={locale}
@@ -270,12 +263,10 @@ function Switch({
 
 function FormSettingsCard({
   builder,
-  publicPath,
-  onPublicPath,
+  readOnlyKey,
 }: {
   builder: Builder;
-  publicPath: string;
-  onPublicPath: (v: string) => void;
+  readOnlyKey: boolean;
 }): ReactNode {
   const { t } = useI18n();
   const { draft } = builder;
@@ -305,9 +296,11 @@ function FormSettingsCard({
           <span className="pre">{t('builder.publicPathPrefix')}</span>
           <input
             aria-label={t('builder.publicPath')}
-            value={publicPath}
+            value={draft.publicFormKey}
+            readOnly={readOnlyKey}
+            placeholder={t('builder.publicPathAuto')}
             onChange={(e) => {
-              onPublicPath(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''));
+              builder.setPublicFormKey(e.target.value.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase());
             }}
           />
         </div>

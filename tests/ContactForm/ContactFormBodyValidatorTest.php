@@ -63,6 +63,21 @@ final class ContactFormBodyValidatorTest extends TestCase
         self::assertNull($input->fields[1]->placeholder);
     }
 
+    public function test_custom_public_form_key_is_lowercased_and_format_validated(): void
+    {
+        $ok = ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'public_form_key' => 'My-Form-2',
+        ]);
+        self::assertSame('my-form-2', $ok->publicFormKey);
+
+        $this->expectException(ValidationException::class);
+        ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'public_form_key' => '-bad-',
+        ]);
+    }
+
     public function test_non_honeypot_field_still_requires_a_default_locale_label(): void
     {
         $this->expectException(ValidationException::class);

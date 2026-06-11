@@ -41,6 +41,7 @@ function draft(fields: DraftField[], consentRequired: boolean): ContactFormDraft
   return {
     name: '',
     description: '',
+    publicFormKey: '',
     defaultLocale: 'ja',
     locales: ['ja', 'en'],
     allowedOrigins: [],

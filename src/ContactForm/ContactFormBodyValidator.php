@@ -54,6 +54,16 @@ final readonly class ContactFormBodyValidator
         $description = is_string($body['description'] ?? null) ? trim((string) $body['description']) : '';
         $description = $description === '' ? null : mb_substr($description, 0, 2000);
 
+        // Optional custom public key (slug). Lowercased; only a-z0-9 and hyphens, 2-64 chars, no
+        // leading/trailing hyphen. Uniqueness is enforced in the use case (needs the repository).
+        $publicFormKey = null;
+        if (is_string($body['public_form_key'] ?? null) && trim((string) $body['public_form_key']) !== '') {
+            $publicFormKey = strtolower(trim((string) $body['public_form_key']));
+            if (preg_match('/^[a-z0-9]([a-z0-9-]{0,62}[a-z0-9])?$/', $publicFormKey) !== 1) {
+                $errors[] = new ValidationError('public_form_key', 'Public key may use only lowercase letters, digits and hyphens (2-64 chars, no leading/trailing hyphen).', 'invalid');
+            }
+        }
+
         // Consent (charter §3): when required, a per-locale label for the default locale is
         // mandatory, and labels are restricted to {ja, en} (ADR 0011).
         $consentRequired = (bool) ($body['consent_required'] ?? false);
@@ -144,6 +154,7 @@ final readonly class ContactFormBodyValidator
             allowedOrigins: $allowedOrigins,
             fields: $fields,
             description: $description,
+            publicFormKey: $publicFormKey,
             consentRequired: $consentRequired,
             consentLabel: $consentLabel === [] ? null : $consentLabel,
             retentionDays: $retentionDays,

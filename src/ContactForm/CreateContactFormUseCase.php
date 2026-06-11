@@ -6,6 +6,8 @@ namespace NeneContact\ContactForm;
 
 use LogicException;
 use Nene2\Http\RequestScopedHolder;
+use Nene2\Validation\ValidationError;
+use Nene2\Validation\ValidationException;
 use NeneContact\Audit\AuditRecorderInterface;
 
 final readonly class CreateContactFormUseCase implements CreateContactFormUseCaseInterface
@@ -24,10 +26,18 @@ final readonly class CreateContactFormUseCase implements CreateContactFormUseCas
     {
         $organizationId = $this->orgId->get();
 
+        // A custom slug must be globally unique (the public URL is shared across tenants); an
+        // omitted one gets a random, collision-free key.
+        if ($input->publicFormKey !== null && $this->forms->publicFormKeyExists($input->publicFormKey)) {
+            throw new ValidationException([
+                new ValidationError('public_form_key', 'This public key is already taken.', 'taken'),
+            ]);
+        }
+
         $form = new ContactForm(
             organizationId: $organizationId,
             name: $input->name,
-            publicFormKey: bin2hex(random_bytes(16)),
+            publicFormKey: $input->publicFormKey ?? bin2hex(random_bytes(16)),
             defaultLocale: $input->defaultLocale,
             locales: $input->locales,
             allowedOrigins: $input->allowedOrigins,

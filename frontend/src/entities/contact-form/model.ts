@@ -34,6 +34,8 @@ export interface DraftField {
 export interface ContactFormDraft {
   name: string;
   description: string;
+  // Custom public slug; settable at create (empty = auto-generate), immutable after.
+  publicFormKey: string;
   defaultLocale: SupportedLocale;
   locales: SupportedLocale[];
   allowedOrigins: string[];

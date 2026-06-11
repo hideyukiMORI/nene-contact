@@ -1141,6 +1141,7 @@ components:
       properties:
         name: { type: string }
         description: { type: string, description: 'Optional form description shown above the fields in the embed.' }
+        public_form_key: { type: string, description: 'Optional custom public slug (lowercase a-z0-9 and hyphens, 2-64, globally unique). Omit to auto-generate. Immutable after creation.' }
         default_locale: { type: string, enum: [ja, en] }
         locales: { type: array, items: { type: string, enum: [ja, en] } }
         allowed_origins: { type: array, items: { type: string } }

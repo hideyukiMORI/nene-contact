@@ -700,6 +700,8 @@ export interface components {
             name: string;
             /** @description Optional form description shown above the fields in the embed. */
             description?: string;
+            /** @description Optional custom public slug (lowercase a-z0-9 and hyphens, 2-64, globally unique). Omit to auto-generate. Immutable after creation. */
+            public_form_key?: string;
             /** @enum {string} */
             default_locale: "ja" | "en";
             locales: ("ja" | "en")[];

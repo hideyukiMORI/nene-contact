@@ -19,6 +19,8 @@ final readonly class CreateContactFormInput
         public array $allowedOrigins,
         public array $fields,
         public ?string $description = null,
+        // Optional requested public key (slug); null generates a random one (create only).
+        public ?string $publicFormKey = null,
         public bool $consentRequired = false,
         public ?array $consentLabel = null,
         public ?int $retentionDays = null,

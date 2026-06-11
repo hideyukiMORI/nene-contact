@@ -45,7 +45,7 @@ comment overrides it.
 | Tenant | `organization` / `organizations` | `Organization` |
 | Operator account | `user` / `users` | `User` |
 | Form definition | `contact_form` / `contact_forms` | `ContactForm` |
-| Public embed key | `public_form_key` | string on `contact_form` (opaque; not internal id) |
+| Public embed key | `public_form_key` | string on `contact_form` (opaque; not internal id). Optionally set at **create** as a slug (lowercase `[a-z0-9-]`, 2-64, globally unique); **immutable** afterwards |
 | Field definition | `form_field` / `form_fields` | `FormField` |
 | Visitor submission | `submission` / `submissions` | `Submission` — **not** `inquiry`, `message`, `lead` |
 | Operator note | `submission_note` / `submission_notes` | `SubmissionNote` |

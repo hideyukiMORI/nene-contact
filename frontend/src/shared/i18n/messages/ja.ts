@@ -361,6 +361,7 @@ export const ja = {
   'builder.descPlaceholder': 'フォームの説明（任意）',
   'builder.publicPath': '公開パス',
   'builder.publicPathPrefix': 'nene.app/',
+  'builder.publicPathAuto': '自動生成（省略可）',
   'builder.consentTitle': '同意取得',
   'builder.consentDesc': '送信前にプライバシーポリシーへの同意を求めます。',
   'builder.fieldLabel': 'ラベル',
