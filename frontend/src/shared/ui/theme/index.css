@@ -5930,43 +5930,31 @@ a.t:hover {
 }
 
 /* detail: 2-col (diff + event-info rail), switched by the pane's own width */
-.al-detail {
-  container-type: inline-size;
-  container-name: audit;
-}
-.al-grid {
+/* The audit-log detail reuses the shared inquiry-detail skeleton (.ib-body / .ib-grid /
+   .rail / .rail-lab / .audit-note, container query @container detail). Only the read-only
+   event-info list is audit-specific (spec v1.0 §00, §04). */
+.al-rail .meta {
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 18px;
+  grid-template-columns: max-content 1fr;
+  gap: 10px 18px;
+  margin: 0;
 }
-.al-grid .al-rail {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  border-top: 1px solid var(--ex-border);
-  padding-top: 18px;
-}
-.al-rail-lab {
-  font-size: 11px;
+.al-rail .meta dt {
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--ex-faint);
-}
-.al-rail .ib-meta dt {
   white-space: nowrap;
+  margin: 0;
 }
-@container audit (min-width: 880px) {
-  .al-grid {
-    grid-template-columns: minmax(0, 1fr) 320px;
-    gap: 32px;
-  }
-  .al-grid .al-rail {
-    border-top: none;
-    padding-top: 0;
-    border-left: 1px solid var(--ex-border);
-    padding-left: 28px;
-  }
+.al-rail .meta dd {
+  font-size: 13px;
+  color: var(--ex-text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.al-rail .meta dd.mono {
+  font-family: var(--ex-font-mono);
+  font-size: 12.5px;
 }
 
 /* kind badge */
