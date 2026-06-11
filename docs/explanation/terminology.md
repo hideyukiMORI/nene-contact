@@ -143,6 +143,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `consent_given_at` | `submission` | immutable consent timestamp (charter §3) |
 | `source` | `submission` | origin: `form` (public/embed) or service ingest `concierge` / `import` / `api` (M6) |
 | `source_url` | `submission` | embed host page the form was submitted from (referer); non-PII reception meta shown by default (ADR 0018); null for service ingest |
+| `locale` | `submission` | locale the visitor submitted in (one of the form's locales); non-PII reception meta; null when unknown |
 | `deleted_at` | `submission` | soft-delete marker (ADR 0016); excluded from inbox |
 | `purged_at` | `submission` | PII erased in place after grace (ADR 0016, charter §5) |
 | `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
