@@ -120,49 +120,6 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
           ))}
         </dl>
 
-        <div className="ib-msg-lab">{t('submission.metaLabel')}</div>
-        <dl className="ib-meta">
-          <dt>{t('submission.sourceLabel')}</dt>
-          <dd>{sourceKey !== undefined ? t(sourceKey) : submission.source}</dd>
-          {submission.sourceUrl !== null ? (
-            <>
-              <dt>{t('submission.sourceUrl')}</dt>
-              <dd>{submission.sourceUrl}</dd>
-            </>
-          ) : null}
-        </dl>
-
-        <div className="ib-tech">
-          {!revealTech ? (
-            <>
-              <button
-                type="button"
-                className="ex-btn ghost"
-                onClick={() => {
-                  setRevealTech(true);
-                }}
-              >
-                <Icon name="shield" size={14} />
-                {t('submission.showTechnicalInfo')}
-              </button>
-              <p className="hint">{t('submission.technicalInfoHint')}</p>
-            </>
-          ) : tech.isPending ? (
-            <div className="ib-state">{t('common.loading')}</div>
-          ) : tech.error !== null ? (
-            <div className="au-note" role="alert">
-              {t('submission.technicalInfoError')}
-            </div>
-          ) : (
-            <dl className="ib-meta">
-              <dt>{t('submission.ip')}</dt>
-              <dd>{tech.data.ip ?? '—'}</dd>
-              <dt>{t('submission.userAgent')}</dt>
-              <dd>{tech.data.userAgent ?? '—'}</dd>
-            </dl>
-          )}
-        </div>
-
         <div className="ib-tags">
           <button type="button" className="ib-addtag">
             <Icon name="plus" size={12} />
@@ -219,6 +176,14 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
             <span className="d" />
             <div className="tlc">
               <div className="tt">{t('submission.received')}</div>
+              <div className="tm2">
+                {t('submission.receivedVia', {
+                  source: sourceKey !== undefined ? t(sourceKey) : submission.source,
+                })}
+              </div>
+              {submission.sourceUrl !== null ? (
+                <div className="tm2">{submission.sourceUrl}</div>
+              ) : null}
             </div>
             <span className="time2">{submission.submittedAt ?? '—'}</span>
           </div>
@@ -231,6 +196,38 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
               <span className="time2">{submission.consentGivenAt}</span>
             </div>
           ) : null}
+        </div>
+
+        <div className="ib-msg-lab">{t('submission.technicalInfo')}</div>
+        <div className="ib-tech">
+          {!revealTech ? (
+            <>
+              <button
+                type="button"
+                className="ex-btn ghost"
+                onClick={() => {
+                  setRevealTech(true);
+                }}
+              >
+                <Icon name="shield" size={14} />
+                {t('submission.showTechnicalInfo')}
+              </button>
+              <p className="tm2">{t('submission.technicalInfoHint')}</p>
+            </>
+          ) : tech.isPending ? (
+            <div className="ib-state">{t('common.loading')}</div>
+          ) : tech.error !== null ? (
+            <div className="au-note" role="alert">
+              {t('submission.technicalInfoError')}
+            </div>
+          ) : (
+            <dl className="ib-meta">
+              <dt>{t('submission.ip')}</dt>
+              <dd>{tech.data.ip ?? '—'}</dd>
+              <dt>{t('submission.userAgent')}</dt>
+              <dd>{tech.data.userAgent ?? '—'}</dd>
+            </dl>
+          )}
         </div>
       </div>
 

@@ -5323,9 +5323,9 @@ a.t:hover {
   gap: 8px;
   align-items: flex-start;
 }
-.ib-tech .hint {
-  font-size: 11.5px;
-  color: var(--ex-faint);
+.ib-tech .tm2 {
+  font-size: 11px;
+  color: var(--ex-muted);
   margin: 0;
 }
 .ib-tags {

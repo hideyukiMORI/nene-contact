@@ -44,7 +44,7 @@ describe('SubmissionDetail', () => {
     expect(screen.getByLabelText('状態')).toHaveValue('open');
   });
 
-  it('shows safe reception meta (source + source_url) by default', async () => {
+  it('shows safe reception meta (source + source_url) in the timeline by default', async () => {
     server.use(
       http.get(DETAIL, () => HttpResponse.json(detailBody())),
       http.get(NOTES, () => HttpResponse.json({ items: [] })),
@@ -52,8 +52,9 @@ describe('SubmissionDetail', () => {
 
     renderDetail();
 
+    // Source + submitted-from page render as the design's reception provenance (ib-tl subtitle).
     expect(await screen.findByText('https://shop.example.com/contact')).toBeInTheDocument();
-    expect(screen.getByText('フォーム')).toBeInTheDocument();
+    expect(screen.getByText('フォームより')).toBeInTheDocument();
   });
 
   it('discloses IP / User-Agent only on click, via the audited endpoint', async () => {
