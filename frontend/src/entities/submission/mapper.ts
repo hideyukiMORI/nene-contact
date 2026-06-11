@@ -1,5 +1,14 @@
-import type { SubmissionDto, SubmissionListDto } from '@/entities/submission/api-types';
-import type { Submission, SubmissionDetail, SubmissionList } from '@/entities/submission/model';
+import type {
+  SubmissionDto,
+  SubmissionListDto,
+  SubmissionTechnicalMetaDto,
+} from '@/entities/submission/api-types';
+import type {
+  Submission,
+  SubmissionDetail,
+  SubmissionList,
+  SubmissionTechnicalMeta,
+} from '@/entities/submission/model';
 
 export function toSubmission(dto: SubmissionDto): Submission {
   return {
@@ -14,8 +23,20 @@ export function toSubmission(dto: SubmissionDto): Submission {
 export function toSubmissionDetail(dto: SubmissionDto): SubmissionDetail {
   return {
     ...toSubmission(dto),
+    source: dto.source ?? 'form',
+    sourceUrl: dto.source_url ?? null,
     consentLabel: dto.consent_label ?? null,
     consentGivenAt: dto.consent_given_at ?? null,
+  };
+}
+
+export function toSubmissionTechnicalMeta(
+  dto: SubmissionTechnicalMetaDto,
+): SubmissionTechnicalMeta {
+  return {
+    id: dto.id,
+    ip: dto.ip ?? null,
+    userAgent: dto.user_agent ?? null,
   };
 }
 

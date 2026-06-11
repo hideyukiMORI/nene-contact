@@ -1,12 +1,21 @@
 import { keepPreviousData, useQuery, type UseQueryResult } from '@tanstack/react-query';
 import { apiClient } from '@/shared/api/client';
 import type { AppError } from '@/shared/api/errors';
-import type { SubmissionDto, SubmissionListDto } from '@/entities/submission/api-types';
-import { toSubmissionDetail, toSubmissionList } from '@/entities/submission/mapper';
+import type {
+  SubmissionDto,
+  SubmissionListDto,
+  SubmissionTechnicalMetaDto,
+} from '@/entities/submission/api-types';
+import {
+  toSubmissionDetail,
+  toSubmissionList,
+  toSubmissionTechnicalMeta,
+} from '@/entities/submission/mapper';
 import type {
   SubmissionDetail,
   SubmissionList,
   SubmissionListParams,
+  SubmissionTechnicalMeta,
 } from '@/entities/submission/model';
 import { submissionKeys } from '@/entities/submission/query-keys';
 
@@ -43,5 +52,28 @@ export function useSubmissionQuery(id: number): UseQueryResult<SubmissionDetail,
     queryKey: submissionKeys.detail(id),
     queryFn: async () =>
       toSubmissionDetail(await apiClient.get<SubmissionDto>(`/admin/submissions/${String(id)}`)),
+  });
+}
+
+/**
+ * Discloses IP / User-Agent on demand (ADR 0018). Disabled until `enabled` is set so the
+ * audited request fires only on an explicit operator reveal; not cached, so re-revealing
+ * re-discloses (and re-audits) rather than reading a stale copy.
+ */
+export function useSubmissionTechnicalMetaQuery(
+  id: number,
+  enabled: boolean,
+): UseQueryResult<SubmissionTechnicalMeta, AppError> {
+  return useQuery<SubmissionTechnicalMeta, AppError>({
+    queryKey: submissionKeys.technicalMeta(id),
+    queryFn: async () =>
+      toSubmissionTechnicalMeta(
+        await apiClient.get<SubmissionTechnicalMetaDto>(
+          `/admin/submissions/${String(id)}/technical-meta`,
+        ),
+      ),
+    enabled,
+    staleTime: 0,
+    gcTime: 0,
   });
 }

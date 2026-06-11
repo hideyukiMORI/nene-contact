@@ -5317,6 +5317,17 @@ a.t:hover {
   font-weight: 700;
   margin-bottom: -6px;
 }
+.ib-tech {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: flex-start;
+}
+.ib-tech .hint {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  margin: 0;
+}
 .ib-tags {
   display: flex;
   gap: 7px;

@@ -17,12 +17,15 @@ function renderDetail(): void {
 
 const DETAIL = 'http://localhost/admin/submissions/9';
 const NOTES = 'http://localhost/admin/submissions/9/notes';
+const TECH = 'http://localhost/admin/submissions/9/technical-meta';
 
 function detailBody(status = 'open') {
   return {
     id: 9,
     contact_form_id: 3,
     status,
+    source: 'form',
+    source_url: 'https://shop.example.com/contact',
     field_values: { email: 'visitor@example.com' },
     submitted_at: '2026-06-04 00:00:00',
   };
@@ -39,6 +42,44 @@ describe('SubmissionDetail', () => {
 
     expect(await screen.findByText('visitor@example.com')).toBeInTheDocument();
     expect(screen.getByLabelText('状態')).toHaveValue('open');
+  });
+
+  it('shows safe reception meta (source + source_url) by default', async () => {
+    server.use(
+      http.get(DETAIL, () => HttpResponse.json(detailBody())),
+      http.get(NOTES, () => HttpResponse.json({ items: [] })),
+    );
+
+    renderDetail();
+
+    expect(await screen.findByText('https://shop.example.com/contact')).toBeInTheDocument();
+    expect(screen.getByText('フォーム')).toBeInTheDocument();
+  });
+
+  it('discloses IP / User-Agent only on click, via the audited endpoint', async () => {
+    let techCalls = 0;
+    server.use(
+      http.get(DETAIL, () => HttpResponse.json(detailBody())),
+      http.get(NOTES, () => HttpResponse.json({ items: [] })),
+      http.get(TECH, () => {
+        techCalls += 1;
+        return HttpResponse.json({ id: 9, ip: '203.0.113.9', user_agent: 'curl/8' });
+      }),
+    );
+    const user = userEvent.setup();
+
+    renderDetail();
+    await screen.findByText('visitor@example.com');
+
+    // Not disclosed until the operator explicitly reveals it (so the audited call is intentional).
+    expect(techCalls).toBe(0);
+    expect(screen.queryByText('203.0.113.9')).not.toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: '技術情報を表示' }));
+
+    expect(await screen.findByText('203.0.113.9')).toBeInTheDocument();
+    expect(screen.getByText('curl/8')).toBeInTheDocument();
+    expect(techCalls).toBe(1);
   });
 
   it('updates status via PATCH', async () => {

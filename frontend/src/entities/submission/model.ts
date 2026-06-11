@@ -35,8 +35,19 @@ export interface SubmissionListParams {
 }
 
 export interface SubmissionDetail extends Submission {
+  // Safe reception meta shown by default (ADR 0018).
+  source: string;
+  sourceUrl: string | null;
   consentLabel: Record<string, string> | null;
   consentGivenAt: string | null;
+}
+
+// Technical reception metadata (IP / User-Agent), disclosed only on demand via the audited
+// endpoint (ADR 0018) — never part of the default submission payload.
+export interface SubmissionTechnicalMeta {
+  id: number;
+  ip: string | null;
+  userAgent: string | null;
 }
 
 export const SUBMISSION_STATUSES: SubmissionStatus[] = ['open', 'in_progress', 'resolved', 'spam'];

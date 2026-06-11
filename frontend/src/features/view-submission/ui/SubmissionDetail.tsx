@@ -1,10 +1,23 @@
 import { Fragment, useState, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { SUBMISSION_STATUSES, type SubmissionStatus } from '@/entities/submission';
+import {
+  SUBMISSION_STATUSES,
+  useSubmissionTechnicalMetaQuery,
+  type SubmissionStatus,
+} from '@/entities/submission';
 import { useI18n } from '@/shared/i18n';
+import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Icon } from '@/shared/ui';
 import { useSubmission } from '@/features/view-submission/hooks/use-submission';
 import { useSubmissionNotes } from '@/features/view-submission/hooks/use-submission-notes';
+
+// Known submission sources → label key; unknown values fall back to the raw string.
+const SOURCE_LABEL_KEYS: Record<string, MessageKey> = {
+  form: 'submission.source.form',
+  concierge: 'submission.source.concierge',
+  import: 'submission.source.import',
+  api: 'submission.source.api',
+};
 
 function display(value: unknown): string {
   if (value === null || value === undefined) {
@@ -30,6 +43,10 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
     useSubmission(submissionId);
   const notes = useSubmissionNotes(submissionId);
   const [noteBody, setNoteBody] = useState('');
+  // IP/UA are fetched only after an explicit reveal; the request is audited server-side.
+  const [revealTech, setRevealTech] = useState(false);
+  const tech = useSubmissionTechnicalMetaQuery(submissionId, revealTech);
+  const sourceKey = submission !== null ? SOURCE_LABEL_KEYS[submission.source] : undefined;
 
   if (isLoading) {
     return <div className="ib-state">{t('common.loading')}</div>;
@@ -102,6 +119,49 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
             </Fragment>
           ))}
         </dl>
+
+        <div className="ib-msg-lab">{t('submission.metaLabel')}</div>
+        <dl className="ib-meta">
+          <dt>{t('submission.sourceLabel')}</dt>
+          <dd>{sourceKey !== undefined ? t(sourceKey) : submission.source}</dd>
+          {submission.sourceUrl !== null ? (
+            <>
+              <dt>{t('submission.sourceUrl')}</dt>
+              <dd>{submission.sourceUrl}</dd>
+            </>
+          ) : null}
+        </dl>
+
+        <div className="ib-tech">
+          {!revealTech ? (
+            <>
+              <button
+                type="button"
+                className="ex-btn ghost"
+                onClick={() => {
+                  setRevealTech(true);
+                }}
+              >
+                <Icon name="shield" size={14} />
+                {t('submission.showTechnicalInfo')}
+              </button>
+              <p className="hint">{t('submission.technicalInfoHint')}</p>
+            </>
+          ) : tech.isPending ? (
+            <div className="ib-state">{t('common.loading')}</div>
+          ) : tech.error !== null ? (
+            <div className="au-note" role="alert">
+              {t('submission.technicalInfoError')}
+            </div>
+          ) : (
+            <dl className="ib-meta">
+              <dt>{t('submission.ip')}</dt>
+              <dd>{tech.data.ip ?? '—'}</dd>
+              <dt>{t('submission.userAgent')}</dt>
+              <dd>{tech.data.userAgent ?? '—'}</dd>
+            </dl>
+          )}
+        </div>
 
         <div className="ib-tags">
           <button type="button" className="ib-addtag">
