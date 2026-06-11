@@ -1094,7 +1094,7 @@ components:
         id: { type: integer }
         field_type:
           type: string
-          enum: [text, email, textarea, select, checkbox, file, honeypot]
+          enum: [text, email, textarea, select, checkbox, date, file, honeypot]
           description: >
             Closed allowlist (single source of truth: NeneContact\ContactForm\FieldType).
             My Number and raw payment card numbers are prohibited as any field type and
@@ -1151,7 +1151,7 @@ components:
           items:
             type: object
             properties:
-              field_type: { type: string, enum: [text, email, textarea, select, checkbox, file, honeypot] }
+              field_type: { type: string, enum: [text, email, textarea, select, checkbox, date, file, honeypot] }
               name: { type: string }
               label: { $ref: '#/components/schemas/LocaleMap' }
               required: { type: boolean }
