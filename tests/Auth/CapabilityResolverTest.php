@@ -26,6 +26,15 @@ final class CapabilityResolverTest extends TestCase
         self::assertSame(Capability::ManageSubmissions, CapabilityResolver::resolve('/admin/submissions/1', 'PATCH'));
     }
 
+    public function test_technical_meta_requires_its_own_capability(): void
+    {
+        // More specific than the generic submissions read — IP/UA disclosure (ADR 0018).
+        self::assertSame(
+            Capability::ViewSubmissionTechnicalMeta,
+            CapabilityResolver::resolve('/admin/submissions/1/technical-meta', 'GET'),
+        );
+    }
+
     public function test_unmapped_route_requires_no_capability(): void
     {
         self::assertNull(CapabilityResolver::resolve('/admin/auth/login', 'POST'));
