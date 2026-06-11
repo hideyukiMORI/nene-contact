@@ -24,6 +24,7 @@ function newField(fieldType: string): DraftField {
 
 const initialDraft: ContactFormDraft = {
   name: '',
+  description: '',
   defaultLocale: 'ja',
   locales: ['ja'],
   allowedOrigins: [],
@@ -38,6 +39,7 @@ export interface FormBuilder {
   error: AppError | null;
   isPending: boolean;
   setName: (name: string) => void;
+  setDescription: (description: string) => void;
   toggleLocale: (locale: SupportedLocale) => void;
   setDefaultLocale: (locale: SupportedLocale) => void;
   toggleConsent: () => void;
@@ -75,6 +77,9 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
     isPending: mutation.isPending,
     setName: (name) => {
       setDraft((d) => ({ ...d, name }));
+    },
+    setDescription: (description) => {
+      setDraft((d) => ({ ...d, description }));
     },
     toggleLocale: (locale) => {
       setDraft((d) => {

@@ -37,6 +37,21 @@ final class ContactFormBodyValidatorTest extends TestCase
         self::assertSame('hp_url', $input->fields[1]->name);
     }
 
+    public function test_description_is_parsed_and_blank_collapses_to_null(): void
+    {
+        $withDesc = ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'description' => '  ご質問はこちらから。  ',
+        ]);
+        self::assertSame('ご質問はこちらから。', $withDesc->description);
+
+        $blank = ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'description' => '   ',
+        ]);
+        self::assertNull($blank->description);
+    }
+
     public function test_non_honeypot_field_still_requires_a_default_locale_label(): void
     {
         $this->expectException(ValidationException::class);

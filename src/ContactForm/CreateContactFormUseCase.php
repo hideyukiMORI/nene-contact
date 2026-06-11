@@ -32,6 +32,7 @@ final readonly class CreateContactFormUseCase implements CreateContactFormUseCas
             locales: $input->locales,
             allowedOrigins: $input->allowedOrigins,
             fields: $input->fields,
+            description: $input->description,
             status: 'active',
             consentRequired: $input->consentRequired,
             consentLabel: $input->consentLabel,

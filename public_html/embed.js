@@ -109,6 +109,7 @@
       '.nene-contact-panel{background:#fff;border-radius:12px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto;position:relative}',
       '.nene-contact-close{position:absolute;top:10px;right:12px;background:none;border:0;font-size:22px;line-height:1;cursor:pointer;color:#6b7280}',
       '.nene-contact-title{font-size:18px;font-weight:700;margin:0 0 12px;color:#111827}'
+      + '.nene-contact-desc{font-size:13px;line-height:1.6;margin:-4px 0 16px;color:#6b7280}'
     ].join('');
   }
 
@@ -156,6 +157,10 @@
 
     if (schema.name) {
       form.appendChild(el('h2', { 'class': 'nene-contact-title' }, localized(typeof schema.name === 'object' ? schema.name : null, locale) || schema.name));
+    }
+
+    if (schema.description) {
+      form.appendChild(el('p', { 'class': 'nene-contact-desc' }, schema.description));
     }
 
     var controls = {};

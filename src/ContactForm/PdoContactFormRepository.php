@@ -15,7 +15,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoContactFormRepository implements ContactFormRepositoryInterface
 {
-    private const FORM_COLUMNS = 'id, organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at';
+    private const FORM_COLUMNS = 'id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at';
     private const FIELD_COLUMNS = 'id, contact_form_id, field_type, name, label_json, required, options_json, sort_order';
 
     /**
@@ -35,11 +35,12 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
         return $this->tx->transactional(static function (DatabaseQueryExecutorInterface $q) use ($form, $organizationId, $now): int {
             $q->execute(
-                'INSERT INTO contact_forms (organization_id, name, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO contact_forms (organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     $organizationId,
                     $form->name,
+                    $form->description,
                     $form->publicFormKey,
                     $form->defaultLocale,
                     self::encode($form->locales),
@@ -88,10 +89,11 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
             // are preserved. Org-scoped so a cross-tenant id updates nothing.
             $q->execute(
                 'UPDATE contact_forms
-                 SET name = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, updated_at = ?
+                 SET name = ?, description = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, updated_at = ?
                  WHERE id = ? AND organization_id = ?',
                 [
                     $form->name,
+                    $form->description,
                     $form->defaultLocale,
                     self::encode($form->locales),
                     self::encode($form->allowedOrigins),
@@ -229,6 +231,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
         return new ContactForm(
             organizationId: (int) $row['organization_id'],
             name: (string) $row['name'],
+            description: isset($row['description']) ? (string) $row['description'] : null,
             publicFormKey: (string) $row['public_form_key'],
             defaultLocale: (string) $row['default_locale'],
             locales: $locales,

@@ -19,6 +19,7 @@ final readonly class PublicFormSchemaResponse
         return [
             'public_form_key' => $form->publicFormKey,
             'name' => $form->name,
+            'description' => $form->description,
             'default_locale' => $form->defaultLocale,
             'locales' => $form->locales,
             // The embed renders an explicit, unchecked consent checkbox when required (charter §3).

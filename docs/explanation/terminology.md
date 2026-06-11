@@ -138,6 +138,7 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | Field | Where | Notes |
 | --- | --- | --- |
 | `allowed_origins` | `contact_form` | array; server-side origin allowlist (ADR 0010) |
+| `description` | `contact_form` | optional form description shown above the fields in the embed (builder spec v1.0) |
 | `retention_days` | `contact_form` / org policy | retention before purge (charter §5) |
 | `consent_required` | `contact_form` | boolean |
 | `consent_label` | `contact_form` | per-locale `ja`/`en` object (ADR 0011) |

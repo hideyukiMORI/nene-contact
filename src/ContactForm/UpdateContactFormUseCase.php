@@ -40,6 +40,7 @@ final readonly class UpdateContactFormUseCase implements UpdateContactFormUseCas
             locales: $input->locales,
             allowedOrigins: $input->allowedOrigins,
             fields: $input->fields,
+            description: $input->description,
             status: $before->status,
             consentRequired: $input->consentRequired,
             consentLabel: $input->consentLabel,
