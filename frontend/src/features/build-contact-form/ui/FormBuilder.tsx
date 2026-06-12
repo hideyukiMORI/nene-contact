@@ -10,15 +10,31 @@ import {
 import {
   SortableContext,
   sortableKeyboardCoordinates,
+  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import { useState, type ReactNode } from 'react';
+import { CSS } from '@dnd-kit/utilities';
+import { useState, type CSSProperties, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import type { ContactFormDraft, DraftField } from '@/entities/contact-form';
+import {
+  defaultChoiceConfig,
+  type ContactFormDraft,
+  type DraftField,
+} from '@/entities/contact-form';
 import { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
+import { useChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import {
+  choiceStateToFieldPatch,
+  draftFieldToChoiceState,
+} from '@/features/build-contact-form/lib/choice-bridge';
+import type { ChoiceState } from '@/features/build-contact-form/lib/choice-core';
 import { SortableFieldCard } from '@/features/build-contact-form/ui/SortableFieldCard';
+import { ChoiceCanvasField } from '@/features/build-contact-form/ui/choice/ChoiceCanvasField';
+import { ChoicePanel } from '@/features/build-contact-form/ui/choice/ChoicePanel';
+import { StyleGallery } from '@/features/build-contact-form/ui/choice/StyleGallery';
+import { RespondentForm } from '@/features/build-contact-form/ui/choice/RespondentForm';
 import {
   FIELD_DEFAULT_KEYS,
   FIELD_TYPE_ICON,
@@ -31,6 +47,40 @@ type Translate = (key: MessageKey, params?: Record<string, string>) => string;
 function defaultPlaceholder(fieldType: string, t: Translate): string {
   const keys = FIELD_DEFAULT_KEYS[fieldType];
   return keys !== undefined ? t(keys.placeholder) : '';
+}
+
+function newOptionValue(): string {
+  return 'opt_' + Math.random().toString(36).slice(2, 10);
+}
+
+// A blank editor state for when no choice field is selected (the hook is always mounted).
+const EMPTY_CHOICE_STATE: ChoiceState = draftFieldToChoiceState(
+  {
+    id: '',
+    fieldType: 'select',
+    name: '',
+    label: {},
+    placeholder: '',
+    required: false,
+    options: [],
+    choice: defaultChoiceConfig(),
+  },
+  'ja',
+);
+
+// Keeps the selected choice field in the sortable list (so DnD measuring stays consistent)
+// while rendering the rich on-canvas editor instead of the compact card.
+function SortableChoiceSlot({ id, children }: { id: string; children: ReactNode }): ReactNode {
+  const { setNodeRef, transform, transition } = useSortable({ id });
+  const style: CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition: transition ?? undefined,
+  };
+  return (
+    <div ref={setNodeRef} style={style}>
+      {children}
+    </div>
+  );
 }
 
 export function FormBuilder({
@@ -52,6 +102,8 @@ export function FormBuilder({
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [galleryOpen, setGalleryOpen] = useState(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -65,12 +117,47 @@ export function FormBuilder({
     }
   };
 
+  const selected = draft.fields.find((f) => f.id === selectedId) ?? null;
+  const isChoiceSelected = selected?.fieldType === 'select';
+
+  // The single choice-state source. Seeded from the selected select field; re-seeds on selection
+  // change. Every edit mirrors back into the draft so the draft stays the persisted truth.
+  const choiceSeed = isChoiceSelected
+    ? draftFieldToChoiceState(selected, locale)
+    : EMPTY_CHOICE_STATE;
+  const choice = useChoiceField(
+    choiceSeed,
+    isChoiceSelected ? selected.id : '__none__',
+    (state) => {
+      if (selected === null || selected.fieldType !== 'select') {
+        return;
+      }
+      const patch = choiceStateToFieldPatch(state, locale, selected.options);
+      builder.updateField(selected.id, {
+        required: patch.required,
+        options: patch.options,
+        choice: patch.choice,
+      });
+    },
+  );
+
   const addField = (fieldType: string): void => {
     const id = builder.addField(fieldType);
     const keys = FIELD_DEFAULT_KEYS[fieldType];
     if (keys !== undefined) {
       builder.setFieldLabel(id, locale, t(keys.label));
       builder.updateField(id, { placeholder: t(keys.placeholder) });
+    }
+    if (fieldType === 'select') {
+      // Seed a few starter options so a new choice field is immediately previewable and valid.
+      builder.updateField(id, {
+        options: [
+          { value: newOptionValue(), label: { [locale]: t('choice.starter.opt1') } },
+          { value: newOptionValue(), label: { [locale]: t('choice.starter.opt2') } },
+          { value: newOptionValue(), label: { [locale]: t('choice.starter.opt3') } },
+        ],
+        choice: defaultChoiceConfig(),
+      });
     }
     setSelectedId(id);
   };
@@ -80,6 +167,13 @@ export function FormBuilder({
     builder.removeField(id);
     if (selectedId === id) {
       setSelectedId(remaining[0]?.id ?? null);
+    }
+  };
+
+  const duplicateField = (id: string): void => {
+    const newId = builder.duplicateField(id);
+    if (newId !== null) {
+      setSelectedId(newId);
     }
   };
 
@@ -94,8 +188,6 @@ export function FormBuilder({
     });
   };
 
-  const selected = draft.fields.find((f) => f.id === selectedId) ?? null;
-
   const fieldLabel = (field: DraftField): string => {
     const raw = field.label[locale];
     return raw !== undefined && raw.trim() !== ''
@@ -104,6 +196,8 @@ export function FormBuilder({
   };
   const fieldPlaceholder = (field: DraftField): string =>
     field.placeholder !== '' ? field.placeholder : defaultPlaceholder(field.fieldType, t);
+
+  const selectedLabel = selected !== null ? fieldLabel(selected) : '';
 
   return (
     <div className="fb-page">
@@ -120,10 +214,17 @@ export function FormBuilder({
         <button type="button" className="ex-btn ghost" onClick={onBack}>
           {t('builder.cancel')}
         </button>
-        <span className="ex-btn ghost">
+        <button
+          type="button"
+          className="ex-btn ghost"
+          disabled={!isChoiceSelected}
+          onClick={() => {
+            setPreviewOpen(true);
+          }}
+        >
           <Icon name="eye" size={15} />
           {t('builder.preview')}
-        </span>
+        </button>
         <button type="button" className="ex-btn" disabled={builder.isPending} onClick={onSubmit}>
           <Icon name="check" size={15} />
           {builder.isPending
@@ -145,7 +246,7 @@ export function FormBuilder({
         </div>
       ) : null}
 
-      <div className="fb-grid">
+      <div className="fb-grid" style={{ position: 'relative' }}>
         <div className="fb-canvas">
           <div className="fb-sheet">
             <div className="fb-sheet-head">
@@ -175,21 +276,39 @@ export function FormBuilder({
                 items={draft.fields.map((f) => f.id)}
                 strategy={verticalListSortingStrategy}
               >
-                {draft.fields.map((field) => (
-                  <SortableFieldCard
-                    key={field.id}
-                    field={field}
-                    label={fieldLabel(field)}
-                    placeholder={fieldPlaceholder(field)}
-                    selected={field.id === selectedId}
-                    onSelect={() => {
-                      setSelectedId(field.id);
-                    }}
-                    onDelete={() => {
-                      deleteField(field.id);
-                    }}
-                  />
-                ))}
+                {draft.fields.map((field) =>
+                  field.fieldType === 'select' && field.id === selectedId ? (
+                    <SortableChoiceSlot key={field.id} id={field.id}>
+                      <ChoiceCanvasField
+                        choice={choice}
+                        label={fieldLabel(field)}
+                        onOpenGallery={() => {
+                          setGalleryOpen(true);
+                        }}
+                        onDelete={() => {
+                          deleteField(field.id);
+                        }}
+                        onDuplicate={() => {
+                          duplicateField(field.id);
+                        }}
+                      />
+                    </SortableChoiceSlot>
+                  ) : (
+                    <SortableFieldCard
+                      key={field.id}
+                      field={field}
+                      label={fieldLabel(field)}
+                      placeholder={fieldPlaceholder(field)}
+                      selected={field.id === selectedId}
+                      onSelect={() => {
+                        setSelectedId(field.id);
+                      }}
+                      onDelete={() => {
+                        deleteField(field.id);
+                      }}
+                    />
+                  ),
+                )}
               </SortableContext>
             </DndContext>
 
@@ -208,33 +327,67 @@ export function FormBuilder({
 
         <div className="fb-panel">
           <FormSettingsCard builder={builder} readOnlyKey={isEditing} />
-          <SelectedFieldCard
-            field={selected}
-            locale={locale}
-            placeholder={selected?.placeholder ?? ''}
-            onLabel={(v) => {
-              if (selected !== null) {
-                builder.setFieldLabel(selected.id, locale, v);
-              }
-            }}
-            onPlaceholder={(v) => {
-              if (selected !== null) {
-                builder.updateField(selected.id, { placeholder: v });
-              }
-            }}
-            onRequired={(v) => {
-              if (selected !== null) {
-                builder.updateField(selected.id, { required: v });
-              }
-            }}
-            onOptions={(values) => {
-              if (selected !== null) {
-                builder.setFieldOptionValues(selected.id, values);
-              }
-            }}
-          />
+          {isChoiceSelected ? (
+            <div className="card card-pad">
+              <h4 className="fb-psec-h">
+                <Icon name="edit" size={15} />
+                {t('builder.selectedField')}
+              </h4>
+              <ChoicePanel
+                choice={choice}
+                label={selectedLabel}
+                onLabel={(v) => {
+                  builder.setFieldLabel(selected.id, locale, v);
+                }}
+                onOpenGallery={() => {
+                  setGalleryOpen(true);
+                }}
+              />
+            </div>
+          ) : (
+            <SelectedFieldCard
+              field={selected}
+              locale={locale}
+              placeholder={selected?.placeholder ?? ''}
+              onLabel={(v) => {
+                if (selected !== null) {
+                  builder.setFieldLabel(selected.id, locale, v);
+                }
+              }}
+              onPlaceholder={(v) => {
+                if (selected !== null) {
+                  builder.updateField(selected.id, { placeholder: v });
+                }
+              }}
+              onRequired={(v) => {
+                if (selected !== null) {
+                  builder.updateField(selected.id, { required: v });
+                }
+              }}
+            />
+          )}
           <PaletteCard onAdd={addField} />
         </div>
+
+        {isChoiceSelected && galleryOpen ? (
+          <StyleGallery
+            choice={choice}
+            onClose={() => {
+              setGalleryOpen(false);
+            }}
+          />
+        ) : null}
+        {isChoiceSelected && previewOpen ? (
+          <RespondentForm
+            choice={choice}
+            formName={draft.name}
+            formDescription={draft.description}
+            fieldLabel={selectedLabel}
+            onClose={() => {
+              setPreviewOpen(false);
+            }}
+          />
+        ) : null}
       </div>
     </div>
   );
@@ -329,7 +482,6 @@ function SelectedFieldCard({
   onLabel,
   onPlaceholder,
   onRequired,
-  onOptions,
 }: {
   field: DraftField | null;
   locale: string;
@@ -337,7 +489,6 @@ function SelectedFieldCard({
   onLabel: (v: string) => void;
   onPlaceholder: (v: string) => void;
   onRequired: (v: boolean) => void;
-  onOptions: (values: string[]) => void;
 }): ReactNode {
   const { t } = useI18n();
 
@@ -384,26 +535,6 @@ function SelectedFieldCard({
               }}
             />
           </div>
-          {field.fieldType === 'select' ? (
-            <div className="fb-frow">
-              <label className="l" htmlFor="fb-field-opts">
-                {t('builder.options')}
-              </label>
-              <textarea
-                id="fb-field-opts"
-                className="input"
-                value={(field.options ?? []).map((o) => o.value).join('\n')}
-                onChange={(e) => {
-                  onOptions(
-                    e.target.value
-                      .split('\n')
-                      .map((line) => line.trim())
-                      .filter((line) => line !== ''),
-                  );
-                }}
-              />
-            </div>
-          ) : null}
           <div className="fb-frow">
             <div className="fb-toggle-row">
               <div className="info">

@@ -9,6 +9,7 @@ export {
   toContactFormList,
   toContactFormDetail,
   toCreateContactFormDto,
+  defaultChoiceConfig,
 } from '@/entities/contact-form/mapper';
 export { contactFormKeys } from '@/entities/contact-form/query-keys';
 export type {
@@ -18,4 +19,11 @@ export type {
   ContactFormDraft,
   DraftField,
   DraftFieldOption,
+  ChoiceConfig,
+  ChoiceStyleId,
+  ChoiceCardLayout,
+  ChoiceRatio,
+  ChoiceOtherConfig,
+  ChoiceCountRule,
+  ChoiceImageConfig,
 } from '@/entities/contact-form/model';

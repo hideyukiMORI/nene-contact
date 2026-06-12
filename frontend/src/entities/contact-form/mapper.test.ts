@@ -104,7 +104,10 @@ describe('contact-form mappers', () => {
     expect(draft.fields[0]?.id).toBe('4');
     expect(draft.fields[0]?.options).toEqual([{ value: 'a', label: { ja: 'A' } }]);
 
-    // The draft re-serializes to the request shape used for the PUT.
+    // A select field carries a default choice config (builder spec v2.0).
+    expect(draft.fields[0]?.choice?.style).toBe('radio');
+
+    // The draft re-serializes to the request shape used for the PUT, including the choice config.
     const dto = toCreateContactFormDto(draft);
     expect(dto.name).toBe('Contact us');
     expect(dto.fields[0]).toEqual({
@@ -113,6 +116,19 @@ describe('contact-form mappers', () => {
       label: { ja: '種別' },
       required: true,
       options: [{ value: 'a', label: { ja: 'A' } }],
+      config: {
+        style: 'radio',
+        defaults: [],
+        other: false,
+        other_config: {
+          label: 'その他',
+          placeholder: '具体的にご記入ください',
+          required: false,
+          max_len: 0,
+        },
+        count_rule: { min_on: false, min: 1, max_on: false, max: 3 },
+        image: { enabled: false, layout: 'card', cols: 2, ratio: '1:1' },
+      },
     });
   });
 

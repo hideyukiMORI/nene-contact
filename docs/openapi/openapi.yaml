@@ -1103,9 +1103,55 @@ components:
         label: { $ref: '#/components/schemas/LocaleMap' }
         placeholder: { type: [string, 'null'], description: 'Optional input hint text shown in the embed.' }
         required: { type: boolean }
-        options: { type: [array, 'null'], items: { type: object, additionalProperties: true } }
+        options: { type: [array, 'null'], items: { $ref: '#/components/schemas/ChoiceOption' } }
+        config: { oneOf: [{ $ref: '#/components/schemas/ChoiceFieldConfig' }, { type: 'null' }], description: 'Declarative display config for choice (select) fields; null otherwise.' }
         sort_order: { type: integer }
       required: [field_type, name, label]
+
+    ChoiceOption:
+      type: object
+      description: A single choice option. `value` is the stable id that config.defaults reference.
+      properties:
+        value: { type: string }
+        label: { $ref: '#/components/schemas/LocaleMap' }
+        description: { allOf: [{ $ref: '#/components/schemas/LocaleMap' }], description: 'Optional per-option supplementary note (picture choice / list).' }
+        image: { type: boolean, description: 'Whether this option has an attached image (picture choice).' }
+      required: [value]
+
+    ChoiceFieldConfig:
+      type: object
+      description: >
+        Display config for a choice (select) field (choice-field management UI, builder spec
+        v2.0). The style internalizes the selection logic (radio/dropdown/segment = single;
+        checkbox/tags/chips = multiple). Declarative only — no operator JavaScript (ADR 0010).
+      properties:
+        style: { type: string, enum: [radio, dropdown, segment, checkbox, tags, chips] }
+        defaults: { type: array, items: { type: string }, description: 'Initially-selected option values; single-logic styles keep at most one.' }
+        other: { type: boolean, description: 'Whether an 「その他」 free-text choice is offered.' }
+        other_config:
+          type: object
+          properties:
+            label: { type: string }
+            placeholder: { type: string }
+            required: { type: boolean }
+            max_len: { type: integer, minimum: 0, maximum: 2000, description: '0 = unlimited.' }
+        count_rule:
+          type: object
+          description: Selection-count rule; only applies to multiple-logic styles.
+          properties:
+            min_on: { type: boolean }
+            min: { type: integer, minimum: 1 }
+            max_on: { type: boolean }
+            max: { type: integer, minimum: 1 }
+        image:
+          type: object
+          description: Picture choice; only the list styles (radio/checkbox) can enable it.
+          properties:
+            enabled: { type: boolean }
+            layout: { type: string, enum: [card, list] }
+            cols: { type: integer, enum: [2, 3] }
+            ratio: { type: string, enum: ['1:1', '4:3', '16:9'] }
+      required: [style]
 
     ContactFormResponse:
       type: object
@@ -1160,7 +1206,8 @@ components:
               label: { $ref: '#/components/schemas/LocaleMap' }
               placeholder: { type: string, description: 'Optional input hint text shown in the embed.' }
               required: { type: boolean }
-              options: { type: array, items: { type: object, additionalProperties: true } }
+              options: { type: array, items: { $ref: '#/components/schemas/ChoiceOption' } }
+              config: { $ref: '#/components/schemas/ChoiceFieldConfig' }
             required: [field_type, name, label]
       required: [name, default_locale, locales, fields]
 
