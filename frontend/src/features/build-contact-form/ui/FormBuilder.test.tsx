@@ -36,14 +36,14 @@ describe('FormBuilder', () => {
 
     renderWithProviders(<FormBuilder onCreated={onCreated} />);
 
-    // The form name is editable both on the canvas title and in the settings card (synced).
+    // The form name is editable on the toolbar and the canvas title (synced).
     const titleInputs = screen.getAllByLabelText('フォーム名');
     await user.type(titleInputs[0] as HTMLElement, 'Sales');
-    // Adding from the palette appends the field, auto-selects it, and seeds a default label.
-    await user.click(screen.getByRole('button', { name: 'メール' }));
+    // The empty form's first field is added from the canvas; it auto-selects and seeds a label.
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
     const labelInput = screen.getByLabelText('ラベル');
     await user.clear(labelInput);
-    await user.type(labelInput, 'メール');
+    await user.type(labelInput, 'お名前');
     await user.click(screen.getByRole('button', { name: '保存して公開' }));
 
     await waitFor(() => {
@@ -53,7 +53,7 @@ describe('FormBuilder', () => {
     // The field key is auto-generated (the spec hides it); the type + label are what matter.
     expect(captured.value?.fields).toHaveLength(1);
     expect(captured.value?.fields?.[0]).toEqual(
-      expect.objectContaining({ field_type: 'email', label: { ja: 'メール' } }),
+      expect.objectContaining({ field_type: 'text', label: { ja: 'お名前' } }),
     );
     expect(captured.value?.fields?.[0]?.name).toMatch(/^field_/);
   });

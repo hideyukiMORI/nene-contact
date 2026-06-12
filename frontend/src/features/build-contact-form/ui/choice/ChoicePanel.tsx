@@ -168,7 +168,7 @@ export function ChoicePanel({
   const RATIOS: ChoiceRatio[] = ['1:1', '4:3', '16:9'];
 
   return (
-    <div className="cf-panelscroll">
+    <>
       <div className="bd-psec">
         <div className="bd-frow">
           <label className="l" htmlFor="cf-field-label">
@@ -376,6 +376,6 @@ export function ChoicePanel({
         </div>
         {choice.logic === 'multiple' ? <CountRule choice={choice} /> : null}
       </div>
-    </div>
+    </>
   );
 }

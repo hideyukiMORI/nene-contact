@@ -43,6 +43,7 @@ import {
 } from '@/features/build-contact-form/lib/field-types';
 
 type Builder = ReturnType<typeof useFormBuilder>;
+type PanelTab = 'field' | 'form';
 
 function newOptionValue(): string {
   return 'opt_' + Math.random().toString(36).slice(2, 10);
@@ -100,6 +101,7 @@ export function FormBuilder({
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [panelTab, setPanelTab] = useState<PanelTab>('field');
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
 
@@ -117,6 +119,11 @@ export function FormBuilder({
 
   const selected = draft.fields.find((f) => f.id === selectedId) ?? null;
   const isChoiceSelected = selected?.fieldType === 'select';
+
+  const selectField = (id: string): void => {
+    setSelectedId(id);
+    setPanelTab('field');
+  };
 
   // The single choice-state source. Seeded from the selected select field; re-seeds on selection
   // change. Every edit mirrors back into the draft so the draft stays the persisted truth.
@@ -157,7 +164,7 @@ export function FormBuilder({
         choice: defaultChoiceConfig(),
       });
     }
-    setSelectedId(id);
+    selectField(id);
   };
 
   const deleteField = (id: string): void => {
@@ -171,7 +178,7 @@ export function FormBuilder({
   const duplicateField = (id: string): void => {
     const newId = builder.duplicateField(id);
     if (newId !== null) {
-      setSelectedId(newId);
+      selectField(newId);
     }
   };
 
@@ -197,6 +204,7 @@ export function FormBuilder({
   // The label editor binds to the raw value (empty when unset) — not the type-name fallback —
   // so clearing it doesn't seed the placeholder text back into the field.
   const selectedRawLabel = selected !== null ? (selected.label[locale] ?? '') : '';
+  const alert = validationMessage ?? (builder.error !== null ? t('builder.error') : null);
 
   // Selection-follow: when a field is selected or added, keep it comfortably in view by scrolling
   // the canvas pane (not the page). scrollTop is computed rather than using scrollIntoView, which
@@ -229,20 +237,44 @@ export function FormBuilder({
   }, [selectedId, draft.fields.length]);
 
   return (
-    <div className="fb-page">
-      <button type="button" className="back-link" onClick={onBack}>
-        <Icon name="chevLeft" size={15} />
-        {t('builder.backToList')}
-      </button>
-
-      <div className="page-head">
-        <div style={{ flex: 1, minWidth: '180px' }}>
-          <h1>{isEditing ? t('builder.editForm') : t('builder.newForm')}</h1>
-          <p className="lead">{t('builder.lead')}</p>
-        </div>
-        <button type="button" className="ex-btn ghost" onClick={onBack}>
-          {t('builder.cancel')}
+    <div className="bd-editor">
+      <div className="bd-toolbar">
+        <button
+          type="button"
+          className="bd-back"
+          aria-label={t('builder.backToList')}
+          onClick={onBack}
+        >
+          <Icon name="arrowLeft" size={16} />
         </button>
+        <span className="bd-tcrumb">{t('builder.formCrumb')} ›</span>
+        <input
+          className="bd-tname"
+          aria-label={t('builder.formName')}
+          value={draft.name}
+          placeholder={t('builder.untitled')}
+          onChange={(e) => {
+            builder.setName(e.target.value);
+          }}
+        />
+        {isEditing ? (
+          <span className="fm-st live">
+            <span className="d" />
+            {t('contactForms.status.active')}
+          </span>
+        ) : (
+          <span className="fm-st draft">
+            <span className="d" />
+            {t('builder.statusDraft')}
+          </span>
+        )}
+        <span className="sp" />
+        {alert !== null ? (
+          <span className="bd-toolbar-alert" role="alert">
+            <Icon name="warn" size={14} />
+            {alert}
+          </span>
+        ) : null}
         <button
           type="button"
           className="ex-btn ghost"
@@ -251,11 +283,11 @@ export function FormBuilder({
             setPreviewOpen(true);
           }}
         >
-          <Icon name="eye" size={15} />
+          <Icon name="eye" size={14} />
           {t('builder.preview')}
         </button>
         <button type="button" className="ex-btn" disabled={builder.isPending} onClick={onSubmit}>
-          <Icon name="check" size={15} />
+          <Icon name="check" size={14} />
           {builder.isPending
             ? t('builder.creating')
             : isEditing
@@ -264,21 +296,10 @@ export function FormBuilder({
         </button>
       </div>
 
-      {validationMessage !== null ? (
-        <div className="au-note" role="alert" style={{ marginBottom: '16px' }}>
-          {validationMessage}
-        </div>
-      ) : null}
-      {builder.error !== null ? (
-        <div className="au-note" role="alert" style={{ marginBottom: '16px' }}>
-          {t('builder.error')}
-        </div>
-      ) : null}
-
-      <div className="fb-grid" style={{ position: 'relative' }}>
-        <div className="fb-canvas" ref={canvasRef}>
-          <div className="fb-sheet">
-            <div className="fb-sheet-head">
+      <div className="bd-wrap" style={{ position: 'relative' }}>
+        <div className="bd-canvas" ref={canvasRef}>
+          <div className="bd-sheet">
+            <div className="bd-sheethead">
               <input
                 className="fb-title-in"
                 aria-label={t('builder.formName')}
@@ -329,7 +350,7 @@ export function FormBuilder({
                       label={fieldLabel(field)}
                       selected={field.id === selectedId}
                       onSelect={() => {
-                        setSelectedId(field.id);
+                        selectField(field.id);
                       }}
                       onDelete={() => {
                         deleteField(field.id);
@@ -342,7 +363,7 @@ export function FormBuilder({
 
             <button
               type="button"
-              className="fb-add"
+              className="bd-add"
               onClick={() => {
                 addField('text');
               }}
@@ -353,50 +374,101 @@ export function FormBuilder({
           </div>
         </div>
 
-        <div className="fb-panel">
-          {selected !== null ? (
-            <div className="fb-pinhead">
-              <span className="fb-typechip">
-                <Icon name={FIELD_TYPE_ICON[selected.fieldType] ?? 'text'} size={14} />
-                {t(`builder.type.${selected.fieldType}` as MessageKey)}
-              </span>
-              <span className="nm">{selectedLabel}</span>
-            </div>
-          ) : null}
-          <FormSettingsCard builder={builder} readOnlyKey={isEditing} />
-          <div className="card card-pad">
-            <h4 className="fb-psec-h">
-              <Icon name="edit" size={15} />
-              {t('builder.selectedField')}
-            </h4>
-            {selected === null ? (
-              <p className="fb-empty-sel">{t('builder.noSelection')}</p>
-            ) : isChoiceSelected ? (
-              <ChoicePanel
-                choice={choice}
-                label={selectedRawLabel}
-                onLabel={(v) => {
-                  builder.setFieldLabel(selected.id, locale, v);
-                }}
-                onOpenGallery={() => {
-                  setGalleryOpen(true);
-                }}
-              />
+        <div className="bd-panel">
+          <div className="bd-ptabs">
+            <button
+              type="button"
+              className={'bd-ptab' + (panelTab === 'field' ? ' on' : '')}
+              onClick={() => {
+                setPanelTab('field');
+              }}
+            >
+              {t('builder.tab.field')}
+            </button>
+            <button
+              type="button"
+              className={'bd-ptab' + (panelTab === 'form' ? ' on' : '')}
+              onClick={() => {
+                setPanelTab('form');
+              }}
+            >
+              {t('builder.tab.form')}
+            </button>
+          </div>
+
+          <div className="cf-panelscroll">
+            {panelTab === 'form' ? (
+              <FormSettingsSection builder={builder} readOnlyKey={isEditing} />
+            ) : selected === null ? (
+              <div className="bd-psec">
+                <p className="fb-empty-sel">{t('builder.noSelection')}</p>
+              </div>
             ) : (
-              <FieldConfigPanel
-                field={selected}
-                label={selectedRawLabel}
-                typeLabel={t(`builder.type.${selected.fieldType}` as MessageKey)}
-                onLabel={(v) => {
-                  builder.setFieldLabel(selected.id, locale, v);
-                }}
-                update={(patch) => {
-                  builder.updateField(selected.id, patch);
-                }}
-              />
+              <>
+                <div className="bd-pinhead">
+                  <span className="bd-typechip">
+                    <Icon name={FIELD_TYPE_ICON[selected.fieldType] ?? 'text'} size={14} />
+                    {t(`builder.type.${selected.fieldType}` as MessageKey)}
+                  </span>
+                  <span className="nm">{selectedLabel}</span>
+                </div>
+                {isChoiceSelected ? (
+                  <ChoicePanel
+                    choice={choice}
+                    label={selectedRawLabel}
+                    onLabel={(v) => {
+                      builder.setFieldLabel(selected.id, locale, v);
+                    }}
+                    onOpenGallery={() => {
+                      setGalleryOpen(true);
+                    }}
+                  />
+                ) : (
+                  <FieldConfigPanel
+                    field={selected}
+                    label={selectedRawLabel}
+                    typeLabel={t(`builder.type.${selected.fieldType}` as MessageKey)}
+                    onLabel={(v) => {
+                      builder.setFieldLabel(selected.id, locale, v);
+                    }}
+                    update={(patch) => {
+                      builder.updateField(selected.id, patch);
+                    }}
+                  />
+                )}
+                <div className="bd-psec">
+                  <button
+                    type="button"
+                    className="bd-fielddel"
+                    onClick={() => {
+                      deleteField(selected.id);
+                    }}
+                  >
+                    <Icon name="trash" size={15} />
+                    {t('builder.deleteField')}
+                  </button>
+                </div>
+                <div className="bd-psec">
+                  <h4>{t('builder.addField')}</h4>
+                  <div className="bd-pal">
+                    {PALETTE.map((type) => (
+                      <button
+                        key={type}
+                        type="button"
+                        className="bd-palitem"
+                        onClick={() => {
+                          addField(type);
+                        }}
+                      >
+                        <Icon name={FIELD_TYPE_ICON[type] ?? 'text'} size={16} />
+                        {t(`builder.type.${type}` as MessageKey)}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </>
             )}
           </div>
-          <PaletteCard onAdd={addField} />
         </div>
 
         {isChoiceSelected && galleryOpen ? (
@@ -435,7 +507,7 @@ function Switch({
   return (
     <button
       type="button"
-      className={'switch' + (on ? '' : ' off')}
+      className={'cf-switch' + (on ? '' : ' off')}
       role="switch"
       aria-checked={on}
       aria-label={label}
@@ -444,7 +516,8 @@ function Switch({
   );
 }
 
-function FormSettingsCard({
+// Form-level settings (the "フォーム設定" inspector tab): name, public path, consent.
+function FormSettingsSection({
   builder,
   readOnlyKey,
 }: {
@@ -455,25 +528,21 @@ function FormSettingsCard({
   const { draft } = builder;
 
   return (
-    <div className="card card-pad">
-      <h4 className="fb-psec-h">
-        <Icon name="settings" size={15} />
-        {t('builder.formSettings')}
-      </h4>
-      <div className="fb-frow">
+    <div className="bd-psec">
+      <div className="bd-frow">
         <label className="l" htmlFor="fb-form-name">
           {t('builder.formName')}
         </label>
         <input
           id="fb-form-name"
-          className="input"
+          className="cf-input"
           value={draft.name}
           onChange={(e) => {
             builder.setName(e.target.value);
           }}
         />
       </div>
-      <div className="fb-frow">
+      <div className="bd-frow">
         <span className="l">{t('builder.publicPath')}</span>
         <div className="fb-affix">
           <span className="pre">{t('builder.publicPathPrefix')}</span>
@@ -488,11 +557,11 @@ function FormSettingsCard({
           />
         </div>
       </div>
-      <div className="fb-frow">
-        <div className="fb-toggle-row">
-          <div className="info">
-            <div className="t">{t('builder.consentTitle')}</div>
-            <div className="d">{t('builder.consentDesc')}</div>
+      <div className="bd-frow">
+        <div className="cf-togglerow">
+          <div className="tx">
+            <div className="tl">{t('builder.consentTitle')}</div>
+            <div className="td">{t('builder.consentDesc')}</div>
           </div>
           <Switch
             on={draft.consentRequired}
@@ -500,33 +569,6 @@ function FormSettingsCard({
             onToggle={builder.toggleConsent}
           />
         </div>
-      </div>
-    </div>
-  );
-}
-
-function PaletteCard({ onAdd }: { onAdd: (fieldType: string) => void }): ReactNode {
-  const { t } = useI18n();
-  return (
-    <div className="card card-pad">
-      <h4 className="fb-psec-h">
-        <Icon name="plus" size={15} />
-        {t('builder.addField')}
-      </h4>
-      <div className="fb-pal">
-        {PALETTE.map((type) => (
-          <button
-            key={type}
-            type="button"
-            className="fb-palitem"
-            onClick={() => {
-              onAdd(type);
-            }}
-          >
-            <Icon name={FIELD_TYPE_ICON[type] ?? 'text'} size={16} />
-            {t(`builder.type.${type}` as MessageKey)}
-          </button>
-        ))}
       </div>
     </div>
   );
