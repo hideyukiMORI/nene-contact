@@ -4743,6 +4743,7 @@ a.t:hover {
   font-weight: 600;
   color: var(--ex-text);
   background: var(--ex-surface2);
+  white-space: nowrap;
 }
 .bd-typechip svg {
   width: 15px;
@@ -7129,6 +7130,7 @@ a.t:hover {
   border-radius: 999px;
   padding: 5px 11px;
   width: max-content;
+  white-space: nowrap;
 }
 .fb-empty-sel {
   font-size: 12.5px;
@@ -7208,7 +7210,7 @@ a.t:hover {
   font-size: 12.5px;
   font-weight: 650;
   color: var(--ex-muted);
-  padding: 7px 13px;
+  padding: 7px 10px;
   border-radius: 6px;
   display: inline-flex;
   align-items: center;
@@ -7236,6 +7238,7 @@ a.t:hover {
 .cf-seg.block button {
   flex: 1;
   justify-content: center;
+  min-width: 0;
 }
 .cf-seg .sub {
   font-size: 10.5px;
@@ -8768,19 +8771,40 @@ a.t:hover {
   line-height: 1.5;
 }
 
-/* panel scroll region */
+/* panel scroll region — subtle, hover-revealed scrollbar. Gutter is reserved
+   (scrollbar-gutter:stable) so revealing the thumb never shifts the layout.
+   The inspector is narrow, so allow CJK to wrap here (overrides the global
+   word-break:keep-all used for wide labels elsewhere). */
 .cf-panelscroll {
   overflow-y: auto;
+  overflow-x: hidden;
   flex: 1;
   min-height: 0;
+  scrollbar-gutter: stable;
+  word-break: normal;
+  line-break: auto;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+.cf-panelscroll:hover,
+.cf-panelscroll:focus-within {
+  scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
 }
 .cf-panelscroll::-webkit-scrollbar {
-  width: 9px;
+  width: 11px;
 }
 .cf-panelscroll::-webkit-scrollbar-thumb {
-  background: var(--ex-border);
+  background: transparent;
   border-radius: 999px;
-  border: 2px solid var(--ex-surface);
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+.cf-panelscroll:hover::-webkit-scrollbar-thumb,
+.cf-panelscroll:focus-within::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ex-faint) 60%, transparent);
+  background-clip: padding-box;
 }
 
 /* ============================================================
@@ -9259,11 +9283,14 @@ a.t:hover {
 }
 
 /* small labelled control rows in the panel (列数 / 比率 etc.) */
+/* small labelled control rows in the panel (列数 / 比率 etc.) — stacked so the
+   control gets the panel's full width (segment labels never overflow the row) */
 .cf-ctrlrow {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 7px;
+  margin-bottom: 14px;
 }
 .cf-ctrlrow:last-child {
   margin-bottom: 0;
@@ -9272,11 +9299,9 @@ a.t:hover {
   font-size: 12px;
   font-weight: 600;
   color: var(--ex-muted);
-  flex: none;
-  width: 76px;
 }
 .cf-ctrlrow .cf-seg {
-  flex: 1;
+  width: 100%;
 }
 
 /* ============================================================
@@ -9427,6 +9452,7 @@ a.t:hover {
 }
 .cf-togglerow .tx {
   flex: 1;
+  min-width: 0;
 }
 .cf-togglerow .tl {
   font-size: 12.5px;
@@ -9596,10 +9622,11 @@ a.t:hover {
 .cf-rulerow {
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 10px;
 }
 .cf-rulerow .tx {
   flex: 1;
+  min-width: 0;
 }
 .cf-rulerow .tl {
   font-size: 12.5px;
@@ -9629,7 +9656,7 @@ a.t:hover {
   border: 0;
   background: transparent;
   cursor: pointer;
-  width: 32px;
+  width: 30px;
   height: 34px;
   display: grid;
   place-items: center;
@@ -9647,7 +9674,7 @@ a.t:hover {
   background: transparent;
 }
 .cf-stepper .val {
-  min-width: 38px;
+  min-width: 32px;
   text-align: center;
   font-size: 14px;
   font-weight: 700;
@@ -10738,14 +10765,47 @@ a.t:hover {
   }
   /* grid items must allow shrink (min-height:0) before they can scroll. overflow-x is pinned to
      hidden: setting only overflow-y:auto computes overflow-x up to auto, which adds a spurious
-     horizontal scrollbar (e.g. from the vertical scrollbar's width). */
-  .fb-canvas {
-    min-height: 0;
-    overflow: hidden auto;
-  }
+     horizontal scrollbar (e.g. from the vertical scrollbar's width). Both panes reserve a stable
+     gutter and use a subtle, hover-revealed scrollbar so a long inspector doesn't show a bar at
+     rest and revealing it never shifts the layout (総合実装指示書 §03). */
+  .fb-canvas,
   .fb-panel {
     min-height: 0;
     overflow: hidden auto;
+    scrollbar-gutter: stable;
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s ease;
+  }
+  /* the inspector is narrow — allow CJK to wrap (overrides the global word-break:keep-all) */
+  .fb-panel {
+    word-break: normal;
+    line-break: auto;
+  }
+  .fb-canvas:hover,
+  .fb-canvas:focus-within,
+  .fb-panel:hover,
+  .fb-panel:focus-within {
+    scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
+  }
+  .fb-canvas::-webkit-scrollbar,
+  .fb-panel::-webkit-scrollbar {
+    width: 12px;
+  }
+  .fb-canvas::-webkit-scrollbar-thumb,
+  .fb-panel::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    border: 3px solid transparent;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+  }
+  .fb-canvas:hover::-webkit-scrollbar-thumb,
+  .fb-canvas:focus-within::-webkit-scrollbar-thumb,
+  .fb-panel:hover::-webkit-scrollbar-thumb,
+  .fb-panel:focus-within::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ex-faint) 58%, transparent);
+    background-clip: padding-box;
   }
 }
 
