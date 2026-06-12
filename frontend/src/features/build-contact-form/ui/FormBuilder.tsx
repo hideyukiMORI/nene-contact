@@ -14,7 +14,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { useState, type CSSProperties, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
@@ -72,8 +72,10 @@ function SortableChoiceSlot({ id, children }: { id: string; children: ReactNode 
     transform: CSS.Transform.toString(transform),
     transition: transition ?? undefined,
   };
+  // Only the selected field renders through this slot, so it always carries the marker the
+  // selection-follow scroll looks for.
   return (
-    <div ref={setNodeRef} style={style}>
+    <div ref={setNodeRef} style={style} data-selected="true">
       {children}
     </div>
   );
@@ -196,6 +198,36 @@ export function FormBuilder({
   // so clearing it doesn't seed the placeholder text back into the field.
   const selectedRawLabel = selected !== null ? (selected.label[locale] ?? '') : '';
 
+  // Selection-follow: when a field is selected or added, keep it comfortably in view by scrolling
+  // the canvas pane (not the page). scrollTop is computed rather than using scrollIntoView, which
+  // would disturb the whole app scroll; a timeout guarantees the move where smooth is unsupported.
+  const canvasRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const sc = canvasRef.current;
+    if (sc === null) {
+      return;
+    }
+    const el = sc.querySelector<HTMLElement>('[data-selected="true"]');
+    if (el === null) {
+      return;
+    }
+    const fr = el.getBoundingClientRect();
+    const cr = sc.getBoundingClientRect();
+    if (fr.top < cr.top + 8 || fr.bottom > cr.bottom - 8) {
+      const top = sc.scrollTop + (fr.top - cr.top) - 20;
+      try {
+        sc.scrollTo({ top, behavior: 'smooth' });
+      } catch {
+        sc.scrollTop = top;
+      }
+      window.setTimeout(() => {
+        if (Math.abs(sc.scrollTop - top) > 4) {
+          sc.scrollTop = top;
+        }
+      }, 360);
+    }
+  }, [selectedId, draft.fields.length]);
+
   return (
     <div className="fb-page">
       <button type="button" className="back-link" onClick={onBack}>
@@ -244,7 +276,7 @@ export function FormBuilder({
       ) : null}
 
       <div className="fb-grid" style={{ position: 'relative' }}>
-        <div className="fb-canvas">
+        <div className="fb-canvas" ref={canvasRef}>
           <div className="fb-sheet">
             <div className="fb-sheet-head">
               <input
@@ -322,6 +354,15 @@ export function FormBuilder({
         </div>
 
         <div className="fb-panel">
+          {selected !== null ? (
+            <div className="fb-pinhead">
+              <span className="fb-typechip">
+                <Icon name={FIELD_TYPE_ICON[selected.fieldType] ?? 'text'} size={14} />
+                {t(`builder.type.${selected.fieldType}` as MessageKey)}
+              </span>
+              <span className="nm">{selectedLabel}</span>
+            </div>
+          ) : null}
           <FormSettingsCard builder={builder} readOnlyKey={isEditing} />
           <div className="card card-pad">
             <h4 className="fb-psec-h">

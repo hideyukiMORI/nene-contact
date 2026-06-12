@@ -50,13 +50,6 @@ function BasicBlock({
 }: FieldConfigPanelProps & { t: Translate }): ReactNode {
   return (
     <div className="bd-psec">
-      <div className="bd-frow">
-        <span className="l">{t('builder.fieldType')}</span>
-        <span className="bd-typechip">
-          <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={15} />
-          {typeLabel}
-        </span>
-      </div>
       <div className="fc-purpose">
         <span className="ic">
           <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={17} />

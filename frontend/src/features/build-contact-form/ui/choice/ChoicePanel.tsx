@@ -171,13 +171,6 @@ export function ChoicePanel({
     <div className="cf-panelscroll">
       <div className="bd-psec">
         <div className="bd-frow">
-          <span className="l">{t('builder.fieldType')}</span>
-          <span className="bd-typechip">
-            <Icon name="list" size={15} />
-            {t('choice.fieldType')}
-          </span>
-        </div>
-        <div className="bd-frow">
           <label className="l" htmlFor="cf-field-label">
             {t('builder.fieldLabel')}
           </label>
