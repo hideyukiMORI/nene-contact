@@ -3,6 +3,7 @@ import type {
   ContactFormListDto,
   CreateContactFormDto,
 } from '@/entities/contact-form/api-types';
+import { defaultFieldTypeConfig } from '@/entities/contact-form/field-defaults';
 import type {
   ChoiceCardLayout,
   ChoiceConfig,
@@ -14,7 +15,11 @@ import type {
   ContactFormList,
   DraftField,
   DraftFieldOption,
+  FieldTypeConfig,
 } from '@/entities/contact-form/model';
+
+// Types whose config is the per-type FieldTypeConfig (everything but select / checkbox / honeypot).
+const TYPE_CONFIG_TYPES = new Set(['text', 'email', 'phone', 'textarea', 'date', 'file']);
 
 const CHOICE_STYLES: readonly ChoiceStyleId[] = [
   'radio',
@@ -142,6 +147,135 @@ function fromChoiceConfig(
   };
 }
 
+// API per-type config (snake_case) → camelCase FieldTypeConfig, merged onto the type defaults so
+// the result is always complete even if the row predates a key. The backend re-normalizes on save.
+function toFieldTypeConfig(type: string, raw: unknown): FieldTypeConfig | null {
+  const base = defaultFieldTypeConfig(type);
+  if (base === null) {
+    return null;
+  }
+  const c = asRecord(raw);
+  const bool = (key: string, fallback: boolean): boolean => {
+    const v = c[key];
+    return typeof v === 'boolean' ? v : fallback;
+  };
+  const num = (key: string, fallback: number): number => {
+    const v = c[key];
+    return typeof v === 'number' ? v : fallback;
+  };
+  const str = (key: string, fallback: string): string => {
+    const v = c[key];
+    return typeof v === 'string' ? v : fallback;
+  };
+
+  switch (type) {
+    case 'text':
+    case 'textarea': {
+      const cl = base as Extract<FieldTypeConfig, { counter: boolean }>;
+      const shared = {
+        minOn: bool('min_on', cl.minOn),
+        min: num('min', cl.min),
+        maxOn: bool('max_on', cl.maxOn),
+        max: num('max', cl.max),
+        counter: bool('counter', cl.counter),
+      };
+      return type === 'text'
+        ? { format: str('format', 'none') as 'none' | 'kana' | 'alnum', ...shared }
+        : { rows: str('rows', 'md') as 'sm' | 'md' | 'lg', ...shared };
+    }
+    case 'email':
+      return {
+        confirm: bool('confirm', false),
+        domainMode: str('domain_mode', 'none') as 'none' | 'allow' | 'block',
+        domains: str('domains', ''),
+        autoreply: bool('autoreply', false),
+      };
+    case 'phone':
+      return { format: str('format', 'jp') as 'jp' | 'jp-nohyphen' | 'intl' };
+    case 'date':
+      return {
+        mode: str('mode', 'date') as 'date' | 'datetime' | 'time',
+        range: str('range', 'none') as 'none' | 'future' | 'past' | 'between',
+        from: str('from', ''),
+        to: str('to', ''),
+        def: str('def', 'none') as 'none' | 'today',
+      };
+    case 'file': {
+      const size = num('max_size', 10);
+      return {
+        fmtImage: bool('fmt_image', true),
+        fmtPdf: bool('fmt_pdf', true),
+        fmtDoc: bool('fmt_doc', false),
+        maxSize: size === 5 || size === 25 ? size : 10,
+        multiple: bool('multiple', false),
+        maxCount: num('max_count', 3),
+      };
+    }
+    default:
+      return base;
+  }
+}
+
+// camelCase FieldTypeConfig → API per-type config (snake_case). The backend re-normalizes.
+function fromFieldTypeConfig(type: string, config: FieldTypeConfig): Record<string, unknown> {
+  switch (type) {
+    case 'text':
+    case 'textarea': {
+      const c = config as Extract<FieldTypeConfig, { counter: boolean }>;
+      const shared = {
+        min_on: c.minOn,
+        min: c.min,
+        max_on: c.maxOn,
+        max: c.max,
+        counter: c.counter,
+      };
+      return type === 'text'
+        ? { format: (c as { format: string }).format, ...shared }
+        : { rows: (c as { rows: string }).rows, ...shared };
+    }
+    case 'email': {
+      const c = config as {
+        confirm: boolean;
+        domainMode: string;
+        domains: string;
+        autoreply: boolean;
+      };
+      return {
+        confirm: c.confirm,
+        domain_mode: c.domainMode,
+        domains: c.domains,
+        autoreply: c.autoreply,
+      };
+    }
+    case 'phone':
+      return { format: (config as { format: string }).format };
+    case 'date': {
+      const c = config as { mode: string; range: string; from: string; to: string; def: string };
+      return { mode: c.mode, range: c.range, from: c.from, to: c.to, def: c.def };
+    }
+    case 'file': {
+      const c = config as {
+        fmtImage: boolean;
+        fmtPdf: boolean;
+        fmtDoc: boolean;
+        maxSize: number;
+        multiple: boolean;
+        maxCount: number;
+      };
+      return {
+        fmt_image: c.fmtImage,
+        fmt_pdf: c.fmtPdf,
+        fmt_doc: c.fmtDoc,
+        max_size: c.maxSize,
+        multiple: c.multiple,
+        max_count: c.maxCount,
+      };
+    }
+    default:
+      return {};
+  }
+}
+
 function toDraftOption(option: Record<string, unknown>): DraftFieldOption {
   const value = option['value'];
   const label = option['label'];
@@ -167,11 +301,15 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
     fieldType: field.field_type,
     name: field.name,
     label: field.label,
+    description: (field as { description?: string }).description ?? '',
     placeholder: field.placeholder ?? '',
     required: field.required ?? false,
     options: field.options != null ? field.options.map((option) => toDraftOption(option)) : null,
     choice:
       field.field_type === 'select' ? toChoiceConfig((field as { config?: unknown }).config) : null,
+    typeConfig: TYPE_CONFIG_TYPES.has(field.field_type)
+      ? toFieldTypeConfig(field.field_type, (field as { config?: unknown }).config)
+      : null,
   }));
 
   return {
@@ -214,6 +352,7 @@ export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFo
       name: field.name,
       label: field.label,
       ...(field.placeholder.trim() !== '' ? { placeholder: field.placeholder } : {}),
+      ...(field.description.trim() !== '' ? { description: field.description } : {}),
       required: field.required,
       ...(field.options !== null
         ? {
@@ -227,7 +366,9 @@ export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFo
         : {}),
       ...(field.fieldType === 'select' && field.choice != null
         ? { config: fromChoiceConfig(field.choice) }
-        : {}),
+        : TYPE_CONFIG_TYPES.has(field.fieldType) && field.typeConfig != null
+          ? { config: fromFieldTypeConfig(field.fieldType, field.typeConfig) }
+          : {}),
     })),
   };
 }

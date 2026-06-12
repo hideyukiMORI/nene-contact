@@ -23,6 +23,7 @@ final readonly class FormField
         public ?int $id = null,
         public ?int $contactFormId = null,
         public ?array $config = null,
+        public ?string $description = null,
     ) {
     }
 }

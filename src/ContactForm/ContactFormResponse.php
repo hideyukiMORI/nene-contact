@@ -32,6 +32,7 @@ final readonly class ContactFormResponse
                     'name' => $f->name,
                     'label' => $f->label,
                     'placeholder' => $f->placeholder,
+                    'description' => $f->description,
                     'required' => $f->required,
                     'options' => $f->options,
                     'config' => $f->config,

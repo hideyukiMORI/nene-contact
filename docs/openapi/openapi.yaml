@@ -1094,7 +1094,7 @@ components:
         id: { type: integer }
         field_type:
           type: string
-          enum: [text, email, textarea, select, checkbox, date, file, honeypot]
+          enum: [text, email, phone, textarea, select, checkbox, date, file, honeypot]
           description: >
             Closed allowlist (single source of truth: NeneContact\ContactForm\FieldType).
             My Number and raw payment card numbers are prohibited as any field type and
@@ -1102,9 +1102,17 @@ components:
         name: { type: string }
         label: { $ref: '#/components/schemas/LocaleMap' }
         placeholder: { type: [string, 'null'], description: 'Optional input hint text shown in the embed.' }
+        description: { type: [string, 'null'], description: 'Optional per-field description shown under the label in the embed.' }
         required: { type: boolean }
         options: { type: [array, 'null'], items: { $ref: '#/components/schemas/ChoiceOption' } }
-        config: { oneOf: [{ $ref: '#/components/schemas/ChoiceFieldConfig' }, { type: 'null' }], description: 'Declarative display config for choice (select) fields; null otherwise.' }
+        config:
+          type: [object, 'null']
+          additionalProperties: true
+          description: >
+            Declarative per-field config (server-normalized). For select fields it is the choice
+            display config ({@see ChoiceFieldConfig}: style/defaults/other/count_rule/image); for
+            text/email/phone/textarea/date/file it is the type-specific config (FieldTypeConfig).
+            Null for checkbox/honeypot.
         sort_order: { type: integer }
       required: [field_type, name, label]
 
@@ -1201,13 +1209,14 @@ components:
           items:
             type: object
             properties:
-              field_type: { type: string, enum: [text, email, textarea, select, checkbox, date, file, honeypot] }
+              field_type: { type: string, enum: [text, email, phone, textarea, select, checkbox, date, file, honeypot] }
               name: { type: string }
               label: { $ref: '#/components/schemas/LocaleMap' }
               placeholder: { type: string, description: 'Optional input hint text shown in the embed.' }
+              description: { type: string, description: 'Optional per-field description shown under the label.' }
               required: { type: boolean }
               options: { type: array, items: { $ref: '#/components/schemas/ChoiceOption' } }
-              config: { $ref: '#/components/schemas/ChoiceFieldConfig' }
+              config: { type: object, additionalProperties: true, description: 'Per-field declarative config (choice display config for select, or the type-specific config otherwise).' }
             required: [field_type, name, label]
       required: [name, default_locale, locales, fields]
 

@@ -63,17 +63,79 @@ export interface ChoiceConfig {
   image: ChoiceImageConfig;
 }
 
+// Per-type declarative config for non-choice fields (field-config UI, builder spec v1.0).
+// Mirrors backend NeneContact\ContactForm\FieldTypeConfig. checkbox/honeypot carry no config.
+export type TextFormat = 'none' | 'kana' | 'alnum';
+export type PhoneFormat = 'jp' | 'jp-nohyphen' | 'intl';
+export type DomainMode = 'none' | 'allow' | 'block';
+export type TextareaRows = 'sm' | 'md' | 'lg';
+export type DateMode = 'date' | 'datetime' | 'time';
+export type DateRange = 'none' | 'future' | 'past' | 'between';
+export type DateDefault = 'none' | 'today';
+export type FileMaxSize = 5 | 10 | 25;
+
+export interface CharLimit {
+  minOn: boolean;
+  min: number;
+  maxOn: boolean;
+  max: number;
+  counter: boolean;
+}
+
+export interface TextConfig extends CharLimit {
+  format: TextFormat;
+}
+export interface EmailConfig {
+  confirm: boolean;
+  domainMode: DomainMode;
+  domains: string;
+  autoreply: boolean;
+}
+export interface PhoneConfig {
+  format: PhoneFormat;
+}
+export interface TextareaConfig extends CharLimit {
+  rows: TextareaRows;
+}
+export interface DateConfig {
+  mode: DateMode;
+  range: DateRange;
+  from: string;
+  to: string;
+  def: DateDefault;
+}
+export interface FileConfig {
+  fmtImage: boolean;
+  fmtPdf: boolean;
+  fmtDoc: boolean;
+  maxSize: FileMaxSize;
+  multiple: boolean;
+  maxCount: number;
+}
+
+export type FieldTypeConfig =
+  | TextConfig
+  | EmailConfig
+  | PhoneConfig
+  | TextareaConfig
+  | DateConfig
+  | FileConfig;
+
 export interface DraftField {
   // Client-only stable id for drag-to-reorder; not sent to the API.
   id: string;
   fieldType: string;
   name: string;
   label: Record<string, string>;
+  // Optional per-field description shown under the label (field-config UI).
+  description: string;
   placeholder: string;
   required: boolean;
   options: DraftFieldOption[] | null;
   // Present for select fields (builder spec v2.0); null/undefined otherwise.
   choice?: ChoiceConfig | null;
+  // Per-type config for non-choice fields; null for checkbox/honeypot.
+  typeConfig?: FieldTypeConfig | null;
 }
 
 export interface ContactFormDraft {
