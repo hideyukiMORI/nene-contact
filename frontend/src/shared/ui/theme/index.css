@@ -10731,6 +10731,10 @@ a.t:hover {
     flex: 1;
     min-height: 0;
     padding-bottom: clamp(16px, 2.2vw, 28px);
+    /* one full-height row whose items can shrink — overrides the base align-items:start so the
+       panes are bounded to the grid height (otherwise they grow to content and never scroll). */
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
   }
   /* grid items must allow shrink (min-height:0) before they can scroll */
   .fb-canvas {
