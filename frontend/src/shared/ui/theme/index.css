@@ -8459,6 +8459,18 @@ a.t:hover {
   transform: rotate(45deg);
   border-radius: 2px;
 }
+/* Dark mode — the floating toolbar & tooltips intentionally use a dark fill; var(--ex-text)
+   flips to near-white in dark, so pin them to an elevated dark slate (builder spec v2.0). */
+[data-theme='dark'] .cf-float,
+[data-theme='dark'] .cf-float::after,
+[data-theme='dark'] .cf-fbtn .tip {
+  background: #26323f;
+}
+[data-theme='dark'] .cf-float {
+  box-shadow:
+    0 14px 34px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(255, 255, 255, 0.07);
+}
 .cf-float .grp {
   display: flex;
   align-items: center;
