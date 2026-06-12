@@ -4687,7 +4687,7 @@ a.t:hover {
   min-height: 0;
 }
 .bd-psec {
-  padding: 18px;
+  padding: 18px 20px;
   border-bottom: 1px solid var(--ex-border);
 }
 .bd-psec h4 {
@@ -8775,6 +8775,11 @@ a.t:hover {
    (scrollbar-gutter:stable) so revealing the thumb never shifts the layout.
    The inspector is narrow, so allow CJK to wrap here (overrides the global
    word-break:keep-all used for wide labels elsewhere). */
+/* panel scroll region — subtle, hover-revealed scrollbar, inset from the panel edge.
+   No scrollbar-width/color on the base rule, so Chromium/Safari honor the custom
+   ::-webkit-scrollbar (which lets the thumb sit inset via a transparent border).
+   Firefox falls back to a thin colored bar via @supports below. Gutter is reserved
+   either way (scrollbar-gutter:stable) so revealing the thumb never shifts the layout. */
 .cf-panelscroll {
   overflow-y: auto;
   overflow-x: hidden;
@@ -8783,28 +8788,35 @@ a.t:hover {
   scrollbar-gutter: stable;
   word-break: normal;
   line-break: auto;
-  scrollbar-width: thin;
-  scrollbar-color: transparent transparent;
-  transition: scrollbar-color 0.2s ease;
-}
-.cf-panelscroll:hover,
-.cf-panelscroll:focus-within {
-  scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
 }
 .cf-panelscroll::-webkit-scrollbar {
-  width: 11px;
+  width: 14px;
 }
 .cf-panelscroll::-webkit-scrollbar-thumb {
   background: transparent;
   border-radius: 999px;
+  /* transparent borders inset the visible thumb: ~5px from the panel edge,
+     ~3px from the content side → comfortable gap from the inputs */
   border: 3px solid transparent;
+  border-right-width: 5px;
   background-clip: padding-box;
   transition: background 0.2s ease;
 }
 .cf-panelscroll:hover::-webkit-scrollbar-thumb,
 .cf-panelscroll:focus-within::-webkit-scrollbar-thumb {
-  background: color-mix(in srgb, var(--ex-faint) 60%, transparent);
+  background: color-mix(in srgb, var(--ex-faint) 55%, transparent);
   background-clip: padding-box;
+}
+@supports not selector(::-webkit-scrollbar) {
+  .cf-panelscroll {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s ease;
+  }
+  .cf-panelscroll:hover,
+  .cf-panelscroll:focus-within {
+    scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
+  }
 }
 
 /* ============================================================
@@ -10766,34 +10778,33 @@ a.t:hover {
   /* grid items must allow shrink (min-height:0) before they can scroll. overflow-x is pinned to
      hidden: setting only overflow-y:auto computes overflow-x up to auto, which adds a spurious
      horizontal scrollbar (e.g. from the vertical scrollbar's width). Both panes reserve a stable
-     gutter and use a subtle, hover-revealed scrollbar so a long inspector doesn't show a bar at
-     rest and revealing it never shifts the layout (総合実装指示書 §03). */
+     gutter so revealing the thumb never shifts the layout (総合実装指示書 §03). */
   .fb-canvas,
   .fb-panel {
     min-height: 0;
     overflow: hidden auto;
     scrollbar-gutter: stable;
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-    transition: scrollbar-color 0.2s ease;
   }
   /* the inspector is narrow — allow CJK to wrap (overrides the global word-break:keep-all) */
   .fb-panel {
     word-break: normal;
     line-break: auto;
   }
+
+  /* left canvas (wide): native thin, hover-revealed bar via scrollbar-color */
+  .fb-canvas {
+    scrollbar-width: thin;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.2s ease;
+  }
   .fb-canvas:hover,
-  .fb-canvas:focus-within,
-  .fb-panel:hover,
-  .fb-panel:focus-within {
+  .fb-canvas:focus-within {
     scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
   }
-  .fb-canvas::-webkit-scrollbar,
-  .fb-panel::-webkit-scrollbar {
+  .fb-canvas::-webkit-scrollbar {
     width: 12px;
   }
-  .fb-canvas::-webkit-scrollbar-thumb,
-  .fb-panel::-webkit-scrollbar-thumb {
+  .fb-canvas::-webkit-scrollbar-thumb {
     background: transparent;
     border-radius: 999px;
     border: 3px solid transparent;
@@ -10801,11 +10812,42 @@ a.t:hover {
     transition: background 0.2s ease;
   }
   .fb-canvas:hover::-webkit-scrollbar-thumb,
-  .fb-canvas:focus-within::-webkit-scrollbar-thumb,
+  .fb-canvas:focus-within::-webkit-scrollbar-thumb {
+    background: color-mix(in srgb, var(--ex-faint) 55%, transparent);
+    background-clip: padding-box;
+  }
+
+  /* right inspector (narrow): custom inset thumb so it sits away from the inputs. No
+     scrollbar-width on the base rule, so Chromium/Safari honor the custom ::-webkit-scrollbar;
+     Firefox falls back to a thin colored bar via @supports. */
+  .fb-panel::-webkit-scrollbar {
+    width: 14px;
+  }
+  .fb-panel::-webkit-scrollbar-thumb {
+    background: transparent;
+    border-radius: 999px;
+    /* transparent borders inset the visible thumb: ~5px from the panel edge,
+       ~3px from the content side → comfortable gap from the inputs */
+    border: 3px solid transparent;
+    border-right-width: 5px;
+    background-clip: padding-box;
+    transition: background 0.2s ease;
+  }
   .fb-panel:hover::-webkit-scrollbar-thumb,
   .fb-panel:focus-within::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--ex-faint) 58%, transparent);
+    background: color-mix(in srgb, var(--ex-faint) 55%, transparent);
     background-clip: padding-box;
+  }
+  @supports not selector(::-webkit-scrollbar) {
+    .fb-panel {
+      scrollbar-width: thin;
+      scrollbar-color: transparent transparent;
+      transition: scrollbar-color 0.2s ease;
+    }
+    .fb-panel:hover,
+    .fb-panel:focus-within {
+      scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
+    }
   }
 }
 
@@ -10818,7 +10860,7 @@ a.t:hover {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 11px 13px;
+  padding: 11px 16px;
   background: var(--ex-surface);
   border: 1px solid var(--ex-border);
   border-radius: var(--ex-radius-lg);
