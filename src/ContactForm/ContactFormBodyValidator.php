@@ -106,7 +106,7 @@ final readonly class ContactFormBodyValidator
             $label = is_array($raw['label'] ?? null) ? array_map(static fn ($v): string => (string) $v, $raw['label']) : [];
             $required = (bool) ($raw['required'] ?? false);
             /** @var list<array<string, mixed>>|null $options */
-            $options = is_array($raw['options'] ?? null) ? array_values(array_filter($raw['options'], 'is_array')) : null;
+            $options = self::normalizeOptions($raw['options'] ?? null);
             // Optional placeholder (hint text); blank collapses to null, capped to the column width.
             $placeholder = is_string($raw['placeholder'] ?? null) ? trim((string) $raw['placeholder']) : '';
             $placeholder = $placeholder === '' ? null : mb_substr($placeholder, 0, 255);
@@ -128,8 +128,25 @@ final readonly class ContactFormBodyValidator
                 $errors[] = new ValidationError("fields.{$i}.label", "Label for the default locale ({$defaultLocale}) is required.", 'required');
             }
 
-            if ($fieldType === FieldType::Select->value && ($options === null || $options === [])) {
-                $errors[] = new ValidationError("fields.{$i}.options", 'Select fields require options.', 'required');
+            // Choice (select) fields carry a declarative display config (choice-field
+            // management UI, builder spec v2.0). The style governs the selection logic.
+            $config = null;
+            if ($fieldType === FieldType::Select->value) {
+                if ($options === null || $options === []) {
+                    $errors[] = new ValidationError("fields.{$i}.options", 'Select fields require options.', 'required');
+                }
+
+                $rawConfig = is_array($raw['config'] ?? null) ? $raw['config'] : [];
+                $styleValue = is_string($rawConfig['style'] ?? null) && $rawConfig['style'] !== ''
+                    ? (string) $rawConfig['style']
+                    : ChoiceStyle::Radio->value;
+
+                if (!ChoiceStyle::isAllowed($styleValue)) {
+                    $errors[] = new ValidationError("fields.{$i}.config.style", "Unsupported choice style '{$styleValue}'.", 'invalid');
+                } else {
+                    $optionValues = array_map(static fn (array $o): string => (string) $o['value'], $options ?? []);
+                    $config = ChoiceFieldConfig::normalize($rawConfig, ChoiceStyle::from($styleValue), $optionValues);
+                }
             }
 
             $fields[] = new FormField(
@@ -140,6 +157,7 @@ final readonly class ContactFormBodyValidator
                 sortOrder: $sort++,
                 options: $options,
                 placeholder: $placeholder,
+                config: $config,
             );
         }
 
@@ -159,6 +177,58 @@ final readonly class ContactFormBodyValidator
             consentLabel: $consentLabel === [] ? null : $consentLabel,
             retentionDays: $retentionDays,
         );
+    }
+
+    /**
+     * Normalize choice-field options into the bounded, snake_case shape persisted in
+     * options_json: a non-empty string `value` (the stable id `defaults` reference),
+     * per-locale `label`, and the optional per-option `description` (per-locale) + `image`
+     * flag used by picture choice (builder spec v2.0). Options without a value are dropped.
+     *
+     * @return list<array<string, mixed>>|null
+     */
+    private static function normalizeOptions(mixed $raw): ?array
+    {
+        if (!is_array($raw)) {
+            return null;
+        }
+
+        $out = [];
+        foreach ($raw as $option) {
+            if (!is_array($option)) {
+                continue;
+            }
+
+            $value = is_string($option['value'] ?? null) ? trim((string) $option['value']) : '';
+            if ($value === '') {
+                continue;
+            }
+
+            /** @var array<string, string> $label */
+            $label = is_array($option['label'] ?? null)
+                ? array_map(static fn ($v): string => (string) $v, $option['label'])
+                : [];
+
+            $normalized = ['value' => mb_substr($value, 0, 255), 'label' => $label];
+
+            if (is_array($option['description'] ?? null)) {
+                $description = array_filter(
+                    array_map(static fn ($v): string => (string) $v, $option['description']),
+                    static fn (string $v): bool => trim($v) !== '',
+                );
+                if ($description !== []) {
+                    $normalized['description'] = $description;
+                }
+            }
+
+            if (($option['image'] ?? false) === true) {
+                $normalized['image'] = true;
+            }
+
+            $out[] = $normalized;
+        }
+
+        return $out;
     }
 
     /**

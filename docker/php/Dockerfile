@@ -6,7 +6,9 @@ COPY --from=composer:2 /usr/bin/composer /usr/local/bin/composer
 
 RUN apt-get update \
     && apt-get install -y --no-install-recommends git unzip libicu-dev libsqlite3-dev \
-    && docker-php-ext-install pdo_mysql pdo_sqlite intl \
+        libfreetype6-dev libjpeg62-turbo-dev libpng-dev \
+    && docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql pdo_sqlite intl gd \
     && rm -rf /var/lib/apt/lists/* \
     && a2enmod rewrite headers \
     && printf '<Directory /var/www/html/public_html>\n    AllowOverride All\n    Require all granted\n</Directory>\n' > /etc/apache2/conf-available/nene-contact.conf \

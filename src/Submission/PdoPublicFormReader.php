@@ -28,7 +28,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         }
 
         $fieldRows = $this->query->fetchAll(
-            'SELECT id, contact_form_id, field_type, name, placeholder, label_json, required, options_json, sort_order
+            'SELECT id, contact_form_id, field_type, name, placeholder, label_json, required, options_json, config_json, sort_order
              FROM form_fields WHERE contact_form_id = ? ORDER BY sort_order ASC, id ASC',
             [(int) $row['id']],
         );
@@ -39,6 +39,10 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
             /** @var list<array<string, mixed>>|null $options */
             $options = isset($f['options_json'])
                 ? (array) json_decode((string) $f['options_json'], true, 512, JSON_THROW_ON_ERROR)
+                : null;
+            /** @var array<string, mixed>|null $config */
+            $config = isset($f['config_json'])
+                ? (array) json_decode((string) $f['config_json'], true, 512, JSON_THROW_ON_ERROR)
                 : null;
 
             return new FormField(
@@ -51,6 +55,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
                 placeholder: isset($f['placeholder']) ? (string) $f['placeholder'] : null,
                 id: (int) $f['id'],
                 contactFormId: (int) $f['contact_form_id'],
+                config: $config,
             );
         }, $fieldRows);
 

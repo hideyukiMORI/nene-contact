@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 import {
+  defaultChoiceConfig,
   useCreateContactFormMutation,
   useUpdateContactFormMutation,
 } from '@/entities/contact-form';
@@ -20,6 +21,8 @@ function newField(fieldType: string): DraftField {
     placeholder: '',
     required: false,
     options: fieldType === 'select' ? [] : null,
+    // Choice fields carry a declarative display config (builder spec v2.0).
+    choice: fieldType === 'select' ? defaultChoiceConfig() : null,
   };
 }
 
@@ -50,11 +53,11 @@ export interface FormBuilder {
   setRetentionDays: (days: number | null) => void;
   setAllowedOrigins: (origins: string[]) => void;
   addField: (fieldType: string) => string;
+  duplicateField: (id: string) => string | null;
   removeField: (id: string) => void;
   moveField: (fromId: string, toId: string) => void;
   updateField: (id: string, patch: Partial<Omit<DraftField, 'id'>>) => void;
   setFieldLabel: (id: string, locale: string, value: string) => void;
-  setFieldOptionValues: (id: string, values: string[]) => void;
   submit: () => Promise<ContactForm>;
 }
 
@@ -126,6 +129,31 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
       setDraft((d) => ({ ...d, fields: [...d.fields, field] }));
       return field.id;
     },
+    duplicateField: (id) => {
+      const source = draft.fields.find((f) => f.id === id);
+      if (source === undefined) {
+        return null;
+      }
+      const newId = crypto.randomUUID();
+      const copy: DraftField = {
+        ...source,
+        id: newId,
+        name: `field_${newId.slice(0, 8)}`,
+        // Deep-copy the parts the choice editor mutates so the clone is independent.
+        options: source.options !== null ? source.options.map((o) => ({ ...o })) : null,
+        choice:
+          source.choice != null
+            ? { ...source.choice, defaults: [...source.choice.defaults] }
+            : null,
+      };
+      setDraft((d) => {
+        const index = d.fields.findIndex((f) => f.id === id);
+        const fields = d.fields.slice();
+        fields.splice(index + 1, 0, copy);
+        return { ...d, fields };
+      });
+      return newId;
+    },
     removeField: (id) => {
       setDraft((d) => ({ ...d, fields: d.fields.filter((f) => f.id !== id) }));
     },
@@ -147,11 +175,6 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
           f.id === id ? { ...f, label: { ...f.label, [locale]: value } } : f,
         ),
       }));
-    },
-    setFieldOptionValues: (id, values) => {
-      patchField(id, {
-        options: values.map((value) => ({ value, label: { [draft.defaultLocale]: value } })),
-      });
     },
     submit: () =>
       editId !== undefined

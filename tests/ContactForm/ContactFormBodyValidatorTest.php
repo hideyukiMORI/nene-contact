@@ -93,4 +93,73 @@ final class ContactFormBodyValidatorTest extends TestCase
             ['field_type' => 'mynumber', 'name' => 'mn', 'label' => ['ja' => 'マイナンバー'], 'required' => true],
         ]));
     }
+
+    public function test_choice_field_config_is_normalized_and_persisted(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            [
+                'field_type' => 'select',
+                'name' => 'topic',
+                'label' => ['ja' => '種別'],
+                'required' => true,
+                'options' => [
+                    ['value' => 'a', 'label' => ['ja' => 'A'], 'description' => ['ja' => '補足'], 'image' => true],
+                    ['value' => 'b', 'label' => ['ja' => 'B']],
+                ],
+                'config' => [
+                    'style' => 'radio',
+                    // 'ghost' is not an option value and must be dropped from defaults.
+                    'defaults' => ['a', 'ghost'],
+                    'other' => true,
+                    'other_config' => ['label' => 'その他', 'placeholder' => '自由に', 'required' => true, 'max_len' => 50],
+                    'count_rule' => ['min_on' => true, 'min' => 2, 'max_on' => false, 'max' => 3],
+                    'image' => ['enabled' => true, 'layout' => 'list', 'cols' => 3, 'ratio' => '16:9'],
+                ],
+            ],
+        ]));
+
+        $field = $input->fields[0];
+        self::assertNotNull($field->config);
+        self::assertSame('radio', $field->config['style']);
+        // defaults filtered to real option values; single-logic style keeps at most one.
+        self::assertSame(['a'], $field->config['defaults']);
+        self::assertTrue($field->config['image']['enabled']);
+        // per-option description/image flow through options_json.
+        self::assertNotNull($field->options);
+        self::assertSame(['ja' => '補足'], $field->options[0]['description']);
+        self::assertTrue($field->options[0]['image']);
+    }
+
+    public function test_choice_field_clears_count_rule_for_single_logic(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            [
+                'field_type' => 'select',
+                'name' => 'topic',
+                'label' => ['ja' => '種別'],
+                'options' => [['value' => 'a', 'label' => ['ja' => 'A']]],
+                // count_rule is only meaningful for multiple-logic styles; radio is single.
+                'config' => ['style' => 'radio', 'count_rule' => ['min_on' => true, 'min' => 2, 'max_on' => true, 'max' => 4]],
+            ],
+        ]));
+
+        $config = $input->fields[0]->config;
+        self::assertNotNull($config);
+        self::assertFalse($config['count_rule']['min_on']);
+        self::assertFalse($config['count_rule']['max_on']);
+    }
+
+    public function test_unsupported_choice_style_is_rejected(): void
+    {
+        $this->expectException(ValidationException::class);
+        ContactFormBodyValidator::parse($this->body([
+            [
+                'field_type' => 'select',
+                'name' => 'topic',
+                'label' => ['ja' => '種別'],
+                'options' => [['value' => 'a', 'label' => ['ja' => 'A']]],
+                'config' => ['style' => 'carousel'],
+            ],
+        ]));
+    }
 }

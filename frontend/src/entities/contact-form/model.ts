@@ -16,8 +16,51 @@ export interface ContactFormList {
 }
 
 export interface DraftFieldOption {
+  // Stable id that ChoiceConfig.defaults reference (persisted as the option `value`).
   value: string;
   label: Record<string, string>;
+  // Optional per-option supplementary note + attached image (picture choice, builder spec v2.0).
+  description?: Record<string, string>;
+  image?: boolean;
+}
+
+// Choice (select) display styles — the style internalizes the selection logic.
+// Mirrors backend NeneContact\ContactForm\ChoiceStyle (builder spec v2.0).
+export type ChoiceStyleId = 'radio' | 'dropdown' | 'segment' | 'checkbox' | 'tags' | 'chips';
+export type ChoiceCardLayout = 'card' | 'list';
+export type ChoiceRatio = '1:1' | '4:3' | '16:9';
+
+export interface ChoiceOtherConfig {
+  label: string;
+  placeholder: string;
+  required: boolean;
+  // 0 = unlimited.
+  maxLen: number;
+}
+
+export interface ChoiceCountRule {
+  minOn: boolean;
+  min: number;
+  maxOn: boolean;
+  max: number;
+}
+
+export interface ChoiceImageConfig {
+  enabled: boolean;
+  layout: ChoiceCardLayout;
+  cols: 2 | 3;
+  ratio: ChoiceRatio;
+}
+
+// Declarative display config for a choice (select) field (builder spec v2.0).
+export interface ChoiceConfig {
+  style: ChoiceStyleId;
+  // Initially-selected option values; single-logic styles keep at most one.
+  defaults: string[];
+  other: boolean;
+  otherConfig: ChoiceOtherConfig;
+  countRule: ChoiceCountRule;
+  image: ChoiceImageConfig;
 }
 
 export interface DraftField {
@@ -29,6 +72,8 @@ export interface DraftField {
   placeholder: string;
   required: boolean;
   options: DraftFieldOption[] | null;
+  // Present for select fields (builder spec v2.0); null/undefined otherwise.
+  choice?: ChoiceConfig | null;
 }
 
 export interface ContactFormDraft {

@@ -34,6 +34,7 @@ final readonly class ContactFormResponse
                     'placeholder' => $f->placeholder,
                     'required' => $f->required,
                     'options' => $f->options,
+                    'config' => $f->config,
                     'sort_order' => $f->sortOrder,
                 ],
                 $form->fields,

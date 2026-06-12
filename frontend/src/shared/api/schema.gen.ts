@@ -668,10 +668,52 @@ export interface components {
             /** @description Optional input hint text shown in the embed. */
             placeholder?: string | null;
             required?: boolean;
-            options?: {
-                [key: string]: unknown;
-            }[] | null;
+            options?: components["schemas"]["ChoiceOption"][] | null;
+            /** @description Declarative display config for choice (select) fields; null otherwise. */
+            config?: components["schemas"]["ChoiceFieldConfig"] | null;
             sort_order?: number;
+        };
+        /** @description A single choice option. `value` is the stable id that config.defaults reference. */
+        ChoiceOption: {
+            value: string;
+            label?: components["schemas"]["LocaleMap"];
+            /** @description Optional per-option supplementary note (picture choice / list). */
+            description?: components["schemas"]["LocaleMap"];
+            /** @description Whether this option has an attached image (picture choice). */
+            image?: boolean;
+        };
+        /** @description Display config for a choice (select) field (choice-field management UI, builder spec v2.0). The style internalizes the selection logic (radio/dropdown/segment = single; checkbox/tags/chips = multiple). Declarative only — no operator JavaScript (ADR 0010). */
+        ChoiceFieldConfig: {
+            /** @enum {string} */
+            style: "radio" | "dropdown" | "segment" | "checkbox" | "tags" | "chips";
+            /** @description Initially-selected option values; single-logic styles keep at most one. */
+            defaults?: string[];
+            /** @description Whether an 「その他」 free-text choice is offered. */
+            other?: boolean;
+            other_config?: {
+                label?: string;
+                placeholder?: string;
+                required?: boolean;
+                /** @description 0 = unlimited. */
+                max_len?: number;
+            };
+            /** @description Selection-count rule; only applies to multiple-logic styles. */
+            count_rule?: {
+                min_on?: boolean;
+                min?: number;
+                max_on?: boolean;
+                max?: number;
+            };
+            /** @description Picture choice; only the list styles (radio/checkbox) can enable it. */
+            image?: {
+                enabled?: boolean;
+                /** @enum {string} */
+                layout?: "card" | "list";
+                /** @enum {integer} */
+                cols?: 2 | 3;
+                /** @enum {string} */
+                ratio?: "1:1" | "4:3" | "16:9";
+            };
         };
         ContactFormResponse: {
             id: number;
@@ -720,9 +762,8 @@ export interface components {
                 /** @description Optional input hint text shown in the embed. */
                 placeholder?: string;
                 required?: boolean;
-                options?: {
-                    [key: string]: unknown;
-                }[];
+                options?: components["schemas"]["ChoiceOption"][];
+                config?: components["schemas"]["ChoiceFieldConfig"];
             }[];
         };
         PublicFormSchema: {

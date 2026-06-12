@@ -112,13 +112,34 @@ Forbidden suffixes: `Controller`, `Service`, `Manager`, `Repo`.
 | `text` | Single line |
 | `email` | Email with validation |
 | `textarea` | Multi line |
-| `select` | Options list (`options_json`) |
+| `select` | Choice field: options list (`options_json`) + display config (`config_json`) |
 | `checkbox` | Boolean consent or flag |
 | `date` | Calendar date (`<input type="date">`) |
 | `file` | Attachment (bounded) |
 | `honeypot` | Anti-spam hidden field |
 
 Prohibited field types (charter §8): no My Number, no raw card number.
+
+### 6.1 Choice display styles (`form_field.config_json.style`, `ChoiceStyle`)
+
+Choice-field management UI (builder spec v2.0). The style internalizes the selection logic;
+there is no separate single/multiple toggle. SSOT: `NeneContact\ContactForm\ChoiceStyle`
+(backend) mirrored by `STYLES` in `choice-core.ts` (frontend).
+
+| Value | Logic | Meaning |
+| --- | --- | --- |
+| `radio` | single | Vertical radio list (image choice capable) |
+| `dropdown` | single | Dropdown / select |
+| `segment` | single | Button group (horizontal) |
+| `checkbox` | multiple | Vertical checkbox list (image choice capable) |
+| `tags` | multiple | Multi-select tag input |
+| `chips` | multiple | Button group, multiple on |
+
+`config_json` keys: `style`, `defaults` (initially-selected option values), `other` +
+`other_config` (`label` / `placeholder` / `required` / `max_len`), `count_rule`
+(`min_on` / `min` / `max_on` / `max`; multiple only), `image` (`enabled` / `layout`
+`card`|`list` / `cols` `2`|`3` / `ratio` `1:1`|`4:3`|`16:9`; radio/checkbox only).
+Per-option keys in `options_json`: `value`, `label`, `description`, `image`.
 
 ---
 
@@ -149,8 +170,9 @@ Prohibited field types (charter §8): no My Number, no raw card number.
 | `deleted_at` | `submission` | soft-delete marker (ADR 0016); excluded from inbox |
 | `purged_at` | `submission` | PII erased in place after grace (ADR 0016, charter §5) |
 | `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
-| `options_json` | `form_field` | per-locale option labels |
+| `options_json` | `form_field` | choice options: `value`, per-locale `label`, optional per-locale `description`, `image` flag |
 | `placeholder` | `form_field` | optional input hint text shown in the embed (builder spec v1.0) |
+| `config_json` | `form_field` | choice display config (`style`/`defaults`/`other`/`count_rule`/`image`; builder spec v2.0); null for non-choice fields |
 | `config_json` | `notification_channel` | encrypted at rest |
 | `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
 | `attachment_id` | `submission_link` | per-attachment targets (Vault) set this; submission-level targets (Deal) leave it null |

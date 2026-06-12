@@ -7170,3 +7170,3125 @@ a.t:hover {
   color: var(--ex-brand);
   transform: translateY(-1px);
 }
+
+/* ============================================================
+   NeNe Contact — 選択フィールド管理UI（Choice field builder）
+   3 approaches to picking selection logic × display style.
+   Built on .ex-* / .bd-* (Pro Console · teal nav · vermilion brand).
+   Prefix: .cf-*
+   ============================================================ */
+
+/* ---- canvas page chrome ---- */
+.cf-board {
+  background: var(--ex-bg);
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow:
+    0 1px 2px rgba(18, 28, 38, 0.05),
+    0 0 0 1px rgba(18, 28, 38, 0.07);
+}
+
+/* ============================================================
+   Shared — segmented control (logic toggle / other compact picks)
+   ============================================================ */
+.cf-seg {
+  display: inline-flex;
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  border-radius: 9px;
+  padding: 3px;
+  gap: 3px;
+}
+.cf-seg button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  padding: 7px 13px;
+  border-radius: 6px;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition:
+    background 0.14s,
+    color 0.14s,
+    box-shadow 0.14s;
+}
+.cf-seg button svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-seg button.on {
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  box-shadow:
+    0 1px 2px rgba(18, 28, 38, 0.1),
+    0 0 0 1px rgba(18, 28, 38, 0.04);
+}
+.cf-seg.block {
+  display: flex;
+}
+.cf-seg.block button {
+  flex: 1;
+  justify-content: center;
+}
+.cf-seg .sub {
+  font-size: 10.5px;
+  font-weight: 600;
+  opacity: 0.7;
+  margin-left: 2px;
+}
+
+.cf-steplab {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ex-faint);
+  margin: 0 0 9px;
+  letter-spacing: 0.01em;
+}
+.cf-steplab .n {
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  display: grid;
+  place-items: center;
+  font-size: 10px;
+  font-weight: 800;
+  flex: none;
+}
+.cf-helper {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  line-height: 1.5;
+  margin: 8px 0 0;
+}
+
+/* ============================================================
+   Shared — style cards (visual mini-preview pickers)
+   ============================================================ */
+.cf-stylegrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 9px;
+}
+.cf-stylegrid.col1 {
+  grid-template-columns: 1fr;
+}
+.cf-stylecard {
+  text-align: left;
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 11px 12px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s,
+    background 0.14s;
+  position: relative;
+}
+.cf-stylecard:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-stylecard.on {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-stylecard .nm {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ex-text);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cf-stylecard .hint {
+  font-size: 10.5px;
+  color: var(--ex-faint);
+  line-height: 1.45;
+}
+.cf-stylecard .tick {
+  position: absolute;
+  top: 9px;
+  right: 9px;
+  width: 17px;
+  height: 17px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  color: #fff;
+  display: none;
+  place-items: center;
+}
+.cf-stylecard .tick svg {
+  width: 11px;
+  height: 11px;
+}
+.cf-stylecard.on .tick {
+  display: grid;
+}
+
+/* mini thumbnail previews inside cards */
+.cf-thumb {
+  background: var(--ex-bg);
+  border: 1px solid var(--ex-border);
+  border-radius: 7px;
+  height: 56px;
+  padding: 8px 9px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  justify-content: center;
+  overflow: hidden;
+}
+.cf-thumb.center {
+  align-items: stretch;
+  justify-content: center;
+}
+.cf-th-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cf-th-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  border: 1.5px solid var(--ex-faint);
+  flex: none;
+}
+.cf-th-dot.on {
+  border-color: var(--ex-brand);
+  background: radial-gradient(circle, var(--ex-brand) 0 2px, transparent 2.5px);
+}
+.cf-th-sq {
+  width: 9px;
+  height: 9px;
+  border-radius: 2.5px;
+  border: 1.5px solid var(--ex-faint);
+  flex: none;
+}
+.cf-th-sq.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+  position: relative;
+}
+.cf-th-sq.on::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, transparent 45%, #fff 46% 54%, transparent 55%);
+  opacity: 0;
+}
+.cf-th-bar {
+  height: 6px;
+  border-radius: 3px;
+  background: var(--ex-surface2);
+  flex: 1;
+}
+.cf-th-bar.w1 {
+  max-width: 38px;
+}
+.cf-th-bar.w2 {
+  max-width: 52px;
+}
+.cf-th-bar.w3 {
+  max-width: 30px;
+}
+.cf-th-dd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1.5px solid var(--ex-faint);
+  border-radius: 5px;
+  padding: 5px 7px;
+  height: 22px;
+}
+.cf-th-dd svg {
+  width: 11px;
+  height: 11px;
+  color: var(--ex-faint);
+}
+.cf-th-seg {
+  display: flex;
+  gap: 4px;
+}
+.cf-th-pill {
+  flex: 1;
+  height: 17px;
+  border-radius: 5px;
+  border: 1.5px solid var(--ex-faint);
+  background: var(--ex-surface);
+}
+.cf-th-pill.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+}
+.cf-th-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+.cf-th-tag {
+  height: 14px;
+  border-radius: 4px;
+  background: var(--ex-brand-weak);
+  border: 1px solid var(--ex-brand-weak-bd);
+}
+.cf-th-tag.t1 {
+  width: 26px;
+}
+.cf-th-tag.t2 {
+  width: 20px;
+}
+.cf-th-tag.plus {
+  width: 14px;
+  background: var(--ex-surface2);
+  border-color: var(--ex-border);
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+/* ============================================================
+   Shared — options list editor
+   ============================================================ */
+.cf-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.cf-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 7px 8px 7px 6px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--ex-surface);
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+.cf-opt:hover {
+  background: var(--ex-surface2);
+}
+.cf-opt.drag-over {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-opt.dragging {
+  opacity: 0.4;
+}
+.cf-opt-grip {
+  color: var(--ex-faint);
+  cursor: grab;
+  display: flex;
+  align-items: center;
+  padding-top: 6px;
+  flex: none;
+}
+.cf-opt-grip svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-opt-grip:active {
+  cursor: grabbing;
+}
+.cf-opt-mark {
+  width: 19px;
+  height: 19px;
+  border: 1.7px solid var(--ex-faint);
+  flex: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+  margin-top: 5px;
+  background: var(--ex-surface);
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+.cf-opt-mark.radio {
+  border-radius: 50%;
+}
+.cf-opt-mark.check {
+  border-radius: 5px;
+}
+.cf-opt-mark.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+}
+.cf-opt-mark.on.radio {
+  background: radial-gradient(circle, #fff 0 3px, var(--ex-brand) 3.5px);
+}
+.cf-opt-mark.on .ck {
+  color: #fff;
+  display: block;
+}
+.cf-opt-mark .ck {
+  display: none;
+}
+.cf-opt-mark .ck svg {
+  width: 12px;
+  height: 12px;
+}
+.cf-opt-body {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-top: 2px;
+}
+.cf-opt-input {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ex-text);
+  padding: 4px 2px;
+  border-radius: 4px;
+  width: 100%;
+}
+.cf-opt-input:focus {
+  outline: none;
+  background: var(--ex-surface);
+  box-shadow: 0 0 0 2px var(--ex-brand-weak);
+}
+.cf-opt-desc {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ex-muted);
+  padding: 2px;
+  width: 100%;
+}
+.cf-opt-desc:focus {
+  outline: none;
+}
+.cf-opt-desc::placeholder {
+  color: var(--ex-faint);
+}
+.cf-opt-img {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1.5px dashed var(--ex-border);
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  cursor: pointer;
+  margin-top: 2px;
+  background: var(--ex-surface);
+  overflow: hidden;
+  transition: border-color 0.12s;
+}
+.cf-opt-img:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-opt-img svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-opt-img.set {
+  border-style: solid;
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-opt-img .ph {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(45deg, var(--ex-surface2) 0 5px, var(--ex-bg) 5px 10px);
+}
+.cf-opt-actions {
+  display: flex;
+  gap: 2px;
+  align-items: center;
+  padding-top: 4px;
+  flex: none;
+}
+.cf-opt-iconbtn {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ex-faint);
+  display: grid;
+  place-items: center;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.cf-opt-iconbtn:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-muted);
+}
+.cf-opt-iconbtn.danger:hover {
+  background: #fdeaea;
+  color: #d14343;
+}
+.cf-opt-iconbtn svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-opt-iconbtn.on {
+  color: var(--ex-brand);
+}
+
+.cf-opt-add {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 8px 9px 30px;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-brand);
+  cursor: pointer;
+  border-radius: 8px;
+}
+.cf-opt-add:hover {
+  background: var(--ex-brand-weak);
+}
+.cf-opt-add svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-opt-add .or {
+  color: var(--ex-faint);
+  font-weight: 600;
+}
+.cf-opt-add .or b {
+  color: var(--ex-muted);
+  font-weight: 650;
+}
+
+.cf-other {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 8px 9px 6px;
+  margin-top: 2px;
+  border-top: 1px dashed var(--ex-border);
+}
+.cf-other .lab {
+  font-size: 12px;
+  color: var(--ex-muted);
+  font-weight: 600;
+  flex: 1;
+}
+.cf-other .lab b {
+  color: var(--ex-text);
+  font-weight: 700;
+}
+
+/* mini toolbar above the options list */
+.cf-opt-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 9px;
+}
+.cf-minibtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 10px;
+  border-radius: 7px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    border-color 0.12s,
+    color 0.12s,
+    background 0.12s;
+}
+.cf-minibtn:hover {
+  border-color: var(--ex-brand-weak-bd);
+  color: var(--ex-text);
+}
+.cf-minibtn svg {
+  width: 13px;
+  height: 13px;
+}
+.cf-minibtn .ct {
+  color: var(--ex-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+/* bulk paste overlay */
+.cf-bulk {
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+}
+.cf-bulk h5 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-bulk p {
+  margin: 0 0 9px;
+  font-size: 11px;
+  color: var(--ex-faint);
+  line-height: 1.5;
+}
+.cf-bulk textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 88px;
+  resize: vertical;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+}
+.cf-bulk textarea:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-bulk-act {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+  justify-content: flex-end;
+}
+
+/* toggle switch (reuse bd-switch sizing) */
+.cf-switch {
+  width: 38px;
+  height: 22px;
+  border-radius: 999px;
+  background: var(--ex-brand);
+  position: relative;
+  flex: none;
+  border: 0;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.15s;
+}
+.cf-switch::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 18px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+  transition: left 0.15s;
+}
+.cf-switch.off {
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+}
+.cf-switch.off::after {
+  left: 2px;
+}
+
+/* ============================================================
+   Shared — live preview controls (rendered in .bd-sheet)
+   ============================================================ */
+.cf-pv {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.cf-pv-radio {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.cf-pv-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  font-size: 13.5px;
+  color: var(--ex-text);
+  width: 100%;
+}
+.cf-pv-opt > div:last-child {
+  flex: 1;
+  min-width: 0;
+  line-height: 1.4;
+}
+.cf-pv-opt .sub {
+  display: block;
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  margin-top: 2px;
+  line-height: 1.4;
+}
+.cf-pv-dot {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1.8px solid var(--ex-faint);
+  flex: none;
+  margin-top: 1px;
+}
+.cf-pv-opt.on .cf-pv-dot {
+  border-color: var(--ex-brand);
+  background: radial-gradient(circle, var(--ex-brand) 0 4px, transparent 4.5px);
+}
+.cf-pv-sq {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.8px solid var(--ex-faint);
+  flex: none;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+}
+.cf-pv-sq svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0;
+}
+.cf-pv-opt.on .cf-pv-sq {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+}
+.cf-pv-opt.on .cf-pv-sq svg {
+  opacity: 1;
+}
+.cf-pv-img {
+  width: 100%;
+  height: 96px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  background: repeating-linear-gradient(45deg, var(--ex-surface2) 0 8px, var(--ex-bg) 8px 16px);
+  border: 1px solid var(--ex-border);
+}
+
+/* card-style preview (radio/checkbox as tappable cards w/ image) */
+.cf-pv-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.cf-pv-card {
+  border: 1.5px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 12px;
+  cursor: default;
+}
+.cf-pv-card.on {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+
+/* dropdown */
+.cf-pv-dd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 11px 13px;
+  font-size: 13.5px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  max-width: 340px;
+}
+.cf-pv-dd.ph {
+  color: var(--ex-faint);
+}
+.cf-pv-dd svg {
+  width: 16px;
+  height: 16px;
+  color: var(--ex-faint);
+}
+
+/* segment / chips */
+.cf-pv-seg {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.cf-pv-seg.attached {
+  gap: 0;
+  border: 1px solid var(--ex-border);
+  border-radius: 9px;
+  overflow: hidden;
+  width: max-content;
+}
+.cf-pv-pill {
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  white-space: nowrap;
+}
+.cf-pv-seg.attached .cf-pv-pill {
+  border-radius: 0;
+  border-width: 0;
+  border-right: 1px solid var(--ex-border);
+}
+.cf-pv-seg.attached .cf-pv-pill:last-child {
+  border-right: 0;
+}
+.cf-pv-pill.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  font-weight: 700;
+}
+
+/* tags / multiselect */
+.cf-pv-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  min-height: 44px;
+  max-width: 380px;
+  background: var(--ex-surface);
+}
+.cf-pv-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 6px 5px 11px;
+  border-radius: 7px;
+  background: var(--ex-brand-weak);
+  border: 1px solid var(--ex-brand-weak-bd);
+  color: var(--ex-brand);
+  font-size: 12.5px;
+  font-weight: 650;
+}
+.cf-pv-chip .x {
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+  color: var(--ex-brand);
+}
+.cf-pv-chip .x svg {
+  width: 11px;
+  height: 11px;
+}
+.cf-pv-tags .ph {
+  color: var(--ex-faint);
+  font-size: 13px;
+}
+.cf-pv-other-inp {
+  border: 1px solid var(--ex-border);
+  border-radius: 7px;
+  padding: 7px 10px;
+  font-size: 12.5px;
+  color: var(--ex-faint);
+  background: var(--ex-surface);
+  margin-top: 4px;
+  max-width: 240px;
+}
+
+/* preview meta footer */
+.cf-pv-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--ex-border);
+  font-size: 11px;
+  color: var(--ex-faint);
+  flex-wrap: wrap;
+}
+.cf-pv-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: var(--ex-surface2);
+  color: var(--ex-muted);
+  font-weight: 650;
+}
+.cf-pv-tag svg {
+  width: 12px;
+  height: 12px;
+  color: var(--ex-brand);
+}
+
+/* a "live" pulse marker on the preview sheet */
+.cf-livetag {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ex-muted);
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  padding: 4px 9px 4px 8px;
+  border-radius: 999px;
+}
+.cf-livetag .d {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #36a866;
+  box-shadow: 0 0 0 0 rgba(54, 168, 102, 0.5);
+  animation: cf-pulse 1.8s infinite;
+}
+@keyframes cf-pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(54, 168, 102, 0.45);
+  }
+  70% {
+    box-shadow: 0 0 0 6px rgba(54, 168, 102, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(54, 168, 102, 0);
+  }
+}
+
+/* ============================================================
+   案B — flat style gallery modal
+   ============================================================ */
+.cf-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 24, 32, 0.42);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  z-index: 40;
+  padding: 24px;
+}
+.cf-modal {
+  width: min(760px, 100%);
+  max-height: 100%;
+  background: var(--ex-surface);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 30px 80px rgba(12, 18, 26, 0.4);
+  display: flex;
+  flex-direction: column;
+}
+.cf-modal-head {
+  padding: 18px 20px 16px;
+  border-bottom: 1px solid var(--ex-border);
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.cf-modal-head h3 {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--ex-text);
+  font-family: var(--ex-font-display);
+}
+.cf-modal-head p {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--ex-muted);
+}
+.cf-modal-x {
+  margin-left: auto;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  cursor: pointer;
+  flex: none;
+}
+.cf-modal-x svg {
+  width: 16px;
+  height: 16px;
+}
+.cf-modal-body {
+  padding: 18px 20px 20px;
+  overflow-y: auto;
+}
+.cf-modal-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+.cf-modal-grouplab {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ex-faint);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cf-modal-grouplab::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--ex-border);
+}
+.cf-gallery {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.cf-gcard {
+  text-align: left;
+  appearance: none;
+  font: inherit;
+  cursor: pointer;
+  background: var(--ex-surface);
+  border: 1.5px solid var(--ex-border);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s,
+    transform 0.12s;
+  position: relative;
+}
+.cf-gcard:hover {
+  border-color: var(--ex-brand-weak-bd);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(18, 28, 38, 0.08);
+}
+.cf-gcard.on {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-gcard .lp {
+  background: var(--ex-bg);
+  border-bottom: 1px solid var(--ex-border);
+  padding: 16px 14px;
+  min-height: 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  justify-content: center;
+}
+.cf-gcard .cap {
+  padding: 11px 13px 13px;
+}
+.cf-gcard .nm {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-gcard .hint {
+  font-size: 10.5px;
+  color: var(--ex-faint);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+.cf-gcard .tick {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  width: 19px;
+  height: 19px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  color: #fff;
+  display: none;
+  place-items: center;
+}
+.cf-gcard .tick svg {
+  width: 12px;
+  height: 12px;
+}
+.cf-gcard.on .tick {
+  display: grid;
+}
+.cf-logicbadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  letter-spacing: 0.02em;
+}
+.cf-logicbadge.single {
+  background: oklch(0.95 0.04 250);
+  color: oklch(0.5 0.13 250);
+}
+.cf-logicbadge.multiple {
+  background: oklch(0.95 0.05 150);
+  color: oklch(0.45 0.12 150);
+}
+/* mini live previews inside gallery cards (scaled-down real controls) */
+.cf-glp-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 11px;
+  color: var(--ex-muted);
+  white-space: nowrap;
+}
+.cf-glp-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  border: 1.6px solid var(--ex-faint);
+  flex: none;
+}
+.cf-glp-dot.on {
+  border-color: var(--ex-brand);
+  background: radial-gradient(circle, var(--ex-brand) 0 3px, transparent 3.5px);
+}
+.cf-glp-sq {
+  width: 13px;
+  height: 13px;
+  border-radius: 3.5px;
+  border: 1.6px solid var(--ex-faint);
+  flex: none;
+}
+.cf-glp-sq.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+}
+.cf-glp-dd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--ex-border);
+  border-radius: 6px;
+  padding: 7px 9px;
+  font-size: 11px;
+  color: var(--ex-muted);
+  background: var(--ex-surface);
+}
+.cf-glp-dd svg {
+  width: 12px;
+  height: 12px;
+  color: var(--ex-faint);
+}
+.cf-glp-seg {
+  display: flex;
+  gap: 5px;
+}
+.cf-glp-pill {
+  padding: 5px 0;
+  flex: 1;
+  text-align: center;
+  font-size: 10px;
+  font-weight: 600;
+  border: 1px solid var(--ex-border);
+  border-radius: 6px;
+  color: var(--ex-muted);
+  background: var(--ex-surface);
+}
+.cf-glp-pill.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+}
+.cf-glp-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+.cf-glp-tag {
+  font-size: 10px;
+  padding: 3px 7px;
+  border-radius: 5px;
+  background: var(--ex-brand-weak);
+  border: 1px solid var(--ex-brand-weak-bd);
+  color: var(--ex-brand);
+  font-weight: 650;
+}
+
+/* trigger row in panel (案B) — shows current style, opens gallery */
+.cf-curstyle {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  border: 1px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 11px 12px;
+  background: var(--ex-surface);
+  cursor: pointer;
+  transition: border-color 0.14s;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+}
+.cf-curstyle:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-curstyle .ic {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.cf-curstyle .ic svg {
+  width: 19px;
+  height: 19px;
+}
+.cf-curstyle .nm {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-curstyle .mt {
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 2px;
+}
+.cf-curstyle .chev {
+  margin-left: auto;
+  color: var(--ex-faint);
+  flex: none;
+}
+.cf-curstyle .chev svg {
+  width: 16px;
+  height: 16px;
+}
+
+/* ============================================================
+   案C — on-canvas inline editing + floating toolbar
+   ============================================================ */
+.cf-canvasfield {
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-brand);
+  border-radius: var(--ex-radius-lg);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+  padding: 16px 18px 18px;
+  position: relative;
+}
+.cf-canvasfield .flab {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ex-text);
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+.cf-canvasfield .flab .req {
+  color: #d14343;
+}
+.cf-canvasfield .fdesc {
+  font-size: 12px;
+  color: var(--ex-muted);
+  margin-bottom: 14px;
+}
+
+/* floating toolbar attached to selected field */
+.cf-float {
+  position: absolute;
+  top: -52px;
+  left: 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: var(--ex-text);
+  border-radius: 11px;
+  padding: 5px;
+  box-shadow: 0 12px 30px rgba(12, 18, 26, 0.32);
+  z-index: 5;
+}
+.cf-float::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 22px;
+  width: 10px;
+  height: 10px;
+  background: var(--ex-text);
+  transform: rotate(45deg);
+  border-radius: 2px;
+}
+.cf-float .grp {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+.cf-float .div {
+  width: 1px;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.16);
+  margin: 0 4px;
+}
+.cf-fbtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 7px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.62);
+  display: grid;
+  place-items: center;
+  position: relative;
+  transition:
+    background 0.12s,
+    color 0.12s;
+}
+.cf-fbtn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+}
+.cf-fbtn.on {
+  background: var(--ex-brand);
+  color: #fff;
+}
+.cf-fbtn svg {
+  width: 16px;
+  height: 16px;
+}
+.cf-fbtn .tip {
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--ex-text);
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.12s;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+.cf-fbtn:hover .tip {
+  opacity: 1;
+}
+.cf-float .ftxt {
+  font-size: 11px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.85);
+  padding: 0 8px;
+  white-space: nowrap;
+}
+.cf-flogic {
+  display: flex;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 7px;
+  padding: 2px;
+  gap: 2px;
+}
+.cf-flogic button {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: rgba(255, 255, 255, 0.6);
+  padding: 5px 10px;
+  border-radius: 5px;
+  white-space: nowrap;
+}
+.cf-flogic button.on {
+  background: rgba(255, 255, 255, 0.18);
+  color: #fff;
+}
+
+/* on-canvas editable option rows */
+.cf-ce-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.cf-ce-opt {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 7px 8px 7px 4px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  transition:
+    background 0.12s,
+    border-color 0.12s;
+}
+.cf-ce-opt:hover {
+  background: var(--ex-surface2);
+}
+.cf-ce-opt.drag-over {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-ce-opt.dragging {
+  opacity: 0.4;
+}
+.cf-ce-grip {
+  color: var(--ex-faint);
+  cursor: grab;
+  opacity: 0;
+  display: flex;
+  flex: none;
+  transition: opacity 0.12s;
+}
+.cf-ce-opt:hover .cf-ce-grip {
+  opacity: 1;
+}
+.cf-ce-grip svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-ce-mark {
+  flex: none;
+  border: 1.8px solid var(--ex-faint);
+  width: 18px;
+  height: 18px;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.cf-ce-mark.radio {
+  border-radius: 50%;
+}
+.cf-ce-mark.check {
+  border-radius: 5px;
+}
+.cf-ce-mark.on {
+  border-color: var(--ex-brand);
+}
+.cf-ce-mark.on.radio {
+  background: radial-gradient(circle, var(--ex-brand) 0 4px, transparent 4.5px);
+}
+.cf-ce-mark.on.check {
+  background: var(--ex-brand);
+}
+.cf-ce-mark .ck {
+  color: #fff;
+  display: none;
+}
+.cf-ce-mark.on.check .ck {
+  display: block;
+}
+.cf-ce-mark .ck svg {
+  width: 12px;
+  height: 12px;
+}
+.cf-ce-pillmark {
+  flex: none;
+  height: 32px;
+  min-width: 64px;
+  border: 1.5px solid var(--ex-border);
+  border-radius: 8px;
+}
+.cf-ce-input {
+  flex: 1;
+  min-width: 0;
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ex-text);
+  padding: 5px 4px;
+  border-radius: 5px;
+}
+.cf-ce-input:focus {
+  outline: none;
+  background: var(--ex-surface);
+  box-shadow: 0 0 0 2px var(--ex-brand-weak);
+}
+.cf-ce-input.ph {
+  color: var(--ex-faint);
+}
+.cf-ce-rm {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ex-faint);
+  display: grid;
+  place-items: center;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    background 0.12s,
+    color 0.12s;
+  flex: none;
+}
+.cf-ce-opt:hover .cf-ce-rm {
+  opacity: 1;
+}
+.cf-ce-rm:hover {
+  background: #fdeaea;
+  color: #d14343;
+}
+.cf-ce-rm svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-ce-add {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 8px 9px 4px;
+}
+.cf-ce-add .mk {
+  flex: none;
+  opacity: 0.4;
+}
+.cf-ce-add input {
+  flex: 1;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 13.5px;
+  color: var(--ex-faint);
+  padding: 5px 4px;
+}
+.cf-ce-add input:focus {
+  outline: none;
+  color: var(--ex-text);
+}
+
+/* compact note shown under the canvas field in 案C */
+.cf-canvasnote {
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 13px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--ex-border);
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.cf-canvasnote svg {
+  width: 13px;
+  height: 13px;
+  color: var(--ex-brand);
+  flex: none;
+}
+
+/* approach annotation banner (above each editor) */
+.cf-anno {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 13px 16px;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: 11px;
+  margin-bottom: 14px;
+}
+.cf-anno .tag {
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  color: #fff;
+  background: var(--ex-brand);
+  padding: 3px 9px;
+  border-radius: 6px;
+  flex: none;
+  margin-top: 1px;
+}
+.cf-anno .ttl {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-anno .ds {
+  font-size: 11.5px;
+  color: var(--ex-muted);
+  margin-top: 2px;
+  line-height: 1.5;
+}
+
+/* panel scroll region */
+.cf-panelscroll {
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+.cf-panelscroll::-webkit-scrollbar {
+  width: 9px;
+}
+.cf-panelscroll::-webkit-scrollbar-thumb {
+  background: var(--ex-border);
+  border-radius: 999px;
+  border: 2px solid var(--ex-surface);
+}
+
+/* ============================================================
+   B×C ハイブリッド — additions
+   ============================================================ */
+/* wide style button inside the floating toolbar (opens gallery) */
+.cf-fbtn-wide {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 11px;
+  border: 0;
+  cursor: pointer;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 650;
+  white-space: nowrap;
+  transition: background 0.12s;
+}
+.cf-fbtn-wide:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+.cf-fbtn-wide .ic {
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.7);
+}
+.cf-fbtn-wide .ic svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-fbtn-wide .lab {
+  color: rgba(255, 255, 255, 0.6);
+  font-weight: 600;
+}
+.cf-fbtn-wide .nm {
+  color: #fff;
+}
+.cf-fbtn-wide .chev {
+  display: inline-flex;
+  color: rgba(255, 255, 255, 0.55);
+  margin-left: -2px;
+}
+.cf-fbtn-wide .chev svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* respondent-view preview strip (shown above editable rows for non-list styles) */
+.cf-previewstrip {
+  background: var(--ex-bg);
+  border: 1px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 13px 14px 14px;
+  margin-bottom: 14px;
+}
+.cf-previewstrip .ttl {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--ex-faint);
+  letter-spacing: 0.02em;
+  margin-bottom: 11px;
+}
+.cf-previewstrip .ttl .d {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #36a866;
+}
+
+/* on-canvas sub-label for the editable option list */
+.cf-ce-sublabel {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ex-faint);
+  margin: 2px 0 7px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.cf-ce-sublabel .ct {
+  font-weight: 600;
+  color: var(--ex-faint);
+}
+.cf-ce-sublabel .sp {
+  flex: 1;
+}
+.cf-ce-sublabel .lnk {
+  color: var(--ex-brand);
+  font-weight: 650;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.cf-ce-sublabel .lnk svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* bulk paste popover anchored on canvas */
+.cf-ce-bulk {
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 4px 0 12px;
+}
+.cf-ce-bulk h5 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-ce-bulk p {
+  margin: 0 0 9px;
+  font-size: 11px;
+  color: var(--ex-faint);
+  line-height: 1.5;
+}
+.cf-ce-bulk textarea {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 84px;
+  resize: vertical;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+}
+.cf-ce-bulk textarea:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-ce-bulk-act {
+  display: flex;
+  gap: 8px;
+  margin-top: 9px;
+  justify-content: flex-end;
+}
+
+/* per-row image affordance on canvas (case C rows) */
+.cf-ce-img {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1.5px dashed var(--ex-border);
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  cursor: pointer;
+  background: var(--ex-surface);
+  overflow: hidden;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    border-color 0.12s;
+}
+.cf-ce-opt:hover .cf-ce-img {
+  opacity: 1;
+}
+.cf-ce-img.set {
+  opacity: 1;
+  border-style: solid;
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-ce-img svg {
+  width: 14px;
+  height: 14px;
+}
+.cf-ce-img .ph {
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(45deg, var(--ex-surface2) 0 5px, var(--ex-bg) 5px 10px);
+}
+
+/* panel: current style card reuse already via .cf-curstyle; helper note */
+.cf-panelnote {
+  font-size: 11px;
+  color: var(--ex-faint);
+  line-height: 1.55;
+  margin-top: 9px;
+  display: flex;
+  gap: 7px;
+  align-items: flex-start;
+}
+.cf-panelnote svg {
+  width: 13px;
+  height: 13px;
+  color: var(--ex-brand);
+  flex: none;
+  margin-top: 1px;
+}
+.cf-panelnote b {
+  color: var(--ex-text);
+  font-weight: 650;
+}
+
+/* ============================================================
+   画像選択（picture choice）— card / list preview + editor
+   ============================================================ */
+/* shared striped placeholder + drop hint */
+.cf-imgph {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(45deg, var(--ex-surface2) 0 9px, var(--ex-bg) 9px 18px);
+}
+.cf-imgph::after {
+  content: '画像';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--ex-faint);
+  letter-spacing: 0.04em;
+}
+
+/* selection marker overlay (on image) */
+.cf-imgmk {
+  position: absolute;
+  top: 8px;
+  left: 8px;
+  width: 22px;
+  height: 22px;
+  border: 2px solid #fff;
+  z-index: 2;
+  background: rgba(20, 24, 32, 0.28);
+  display: grid;
+  place-items: center;
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.25);
+}
+.cf-imgmk.radio {
+  border-radius: 50%;
+}
+.cf-imgmk.check {
+  border-radius: 6px;
+}
+.cf-imgmk.on {
+  background: var(--ex-brand);
+  border-color: #fff;
+}
+.cf-imgmk.on.radio {
+  background: radial-gradient(circle, #fff 0 4px, var(--ex-brand) 4.5px);
+}
+.cf-imgmk svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+}
+.cf-imgmk.on.check svg {
+  opacity: 1;
+}
+/* list marker isn't overlaid — give it a static box */
+.cf-imglist-row > .cf-imgmk {
+  position: static;
+  border-color: var(--ex-faint);
+  background: var(--ex-surface);
+  color: var(--ex-brand);
+  box-shadow: none;
+  flex: none;
+}
+.cf-imglist-row > .cf-imgmk.radio.on {
+  background: radial-gradient(circle, var(--ex-brand) 0 4px, transparent 4.5px);
+  border-color: var(--ex-brand);
+}
+.cf-imglist-row > .cf-imgmk.check.on {
+  background: var(--ex-brand);
+  border-color: var(--ex-brand);
+}
+.cf-imglist-row > .cf-imgmk.check.on svg {
+  opacity: 1;
+  color: #fff;
+}
+
+/* card grid */
+.cf-imgcards {
+  display: grid;
+  gap: 12px;
+}
+.cf-imgcards.cols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.cf-imgcards.cols3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.cf-imgcard {
+  border: 1.5px solid var(--ex-border);
+  border-radius: 12px;
+  overflow: hidden;
+  background: var(--ex-surface);
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+.cf-imgcard.on {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-imgcard-img {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  background: var(--ex-bg);
+}
+.cf-imgcard-img.dash {
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  border: none;
+  background: repeating-linear-gradient(45deg, var(--ex-surface2) 0 9px, var(--ex-bg) 9px 18px);
+}
+.cf-imgcard-img.dash svg {
+  width: 18px;
+  height: 18px;
+}
+.cf-imgcard-cap {
+  padding: 10px 12px 12px;
+}
+.cf-imgcard-cap .t {
+  font-size: 13px;
+  font-weight: 650;
+  color: var(--ex-text);
+  line-height: 1.35;
+}
+.cf-imgcard.on .cf-imgcard-cap .t {
+  color: var(--ex-brand);
+}
+.cf-imgcard-cap .d {
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* horizontal list with thumbnail */
+.cf-imglist {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+}
+.cf-imglist-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border: 1.5px solid var(--ex-border);
+  border-radius: 11px;
+  padding: 10px 13px 10px 11px;
+  background: var(--ex-surface);
+  transition:
+    border-color 0.14s,
+    box-shadow 0.14s;
+}
+.cf-imglist-row.on {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-imglist-thumb {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 9px;
+  overflow: hidden;
+  flex: none;
+  background: var(--ex-bg);
+}
+.cf-imglist-thumb.dash {
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  background: repeating-linear-gradient(45deg, var(--ex-surface2) 0 8px, var(--ex-bg) 8px 16px);
+}
+.cf-imglist-cap {
+  flex: 1;
+  min-width: 0;
+}
+.cf-imglist-cap .t {
+  font-size: 13.5px;
+  font-weight: 650;
+  color: var(--ex-text);
+}
+.cf-imglist-row.on .cf-imglist-cap .t {
+  color: var(--ex-brand);
+}
+.cf-imglist-cap .d {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  margin-top: 2px;
+  line-height: 1.45;
+}
+
+/* editor: option row in image mode (dropzone + label + desc) */
+.cf-ce-opt.img {
+  align-items: flex-start;
+  padding-top: 9px;
+  padding-bottom: 9px;
+}
+.cf-ce-drop {
+  position: relative;
+  width: 46px;
+  height: 46px;
+  border-radius: 8px;
+  border: 1.5px dashed var(--ex-border);
+  flex: none;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--ex-surface);
+  margin-top: 1px;
+  transition: border-color 0.12s;
+}
+.cf-ce-drop:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-ce-drop.set {
+  border-style: solid;
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-ce-drop .cf-imgph::after {
+  content: '';
+}
+.cf-ce-drop .ic {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  z-index: 1;
+}
+.cf-ce-drop .ic svg {
+  width: 16px;
+  height: 16px;
+}
+.cf-ce-body2 {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.cf-ce-body2 .cf-ce-input {
+  font-size: 13.5px;
+  padding: 3px 4px;
+}
+.cf-ce-body2 .cf-ce-desc {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 11px;
+  color: var(--ex-muted);
+  padding: 2px 4px;
+  width: 100%;
+}
+.cf-ce-body2 .cf-ce-desc:focus {
+  outline: none;
+  background: var(--ex-surface);
+  box-shadow: 0 0 0 2px var(--ex-brand-weak);
+  border-radius: 4px;
+}
+.cf-ce-body2 .cf-ce-desc::placeholder {
+  color: var(--ex-faint);
+}
+
+/* small labelled control rows in the panel (列数 / 比率 etc.) */
+.cf-ctrlrow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cf-ctrlrow:last-child {
+  margin-bottom: 0;
+}
+.cf-ctrlrow .l {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  flex: none;
+  width: 76px;
+}
+.cf-ctrlrow .cf-seg {
+  flex: 1;
+}
+
+/* ============================================================
+   「その他」自由記述 — preview + config
+   ============================================================ */
+.cf-pv-req {
+  color: #d14343;
+  font-weight: 700;
+  margin-left: 3px;
+}
+.cf-pv-otherbox {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 5px;
+  max-width: 360px;
+}
+.cf-pv-otherfield {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 9px 12px;
+  font-size: 13px;
+  color: var(--ex-faint);
+  background: var(--ex-surface);
+}
+.cf-pv-othercount {
+  font-size: 11px;
+  color: var(--ex-faint);
+  font-variant-numeric: tabular-nums;
+  flex: none;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cf-pv-otherwrap {
+  margin-top: 11px;
+  padding: 11px 12px 12px;
+  border: 1px dashed var(--ex-border);
+  border-radius: 9px;
+  background: var(--ex-surface2);
+}
+.cf-pv-otherlab {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+}
+
+/* config block (panel + canvas popover) */
+.cf-othercfg {
+  border: 1px solid var(--ex-border);
+  border-radius: 11px;
+  background: var(--ex-surface);
+  overflow: hidden;
+}
+.cf-othercfg-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 13px;
+  border-bottom: 1px solid var(--ex-border);
+}
+.cf-othercfg-head .ic {
+  width: 30px;
+  height: 30px;
+  border-radius: 7px;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.cf-othercfg-head .ic svg {
+  width: 16px;
+  height: 16px;
+}
+.cf-othercfg-head .nm {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-othercfg-head .mt {
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 1px;
+}
+.cf-othercfg-head .cf-switch {
+  margin-left: auto;
+}
+.cf-othercfg-body {
+  padding: 13px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+.cf-othercfg-body.off {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.cf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+.cf-field > label {
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.cf-field > label .opt {
+  font-weight: 500;
+  color: var(--ex-faint);
+}
+.cf-input {
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 9px 11px;
+  font: inherit;
+  font-size: 13px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  width: 100%;
+  box-sizing: border-box;
+}
+.cf-input:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-input::placeholder {
+  color: var(--ex-faint);
+}
+.cf-inline2 {
+  display: flex;
+  gap: 10px;
+  align-items: flex-end;
+}
+.cf-inline2 > .cf-field {
+  flex: 1;
+  min-width: 0;
+}
+.cf-togglerow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.cf-togglerow .tx {
+  flex: 1;
+}
+.cf-togglerow .tl {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-text);
+}
+.cf-togglerow .td {
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 1px;
+  line-height: 1.4;
+}
+.cf-numwrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.cf-numwrap .cf-input {
+  width: 90px;
+}
+.cf-numwrap .unit {
+  font-size: 12px;
+  color: var(--ex-faint);
+}
+.cf-numwrap .off {
+  color: var(--ex-faint);
+  font-size: 12px;
+}
+.cf-maxchars {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* canvas popover for その他 config */
+.cf-pop {
+  position: absolute;
+  z-index: 30;
+  width: 320px;
+  background: var(--ex-surface);
+  border-radius: 13px;
+  box-shadow:
+    0 18px 44px rgba(12, 18, 26, 0.26),
+    0 0 0 1px rgba(18, 28, 38, 0.07);
+}
+.cf-pop-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 14px 11px;
+  border-bottom: 1px solid var(--ex-border);
+}
+.cf-pop-head .t {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-pop-head .x {
+  margin-left: auto;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ex-faint);
+  display: grid;
+  place-items: center;
+}
+.cf-pop-head .x:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-muted);
+}
+.cf-pop-head .x svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-pop-body {
+  padding: 13px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+}
+/* the その他 row on canvas with a gear */
+.cf-other-cog {
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  color: var(--ex-faint);
+  display: grid;
+  place-items: center;
+  flex: none;
+  opacity: 0;
+  transition:
+    opacity 0.12s,
+    background 0.12s,
+    color 0.12s;
+}
+.cf-ce-opt:hover .cf-other-cog {
+  opacity: 1;
+}
+.cf-other-cog:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-brand);
+}
+.cf-other-cog.on {
+  opacity: 1;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+}
+.cf-other-cog svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-other-badges {
+  display: flex;
+  gap: 5px;
+  flex: none;
+}
+.cf-other-badge {
+  font-size: 9.5px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: var(--ex-surface2);
+  color: var(--ex-muted);
+  white-space: nowrap;
+}
+.cf-other-badge.req {
+  background: #fdeaea;
+  color: #d14343;
+}
+
+/* ============================================================
+   複数選択 — 選択数ルール（上限/下限）
+   ============================================================ */
+.cf-pv-countcap {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--ex-brand);
+  background: var(--ex-brand-weak);
+  border: 1px solid var(--ex-brand-weak-bd);
+  padding: 4px 10px;
+  border-radius: 999px;
+  margin-bottom: 10px;
+  width: max-content;
+  white-space: nowrap;
+}
+.cf-pv-countcap svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* panel: two number steppers for min / max */
+.cf-rulegrid {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+.cf-rulerow {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.cf-rulerow .tx {
+  flex: 1;
+}
+.cf-rulerow .tl {
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-text);
+}
+.cf-rulerow .td {
+  font-size: 11px;
+  color: var(--ex-faint);
+  margin-top: 1px;
+}
+.cf-stepper {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--ex-surface);
+  flex: none;
+}
+.cf-stepper.dim {
+  opacity: 0.4;
+  pointer-events: none;
+}
+.cf-stepper button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  width: 32px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  font-size: 16px;
+  transition: background 0.12s;
+}
+.cf-stepper button:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-text);
+}
+.cf-stepper button:disabled {
+  color: var(--ex-faint);
+  cursor: default;
+  background: transparent;
+}
+.cf-stepper .val {
+  min-width: 38px;
+  text-align: center;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ex-text);
+  font-variant-numeric: tabular-nums;
+  border-left: 1px solid var(--ex-border);
+  border-right: 1px solid var(--ex-border);
+  padding: 0 4px;
+  line-height: 34px;
+}
+.cf-rulewarn {
+  display: flex;
+  align-items: flex-start;
+  gap: 7px;
+  font-size: 11px;
+  color: #b45309;
+  background: #fef5e7;
+  border: 1px solid #f6e0b3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  line-height: 1.45;
+  margin-top: 2px;
+}
+.cf-rulewarn svg {
+  width: 13px;
+  height: 13px;
+  flex: none;
+  margin-top: 1px;
+  color: #d97706;
+}
+.cf-rulesummary {
+  font-size: 11.5px;
+  color: var(--ex-muted);
+  line-height: 1.5;
+  margin-top: 3px;
+}
+.cf-rulesummary b {
+  color: var(--ex-text);
+  font-weight: 700;
+}
+
+/* ============================================================
+   回答者ビュー（respondent preview）+ バリデーションエラー
+   ============================================================ */
+.cf-resp-scrim {
+  position: absolute;
+  inset: 0;
+  background: rgba(18, 24, 32, 0.5);
+  backdrop-filter: blur(3px);
+  display: flex;
+  flex-direction: column;
+  z-index: 60;
+}
+.cf-resp-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 13px 18px;
+  background: var(--ex-surface);
+  border-bottom: 1px solid var(--ex-border);
+  flex: none;
+}
+.cf-resp-bar .badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ex-text);
+}
+.cf-resp-bar .badge .ic {
+  width: 26px;
+  height: 26px;
+  border-radius: 7px;
+  background: var(--ex-brand-weak);
+  color: var(--ex-brand);
+  display: grid;
+  place-items: center;
+}
+.cf-resp-bar .badge .ic svg {
+  width: 15px;
+  height: 15px;
+}
+.cf-resp-bar .sub {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+}
+.cf-resp-bar .sp {
+  flex: 1;
+}
+.cf-resp-seg {
+  display: inline-flex;
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 3px;
+  gap: 3px;
+}
+.cf-resp-seg button {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  font-size: 11.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  padding: 6px 12px;
+  border-radius: 6px;
+}
+.cf-resp-seg button.on {
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  box-shadow: 0 1px 2px rgba(18, 28, 38, 0.1);
+}
+.cf-resp-x {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  display: grid;
+  place-items: center;
+  color: var(--ex-muted);
+  cursor: pointer;
+  flex: none;
+}
+.cf-resp-x svg {
+  width: 16px;
+  height: 16px;
+}
+.cf-resp-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 30px 20px 40px;
+}
+.cf-resp-form {
+  width: min(560px, 100%);
+  margin: 0 auto;
+  background: var(--ex-surface);
+  border-radius: 16px;
+  box-shadow: 0 20px 50px rgba(12, 18, 26, 0.2);
+  overflow: hidden;
+}
+.cf-resp-head {
+  padding: 26px 30px 20px;
+  border-bottom: 1px solid var(--ex-border);
+}
+.cf-resp-head .t {
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--ex-text);
+  font-family: var(--ex-font-display);
+}
+.cf-resp-head .d {
+  font-size: 13.5px;
+  color: var(--ex-muted);
+  margin-top: 6px;
+  line-height: 1.6;
+}
+.cf-resp-body {
+  padding: 24px 30px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* error banner at top after submit */
+.cf-resp-errbanner {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: #fdecec;
+  border: 1px solid #f3c2c2;
+  border-radius: 11px;
+  padding: 13px 15px;
+}
+.cf-resp-errbanner .ic {
+  color: #d14343;
+  flex: none;
+  margin-top: 1px;
+}
+.cf-resp-errbanner .ic svg {
+  width: 18px;
+  height: 18px;
+}
+.cf-resp-errbanner .tx {
+  font-size: 12.5px;
+  color: #a23434;
+  line-height: 1.5;
+}
+.cf-resp-errbanner .tx b {
+  font-weight: 700;
+}
+.cf-resp-ok {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+  background: oklch(0.96 0.04 150);
+  border: 1px solid oklch(0.85 0.07 150);
+  border-radius: 11px;
+  padding: 14px 16px;
+  color: oklch(0.4 0.1 150);
+  font-size: 13.5px;
+  font-weight: 650;
+}
+.cf-resp-ok .ic {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: oklch(0.6 0.13 150);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  flex: none;
+}
+.cf-resp-ok .ic svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* a question block */
+.cf-q .qlab {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: var(--ex-text);
+  margin-bottom: 3px;
+}
+.cf-q .qlab .req {
+  color: #d14343;
+  margin-left: 3px;
+}
+.cf-q .qhint {
+  font-size: 12.5px;
+  color: var(--ex-muted);
+  margin-bottom: 13px;
+  line-height: 1.5;
+}
+.cf-q.invalid .qlab {
+  color: #a23434;
+}
+.cf-q-err {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #d14343;
+  margin-top: 11px;
+}
+.cf-q-err svg {
+  width: 14px;
+  height: 14px;
+  flex: none;
+}
+
+/* interactive options (radio/checkbox plain) */
+.cf-r-opts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cf-r-opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 11px;
+  padding: 13px 15px;
+  border: 1.5px solid var(--ex-border);
+  border-radius: 11px;
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    background 0.12s,
+    box-shadow 0.12s;
+  background: var(--ex-surface);
+}
+.cf-r-opt:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-r-opt.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand-weak);
+  box-shadow: 0 0 0 2px var(--ex-brand-weak);
+}
+.cf-r-opt.invalid {
+  border-color: #e9a3a3;
+}
+.cf-r-mk {
+  width: 20px;
+  height: 20px;
+  border: 1.8px solid var(--ex-faint);
+  flex: none;
+  margin-top: 1px;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  transition:
+    border-color 0.12s,
+    background 0.12s;
+}
+.cf-r-mk.radio {
+  border-radius: 50%;
+}
+.cf-r-mk.check {
+  border-radius: 6px;
+}
+.cf-r-opt.on .cf-r-mk.radio {
+  border-color: var(--ex-brand);
+  background: radial-gradient(circle, var(--ex-brand) 0 5px, #fff 5.5px);
+}
+.cf-r-opt.on .cf-r-mk.check {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+}
+.cf-r-mk svg {
+  width: 13px;
+  height: 13px;
+  opacity: 0;
+}
+.cf-r-opt.on .cf-r-mk.check svg {
+  opacity: 1;
+}
+.cf-r-cap {
+  flex: 1;
+  min-width: 0;
+}
+.cf-r-cap .t {
+  font-size: 14px;
+  color: var(--ex-text);
+  font-weight: 550;
+}
+.cf-r-cap .d {
+  font-size: 12px;
+  color: var(--ex-faint);
+  margin-top: 3px;
+  line-height: 1.45;
+}
+
+/* interactive dropdown */
+.cf-r-dd {
+  position: relative;
+}
+.cf-r-ddbtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 1.5px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 13px 15px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  cursor: pointer;
+}
+.cf-r-ddbtn.ph {
+  color: var(--ex-faint);
+}
+.cf-r-ddbtn.invalid {
+  border-color: #e9a3a3;
+}
+.cf-r-ddbtn.open {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-r-ddbtn svg {
+  width: 17px;
+  height: 17px;
+  color: var(--ex-faint);
+}
+.cf-r-ddmenu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: 11px;
+  box-shadow: 0 14px 36px rgba(12, 18, 26, 0.18);
+  padding: 6px;
+  z-index: 5;
+  max-height: 240px;
+  overflow-y: auto;
+}
+.cf-r-ddopt {
+  padding: 11px 13px;
+  border-radius: 7px;
+  font-size: 14px;
+  color: var(--ex-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.cf-r-ddopt:hover {
+  background: var(--ex-surface2);
+}
+.cf-r-ddopt.on {
+  color: var(--ex-brand);
+  font-weight: 650;
+}
+.cf-r-ddopt svg {
+  width: 15px;
+  height: 15px;
+}
+
+/* interactive segment / chips */
+.cf-r-seg {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cf-r-pill {
+  padding: 11px 19px;
+  font-size: 14px;
+  font-weight: 600;
+  border: 1.5px solid var(--ex-border);
+  border-radius: 10px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  cursor: pointer;
+  transition:
+    border-color 0.12s,
+    background 0.12s,
+    color 0.12s;
+}
+.cf-r-pill:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-r-pill.on {
+  border-color: var(--ex-brand);
+  background: var(--ex-brand);
+  color: #fff;
+}
+.cf-r-seg.invalid .cf-r-pill:not(.on) {
+  border-color: #e9a3a3;
+}
+
+/* interactive tags / multiselect */
+.cf-r-tags {
+  border: 1.5px solid var(--ex-border);
+  border-radius: 11px;
+  padding: 10px 12px;
+  background: var(--ex-surface);
+  cursor: text;
+  min-height: 48px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.cf-r-tags.invalid {
+  border-color: #e9a3a3;
+}
+.cf-r-tags.focus {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-r-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px 6px 12px;
+  border-radius: 8px;
+  background: var(--ex-brand-weak);
+  border: 1px solid var(--ex-brand-weak-bd);
+  color: var(--ex-brand);
+  font-size: 13px;
+  font-weight: 650;
+}
+.cf-r-tag .x {
+  display: grid;
+  place-items: center;
+  width: 17px;
+  height: 17px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+.cf-r-tag .x:hover {
+  background: rgba(0, 0, 0, 0.06);
+}
+.cf-r-tag .x svg {
+  width: 12px;
+  height: 12px;
+}
+.cf-r-tags .ph {
+  color: var(--ex-faint);
+  font-size: 13.5px;
+}
+.cf-r-pop {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(100% + 6px);
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: 11px;
+  box-shadow: 0 14px 36px rgba(12, 18, 26, 0.18);
+  padding: 6px;
+  z-index: 5;
+}
+
+/* interactive image cards */
+.cf-r-imgcards {
+  display: grid;
+  gap: 12px;
+}
+.cf-r-imgcards.cols2 {
+  grid-template-columns: repeat(2, 1fr);
+}
+.cf-r-imgcards.cols3 {
+  grid-template-columns: repeat(3, 1fr);
+}
+.cf-r-imgcard {
+  border: 1.5px solid var(--ex-border);
+  border-radius: 13px;
+  overflow: hidden;
+  cursor: pointer;
+  background: var(--ex-surface);
+  transition:
+    border-color 0.12s,
+    box-shadow 0.12s;
+}
+.cf-r-imgcard:hover {
+  border-color: var(--ex-brand-weak-bd);
+}
+.cf-r-imgcard.on {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 2px var(--ex-brand-weak);
+}
+.cf-r-imgcards.invalid .cf-r-imgcard:not(.on) {
+  border-color: #e9a3a3;
+}
+.cf-r-imgcard .img {
+  position: relative;
+  width: 100%;
+  background: var(--ex-bg);
+}
+.cf-r-imgcard .cap {
+  padding: 11px 13px 13px;
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--ex-text);
+}
+.cf-r-imgcard.on .cap {
+  color: var(--ex-brand);
+}
+
+/* "その他" free-text input (respondent) */
+.cf-r-other {
+  margin-top: 11px;
+}
+.cf-r-otherinp {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1.5px solid var(--ex-border);
+  border-radius: 10px;
+  padding: 12px 14px;
+  font: inherit;
+  font-size: 14px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+  resize: vertical;
+  min-height: 46px;
+}
+.cf-r-otherinp:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-r-otherinp.invalid {
+  border-color: #e9a3a3;
+}
+.cf-r-otherinp.invalid:focus {
+  box-shadow: 0 0 0 3px #fdeaea;
+}
+.cf-r-othermeta {
+  display: flex;
+  align-items: center;
+  margin-top: 6px;
+}
+.cf-r-othermeta .sp {
+  flex: 1;
+}
+.cf-r-count {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  font-variant-numeric: tabular-nums;
+  font-family: 'JetBrains Mono', monospace;
+}
+.cf-r-count.over {
+  color: #d14343;
+  font-weight: 700;
+}
+
+/* submit footer */
+.cf-resp-foot {
+  padding: 20px 30px 26px;
+  border-top: 1px solid var(--ex-border);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.cf-resp-submit {
+  appearance: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--ex-brand);
+  padding: 13px 26px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.cf-resp-submit:hover {
+  filter: brightness(1.05);
+}
+.cf-resp-submit svg {
+  width: 16px;
+  height: 16px;
+}
+.cf-resp-foot .note {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+}
+
+/* a11y: invisible full-bleed close button behind the style gallery modal (backdrop click) */
+.cf-scrim-btn {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  cursor: default;
+}
+.cf-scrim > .cf-modal {
+  position: relative;
+  z-index: 1;
+}
+
+/* tag remove control is a <button> for a11y; keep the spec's chip-x visuals */
+.cf-r-tag button.x {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+}
