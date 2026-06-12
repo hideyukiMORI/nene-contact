@@ -10736,14 +10736,16 @@ a.t:hover {
     grid-template-rows: minmax(0, 1fr);
     align-items: stretch;
   }
-  /* grid items must allow shrink (min-height:0) before they can scroll */
+  /* grid items must allow shrink (min-height:0) before they can scroll. overflow-x is pinned to
+     hidden: setting only overflow-y:auto computes overflow-x up to auto, which adds a spurious
+     horizontal scrollbar (e.g. from the vertical scrollbar's width). */
   .fb-canvas {
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden auto;
   }
   .fb-panel {
     min-height: 0;
-    overflow-y: auto;
+    overflow: hidden auto;
   }
 }
 
