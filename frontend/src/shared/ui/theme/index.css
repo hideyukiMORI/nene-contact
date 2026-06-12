@@ -10747,130 +10747,58 @@ a.t:hover {
 }
 
 /* ============================================================
-   Form builder — pane scrolling (総合実装指示書 §03)
-   Fixed-height shell + two independent scroll regions at ≥980px, so scrolling
-   the right inspector never moves the left canvas. Below 980 the panel wraps
-   under the canvas and the page scrolls normally.
+   Form builder (editable) — canvas scrollbar, sticky pinhead, toolbar bits.
+   The builder uses the .bd-editor / .bd-toolbar / .bd-wrap / .bd-canvas / .bd-panel
+   shell (shared with the read-only detail view), which already provides the
+   fixed-height shell + two independent scroll regions (総合実装指示書 §03). The
+   .bd-canvas (left) and .cf-panelscroll (right, under the tabs) are the scrollers.
    ============================================================ */
-@media (min-width: 980px) {
-  .ex-content:has(> .fb-page) {
-    overflow: hidden;
-    padding: 0;
-  }
-  .fb-page {
-    flex: 1;
-    min-height: 0;
-    max-width: none;
-    display: flex;
-    flex-direction: column;
-    margin: 0;
-    padding: clamp(18px, 2.4vw, 32px) clamp(20px, 3vw, 40px) 0;
-  }
-  .fb-grid {
-    flex: 1;
-    min-height: 0;
-    padding-bottom: clamp(16px, 2.2vw, 28px);
-    /* one full-height row whose items can shrink — overrides the base align-items:start so the
-       panes are bounded to the grid height (otherwise they grow to content and never scroll). */
-    grid-template-rows: minmax(0, 1fr);
-    align-items: stretch;
-  }
-  /* grid items must allow shrink (min-height:0) before they can scroll. overflow-x is pinned to
-     hidden: setting only overflow-y:auto computes overflow-x up to auto, which adds a spurious
-     horizontal scrollbar (e.g. from the vertical scrollbar's width). Both panes reserve a stable
-     gutter so revealing the thumb never shifts the layout (総合実装指示書 §03). */
-  .fb-canvas,
-  .fb-panel {
-    min-height: 0;
-    overflow: hidden auto;
-    scrollbar-gutter: stable;
-  }
-  /* the inspector is narrow — allow CJK to wrap (overrides the global word-break:keep-all) */
-  .fb-panel {
-    word-break: normal;
-    line-break: auto;
-  }
-
-  /* left canvas (wide): native thin, hover-revealed bar via scrollbar-color */
-  .fb-canvas {
-    scrollbar-width: thin;
-    scrollbar-color: transparent transparent;
-    transition: scrollbar-color 0.2s ease;
-  }
-  .fb-canvas:hover,
-  .fb-canvas:focus-within {
-    scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
-  }
-  .fb-canvas::-webkit-scrollbar {
-    width: 12px;
-  }
-  .fb-canvas::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 999px;
-    border: 3px solid transparent;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
-  }
-  .fb-canvas:hover::-webkit-scrollbar-thumb,
-  .fb-canvas:focus-within::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--ex-faint) 55%, transparent);
-    background-clip: padding-box;
-  }
-
-  /* right inspector (narrow): custom inset thumb so it sits away from the inputs. No
-     scrollbar-width on the base rule, so Chromium/Safari honor the custom ::-webkit-scrollbar;
-     Firefox falls back to a thin colored bar via @supports. */
-  .fb-panel::-webkit-scrollbar {
-    width: 14px;
-  }
-  .fb-panel::-webkit-scrollbar-thumb {
-    background: transparent;
-    border-radius: 999px;
-    /* transparent borders inset the visible thumb: ~5px from the panel edge,
-       ~3px from the content side → comfortable gap from the inputs */
-    border: 3px solid transparent;
-    border-right-width: 5px;
-    background-clip: padding-box;
-    transition: background 0.2s ease;
-  }
-  .fb-panel:hover::-webkit-scrollbar-thumb,
-  .fb-panel:focus-within::-webkit-scrollbar-thumb {
-    background: color-mix(in srgb, var(--ex-faint) 55%, transparent);
-    background-clip: padding-box;
-  }
-  @supports not selector(::-webkit-scrollbar) {
-    .fb-panel {
-      scrollbar-width: thin;
-      scrollbar-color: transparent transparent;
-      transition: scrollbar-color 0.2s ease;
-    }
-    .fb-panel:hover,
-    .fb-panel:focus-within {
-      scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
-    }
-  }
+/* left canvas: reserved gutter + subtle, hover-revealed scrollbar */
+.bd-canvas {
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 0.2s ease;
+}
+.bd-canvas:hover,
+.bd-canvas:focus-within {
+  scrollbar-color: var(--ex-border-strong, #d4d9e0) transparent;
+}
+.bd-canvas::-webkit-scrollbar {
+  width: 12px;
+}
+.bd-canvas::-webkit-scrollbar-thumb {
+  background: transparent;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: padding-box;
+  transition: background 0.2s ease;
+}
+.bd-canvas:hover::-webkit-scrollbar-thumb,
+.bd-canvas:focus-within::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--ex-faint) 55%, transparent);
+  background-clip: padding-box;
 }
 
 /* sticky inspector context header — keeps "what am I editing" visible while the
-   panel scrolls (independent scroll regions). Shown whenever a field is selected. */
-.fb-pinhead {
+   panel scrolls. Full-bleed across the .cf-panelscroll, aligned with .bd-psec. */
+.bd-pinhead {
   position: sticky;
   top: 0;
   z-index: 6;
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 11px 16px;
+  padding: 11px 20px;
   background: var(--ex-surface);
-  border: 1px solid var(--ex-border);
-  border-radius: var(--ex-radius-lg);
+  border-bottom: 1px solid var(--ex-border);
 }
-.fb-pinhead .fb-typechip {
+.bd-pinhead .bd-typechip {
   flex: none;
   font-size: 11.5px;
   padding: 5px 9px;
 }
-.fb-pinhead .nm {
+.bd-pinhead .nm {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--ex-text);
@@ -10878,4 +10806,59 @@ a.t:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   min-width: 0;
+}
+
+/* full-width "delete this field" button at the bottom of the field inspector */
+.bd-fielddel {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  font: inherit;
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.14s,
+    color 0.14s,
+    background 0.14s;
+}
+.bd-fielddel:hover {
+  border-color: #e9a3a3;
+  color: #d14343;
+  background: #fdeaea;
+}
+
+/* draft status badge in the toolbar (new, unsaved form) */
+.fm-st.draft {
+  background: var(--ex-surface2);
+  color: var(--ex-muted);
+}
+.fm-st.draft .d {
+  background: var(--ex-faint);
+}
+
+/* inline validation/error chip in the builder toolbar */
+.bd-toolbar-alert {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #d14343;
+  background: #fdeaea;
+  border: 1px solid #f3c2c2;
+  border-radius: 999px;
+  padding: 4px 11px;
+  white-space: nowrap;
+}
+.bd-toolbar-alert svg {
+  width: 14px;
+  height: 14px;
 }
