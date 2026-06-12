@@ -38,6 +38,7 @@ export function SortableFieldCard({
       ref={setNodeRef}
       style={style}
       className={'fb-field' + (selected ? ' sel' : '')}
+      data-selected={selected ? 'true' : undefined}
       role="button"
       tabIndex={0}
       onClick={onSelect}

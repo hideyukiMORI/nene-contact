@@ -10706,3 +10706,68 @@ a.t:hover {
     animation: none;
   }
 }
+
+/* ============================================================
+   Form builder — pane scrolling (総合実装指示書 §03)
+   Fixed-height shell + two independent scroll regions at ≥980px, so scrolling
+   the right inspector never moves the left canvas. Below 980 the panel wraps
+   under the canvas and the page scrolls normally.
+   ============================================================ */
+@media (min-width: 980px) {
+  .ex-content:has(> .fb-page) {
+    overflow: hidden;
+    padding: 0;
+  }
+  .fb-page {
+    flex: 1;
+    min-height: 0;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    margin: 0;
+    padding: clamp(18px, 2.4vw, 32px) clamp(20px, 3vw, 40px) 0;
+  }
+  .fb-grid {
+    flex: 1;
+    min-height: 0;
+    padding-bottom: clamp(16px, 2.2vw, 28px);
+  }
+  /* grid items must allow shrink (min-height:0) before they can scroll */
+  .fb-canvas {
+    min-height: 0;
+    overflow-y: auto;
+  }
+  .fb-panel {
+    min-height: 0;
+    overflow-y: auto;
+  }
+}
+
+/* sticky inspector context header — keeps "what am I editing" visible while the
+   panel scrolls (independent scroll regions). Shown whenever a field is selected. */
+.fb-pinhead {
+  position: sticky;
+  top: 0;
+  z-index: 6;
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 11px 13px;
+  background: var(--ex-surface);
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius-lg);
+}
+.fb-pinhead .fb-typechip {
+  flex: none;
+  font-size: 11.5px;
+  padding: 5px 9px;
+}
+.fb-pinhead .nm {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--ex-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
+}
