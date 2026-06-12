@@ -662,15 +662,19 @@ export interface components {
              * @description Closed allowlist (single source of truth: NeneContact\ContactForm\FieldType). My Number and raw payment card numbers are prohibited as any field type and 要配慮個人情報 is never a default (APPI charter §8, Definition of Done A4).
              * @enum {string}
              */
-            field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
+            field_type: "text" | "email" | "phone" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
             name: string;
             label: components["schemas"]["LocaleMap"];
             /** @description Optional input hint text shown in the embed. */
             placeholder?: string | null;
+            /** @description Optional per-field description shown under the label in the embed. */
+            description?: string | null;
             required?: boolean;
             options?: components["schemas"]["ChoiceOption"][] | null;
-            /** @description Declarative display config for choice (select) fields; null otherwise. */
-            config?: components["schemas"]["ChoiceFieldConfig"] | null;
+            /** @description Declarative per-field config (server-normalized). For select fields it is the choice display config ({@see ChoiceFieldConfig}: style/defaults/other/count_rule/image); for text/email/phone/textarea/date/file it is the type-specific config (FieldTypeConfig). Null for checkbox/honeypot. */
+            config?: {
+                [key: string]: unknown;
+            } | null;
             sort_order?: number;
         };
         /** @description A single choice option. `value` is the stable id that config.defaults reference. */
@@ -756,14 +760,19 @@ export interface components {
             retention_days?: number;
             fields: {
                 /** @enum {string} */
-                field_type: "text" | "email" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
+                field_type: "text" | "email" | "phone" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
                 name: string;
                 label: components["schemas"]["LocaleMap"];
                 /** @description Optional input hint text shown in the embed. */
                 placeholder?: string;
+                /** @description Optional per-field description shown under the label. */
+                description?: string;
                 required?: boolean;
                 options?: components["schemas"]["ChoiceOption"][];
-                config?: components["schemas"]["ChoiceFieldConfig"];
+                /** @description Per-field declarative config (choice display config for select, or the type-specific config otherwise). */
+                config?: {
+                    [key: string]: unknown;
+                };
             }[];
         };
         PublicFormSchema: {

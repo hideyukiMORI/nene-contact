@@ -52,6 +52,7 @@ describe('contact-form mappers', () => {
           fieldType: 'email',
           name: 'email',
           label: { ja: 'メール' },
+          description: '',
           placeholder: '',
           required: true,
           options: null,

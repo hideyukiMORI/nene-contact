@@ -28,7 +28,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         }
 
         $fieldRows = $this->query->fetchAll(
-            'SELECT id, contact_form_id, field_type, name, placeholder, label_json, required, options_json, config_json, sort_order
+            'SELECT id, contact_form_id, field_type, name, placeholder, description, label_json, required, options_json, config_json, sort_order
              FROM form_fields WHERE contact_form_id = ? ORDER BY sort_order ASC, id ASC',
             [(int) $row['id']],
         );
@@ -56,6 +56,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
                 id: (int) $f['id'],
                 contactFormId: (int) $f['contact_form_id'],
                 config: $config,
+                description: isset($f['description']) ? (string) $f['description'] : null,
             );
         }, $fieldRows);
 

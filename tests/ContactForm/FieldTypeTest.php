@@ -15,7 +15,7 @@ final class FieldTypeTest extends TestCase
      */
     public static function allowedTypes(): array
     {
-        return [['text'], ['email'], ['textarea'], ['select'], ['checkbox'], ['date'], ['file'], ['honeypot']];
+        return [['text'], ['email'], ['phone'], ['textarea'], ['select'], ['checkbox'], ['date'], ['file'], ['honeypot']];
     }
 
     #[DataProvider('allowedTypes')]
@@ -62,7 +62,7 @@ final class FieldTypeTest extends TestCase
     public function test_allowed_values_is_the_closed_allowlist(): void
     {
         self::assertSame(
-            ['text', 'email', 'textarea', 'select', 'checkbox', 'date', 'file', 'honeypot'],
+            ['text', 'email', 'phone', 'textarea', 'select', 'checkbox', 'date', 'file', 'honeypot'],
             FieldType::allowedValues(),
         );
     }

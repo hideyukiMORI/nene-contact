@@ -11,6 +11,7 @@ export {
   toCreateContactFormDto,
   defaultChoiceConfig,
 } from '@/entities/contact-form/mapper';
+export { defaultFieldTypeConfig } from '@/entities/contact-form/field-defaults';
 export { contactFormKeys } from '@/entities/contact-form/query-keys';
 export type {
   ContactForm,
@@ -26,4 +27,20 @@ export type {
   ChoiceOtherConfig,
   ChoiceCountRule,
   ChoiceImageConfig,
+  FieldTypeConfig,
+  TextConfig,
+  EmailConfig,
+  PhoneConfig,
+  TextareaConfig,
+  DateConfig,
+  FileConfig,
+  CharLimit,
+  TextFormat,
+  PhoneFormat,
+  DomainMode,
+  TextareaRows,
+  DateMode,
+  DateRange,
+  DateDefault,
+  FileMaxSize,
 } from '@/entities/contact-form/model';

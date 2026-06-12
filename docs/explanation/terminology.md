@@ -111,6 +111,7 @@ Forbidden suffixes: `Controller`, `Service`, `Manager`, `Repo`.
 | --- | --- |
 | `text` | Single line |
 | `email` | Email with validation |
+| `phone` | Telephone number with format check (jp / jp-nohyphen / intl) |
 | `textarea` | Multi line |
 | `select` | Choice field: options list (`options_json`) + display config (`config_json`) |
 | `checkbox` | Boolean consent or flag |
@@ -135,11 +136,26 @@ there is no separate single/multiple toggle. SSOT: `NeneContact\ContactForm\Choi
 | `tags` | multiple | Multi-select tag input |
 | `chips` | multiple | Button group, multiple on |
 
-`config_json` keys: `style`, `defaults` (initially-selected option values), `other` +
-`other_config` (`label` / `placeholder` / `required` / `max_len`), `count_rule`
+Choice `config_json` keys (select): `style`, `defaults` (initially-selected option values),
+`other` + `other_config` (`label` / `placeholder` / `required` / `max_len`), `count_rule`
 (`min_on` / `min` / `max_on` / `max`; multiple only), `image` (`enabled` / `layout`
 `card`|`list` / `cols` `2`|`3` / `ratio` `1:1`|`4:3`|`16:9`; radio/checkbox only).
 Per-option keys in `options_json`: `value`, `label`, `description`, `image`.
+
+### 6.2 Per-type field config (`form_field.config_json`, `FieldTypeConfig`)
+
+Non-choice fields store a declarative type-specific config in the same `config_json` column
+(field-config UI, builder spec v1.0). SSOT: `NeneContact\ContactForm\FieldTypeConfig` mirrored by
+the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (null).
+
+| Type | `config_json` keys |
+| --- | --- |
+| `text` | `format` (none/kana/alnum), `min_on`/`min`/`max_on`/`max`, `counter` |
+| `email` | `confirm`, `domain_mode` (none/allow/block), `domains`, `autoreply` |
+| `phone` | `format` (jp/jp-nohyphen/intl) |
+| `textarea` | `rows` (sm/md/lg), `min_on`/`min`/`max_on`/`max`, `counter` |
+| `date` | `mode` (date/datetime/time), `range` (none/future/past/between), `from`/`to`, `def` (none/today) |
+| `file` | `fmt_image`/`fmt_pdf`/`fmt_doc`, `max_size` (5/10/25), `multiple`, `max_count` |
 
 ---
 
@@ -172,7 +188,8 @@ Per-option keys in `options_json`: `value`, `label`, `description`, `image`.
 | `field_values_json` | `submission` | submitted values; erased to `[]` on purge (ADR 0016) |
 | `options_json` | `form_field` | choice options: `value`, per-locale `label`, optional per-locale `description`, `image` flag |
 | `placeholder` | `form_field` | optional input hint text shown in the embed (builder spec v1.0) |
-| `config_json` | `form_field` | choice display config (`style`/`defaults`/`other`/`count_rule`/`image`; builder spec v2.0); null for non-choice fields |
+| `description` | `form_field` | optional per-field description shown under the label in the embed (field-config UI) |
+| `config_json` | `form_field` | per-field declarative config: choice display config (select) or type-specific config (FieldTypeConfig); null for checkbox/honeypot |
 | `config_json` | `notification_channel` | encrypted at rest |
 | `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
 | `attachment_id` | `submission_link` | per-attachment targets (Vault) set this; submission-level targets (Deal) leave it null |

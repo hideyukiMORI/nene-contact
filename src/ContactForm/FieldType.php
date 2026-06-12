@@ -18,6 +18,7 @@ enum FieldType: string
 {
     case Text = 'text';
     case Email = 'email';
+    case Phone = 'phone';
     case Textarea = 'textarea';
     case Select = 'select';
     case Checkbox = 'checkbox';

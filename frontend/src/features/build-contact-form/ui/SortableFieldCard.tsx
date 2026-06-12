@@ -6,42 +6,17 @@ import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import { FIELD_TYPE_ICON } from '@/features/build-contact-form/lib/field-types';
-
-// Type-specific preview input on the canvas (spec §03). The placeholder text is the gray hint.
-function FieldInput({ field, placeholder }: { field: DraftField; placeholder: string }): ReactNode {
-  if (field.fieldType === 'textarea') {
-    return <div className="fb-finput area">{placeholder}</div>;
-  }
-  if (field.fieldType === 'select') {
-    return (
-      <div className="fb-finput sel-in">
-        <span>{placeholder}</span>
-        <Icon name="chevDown" size={15} />
-      </div>
-    );
-  }
-  if (field.fieldType === 'file') {
-    return (
-      <div className="fb-finput file-in">
-        <Icon name="file" size={15} />
-        {placeholder}
-      </div>
-    );
-  }
-  return <div className="fb-finput">{placeholder}</div>;
-}
+import { FieldPreview } from '@/features/build-contact-form/ui/field-config/FieldPreview';
 
 export function SortableFieldCard({
   field,
   label,
-  placeholder,
   selected,
   onSelect,
   onDelete,
 }: {
   field: DraftField;
   label: string;
-  placeholder: string;
   selected: boolean;
   onSelect: () => void;
   onDelete: () => void;
@@ -90,7 +65,8 @@ export function SortableFieldCard({
           {label}
           {field.required ? <span className="req">＊</span> : null}
         </div>
-        <FieldInput field={field} placeholder={placeholder} />
+        {field.description !== '' ? <div className="fb-fdesc">{field.description}</div> : null}
+        <FieldPreview field={field} />
       </div>
       <span className="fb-ftype">
         <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={11} />

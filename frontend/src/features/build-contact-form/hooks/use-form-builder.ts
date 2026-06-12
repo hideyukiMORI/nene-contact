@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { arrayMove } from '@dnd-kit/sortable';
 import {
   defaultChoiceConfig,
+  defaultFieldTypeConfig,
   useCreateContactFormMutation,
   useUpdateContactFormMutation,
 } from '@/entities/contact-form';
@@ -18,11 +19,14 @@ function newField(fieldType: string): DraftField {
     // one so submissions/embeds have a usable name without the operator managing it.
     name: `field_${id.slice(0, 8)}`,
     label: {},
+    description: '',
     placeholder: '',
     required: false,
     options: fieldType === 'select' ? [] : null,
-    // Choice fields carry a declarative display config (builder spec v2.0).
+    // Choice fields carry a declarative display config (builder spec v2.0); other types carry a
+    // per-type config (field-config UI).
     choice: fieldType === 'select' ? defaultChoiceConfig() : null,
+    typeConfig: fieldType === 'select' ? null : defaultFieldTypeConfig(fieldType),
   };
 }
 
@@ -139,12 +143,13 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
         ...source,
         id: newId,
         name: `field_${newId.slice(0, 8)}`,
-        // Deep-copy the parts the choice editor mutates so the clone is independent.
+        // Deep-copy the nested config the editors mutate so the clone is independent.
         options: source.options !== null ? source.options.map((o) => ({ ...o })) : null,
         choice:
           source.choice != null
             ? { ...source.choice, defaults: [...source.choice.defaults] }
             : null,
+        typeConfig: source.typeConfig != null ? { ...source.typeConfig } : null,
       };
       setDraft((d) => {
         const index = d.fields.findIndex((f) => f.id === id);

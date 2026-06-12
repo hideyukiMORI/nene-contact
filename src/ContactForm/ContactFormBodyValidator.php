@@ -110,6 +110,10 @@ final readonly class ContactFormBodyValidator
             // Optional placeholder (hint text); blank collapses to null, capped to the column width.
             $placeholder = is_string($raw['placeholder'] ?? null) ? trim((string) $raw['placeholder']) : '';
             $placeholder = $placeholder === '' ? null : mb_substr($placeholder, 0, 255);
+            // Optional per-field description (hint under the label); blank collapses to null.
+            // Note: distinct from the form-level $description above — do not shadow it.
+            $fieldDescription = is_string($raw['description'] ?? null) ? trim((string) $raw['description']) : '';
+            $fieldDescription = $fieldDescription === '' ? null : mb_substr($fieldDescription, 0, 2000);
 
             if (FieldType::isProhibited($fieldType)) {
                 $errors[] = new ValidationError("fields.{$i}.field_type", "Field type '{$fieldType}' is prohibited (APPI compliance, charter §8).", 'prohibited');
@@ -147,6 +151,11 @@ final readonly class ContactFormBodyValidator
                     $optionValues = array_map(static fn (array $o): string => (string) $o['value'], $options ?? []);
                     $config = ChoiceFieldConfig::normalize($rawConfig, ChoiceStyle::from($styleValue), $optionValues);
                 }
+            } elseif (FieldType::isAllowed($fieldType)) {
+                // Non-choice types carry a declarative per-type config (text/email/phone/textarea/
+                // date/file — field-config UI). checkbox/honeypot normalize to null.
+                $rawConfig = is_array($raw['config'] ?? null) ? $raw['config'] : [];
+                $config = FieldTypeConfig::normalize($fieldType, $rawConfig);
             }
 
             $fields[] = new FormField(
@@ -158,6 +167,7 @@ final readonly class ContactFormBodyValidator
                 options: $options,
                 placeholder: $placeholder,
                 config: $config,
+                description: $fieldDescription,
             );
         }
 

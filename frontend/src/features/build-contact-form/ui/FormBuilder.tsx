@@ -31,6 +31,7 @@ import {
 } from '@/features/build-contact-form/lib/choice-bridge';
 import type { ChoiceState } from '@/features/build-contact-form/lib/choice-core';
 import { SortableFieldCard } from '@/features/build-contact-form/ui/SortableFieldCard';
+import { FieldConfigPanel } from '@/features/build-contact-form/ui/field-config/FieldConfigPanel';
 import { ChoiceCanvasField } from '@/features/build-contact-form/ui/choice/ChoiceCanvasField';
 import { ChoicePanel } from '@/features/build-contact-form/ui/choice/ChoicePanel';
 import { StyleGallery } from '@/features/build-contact-form/ui/choice/StyleGallery';
@@ -42,12 +43,6 @@ import {
 } from '@/features/build-contact-form/lib/field-types';
 
 type Builder = ReturnType<typeof useFormBuilder>;
-type Translate = (key: MessageKey, params?: Record<string, string>) => string;
-
-function defaultPlaceholder(fieldType: string, t: Translate): string {
-  const keys = FIELD_DEFAULT_KEYS[fieldType];
-  return keys !== undefined ? t(keys.placeholder) : '';
-}
 
 function newOptionValue(): string {
   return 'opt_' + Math.random().toString(36).slice(2, 10);
@@ -60,6 +55,7 @@ const EMPTY_CHOICE_STATE: ChoiceState = draftFieldToChoiceState(
     fieldType: 'select',
     name: '',
     label: {},
+    description: '',
     placeholder: '',
     required: false,
     options: [],
@@ -194,10 +190,11 @@ export function FormBuilder({
       ? raw
       : t(`builder.type.${field.fieldType}` as MessageKey);
   };
-  const fieldPlaceholder = (field: DraftField): string =>
-    field.placeholder !== '' ? field.placeholder : defaultPlaceholder(field.fieldType, t);
 
   const selectedLabel = selected !== null ? fieldLabel(selected) : '';
+  // The label editor binds to the raw value (empty when unset) — not the type-name fallback —
+  // so clearing it doesn't seed the placeholder text back into the field.
+  const selectedRawLabel = selected !== null ? (selected.label[locale] ?? '') : '';
 
   return (
     <div className="fb-page">
@@ -298,7 +295,6 @@ export function FormBuilder({
                       key={field.id}
                       field={field}
                       label={fieldLabel(field)}
-                      placeholder={fieldPlaceholder(field)}
                       selected={field.id === selectedId}
                       onSelect={() => {
                         setSelectedId(field.id);
@@ -327,15 +323,17 @@ export function FormBuilder({
 
         <div className="fb-panel">
           <FormSettingsCard builder={builder} readOnlyKey={isEditing} />
-          {isChoiceSelected ? (
-            <div className="card card-pad">
-              <h4 className="fb-psec-h">
-                <Icon name="edit" size={15} />
-                {t('builder.selectedField')}
-              </h4>
+          <div className="card card-pad">
+            <h4 className="fb-psec-h">
+              <Icon name="edit" size={15} />
+              {t('builder.selectedField')}
+            </h4>
+            {selected === null ? (
+              <p className="fb-empty-sel">{t('builder.noSelection')}</p>
+            ) : isChoiceSelected ? (
               <ChoicePanel
                 choice={choice}
-                label={selectedLabel}
+                label={selectedRawLabel}
                 onLabel={(v) => {
                   builder.setFieldLabel(selected.id, locale, v);
                 }}
@@ -343,29 +341,20 @@ export function FormBuilder({
                   setGalleryOpen(true);
                 }}
               />
-            </div>
-          ) : (
-            <SelectedFieldCard
-              field={selected}
-              locale={locale}
-              placeholder={selected?.placeholder ?? ''}
-              onLabel={(v) => {
-                if (selected !== null) {
+            ) : (
+              <FieldConfigPanel
+                field={selected}
+                label={selectedRawLabel}
+                typeLabel={t(`builder.type.${selected.fieldType}` as MessageKey)}
+                onLabel={(v) => {
                   builder.setFieldLabel(selected.id, locale, v);
-                }
-              }}
-              onPlaceholder={(v) => {
-                if (selected !== null) {
-                  builder.updateField(selected.id, { placeholder: v });
-                }
-              }}
-              onRequired={(v) => {
-                if (selected !== null) {
-                  builder.updateField(selected.id, { required: v });
-                }
-              }}
-            />
-          )}
+                }}
+                update={(patch) => {
+                  builder.updateField(selected.id, patch);
+                }}
+              />
+            )}
+          </div>
           <PaletteCard onAdd={addField} />
         </div>
 
@@ -471,86 +460,6 @@ function FormSettingsCard({
           />
         </div>
       </div>
-    </div>
-  );
-}
-
-function SelectedFieldCard({
-  field,
-  locale,
-  placeholder,
-  onLabel,
-  onPlaceholder,
-  onRequired,
-}: {
-  field: DraftField | null;
-  locale: string;
-  placeholder: string;
-  onLabel: (v: string) => void;
-  onPlaceholder: (v: string) => void;
-  onRequired: (v: boolean) => void;
-}): ReactNode {
-  const { t } = useI18n();
-
-  return (
-    <div className="card card-pad">
-      <h4 className="fb-psec-h">
-        <Icon name="edit" size={15} />
-        {t('builder.selectedField')}
-      </h4>
-      {field === null ? (
-        <p className="fb-empty-sel">{t('builder.noSelection')}</p>
-      ) : (
-        <>
-          <div className="fb-frow">
-            <span className="l">{t('builder.fieldType')}</span>
-            <span className="fb-typechip">
-              <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={15} />
-              {t(`builder.type.${field.fieldType}` as MessageKey)}
-            </span>
-          </div>
-          <div className="fb-frow">
-            <label className="l" htmlFor="fb-field-label">
-              {t('builder.fieldLabel')}
-            </label>
-            <input
-              id="fb-field-label"
-              className="input"
-              value={field.label[locale] ?? ''}
-              onChange={(e) => {
-                onLabel(e.target.value);
-              }}
-            />
-          </div>
-          <div className="fb-frow">
-            <label className="l" htmlFor="fb-field-ph">
-              {t('builder.placeholder')}
-            </label>
-            <input
-              id="fb-field-ph"
-              className="input"
-              value={placeholder}
-              onChange={(e) => {
-                onPlaceholder(e.target.value);
-              }}
-            />
-          </div>
-          <div className="fb-frow">
-            <div className="fb-toggle-row">
-              <div className="info">
-                <div className="t">{t('builder.required')}</div>
-              </div>
-              <Switch
-                on={field.required}
-                label={t('builder.required')}
-                onToggle={() => {
-                  onRequired(!field.required);
-                }}
-              />
-            </div>
-          </div>
-        </>
-      )}
     </div>
   );
 }

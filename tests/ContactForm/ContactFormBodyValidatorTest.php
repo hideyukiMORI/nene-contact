@@ -162,4 +162,68 @@ final class ContactFormBodyValidatorTest extends TestCase
             ],
         ]));
     }
+
+    public function test_phone_field_type_is_accepted_with_format_config(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            [
+                'field_type' => 'phone',
+                'name' => 'tel',
+                'label' => ['ja' => '電話番号'],
+                'description' => '日中つながる番号',
+                'config' => ['format' => 'intl'],
+            ],
+        ]));
+
+        $field = $input->fields[0];
+        self::assertSame('phone', $field->fieldType);
+        self::assertSame('日中つながる番号', $field->description);
+        self::assertNotNull($field->config);
+        self::assertSame('intl', $field->config['format']);
+    }
+
+    public function test_text_field_config_is_normalized_and_clamped(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            [
+                'field_type' => 'text',
+                'name' => 'name',
+                'label' => ['ja' => 'お名前'],
+                // 'shouty' is not an allowed format and falls back to 'none'; max is clamped.
+                'config' => ['format' => 'shouty', 'max_on' => true, 'max' => 999999, 'counter' => true],
+            ],
+        ]));
+
+        $config = $input->fields[0]->config;
+        self::assertNotNull($config);
+        self::assertSame('none', $config['format']);
+        self::assertSame(9999, $config['max']);
+        self::assertTrue($config['counter']);
+    }
+
+    public function test_file_field_config_drops_max_count_when_single(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            [
+                'field_type' => 'file',
+                'name' => 'attach',
+                'label' => ['ja' => '添付'],
+                'config' => ['fmt_image' => true, 'max_size' => 25, 'multiple' => false, 'max_count' => 9],
+            ],
+        ]));
+
+        $config = $input->fields[0]->config;
+        self::assertNotNull($config);
+        self::assertSame(25, $config['max_size']);
+        self::assertSame(1, $config['max_count']);
+    }
+
+    public function test_checkbox_field_has_no_config(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            ['field_type' => 'checkbox', 'name' => 'agree', 'label' => ['ja' => '同意'], 'config' => ['x' => 1]],
+        ]));
+
+        self::assertNull($input->fields[0]->config);
+    }
 }

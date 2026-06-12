@@ -1,3 +1,4 @@
+import { defaultChoiceConfig, defaultFieldTypeConfig } from '@/entities/contact-form';
 import type { ContactFormDraft, DraftField, DraftFieldOption } from '@/entities/contact-form';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 
@@ -29,7 +30,18 @@ function field(
   required: boolean,
   options: DraftFieldOption[] | null = null,
 ): DraftField {
-  return { id: crypto.randomUUID(), fieldType, name, label, placeholder: '', required, options };
+  return {
+    id: crypto.randomUUID(),
+    fieldType,
+    name,
+    label,
+    description: '',
+    placeholder: '',
+    required,
+    options,
+    choice: fieldType === 'select' ? defaultChoiceConfig() : null,
+    typeConfig: fieldType === 'select' ? null : defaultFieldTypeConfig(fieldType),
+  };
 }
 
 /** Spam-protection honeypot included on every preset (ADR 0010). */
