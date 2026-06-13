@@ -17,6 +17,9 @@ import { CSS } from '@dnd-kit/utilities';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
+import type { IconName } from '@/shared/ui';
+import { FormSettingsPage } from '@/features/build-contact-form/ui/FormSettingsPage';
+import { PublishPage } from '@/features/build-contact-form/ui/PublishPage';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import {
   defaultChoiceConfig,
@@ -43,8 +46,14 @@ import {
   PALETTE,
 } from '@/features/build-contact-form/lib/field-types';
 
-type Builder = ReturnType<typeof useFormBuilder>;
-type PanelTab = 'field' | 'form';
+type BuilderTab = 'fields' | 'settings' | 'design' | 'publish';
+
+const BUILDER_TABS: { id: BuilderTab; icon: IconName; labelKey: MessageKey }[] = [
+  { id: 'fields', icon: 'lines', labelKey: 'builder.tab2.fields' },
+  { id: 'settings', icon: 'settings', labelKey: 'builder.tab2.settings' },
+  { id: 'design', icon: 'bulb', labelKey: 'builder.tab2.design' },
+  { id: 'publish', icon: 'code', labelKey: 'builder.tab2.publish' },
+];
 
 function newOptionValue(): string {
   return 'opt_' + Math.random().toString(36).slice(2, 10);
@@ -102,10 +111,10 @@ export function FormBuilder({
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [panelTab, setPanelTab] = useState<PanelTab>('field');
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
-  const [view, setView] = useState<'build' | 'design'>('build');
+  const [tab, setTab] = useState<BuilderTab>('fields');
+  const [savedAt, setSavedAt] = useState<string | null>(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -124,7 +133,6 @@ export function FormBuilder({
 
   const selectField = (id: string): void => {
     setSelectedId(id);
-    setPanelTab('field');
   };
 
   // The single choice-state source. Seeded from the selected select field; re-seeds on selection
@@ -190,9 +198,20 @@ export function FormBuilder({
       setValidationMessage(t('builder.validation'));
       return;
     }
-    void builder.submit().then(onCreated, () => {
-      // Error surfaced via builder.error (AppError).
-    });
+    void builder.submit().then(
+      () => {
+        const now = new Date();
+        const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        setSavedAt(hhmm);
+        // Editing stays in the full-screen builder; a brand-new form returns to the list.
+        if (!isEditing) {
+          onCreated();
+        }
+      },
+      () => {
+        // Error surfaced via builder.error (AppError).
+      },
+    );
   };
 
   const fieldLabel = (field: DraftField): string => {
@@ -239,28 +258,23 @@ export function FormBuilder({
   }, [selectedId, draft.fields.length]);
 
   return (
-    <div className="bd-editor">
-      <div className="bd-toolbar">
+    <div className="exwrap pr acc-vt1 st-root bd-editor">
+      <div className="st-toolbar">
         <button
           type="button"
-          className="bd-back"
+          className="st-back"
           aria-label={t('builder.backToList')}
+          title={t('builder.backToList')}
           onClick={onBack}
         >
           <Icon name="arrowLeft" size={16} />
         </button>
-        <span className="bd-tcrumb">{t('builder.formCrumb')} ›</span>
-        <input
-          className="bd-tname"
-          aria-label={t('builder.formName')}
-          value={draft.name}
-          placeholder={t('builder.untitled')}
-          onChange={(e) => {
-            builder.setName(e.target.value);
-          }}
-        />
+        <span className="st-crumb">{t('builder.formCrumb')} ›</span>
+        <span className="st-name">
+          {draft.name.trim() === '' ? t('builder.untitled') : draft.name}
+        </span>
         {isEditing ? (
-          <span className="fm-st live">
+          <span className="st-st">
             <span className="d" />
             {t('contactForms.status.active')}
           </span>
@@ -276,10 +290,12 @@ export function FormBuilder({
             <Icon name="warn" size={14} />
             {alert}
           </span>
+        ) : savedAt !== null ? (
+          <span className="st-saved">{t('builder.savedAt', { time: savedAt })}</span>
         ) : null}
         <button
           type="button"
-          className="ex-btn ghost"
+          className="st-btn ghost"
           disabled={!isChoiceSelected}
           onClick={() => {
             setPreviewOpen(true);
@@ -288,42 +304,35 @@ export function FormBuilder({
           <Icon name="eye" size={14} />
           {t('builder.preview')}
         </button>
-        <button type="button" className="ex-btn" disabled={builder.isPending} onClick={onSubmit}>
+        <button type="button" className="st-btn" disabled={builder.isPending} onClick={onSubmit}>
           <Icon name="check" size={14} />
-          {builder.isPending
-            ? t('builder.creating')
-            : isEditing
-              ? t('builder.saveChanges')
-              : t('builder.publish')}
+          {builder.isPending ? t('builder.creating') : t('builder.publishBtn')}
         </button>
       </div>
 
-      <div className="bd-views">
-        <button
-          type="button"
-          className={'bd-view' + (view === 'build' ? ' on' : '')}
-          onClick={() => {
-            setView('build');
-          }}
-        >
-          <Icon name="lines" size={15} />
-          {t('builder.view.build')}
-        </button>
-        <button
-          type="button"
-          className={'bd-view' + (view === 'design' ? ' on' : '')}
-          onClick={() => {
-            setView('design');
-          }}
-        >
-          <Icon name="bulb" size={15} />
-          {t('builder.view.design')}
-        </button>
+      <div className="st-tabs">
+        {BUILDER_TABS.map((bt) => (
+          <button
+            key={bt.id}
+            type="button"
+            className={'st-tab' + (tab === bt.id ? ' on' : '')}
+            onClick={() => {
+              setTab(bt.id);
+            }}
+          >
+            <Icon name={bt.icon} size={15} />
+            {t(bt.labelKey)}
+          </button>
+        ))}
       </div>
 
-      {view === 'design' ? (
+      {tab === 'settings' ? <FormSettingsPage builder={builder} readOnlyKey={isEditing} /> : null}
+      {tab === 'design' ? (
         <AppearanceStudio value={draft.appearance} onChange={builder.setAppearance} />
-      ) : (
+      ) : null}
+      {tab === 'publish' ? <PublishPage builder={builder} isEditing={isEditing} /> : null}
+
+      {tab === 'fields' ? (
         <div className="bd-wrap" style={{ position: 'relative' }}>
           <div className="bd-canvas" ref={canvasRef}>
             <div className="bd-sheet">
@@ -408,30 +417,13 @@ export function FormBuilder({
 
           <div className="bd-panel">
             <div className="bd-ptabs">
-              <button
-                type="button"
-                className={'bd-ptab' + (panelTab === 'field' ? ' on' : '')}
-                onClick={() => {
-                  setPanelTab('field');
-                }}
-              >
+              <button type="button" className="bd-ptab on">
                 {t('builder.tab.field')}
-              </button>
-              <button
-                type="button"
-                className={'bd-ptab' + (panelTab === 'form' ? ' on' : '')}
-                onClick={() => {
-                  setPanelTab('form');
-                }}
-              >
-                {t('builder.tab.form')}
               </button>
             </div>
 
             <div className="cf-panelscroll">
-              {panelTab === 'form' ? (
-                <FormSettingsSection builder={builder} readOnlyKey={isEditing} />
-              ) : selected === null ? (
+              {selected === null ? (
                 <div className="bd-psec">
                   <p className="fb-empty-sel">{t('builder.noSelection')}</p>
                 </div>
@@ -523,86 +515,7 @@ export function FormBuilder({
             />
           ) : null}
         </div>
-      )}
-    </div>
-  );
-}
-
-function Switch({
-  on,
-  label,
-  onToggle,
-}: {
-  on: boolean;
-  label: string;
-  onToggle: () => void;
-}): ReactNode {
-  return (
-    <button
-      type="button"
-      className={'cf-switch' + (on ? '' : ' off')}
-      role="switch"
-      aria-checked={on}
-      aria-label={label}
-      onClick={onToggle}
-    />
-  );
-}
-
-// Form-level settings (the "フォーム設定" inspector tab): name, public path, consent.
-function FormSettingsSection({
-  builder,
-  readOnlyKey,
-}: {
-  builder: Builder;
-  readOnlyKey: boolean;
-}): ReactNode {
-  const { t } = useI18n();
-  const { draft } = builder;
-
-  return (
-    <div className="bd-psec">
-      <div className="bd-frow">
-        <label className="l" htmlFor="fb-form-name">
-          {t('builder.formName')}
-        </label>
-        <input
-          id="fb-form-name"
-          className="cf-input"
-          value={draft.name}
-          onChange={(e) => {
-            builder.setName(e.target.value);
-          }}
-        />
-      </div>
-      <div className="bd-frow">
-        <span className="l">{t('builder.publicPath')}</span>
-        <div className="fb-affix">
-          <span className="pre">{t('builder.publicPathPrefix')}</span>
-          <input
-            aria-label={t('builder.publicPath')}
-            value={draft.publicFormKey}
-            readOnly={readOnlyKey}
-            placeholder={t('builder.publicPathAuto')}
-            onChange={(e) => {
-              builder.setPublicFormKey(e.target.value.replace(/[^a-zA-Z0-9-]/g, '').toLowerCase());
-            }}
-          />
-        </div>
-      </div>
-      <div className="bd-frow">
-        <div className="cf-togglerow">
-          <div className="tx">
-            <div className="tl">{t('builder.consentTitle')}</div>
-            <div className="td">{t('builder.consentDesc')}</div>
-          </div>
-          <Switch
-            on={draft.consentRequired}
-            label={t('builder.consentTitle')}
-            onToggle={builder.toggleConsent}
-          />
-        </div>
-      </div>
+      ) : null}
     </div>
   );
 }
