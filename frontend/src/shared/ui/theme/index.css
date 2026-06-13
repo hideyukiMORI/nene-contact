@@ -2672,6 +2672,37 @@ h3 {
   color: var(--danger);
 }
 
+/* Account screen: read-only identity list + password form spacing. */
+.ac-meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px 28px;
+  margin: 0;
+}
+.ac-meta dt {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  margin-bottom: 3px;
+}
+.ac-meta dd {
+  margin: 0;
+  font-size: 14px;
+  color: var(--ex-text);
+}
+.ac-lead {
+  margin: 0 0 18px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ex-muted);
+}
+.nc-form {
+  max-width: 420px;
+}
+.nc-form .nc-button {
+  margin-top: 20px;
+}
+
 .nc-alert,
 .nc-alert-error {
   display: block;

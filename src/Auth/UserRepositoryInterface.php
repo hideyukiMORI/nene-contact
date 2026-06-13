@@ -23,4 +23,6 @@ interface UserRepositoryInterface
     public function countByRole(string $role): int;
 
     public function update(int $id, string $role, string $status): void;
+
+    public function updatePassword(int $id, string $passwordHash): void;
 }

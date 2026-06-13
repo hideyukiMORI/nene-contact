@@ -80,15 +80,54 @@ final readonly class AuthServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                ChangePasswordUseCaseInterface::class,
+                static function (ContainerInterface $c): ChangePasswordUseCaseInterface {
+                    $users = $c->get(UserRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$users instanceof UserRepositoryInterface) {
+                        throw new LogicException('User repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new ChangePasswordUseCase($users, $audit);
+                },
+            )
+            ->set(
+                ChangePasswordHandler::class,
+                static function (ContainerInterface $c): ChangePasswordHandler {
+                    $uc = $c->get(ChangePasswordUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof ChangePasswordUseCaseInterface) {
+                        throw new LogicException('ChangePassword use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new ChangePasswordHandler($uc, $json);
+                },
+            )
+            ->set(
                 AuthRouteRegistrar::class,
                 static function (ContainerInterface $c): AuthRouteRegistrar {
                     $login = $c->get(LoginHandler::class);
+                    $changePassword = $c->get(ChangePasswordHandler::class);
 
                     if (!$login instanceof LoginHandler) {
                         throw new LogicException('Login handler service is invalid.');
                     }
 
-                    return new AuthRouteRegistrar($login);
+                    if (!$changePassword instanceof ChangePasswordHandler) {
+                        throw new LogicException('ChangePassword handler service is invalid.');
+                    }
+
+                    return new AuthRouteRegistrar($login, $changePassword);
                 },
             )
             ->set(

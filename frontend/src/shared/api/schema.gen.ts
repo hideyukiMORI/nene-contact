@@ -38,6 +38,26 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/account/password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the authenticated operator's own password
+         * @description Verifies the current password and sets a new one for the token actor. Acts only on the caller (the user id comes from the JWT, never a path parameter), so it cannot change another user's password. Audited as user.password_changed.
+         */
+        post: operations["changeOwnPassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/users": {
         parameters: {
             query?: never;
@@ -627,6 +647,10 @@ export interface components {
             /** @enum {string} */
             role: "admin" | "editor";
         };
+        ChangePasswordRequest: {
+            current_password: string;
+            new_password: string;
+        };
         UpdateUserRequest: {
             /** @enum {string} */
             role?: "admin" | "editor";
@@ -1098,6 +1122,30 @@ export interface operations {
                 content: {
                     "application/json": components["schemas"]["LoginResponse"];
                 };
+            };
+            401: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    changeOwnPassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ChangePasswordRequest"];
+            };
+        };
+        responses: {
+            /** @description Password changed */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
             };
             401: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
