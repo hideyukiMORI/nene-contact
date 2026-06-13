@@ -205,8 +205,16 @@ export interface ContactFormDraft {
   consentLabel: Record<string, string> | null;
   retentionDays: number | null;
   appearance: Appearance;
+  // Submit experience (builder フォーム設定): button label + after-submit behaviour.
+  submitLabel: Record<string, string> | null;
+  postSubmit: PostSubmitAction;
+  successMessage: Record<string, string> | null;
+  redirectUrl: string | null;
   fields: DraftField[];
 }
+
+// After a successful submit: show a completion message (default) or redirect away.
+export type PostSubmitAction = 'message' | 'redirect';
 
 // A full form: the editable draft plus the server-owned identity. Used by the read-only
 // detail view and as the builder's edit seed (a draft is a structural subset).

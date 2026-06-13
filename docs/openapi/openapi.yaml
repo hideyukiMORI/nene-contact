@@ -1271,6 +1271,10 @@ components:
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         retention_days: { type: [integer, 'null'], description: 'Per-form retention; null uses the documented default (charter §5).' }
         appearance: { $ref: '#/components/schemas/Appearance' }
+        submit_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }], description: 'Per-locale submit button label; null uses the default.' }
+        post_submit: { type: string, enum: [message, redirect], description: 'After a successful submit: show a completion message or redirect.' }
+        success_message: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
+        redirect_url: { type: [string, 'null'] }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
@@ -1389,6 +1393,14 @@ components:
         appearance:
           allOf: [{ $ref: '#/components/schemas/Appearance' }]
           description: 'Optional embed appearance; missing/partial fills from defaults (full-replace on update).'
+        submit_label:
+          allOf: [{ $ref: '#/components/schemas/LocaleMap' }]
+          description: 'Optional per-locale submit button label.'
+        post_submit: { type: string, enum: [message, redirect], default: message }
+        success_message:
+          allOf: [{ $ref: '#/components/schemas/LocaleMap' }]
+          description: 'Optional per-locale completion message (shown when post_submit=message).'
+        redirect_url: { type: string, description: 'Required when post_submit=redirect; must start with http(s)://.' }
         fields:
           type: array
           items:
@@ -1416,6 +1428,10 @@ components:
         consent_required: { type: boolean }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         appearance: { $ref: '#/components/schemas/Appearance' }
+        submit_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
+        post_submit: { type: string, enum: [message, redirect] }
+        success_message: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
+        redirect_url: { type: [string, 'null'] }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }

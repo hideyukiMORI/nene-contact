@@ -65,6 +65,10 @@ function draft(fields: DraftField[], consentRequired: boolean): ContactFormDraft
     consentLabel: consentRequired ? { ...CONSENT_LABEL } : null,
     retentionDays: null,
     appearance: defaultAppearance(),
+    submitLabel: null,
+    postSubmit: 'message',
+    successMessage: null,
+    redirectUrl: null,
     fields,
   };
 }

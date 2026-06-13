@@ -97,6 +97,34 @@ final readonly class ContactFormBodyValidator
             $errors[] = $appearanceError;
         }
 
+        // Submit experience (builder フォーム設定「送信ボタン・送信後」): a per-locale submit label,
+        // and what happens after a successful submit (a completion message or a redirect).
+        $submitLabel = self::localeMap($body['submit_label'] ?? null);
+        if ($submitLabel !== [] && array_diff(array_keys($submitLabel), self::SUPPORTED_LOCALES) !== []) {
+            $errors[] = new ValidationError('submit_label', 'Submit label locales must be a subset of {ja, en}.', 'invalid');
+        }
+        $successMessage = self::localeMap($body['success_message'] ?? null);
+        if ($successMessage !== [] && array_diff(array_keys($successMessage), self::SUPPORTED_LOCALES) !== []) {
+            $errors[] = new ValidationError('success_message', 'Success message locales must be a subset of {ja, en}.', 'invalid');
+        }
+
+        $postSubmit = is_string($body['post_submit'] ?? null) ? (string) $body['post_submit'] : 'message';
+        if (!in_array($postSubmit, ['message', 'redirect'], true)) {
+            $errors[] = new ValidationError('post_submit', 'Post-submit action must be "message" or "redirect".', 'invalid');
+            $postSubmit = 'message';
+        }
+
+        $redirectUrl = null;
+        if (is_string($body['redirect_url'] ?? null) && trim((string) $body['redirect_url']) !== '') {
+            $redirectUrl = mb_substr(trim((string) $body['redirect_url']), 0, 2048);
+            if (!preg_match('#^https?://#i', $redirectUrl)) {
+                $errors[] = new ValidationError('redirect_url', 'Redirect URL must start with http:// or https://.', 'invalid');
+            }
+        }
+        if ($postSubmit === 'redirect' && $redirectUrl === null) {
+            $errors[] = new ValidationError('redirect_url', 'A redirect URL is required when the post-submit action is redirect.', 'required');
+        }
+
         $rawFields = is_array($body['fields'] ?? null) ? $body['fields'] : [];
         $fields = [];
         $sort = 0;
@@ -194,7 +222,32 @@ final readonly class ContactFormBodyValidator
             consentLabel: $consentLabel === [] ? null : $consentLabel,
             retentionDays: $retentionDays,
             appearance: $appearance,
+            submitLabel: $submitLabel === [] ? null : $submitLabel,
+            postSubmit: $postSubmit,
+            successMessage: $successMessage === [] ? null : $successMessage,
+            redirectUrl: $redirectUrl,
         );
+    }
+
+    /**
+     * Normalize a per-locale label map (ja/en); blank values dropped, each capped.
+     *
+     * @return array<string, string>
+     */
+    private static function localeMap(mixed $value): array
+    {
+        if (!is_array($value)) {
+            return [];
+        }
+
+        $out = [];
+        foreach ($value as $locale => $text) {
+            if (is_string($locale) && is_string($text) && trim($text) !== '') {
+                $out[$locale] = mb_substr(trim($text), 0, 500);
+            }
+        }
+
+        return $out;
     }
 
     /**

@@ -473,7 +473,8 @@
       wrap.appendChild(cWrap);
     }
 
-    var submit = el('button', { type: 'submit', 'class': 'pv-btn pv-btn--' + a.button.style }, locale === 'en' ? 'Send' : '送信する');
+    var submitText = localized(schema.submit_label, locale) || (locale === 'en' ? 'Send' : '送信する');
+    var submit = el('button', { type: 'submit', 'class': 'pv-btn pv-btn--' + a.button.style }, submitText);
     submit.appendChild(icon('send'));
     wrap.appendChild(submit);
 
@@ -561,7 +562,15 @@
       .then(function (r) {
         if (r.status === 201 || r.status === 204) {
           form.reset();
-          showMessage(msg, 'ok', locale === 'en' ? 'Thank you — your message was sent.' : '送信しました。ありがとうございます。');
+          // After-submit behaviour (builder フォーム設定): redirect away, or show the form's
+          // completion message (falling back to the built-in thank-you text).
+          if (schema.post_submit === 'redirect' && isStr(schema.redirect_url) && schema.redirect_url) {
+            location.href = schema.redirect_url;
+            return;
+          }
+          var done = localized(schema.success_message, locale)
+            || (locale === 'en' ? 'Thank you — your message was sent.' : '送信しました。ありがとうございます。');
+          showMessage(msg, 'ok', done);
           return;
         }
         if (r.status === 422) {

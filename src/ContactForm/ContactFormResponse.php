@@ -26,6 +26,10 @@ final readonly class ContactFormResponse
             'consent_label' => $form->consentLabel,
             'retention_days' => $form->retentionDays,
             'appearance' => ($form->appearance ?? Appearance::defaults())->toArray(),
+            'submit_label' => $form->submitLabel,
+            'post_submit' => $form->postSubmit,
+            'success_message' => $form->successMessage,
+            'redirect_url' => $form->redirectUrl,
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'id' => $f->id,

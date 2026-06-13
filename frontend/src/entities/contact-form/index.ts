@@ -19,6 +19,7 @@ export type {
   ContactFormList,
   ContactFormDetail,
   ContactFormDraft,
+  PostSubmitAction,
   Appearance,
   AppearanceMode,
   AppearanceFont,

@@ -13,6 +13,7 @@ import type {
   ContactForm,
   ContactFormDraft,
   DraftField,
+  PostSubmitAction,
 } from '@/entities/contact-form';
 import type { SupportedLocale } from '@/shared/i18n/locales';
 
@@ -47,6 +48,10 @@ const initialDraft: ContactFormDraft = {
   consentLabel: null,
   retentionDays: null,
   appearance: defaultAppearance(),
+  submitLabel: null,
+  postSubmit: 'message',
+  successMessage: null,
+  redirectUrl: null,
   fields: [],
 };
 
@@ -64,6 +69,10 @@ export interface FormBuilder {
   setRetentionDays: (days: number | null) => void;
   setAllowedOrigins: (origins: string[]) => void;
   setAppearance: (appearance: Appearance) => void;
+  setSubmitLabel: (locale: string, value: string) => void;
+  setPostSubmit: (action: PostSubmitAction) => void;
+  setSuccessMessage: (locale: string, value: string) => void;
+  setRedirectUrl: (url: string) => void;
   addField: (fieldType: string) => string;
   duplicateField: (id: string) => string | null;
   removeField: (id: string) => void;
@@ -138,6 +147,18 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
     },
     setAppearance: (appearance) => {
       setDraft((d) => ({ ...d, appearance }));
+    },
+    setSubmitLabel: (locale, value) => {
+      setDraft((d) => ({ ...d, submitLabel: { ...(d.submitLabel ?? {}), [locale]: value } }));
+    },
+    setPostSubmit: (action) => {
+      setDraft((d) => ({ ...d, postSubmit: action }));
+    },
+    setSuccessMessage: (locale, value) => {
+      setDraft((d) => ({ ...d, successMessage: { ...(d.successMessage ?? {}), [locale]: value } }));
+    },
+    setRedirectUrl: (url) => {
+      setDraft((d) => ({ ...d, redirectUrl: url }));
     },
     addField: (fieldType) => {
       const field = newField(fieldType);
