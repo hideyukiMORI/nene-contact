@@ -6,6 +6,7 @@ export {
   toCreateChannelDto,
 } from '@/entities/notification-channel/mapper';
 export { notificationChannelKeys } from '@/entities/notification-channel/query-keys';
+export { CHANNEL_TYPES, CHANNEL_ICON } from '@/entities/notification-channel/meta';
 export type {
   ChannelType,
   NotificationChannel,

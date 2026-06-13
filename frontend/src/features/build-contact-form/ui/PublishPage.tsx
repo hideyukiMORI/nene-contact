@@ -1,23 +1,27 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
+import { useNotificationChannelsQuery, CHANNEL_ICON } from '@/entities/notification-channel';
 import type { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
 
 type Builder = ReturnType<typeof useFormBuilder>;
 type SnippetMode = 'chat' | 'modal' | 'inline';
 
 // 連携・公開 tab — an independent page (builder IA spec §2): publish state, public URL, embed
-// snippet, external integrations. The embed snippet + public key are wired; the publish-state
-// toggle reflects the form's status, and the integration rows map to the existing notification
-// channel types (managed in their own screen for now).
+// snippet, notification channels. The embed snippet + public key are wired; the publish-state
+// toggle reflects the form's status; the notifications card shows the form's live channels and
+// links to the dedicated channels screen for add/edit (a new, unsaved form has no id yet).
 export function PublishPage({
   builder,
   isEditing,
+  formId,
 }: {
   builder: Builder;
   isEditing: boolean;
+  formId: number | undefined;
 }): ReactNode {
   const { t } = useI18n();
   const { draft } = builder;
@@ -157,47 +161,74 @@ export function PublishPage({
 
         <div className="scard">
           <h4>
-            <Icon name="link" size={14} />
+            <Icon name="bell" size={14} />
             {t('publishTab.integrations')}
           </h4>
-          <div className="pub-int">
-            <span className="pi-ic">
-              <Icon name="link" size={19} />
-            </span>
-            <div className="pi-main">
-              <div className="n">{t('publishTab.webhook')}</div>
-              <div className="d">{t('publishTab.webhookDesc')}</div>
-            </div>
-            <span className="miniout">{t('publishTab.configure')}</span>
-          </div>
-          <div className="pub-int">
-            <span className="pi-ic">
-              <Icon name="slack" size={19} />
-            </span>
-            <div className="pi-main">
-              <div className="n">{t('publishTab.slack')}</div>
-              <div className="d">{t('publishTab.slackDesc')}</div>
-            </div>
-            <span className="miniout">{t('publishTab.connect')}</span>
-          </div>
-          <div className="pub-int">
-            <span className="pi-ic">
-              <Icon name="mail" size={19} />
-            </span>
-            <div className="pi-main">
-              <div className="n">{t('publishTab.mail')}</div>
-              <div className="d">{t('publishTab.mailDesc')}</div>
-            </div>
-            <span className="miniout">{t('publishTab.connect')}</span>
-          </div>
           <p
             className="td"
-            style={{ fontSize: '11.5px', color: 'var(--ex-faint)', margin: '10px 0 0' }}
+            style={{ fontSize: '11.5px', color: 'var(--ex-faint)', margin: '-2px 0 10px' }}
           >
-            {t('publishTab.intHint')}
+            {t('publishTab.intLead')}
           </p>
+          {formId === undefined ? (
+            <p className="td" style={{ fontSize: '12px', color: 'var(--ex-faint)' }}>
+              {t('publishTab.intUnsaved')}
+            </p>
+          ) : (
+            <BuilderChannels contactFormId={formId} />
+          )}
         </div>
       </div>
     </div>
+  );
+}
+
+// Live notification-channel summary for a saved form. Read-only here — add/edit happens on the
+// dedicated channels screen (the create endpoint needs a saved contact_form_id and exposes no
+// config back, so editing belongs on the full screen). Reuses the entity query + icon map.
+function BuilderChannels({ contactFormId }: { contactFormId: number }): ReactNode {
+  const { t } = useI18n();
+  const navigate = useNavigate();
+  const query = useNotificationChannelsQuery(contactFormId);
+  const channels = query.data ?? [];
+
+  return (
+    <>
+      {query.isPending ? (
+        <p className="td" style={{ fontSize: '12px', color: 'var(--ex-faint)' }}>
+          {t('common.loading')}
+        </p>
+      ) : channels.length === 0 ? (
+        <p className="td" style={{ fontSize: '12px', color: 'var(--ex-faint)' }}>
+          {t('publishTab.intEmpty')}
+        </p>
+      ) : (
+        channels.map((channel) => (
+          <div className="pub-int" key={channel.id}>
+            <span className="pi-ic">
+              <Icon name={CHANNEL_ICON[channel.channelType]} size={19} />
+            </span>
+            <div className="pi-main">
+              <div className="n">{t(`channel.type.${channel.channelType}`)}</div>
+            </div>
+            <span className={channel.isEnabled ? 'ex-badge done' : 'fm-st ended'}>
+              <span className={channel.isEnabled ? 'dot' : 'd'} />
+              {channel.isEnabled ? t('publishTab.channelOn') : t('publishTab.channelOff')}
+            </span>
+          </div>
+        ))
+      )}
+      <button
+        type="button"
+        className="miniout"
+        style={{ marginTop: 10 }}
+        onClick={() => {
+          void navigate(`/contact-forms/${String(contactFormId)}/channels`);
+        }}
+      >
+        <Icon name="settings" size={14} />
+        {t('publishTab.manageChannels')}
+      </button>
+    </>
   );
 }

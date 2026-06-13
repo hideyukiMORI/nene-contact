@@ -874,16 +874,13 @@ export const ja = {
   'publishTab.copy': 'コピー',
   'publishTab.embed': '埋め込みコード',
   'publishTab.copyCode': 'コードをコピー',
-  'publishTab.integrations': '外部連携',
-  'publishTab.webhook': 'Webhook',
-  'publishTab.webhookDesc': '送信ごとに任意のURLへ POST',
-  'publishTab.slack': 'Slack 通知',
-  'publishTab.slackDesc': '指定チャンネルへ新着を投稿',
-  'publishTab.mail': 'メール転送',
-  'publishTab.mailDesc': '受信箱と並行して外部メールへ転送',
-  'publishTab.configure': '設定',
-  'publishTab.connect': '接続',
-  'publishTab.intHint': '外部連携は通知チャンネル（Slack／Webhook／メール）として設定します。',
+  'publishTab.integrations': '通知先',
+  'publishTab.intLead': '送信があったときに通知する先（メール／Slack／Chatwork／Webhook）。',
+  'publishTab.intEmpty': '通知先はまだ設定されていません。',
+  'publishTab.intUnsaved': 'フォームを保存すると通知先を設定できます。',
+  'publishTab.manageChannels': '通知先を管理',
+  'publishTab.channelOn': '有効',
+  'publishTab.channelOff': '無効',
 } as const;
 
 export type MessageKey = keyof typeof ja;

@@ -368,7 +368,9 @@ export function FormBuilder({
       {tab === 'design' ? (
         <AppearanceStudio value={draft.appearance} onChange={builder.setAppearance} />
       ) : null}
-      {tab === 'publish' ? <PublishPage builder={builder} isEditing={isEditing} /> : null}
+      {tab === 'publish' ? (
+        <PublishPage builder={builder} isEditing={isEditing} formId={formId} />
+      ) : null}
 
       {tab === 'fields' ? (
         <div className="bd-wrap" style={{ position: 'relative' }}>
