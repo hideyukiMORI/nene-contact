@@ -218,6 +218,7 @@ export const en: Partial<MessageCatalog> = {
   'contactForms.column.locales': 'Locales',
   'contactForms.column.status': 'Status',
   'contactForms.column.actions': 'Actions',
+  'contactForms.open': 'Open {name}',
   'contactForms.new': 'New form',
   'contactForms.embed': 'Embed',
   'contactForms.edit': 'Edit',
