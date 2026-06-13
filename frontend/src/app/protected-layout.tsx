@@ -42,7 +42,6 @@ const NAV_GROUPS: { labelKey: MessageKey; items: NavLinkItem[] }[] = [
     items: [
       { to: '/users', labelKey: 'nav.users', icon: 'users' },
       { to: '/audit-log', labelKey: 'nav.auditLog', icon: 'shield' },
-      { to: '/settings', labelKey: 'nav.settings', icon: 'settings' },
     ],
   },
 ];
@@ -80,9 +79,6 @@ function usePageCrumbs(): Crumb[] {
   }
   if (segments[0] === 'audit-log') {
     return [{ label: t('nav.auditLog') }];
-  }
-  if (segments[0] === 'settings') {
-    return [{ label: t('nav.settings') }];
   }
   return [{ label: t('nav.dashboard') }];
 }
@@ -242,18 +238,6 @@ export function ProtectedLayout(): ReactNode {
                       </div>
                     </div>
                     <div className="mn-list">
-                      <Link
-                        to="/settings"
-                        className="mn-item"
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuOpen(false);
-                        }}
-                      >
-                        <Icon name="settings" size={16} />
-                        {t('nav.settings')}
-                      </Link>
-                      <div className="mn-sep" />
                       <button
                         type="button"
                         className="mn-item danger"
