@@ -29,8 +29,11 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         }
 
         $fieldRows = $this->query->fetchAll(
+            // deleted_at IS NULL: editing a form soft-deletes the old field rows and inserts a
+            // new set (ADR 0016), so the public schema must show only the live fields — matching
+            // the admin repository — or it renders stale/duplicate fields.
             'SELECT id, contact_form_id, field_type, name, placeholder, description, label_json, required, options_json, config_json, sort_order
-             FROM form_fields WHERE contact_form_id = ? ORDER BY sort_order ASC, id ASC',
+             FROM form_fields WHERE contact_form_id = ? AND deleted_at IS NULL ORDER BY sort_order ASC, id ASC',
             [(int) $row['id']],
         );
 
