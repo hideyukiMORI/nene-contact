@@ -758,7 +758,30 @@ export interface components {
             consent_label?: components["schemas"]["LocaleMap"] | null;
             /** @description Per-form retention; null uses the documented default (charter §5). */
             retention_days?: number | null;
+            appearance?: components["schemas"]["Appearance"];
             fields: components["schemas"]["FormField"][];
+        };
+        /** @description Per-form embed theme + chrome (builder spec — appearance v1). Missing keys fall back to defaults. */
+        Appearance: {
+            /**
+             * @description Display mode of the embed widget.
+             * @enum {string}
+             */
+            mode?: "floating" | "button" | "inline";
+            /** @description Accent/button colour (hex). */
+            accent?: string;
+            /** @description Panel/form background colour (hex). */
+            surface?: string;
+            /** @description Body text colour (hex). */
+            text?: string;
+            /** @description Corner radius in px. */
+            radius?: number;
+            /** @enum {string} */
+            font?: "system" | "sans" | "serif";
+            /** @description Show the form title. */
+            header?: boolean;
+            /** @description Render the title + description as a hero band. */
+            hero?: boolean;
         };
         ContactFormListResponse: {
             items?: components["schemas"]["ContactFormResponse"][];
@@ -782,6 +805,8 @@ export interface components {
             consent_label?: components["schemas"]["LocaleMap"];
             /** @description Optional per-form retention in days; omit to use the documented default (charter §5). */
             retention_days?: number;
+            /** @description Optional embed appearance; missing/partial fills from defaults (full-replace on update). */
+            appearance?: components["schemas"]["Appearance"];
             fields: {
                 /** @enum {string} */
                 field_type: "text" | "email" | "phone" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
@@ -809,6 +834,7 @@ export interface components {
             locales: ("ja" | "en")[];
             consent_required: boolean;
             consent_label?: components["schemas"]["LocaleMap"] | null;
+            appearance?: components["schemas"]["Appearance"];
             fields: components["schemas"]["FormField"][];
         };
         SubmitAccepted: {

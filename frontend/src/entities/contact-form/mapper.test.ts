@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import {
+  defaultAppearance,
   toContactForm,
   toContactFormDetail,
   toContactFormDraft,
@@ -46,6 +47,7 @@ describe('contact-form mappers', () => {
       consentRequired: false,
       consentLabel: null,
       retentionDays: null,
+      appearance: defaultAppearance(),
       fields: [
         {
           id: 'f1',
@@ -66,10 +68,46 @@ describe('contact-form mappers', () => {
       locales: ['ja'],
       allowed_origins: ['https://example.com'],
       consent_required: false,
+      appearance: defaultAppearance(),
       fields: [{ field_type: 'email', name: 'email', label: { ja: 'メール' }, required: true }],
     });
     expect(dto).not.toHaveProperty('consent_label');
     expect(dto).not.toHaveProperty('retention_days');
+  });
+
+  it('reads appearance from the DTO (defaults when absent) and re-serializes it', () => {
+    const withDefaults = toContactFormDraft({
+      id: 1,
+      name: 'A',
+      public_form_key: 'a',
+      default_locale: 'ja',
+      locales: ['ja'],
+      status: 'active',
+      consent_required: false,
+      fields: [],
+    });
+    expect(withDefaults.appearance).toEqual(defaultAppearance());
+
+    const custom = toContactFormDraft({
+      id: 1,
+      name: 'A',
+      public_form_key: 'a',
+      default_locale: 'ja',
+      locales: ['ja'],
+      status: 'active',
+      consent_required: false,
+      appearance: { mode: 'inline', accent: '#e11d48', radius: 16, header: false, hero: true },
+      fields: [],
+    });
+    expect(custom.appearance.mode).toBe('inline');
+    expect(custom.appearance.accent).toBe('#e11d48');
+    expect(custom.appearance.radius).toBe(16);
+    expect(custom.appearance.header).toBe(false);
+    expect(custom.appearance.hero).toBe(true);
+    // Untouched keys keep defaults.
+    expect(custom.appearance.surface).toBe('#ffffff');
+
+    expect(toCreateContactFormDto(custom).appearance).toEqual(custom.appearance);
   });
 
   it('maps a form DTO to an editable draft (and survives a round-trip to the request)', () => {
