@@ -15,7 +15,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoContactFormRepository implements ContactFormRepositoryInterface
 {
-    private const FORM_COLUMNS = 'id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at';
+    private const FORM_COLUMNS = 'id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, appearance_json, created_at, updated_at';
     private const FIELD_COLUMNS = 'id, contact_form_id, field_type, name, placeholder, description, label_json, required, options_json, config_json, sort_order';
 
     /**
@@ -35,8 +35,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
         return $this->tx->transactional(static function (DatabaseQueryExecutorInterface $q) use ($form, $organizationId, $now): int {
             $q->execute(
-                'INSERT INTO contact_forms (organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO contact_forms (organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, appearance_json, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     $organizationId,
                     $form->name,
@@ -49,6 +49,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
                     $form->consentRequired ? 1 : 0,
                     $form->consentLabel !== null ? self::encode($form->consentLabel) : null,
                     $form->retentionDays,
+                    $form->appearance !== null ? self::encode($form->appearance->toArray()) : null,
                     $now,
                     $now,
                 ],
@@ -92,7 +93,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
             // are preserved. Org-scoped so a cross-tenant id updates nothing.
             $q->execute(
                 'UPDATE contact_forms
-                 SET name = ?, description = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, updated_at = ?
+                 SET name = ?, description = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, appearance_json = ?, updated_at = ?
                  WHERE id = ? AND organization_id = ?',
                 [
                     $form->name,
@@ -103,6 +104,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
                     $form->consentRequired ? 1 : 0,
                     $form->consentLabel !== null ? self::encode($form->consentLabel) : null,
                     $form->retentionDays,
+                    $form->appearance !== null ? self::encode($form->appearance->toArray()) : null,
                     $now,
                     $formId,
                     $organizationId,
@@ -252,6 +254,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
         $allowedOrigins = self::decode(isset($row['allowed_origins_json']) ? (string) $row['allowed_origins_json'] : null) ?? [];
         /** @var array<string, string>|null $consentLabel */
         $consentLabel = self::decode(isset($row['consent_label_json']) ? (string) $row['consent_label_json'] : null);
+        /** @var array<string, mixed>|null $appearance */
+        $appearance = self::decode(isset($row['appearance_json']) ? (string) $row['appearance_json'] : null);
 
         return new ContactForm(
             organizationId: (int) $row['organization_id'],
@@ -266,6 +270,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
             consentRequired: (bool) $row['consent_required'],
             consentLabel: $consentLabel,
             retentionDays: isset($row['retention_days']) ? (int) $row['retention_days'] : null,
+            appearance: Appearance::fromStored($appearance),
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],

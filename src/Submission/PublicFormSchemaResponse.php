@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NeneContact\Submission;
 
+use NeneContact\ContactForm\Appearance;
 use NeneContact\ContactForm\ContactForm;
 use NeneContact\ContactForm\FormField;
 
@@ -25,6 +26,8 @@ final readonly class PublicFormSchemaResponse
             // The embed renders an explicit, unchecked consent checkbox when required (charter §3).
             'consent_required' => $form->consentRequired,
             'consent_label' => $form->consentLabel,
+            // Embed theme + chrome (builder spec — appearance v1); defaults when unset.
+            'appearance' => ($form->appearance ?? Appearance::defaults())->toArray(),
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'field_type' => $f->fieldType,

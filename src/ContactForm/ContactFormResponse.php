@@ -25,6 +25,7 @@ final readonly class ContactFormResponse
             'consent_required' => $form->consentRequired,
             'consent_label' => $form->consentLabel,
             'retention_days' => $form->retentionDays,
+            'appearance' => ($form->appearance ?? Appearance::defaults())->toArray(),
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'id' => $f->id,

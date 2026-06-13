@@ -24,6 +24,7 @@ final readonly class CreateContactFormInput
         public bool $consentRequired = false,
         public ?array $consentLabel = null,
         public ?int $retentionDays = null,
+        public ?Appearance $appearance = null,
     ) {
     }
 }

@@ -90,6 +90,13 @@ final readonly class ContactFormBodyValidator
             }
         }
 
+        // Optional embed appearance (builder spec — appearance v1). Missing/partial fills from
+        // defaults; invalid colours/mode/font/radius surface as field errors.
+        [$appearance, $appearanceErrors] = Appearance::parse($body['appearance'] ?? null);
+        foreach ($appearanceErrors as $appearanceError) {
+            $errors[] = $appearanceError;
+        }
+
         $rawFields = is_array($body['fields'] ?? null) ? $body['fields'] : [];
         $fields = [];
         $sort = 0;
@@ -186,6 +193,7 @@ final readonly class ContactFormBodyValidator
             consentRequired: $consentRequired,
             consentLabel: $consentLabel === [] ? null : $consentLabel,
             retentionDays: $retentionDays,
+            appearance: $appearance,
         );
     }
 

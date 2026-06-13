@@ -45,6 +45,7 @@ final readonly class UpdateContactFormUseCase implements UpdateContactFormUseCas
             consentRequired: $input->consentRequired,
             consentLabel: $input->consentLabel,
             retentionDays: $input->retentionDays,
+            appearance: $input->appearance,
             id: $before->id,
             createdAt: $before->createdAt,
         );
