@@ -15,23 +15,59 @@ export interface ContactFormList {
   total: number;
 }
 
-// Embed appearance (builder spec — appearance v1). Mirrors backend NeneContact\ContactForm\Appearance.
-export type AppearanceMode = 'floating' | 'button' | 'inline';
+// Embed appearance (Appearance Studio — appearance v2). Nested token tree mirroring backend
+// NeneContact\ContactForm\Appearance and the studio model (window.STUDIO.DEFAULT).
+export type AppearanceMode = 'modal' | 'chat' | 'inline';
+export type AppearanceTheme = 'light' | 'dark';
 export type AppearanceFont = 'system' | 'sans' | 'serif';
+export type BorderStyle = 'solid' | 'dashed' | 'dotted';
+export type FocusShape = 'ring' | 'solid' | 'glow';
+export type MotionAnim = 'fade' | 'slide' | 'scale';
+export type Density = 'compact' | 'cozy' | 'comfortable';
+export type ButtonStyle = 'solid' | 'outline' | 'soft';
+export type ModalPosition = 'center' | 'right';
+export type LauncherSide = 'left' | 'right';
+export type LauncherShape = 'pill' | 'circle';
+export type InlineAlign = 'left' | 'center' | 'right';
+export type HeroFit = 'cover' | 'contain';
 
-export interface Appearance {
-  mode: AppearanceMode;
-  // Theme colours as hex (#rgb or #rrggbb).
+export interface AppearanceColors {
   accent: string;
   surface: string;
   text: string;
-  // Corner radius in px (0–24).
-  radius: number;
+  muted: string;
+  border: string;
+  inputBg: string;
+  error: string;
+  buttonText: string;
+}
+
+export interface Appearance {
+  mode: AppearanceMode;
+  preset: string;
+  theme: AppearanceTheme;
   font: AppearanceFont;
-  // Show the form title.
-  header: boolean;
-  // Render the title + description as an accent-tinted hero band.
-  hero: boolean;
+  fontH: AppearanceFont;
+  colors: AppearanceColors;
+  radius: { form: number; input: number; button: number };
+  border: { width: number; style: BorderStyle; color: string };
+  focus: { color: string; width: number; shape: FocusShape };
+  motion: { anim: MotionAnim; speed: number };
+  density: Density;
+  button: { style: ButtonStyle; pill: boolean };
+  modal: { width: number; position: ModalPosition; backdrop: number };
+  chat: { oneByOne: boolean; progress: boolean; typing: boolean };
+  launcher: { side: LauncherSide; shape: LauncherShape; label: string };
+  inline: { align: InlineAlign };
+  hero: {
+    on: boolean;
+    media: string;
+    fit: HeroFit;
+    height: number;
+    inset: number;
+    overlay: number;
+    overlayTitle: boolean;
+  };
 }
 
 export interface DraftFieldOption {

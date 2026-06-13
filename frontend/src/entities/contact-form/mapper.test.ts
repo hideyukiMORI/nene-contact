@@ -96,16 +96,21 @@ describe('contact-form mappers', () => {
       locales: ['ja'],
       status: 'active',
       consent_required: false,
-      appearance: { mode: 'inline', accent: '#e11d48', radius: 16, header: false, hero: true },
+      appearance: {
+        mode: 'inline',
+        colors: { accent: '#e11d48' },
+        radius: { input: 16 },
+        hero: { on: false },
+      },
       fields: [],
     });
     expect(custom.appearance.mode).toBe('inline');
-    expect(custom.appearance.accent).toBe('#e11d48');
-    expect(custom.appearance.radius).toBe(16);
-    expect(custom.appearance.header).toBe(false);
-    expect(custom.appearance.hero).toBe(true);
-    // Untouched keys keep defaults.
-    expect(custom.appearance.surface).toBe('#ffffff');
+    expect(custom.appearance.colors.accent).toBe('#e11d48');
+    expect(custom.appearance.radius.input).toBe(16);
+    expect(custom.appearance.hero.on).toBe(false);
+    // Untouched leaves keep defaults (deep merge).
+    expect(custom.appearance.colors.surface).toBe('#ffffff');
+    expect(custom.appearance.radius.form).toBe(14);
 
     expect(toCreateContactFormDto(custom).appearance).toEqual(custom.appearance);
   });
