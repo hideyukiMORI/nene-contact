@@ -761,27 +761,100 @@ export interface components {
             appearance?: components["schemas"]["Appearance"];
             fields: components["schemas"]["FormField"][];
         };
-        /** @description Per-form embed theme + chrome (builder spec — appearance v1). Missing keys fall back to defaults. */
+        /** @description Per-form embed theme + chrome (Appearance Studio — appearance v2). A nested token tree; missing/partial leaves fall back to defaults (current NeNe look). Mirrors NeneContact\ContactForm\Appearance. */
         Appearance: {
             /**
-             * @description Display mode of the embed widget.
+             * @description Display mode.
              * @enum {string}
              */
-            mode?: "floating" | "button" | "inline";
-            /** @description Accent/button colour (hex). */
-            accent?: string;
-            /** @description Panel/form background colour (hex). */
-            surface?: string;
-            /** @description Body text colour (hex). */
-            text?: string;
-            /** @description Corner radius in px. */
-            radius?: number;
+            mode?: "modal" | "chat" | "inline";
+            /** @description Applied preset id, or "custom" after manual edits. */
+            preset?: string;
             /** @enum {string} */
+            theme?: "light" | "dark";
+            /**
+             * @description Body font.
+             * @enum {string}
+             */
             font?: "system" | "sans" | "serif";
-            /** @description Show the form title. */
-            header?: boolean;
-            /** @description Render the title + description as a hero band. */
-            hero?: boolean;
+            /**
+             * @description Heading font.
+             * @enum {string}
+             */
+            fontH?: "system" | "sans" | "serif";
+            /** @description Eight themeable colours (hex). */
+            colors?: {
+                accent?: string;
+                surface?: string;
+                text?: string;
+                muted?: string;
+                border?: string;
+                inputBg?: string;
+                error?: string;
+                buttonText?: string;
+            };
+            radius?: {
+                form?: number;
+                input?: number;
+                button?: number;
+            };
+            border?: {
+                width?: number;
+                /** @enum {string} */
+                style?: "solid" | "dashed" | "dotted";
+                color?: string;
+            };
+            focus?: {
+                color?: string;
+                width?: number;
+                /** @enum {string} */
+                shape?: "ring" | "solid" | "glow";
+            };
+            motion?: {
+                /** @enum {string} */
+                anim?: "fade" | "slide" | "scale";
+                speed?: number;
+            };
+            /** @enum {string} */
+            density?: "compact" | "cozy" | "comfortable";
+            button?: {
+                /** @enum {string} */
+                style?: "solid" | "outline" | "soft";
+                pill?: boolean;
+            };
+            modal?: {
+                width?: number;
+                /** @enum {string} */
+                position?: "center" | "right";
+                backdrop?: number;
+            };
+            chat?: {
+                oneByOne?: boolean;
+                progress?: boolean;
+                typing?: boolean;
+            };
+            launcher?: {
+                /** @enum {string} */
+                side?: "left" | "right";
+                /** @enum {string} */
+                shape?: "pill" | "circle";
+                label?: string;
+            };
+            inline?: {
+                /** @enum {string} */
+                align?: "left" | "center" | "right";
+            };
+            hero?: {
+                on?: boolean;
+                /** @description Media id (mock library today; upload asset later). */
+                media?: string;
+                /** @enum {string} */
+                fit?: "cover" | "contain";
+                height?: number;
+                inset?: number;
+                overlay?: number;
+                overlayTitle?: boolean;
+            };
         };
         ContactFormListResponse: {
             items?: components["schemas"]["ContactFormResponse"][];

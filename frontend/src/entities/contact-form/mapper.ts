@@ -6,8 +6,6 @@ import type {
 import { defaultFieldTypeConfig } from '@/entities/contact-form/field-defaults';
 import type {
   Appearance,
-  AppearanceFont,
-  AppearanceMode,
   ChoiceCardLayout,
   ChoiceConfig,
   ChoiceRatio,
@@ -21,43 +19,79 @@ import type {
   FieldTypeConfig,
 } from '@/entities/contact-form/model';
 
-const APPEARANCE_MODES: readonly AppearanceMode[] = ['floating', 'button', 'inline'];
-const APPEARANCE_FONTS: readonly AppearanceFont[] = ['system', 'sans', 'serif'];
-
-// The widget's default theme (reproduces the original hardcoded look); mirrors backend
-// NeneContact\ContactForm\Appearance::defaults().
+// The studio default token tree (current NeNe look); mirrors backend
+// NeneContact\ContactForm\Appearance::defaultData() and window.STUDIO.DEFAULT.
 export function defaultAppearance(): Appearance {
   return {
-    mode: 'floating',
-    accent: '#2563eb',
-    surface: '#ffffff',
-    text: '#111827',
-    radius: 8,
-    font: 'system',
-    header: true,
-    hero: false,
+    mode: 'modal',
+    preset: 'nene',
+    theme: 'light',
+    font: 'sans',
+    fontH: 'sans',
+    colors: {
+      accent: '#dc5b34',
+      surface: '#ffffff',
+      text: '#161a22',
+      muted: '#5a6273',
+      border: '#e2e6eb',
+      inputBg: '#ffffff',
+      error: '#d14343',
+      buttonText: '#ffffff',
+    },
+    radius: { form: 14, input: 8, button: 8 },
+    border: { width: 1.5, style: 'solid', color: '#e2e6eb' },
+    focus: { color: '#dc5b34', width: 3.5, shape: 'ring' },
+    motion: { anim: 'scale', speed: 320 },
+    density: 'cozy',
+    button: { style: 'solid', pill: false },
+    modal: { width: 460, position: 'center', backdrop: 0.45 },
+    chat: { oneByOne: true, progress: true, typing: true },
+    launcher: { side: 'right', shape: 'pill', label: 'お問い合わせ' },
+    inline: { align: 'center' },
+    hero: {
+      on: true,
+      media: 'm-team',
+      fit: 'cover',
+      height: 150,
+      inset: 0,
+      overlay: 0.28,
+      overlayTitle: true,
+    },
   };
 }
 
+// The backend validates and always returns a complete tree; this is a defensive deep-merge so a
+// partial/legacy payload still resolves to a full Appearance. Scalars/objects merge per group.
 function toAppearance(raw: unknown): Appearance {
   const d = defaultAppearance();
   if (typeof raw !== 'object' || raw === null) {
     return d;
   }
   const a = raw as Record<string, unknown>;
-  const mode = APPEARANCE_MODES.find((m) => m === a.mode) ?? d.mode;
-  const font = APPEARANCE_FONTS.find((f) => f === a.font) ?? d.font;
-  const radius =
-    typeof a.radius === 'number' && a.radius >= 0 && a.radius <= 24 ? a.radius : d.radius;
+  const group = <T>(key: string, base: T): T =>
+    typeof a[key] === 'object' && a[key] !== null
+      ? { ...base, ...(a[key] as Record<string, unknown>) }
+      : base;
+  const scalar = <T>(key: string, base: T): T => (a[key] !== undefined ? (a[key] as T) : base);
+
   return {
-    mode,
-    accent: typeof a.accent === 'string' ? a.accent : d.accent,
-    surface: typeof a.surface === 'string' ? a.surface : d.surface,
-    text: typeof a.text === 'string' ? a.text : d.text,
-    radius,
-    font,
-    header: typeof a.header === 'boolean' ? a.header : d.header,
-    hero: typeof a.hero === 'boolean' ? a.hero : d.hero,
+    mode: scalar('mode', d.mode),
+    preset: scalar('preset', d.preset),
+    theme: scalar('theme', d.theme),
+    font: scalar('font', d.font),
+    fontH: scalar('fontH', d.fontH),
+    colors: group('colors', d.colors),
+    radius: group('radius', d.radius),
+    border: group('border', d.border),
+    focus: group('focus', d.focus),
+    motion: group('motion', d.motion),
+    density: scalar('density', d.density),
+    button: group('button', d.button),
+    modal: group('modal', d.modal),
+    chat: group('chat', d.chat),
+    launcher: group('launcher', d.launcher),
+    inline: group('inline', d.inline),
+    hero: group('hero', d.hero),
   };
 }
 

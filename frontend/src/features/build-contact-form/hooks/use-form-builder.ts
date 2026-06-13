@@ -8,12 +8,7 @@ import {
   useUpdateContactFormMutation,
 } from '@/entities/contact-form';
 import type { AppError } from '@/shared/api/errors';
-import type {
-  Appearance,
-  ContactForm,
-  ContactFormDraft,
-  DraftField,
-} from '@/entities/contact-form';
+import type { ContactForm, ContactFormDraft, DraftField } from '@/entities/contact-form';
 import type { SupportedLocale } from '@/shared/i18n/locales';
 
 function newField(fieldType: string): DraftField {
@@ -63,7 +58,6 @@ export interface FormBuilder {
   setConsentLabel: (locale: string, value: string) => void;
   setRetentionDays: (days: number | null) => void;
   setAllowedOrigins: (origins: string[]) => void;
-  setAppearance: (patch: Partial<Appearance>) => void;
   addField: (fieldType: string) => string;
   duplicateField: (id: string) => string | null;
   removeField: (id: string) => void;
@@ -135,9 +129,6 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
     },
     setAllowedOrigins: (origins) => {
       setDraft((d) => ({ ...d, allowedOrigins: origins }));
-    },
-    setAppearance: (patch) => {
-      setDraft((d) => ({ ...d, appearance: { ...d.appearance, ...patch } }));
     },
     addField: (fieldType) => {
       const field = newField(fieldType);

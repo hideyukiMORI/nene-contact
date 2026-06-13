@@ -20,8 +20,6 @@ import { Icon } from '@/shared/ui';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import {
   defaultChoiceConfig,
-  type AppearanceFont,
-  type AppearanceMode,
   type ContactFormDraft,
   type DraftField,
 } from '@/entities/contact-form';
@@ -45,7 +43,7 @@ import {
 } from '@/features/build-contact-form/lib/field-types';
 
 type Builder = ReturnType<typeof useFormBuilder>;
-type PanelTab = 'field' | 'form' | 'design';
+type PanelTab = 'field' | 'form';
 
 function newOptionValue(): string {
   return 'opt_' + Math.random().toString(36).slice(2, 10);
@@ -396,22 +394,11 @@ export function FormBuilder({
             >
               {t('builder.tab.form')}
             </button>
-            <button
-              type="button"
-              className={'bd-ptab' + (panelTab === 'design' ? ' on' : '')}
-              onClick={() => {
-                setPanelTab('design');
-              }}
-            >
-              {t('builder.tab.design')}
-            </button>
           </div>
 
           <div className="cf-panelscroll">
             {panelTab === 'form' ? (
               <FormSettingsSection builder={builder} readOnlyKey={isEditing} />
-            ) : panelTab === 'design' ? (
-              <DesignSettingsSection builder={builder} />
             ) : selected === null ? (
               <div className="bd-psec">
                 <p className="fb-empty-sel">{t('builder.noSelection')}</p>
@@ -530,209 +517,6 @@ function Switch({
 }
 
 // Form-level settings (the "フォーム設定" inspector tab): name, public path, consent.
-const APPEARANCE_MODES: AppearanceMode[] = ['floating', 'button', 'inline'];
-const APPEARANCE_FONTS: AppearanceFont[] = ['system', 'sans', 'serif'];
-const PREVIEW_FONT_STACK: Record<AppearanceFont, string> = {
-  system: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',
-  sans: 'Arial,Helvetica,sans-serif',
-  serif: 'Georgia,"Times New Roman",serif',
-};
-
-// One theme colour: a native colour well paired with an editable hex field (kept in sync).
-function ColorRow({
-  label,
-  value,
-  onChange,
-}: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-}): ReactNode {
-  return (
-    <div className="bd-frow">
-      <span className="l">{label}</span>
-      <div className="bd-dz-color">
-        <input
-          type="color"
-          aria-label={label}
-          value={value}
-          onChange={(e) => {
-            onChange(e.target.value);
-          }}
-        />
-        <input
-          type="text"
-          className="cf-input"
-          aria-label={`${label} (hex)`}
-          value={value}
-          onChange={(e) => {
-            onChange(e.target.value);
-          }}
-        />
-      </div>
-    </div>
-  );
-}
-
-// A live, self-contained rendition of the embed's chrome under the chosen theme (CSS variables),
-// so colour/radius/font/header/hero changes are visible without leaving the builder.
-function AppearancePreview({ draft }: { draft: ContactFormDraft }): ReactNode {
-  const { t } = useI18n();
-  const ap = draft.appearance;
-  const title = draft.name.trim() !== '' ? draft.name.trim() : t('builder.design.previewTitle');
-  const desc = draft.description.trim();
-  const style = {
-    '--pv-accent': ap.accent,
-    '--pv-surface': ap.surface,
-    '--pv-text': ap.text,
-    '--pv-radius': `${String(ap.radius)}px`,
-    '--pv-font': PREVIEW_FONT_STACK[ap.font],
-  } as CSSProperties;
-  const showTitle = ap.header && title !== '';
-  const head =
-    showTitle || desc !== '' ? (
-      <div className={ap.hero ? 'pv-hero' : 'pv-head'}>
-        {showTitle ? <div className="pv-title">{title}</div> : null}
-        {desc !== '' ? <div className="pv-desc">{desc}</div> : null}
-      </div>
-    ) : null;
-
-  return (
-    <div className="bd-dz-preview" style={style} aria-hidden="true">
-      {head}
-      <div className="pv-field">
-        <div className="pv-label">{t('builder.design.previewField')}</div>
-        <div className="pv-input" />
-      </div>
-      <div className="pv-btn">{t('builder.design.previewSubmit')}</div>
-    </div>
-  );
-}
-
-function DesignSettingsSection({ builder }: { builder: Builder }): ReactNode {
-  const { t } = useI18n();
-  const ap = builder.draft.appearance;
-  const { setAppearance } = builder;
-
-  return (
-    <div className="bd-psec bd-design">
-      <div className="bd-frow">
-        <span className="l">{t('builder.design.mode')}</span>
-        <div className="bd-dz-seg">
-          {APPEARANCE_MODES.map((m) => (
-            <button
-              key={m}
-              type="button"
-              className={'o' + (ap.mode === m ? ' on' : '')}
-              onClick={() => {
-                setAppearance({ mode: m });
-              }}
-            >
-              {t(`builder.design.mode.${m}`)}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <ColorRow
-        label={t('builder.design.accent')}
-        value={ap.accent}
-        onChange={(accent) => {
-          setAppearance({ accent });
-        }}
-      />
-      <ColorRow
-        label={t('builder.design.surface')}
-        value={ap.surface}
-        onChange={(surface) => {
-          setAppearance({ surface });
-        }}
-      />
-      <ColorRow
-        label={t('builder.design.text')}
-        value={ap.text}
-        onChange={(text) => {
-          setAppearance({ text });
-        }}
-      />
-
-      <div className="bd-frow">
-        <span className="l">
-          {t('builder.design.radius')} <span className="bd-dz-val">{ap.radius}px</span>
-        </span>
-        <input
-          type="range"
-          className="bd-dz-range"
-          min={0}
-          max={24}
-          value={ap.radius}
-          aria-label={t('builder.design.radius')}
-          onChange={(e) => {
-            setAppearance({ radius: Number(e.target.value) });
-          }}
-        />
-      </div>
-
-      <div className="bd-frow">
-        <label className="l" htmlFor="bd-dz-font">
-          {t('builder.design.font')}
-        </label>
-        <select
-          id="bd-dz-font"
-          className="cf-input"
-          value={ap.font}
-          onChange={(e) => {
-            setAppearance({ font: e.target.value as AppearanceFont });
-          }}
-        >
-          {APPEARANCE_FONTS.map((f) => (
-            <option key={f} value={f}>
-              {t(`builder.design.font.${f}`)}
-            </option>
-          ))}
-        </select>
-      </div>
-
-      <div className="bd-frow">
-        <div className="cf-togglerow">
-          <div className="tx">
-            <div className="tl">{t('builder.design.header')}</div>
-            <div className="td">{t('builder.design.headerDesc')}</div>
-          </div>
-          <Switch
-            on={ap.header}
-            label={t('builder.design.header')}
-            onToggle={() => {
-              setAppearance({ header: !ap.header });
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="bd-frow">
-        <div className="cf-togglerow">
-          <div className="tx">
-            <div className="tl">{t('builder.design.hero')}</div>
-            <div className="td">{t('builder.design.heroDesc')}</div>
-          </div>
-          <Switch
-            on={ap.hero}
-            label={t('builder.design.hero')}
-            onToggle={() => {
-              setAppearance({ hero: !ap.hero });
-            }}
-          />
-        </div>
-      </div>
-
-      <div className="bd-frow">
-        <span className="l">{t('builder.design.preview')}</span>
-        <AppearancePreview draft={builder.draft} />
-      </div>
-    </div>
-  );
-}
-
 function FormSettingsSection({
   builder,
   readOnlyKey,
