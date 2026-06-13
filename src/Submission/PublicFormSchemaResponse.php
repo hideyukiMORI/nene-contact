@@ -28,6 +28,11 @@ final readonly class PublicFormSchemaResponse
             'consent_label' => $form->consentLabel,
             // Embed theme + chrome (builder spec — appearance v1); defaults when unset.
             'appearance' => ($form->appearance ?? Appearance::defaults())->toArray(),
+            // Submit experience (builder フォーム設定): button label + after-submit behaviour.
+            'submit_label' => $form->submitLabel,
+            'post_submit' => $form->postSubmit,
+            'success_message' => $form->successMessage,
+            'redirect_url' => $form->redirectUrl,
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'field_type' => $f->fieldType,

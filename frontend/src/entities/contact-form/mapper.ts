@@ -400,6 +400,10 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
     consentLabel: dto.consent_label ?? null,
     retentionDays: dto.retention_days ?? null,
     appearance: toAppearance((dto as { appearance?: unknown }).appearance),
+    submitLabel: dto.submit_label ?? null,
+    postSubmit: dto.post_submit ?? 'message',
+    successMessage: dto.success_message ?? null,
+    redirectUrl: dto.redirect_url ?? null,
     fields,
   };
 }
@@ -426,6 +430,12 @@ export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFo
     ...(draft.consentLabel !== null ? { consent_label: draft.consentLabel } : {}),
     ...(draft.retentionDays !== null ? { retention_days: draft.retentionDays } : {}),
     appearance: { ...draft.appearance },
+    ...(draft.submitLabel !== null ? { submit_label: draft.submitLabel } : {}),
+    post_submit: draft.postSubmit,
+    ...(draft.successMessage !== null ? { success_message: draft.successMessage } : {}),
+    ...(draft.redirectUrl !== null && draft.redirectUrl.trim() !== ''
+      ? { redirect_url: draft.redirectUrl }
+      : {}),
     fields: draft.fields.map((field) => ({
       field_type: field.fieldType as CreateContactFormDto['fields'][number]['field_type'],
       name: field.name,

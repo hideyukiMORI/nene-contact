@@ -813,6 +813,15 @@ export interface components {
             /** @description Per-form retention; null uses the documented default (charter §5). */
             retention_days?: number | null;
             appearance?: components["schemas"]["Appearance"];
+            /** @description Per-locale submit button label; null uses the default. */
+            submit_label?: components["schemas"]["LocaleMap"] | null;
+            /**
+             * @description After a successful submit: show a completion message or redirect.
+             * @enum {string}
+             */
+            post_submit?: "message" | "redirect";
+            success_message?: components["schemas"]["LocaleMap"] | null;
+            redirect_url?: string | null;
             fields: components["schemas"]["FormField"][];
         };
         /** @description Per-form embed theme + chrome (Appearance Studio — appearance v2). A nested token tree; missing/partial leaves fall back to defaults (current NeNe look). Mirrors NeneContact\ContactForm\Appearance. */
@@ -934,6 +943,17 @@ export interface components {
             retention_days?: number;
             /** @description Optional embed appearance; missing/partial fills from defaults (full-replace on update). */
             appearance?: components["schemas"]["Appearance"];
+            /** @description Optional per-locale submit button label. */
+            submit_label?: components["schemas"]["LocaleMap"];
+            /**
+             * @default message
+             * @enum {string}
+             */
+            post_submit: "message" | "redirect";
+            /** @description Optional per-locale completion message (shown when post_submit=message). */
+            success_message?: components["schemas"]["LocaleMap"];
+            /** @description Required when post_submit=redirect; must start with http(s)://. */
+            redirect_url?: string;
             fields: {
                 /** @enum {string} */
                 field_type: "text" | "email" | "phone" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
@@ -962,6 +982,11 @@ export interface components {
             consent_required: boolean;
             consent_label?: components["schemas"]["LocaleMap"] | null;
             appearance?: components["schemas"]["Appearance"];
+            submit_label?: components["schemas"]["LocaleMap"] | null;
+            /** @enum {string} */
+            post_submit?: "message" | "redirect";
+            success_message?: components["schemas"]["LocaleMap"] | null;
+            redirect_url?: string | null;
             fields: components["schemas"]["FormField"][];
         };
         SubmitAccepted: {

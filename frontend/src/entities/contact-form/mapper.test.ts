@@ -48,6 +48,10 @@ describe('contact-form mappers', () => {
       consentLabel: null,
       retentionDays: null,
       appearance: defaultAppearance(),
+      submitLabel: null,
+      postSubmit: 'message',
+      successMessage: null,
+      redirectUrl: null,
       fields: [
         {
           id: 'f1',
@@ -69,10 +73,13 @@ describe('contact-form mappers', () => {
       allowed_origins: ['https://example.com'],
       consent_required: false,
       appearance: defaultAppearance(),
+      post_submit: 'message',
       fields: [{ field_type: 'email', name: 'email', label: { ja: 'メール' }, required: true }],
     });
     expect(dto).not.toHaveProperty('consent_label');
     expect(dto).not.toHaveProperty('retention_days');
+    expect(dto).not.toHaveProperty('submit_label');
+    expect(dto).not.toHaveProperty('redirect_url');
   });
 
   it('reads appearance from the DTO (defaults when absent) and re-serializes it', () => {
@@ -127,6 +134,9 @@ describe('contact-form mappers', () => {
       consent_required: true,
       consent_label: { ja: '同意します' },
       retention_days: 30,
+      submit_label: { ja: '送信する' },
+      post_submit: 'redirect',
+      redirect_url: 'https://example.com/thanks',
       fields: [
         {
           id: 4,
@@ -144,6 +154,9 @@ describe('contact-form mappers', () => {
     expect(draft.allowedOrigins).toEqual(['https://example.com']);
     expect(draft.consentLabel).toEqual({ ja: '同意します' });
     expect(draft.retentionDays).toBe(30);
+    expect(draft.submitLabel).toEqual({ ja: '送信する' });
+    expect(draft.postSubmit).toBe('redirect');
+    expect(draft.redirectUrl).toBe('https://example.com/thanks');
     expect(draft.fields).toHaveLength(1);
     expect(draft.fields[0]?.id).toBe('4');
     expect(draft.fields[0]?.options).toEqual([{ value: 'a', label: { ja: 'A' } }]);
@@ -154,6 +167,9 @@ describe('contact-form mappers', () => {
     // The draft re-serializes to the request shape used for the PUT, including the choice config.
     const dto = toCreateContactFormDto(draft);
     expect(dto.name).toBe('Contact us');
+    expect(dto.submit_label).toEqual({ ja: '送信する' });
+    expect(dto.post_submit).toBe('redirect');
+    expect(dto.redirect_url).toBe('https://example.com/thanks');
     expect(dto.fields[0]).toEqual({
       field_type: 'select',
       name: 'topic',

@@ -118,6 +118,124 @@ export function FormSettingsPage({
 
         <div className="scard">
           <h4>
+            <Icon name="send" size={14} />
+            {t('settingsTab.submit')}
+          </h4>
+          <div className="srow">
+            <label className="l" htmlFor="st-submit-ja">
+              {enLocale ? t('settingsTab.submitLabelJa') : t('settingsTab.submitLabel')}
+            </label>
+            <input
+              id="st-submit-ja"
+              className="sinput"
+              value={draft.submitLabel?.['ja'] ?? ''}
+              placeholder={t('settingsTab.submitLabelPh')}
+              onChange={(e) => {
+                builder.setSubmitLabel('ja', e.target.value);
+              }}
+            />
+          </div>
+          {enLocale ? (
+            <div className="srow">
+              <label className="l" htmlFor="st-submit-en">
+                {t('settingsTab.submitLabelEn')}
+              </label>
+              <input
+                id="st-submit-en"
+                className="sinput"
+                value={draft.submitLabel?.['en'] ?? ''}
+                placeholder="Send"
+                onChange={(e) => {
+                  builder.setSubmitLabel('en', e.target.value);
+                }}
+              />
+            </div>
+          ) : null}
+          <div className="srow">
+            <span className="l">{t('settingsTab.postSubmit')}</span>
+            <div className="bx-seg">
+              <button
+                type="button"
+                className={draft.postSubmit === 'message' ? 'on' : ''}
+                onClick={() => {
+                  builder.setPostSubmit('message');
+                }}
+              >
+                {t('settingsTab.postSubmitMessage')}
+              </button>
+              <button
+                type="button"
+                className={draft.postSubmit === 'redirect' ? 'on' : ''}
+                onClick={() => {
+                  builder.setPostSubmit('redirect');
+                }}
+              >
+                {t('settingsTab.postSubmitRedirect')}
+              </button>
+            </div>
+          </div>
+          {draft.postSubmit === 'message' ? (
+            <>
+              <div className="srow">
+                <label className="l" htmlFor="st-success-ja">
+                  {enLocale ? t('settingsTab.successMessageJa') : t('settingsTab.successMessage')}
+                </label>
+                <textarea
+                  id="st-success-ja"
+                  className="sinput area"
+                  value={draft.successMessage?.['ja'] ?? ''}
+                  placeholder={t('settingsTab.successMessagePh')}
+                  onChange={(e) => {
+                    builder.setSuccessMessage('ja', e.target.value);
+                  }}
+                />
+              </div>
+              {enLocale ? (
+                <div className="srow">
+                  <label className="l" htmlFor="st-success-en">
+                    {t('settingsTab.successMessageEn')}
+                  </label>
+                  <textarea
+                    id="st-success-en"
+                    className="sinput area"
+                    value={draft.successMessage?.['en'] ?? ''}
+                    placeholder="Thank you for reaching out."
+                    onChange={(e) => {
+                      builder.setSuccessMessage('en', e.target.value);
+                    }}
+                  />
+                </div>
+              ) : null}
+            </>
+          ) : (
+            <div className="srow">
+              <label className="l" htmlFor="st-redirect">
+                {t('settingsTab.redirectUrl')}
+              </label>
+              <div style={{ flex: 1 }}>
+                <input
+                  id="st-redirect"
+                  className="sinput"
+                  type="url"
+                  value={draft.redirectUrl ?? ''}
+                  placeholder={t('settingsTab.redirectUrlPh')}
+                  onChange={(e) => {
+                    builder.setRedirectUrl(e.target.value);
+                  }}
+                />
+                <p
+                  className="td"
+                  style={{ fontSize: '11.5px', color: 'var(--ex-faint)', margin: '6px 0 0' }}
+                >
+                  {t('settingsTab.redirectUrlHint')}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="scard">
+          <h4>
             <Icon name="shield" size={14} />
             {t('settingsTab.spamLang')}
           </h4>

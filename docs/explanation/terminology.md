@@ -179,6 +179,10 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 | `retention_days` | `contact_form` / org policy | retention before purge (charter §5) |
 | `consent_required` | `contact_form` | boolean |
 | `consent_label` | `contact_form` | per-locale `ja`/`en` object (ADR 0011) |
+| `submit_label` | `contact_form` | optional per-locale submit button label; null uses the embed default (submit experience) |
+| `post_submit` | `contact_form` | after-submit behaviour: `message` (default) or `redirect` (submit experience) |
+| `success_message` | `contact_form` | optional per-locale completion message shown when `post_submit=message` (submit experience) |
+| `redirect_url` | `contact_form` | absolute `http(s)` URL; required when `post_submit=redirect` (submit experience) |
 | `consent_given_at` | `submission` | immutable consent timestamp (charter §3) |
 | `source` | `submission` | origin: `form` (public/embed) or service ingest `concierge` / `import` / `api` (M6) |
 | `source_url` | `submission` | embed host page the form was submitted from (referer); non-PII reception meta shown by default (ADR 0018); null for service ingest |

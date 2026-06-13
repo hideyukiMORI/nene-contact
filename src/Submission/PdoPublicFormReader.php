@@ -19,7 +19,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm
     {
         $row = $this->query->fetchOne(
-            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, appearance_json, created_at, updated_at
+            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, appearance_json, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at
              FROM contact_forms WHERE public_form_key = ?',
             [$publicFormKey],
         );
@@ -76,6 +76,14 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         $appearance = isset($row['appearance_json'])
             ? (array) json_decode((string) $row['appearance_json'], true, 512, JSON_THROW_ON_ERROR)
             : null;
+        /** @var array<string, string>|null $submitLabel */
+        $submitLabel = isset($row['submit_label_json'])
+            ? (array) json_decode((string) $row['submit_label_json'], true, 512, JSON_THROW_ON_ERROR)
+            : null;
+        /** @var array<string, string>|null $successMessage */
+        $successMessage = isset($row['success_message_json'])
+            ? (array) json_decode((string) $row['success_message_json'], true, 512, JSON_THROW_ON_ERROR)
+            : null;
 
         return new ContactForm(
             organizationId: (int) $row['organization_id'],
@@ -90,6 +98,10 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
             consentRequired: (bool) $row['consent_required'],
             consentLabel: $consentLabel,
             appearance: Appearance::fromStored($appearance),
+            submitLabel: $submitLabel,
+            postSubmit: isset($row['post_submit']) ? (string) $row['post_submit'] : 'message',
+            successMessage: $successMessage,
+            redirectUrl: isset($row['redirect_url']) ? (string) $row['redirect_url'] : null,
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],

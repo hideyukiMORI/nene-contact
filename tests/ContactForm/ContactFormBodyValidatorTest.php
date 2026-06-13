@@ -226,4 +226,69 @@ final class ContactFormBodyValidatorTest extends TestCase
 
         self::assertNull($input->fields[0]->config);
     }
+
+    public function test_submit_experience_defaults_when_omitted(): void
+    {
+        $input = ContactFormBodyValidator::parse($this->body([
+            ['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true],
+        ]));
+
+        self::assertNull($input->submitLabel);
+        self::assertSame('message', $input->postSubmit);
+        self::assertNull($input->successMessage);
+        self::assertNull($input->redirectUrl);
+    }
+
+    public function test_submit_label_and_success_message_are_locale_maps(): void
+    {
+        $input = ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'submit_label' => ['ja' => ' 送信する ', 'en' => ''],
+            'success_message' => ['ja' => 'ありがとうございました'],
+        ]);
+
+        // Blank locale entries are dropped, surviving entries trimmed.
+        self::assertSame(['ja' => '送信する'], $input->submitLabel);
+        self::assertSame(['ja' => 'ありがとうございました'], $input->successMessage);
+    }
+
+    public function test_unsupported_submit_label_locale_is_rejected(): void
+    {
+        $this->expectException(ValidationException::class);
+        ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'submit_label' => ['fr' => 'Envoyer'],
+        ]);
+    }
+
+    public function test_redirect_post_submit_requires_a_valid_http_url(): void
+    {
+        $input = ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'post_submit' => 'redirect',
+            'redirect_url' => '  https://example.com/thanks  ',
+        ]);
+
+        self::assertSame('redirect', $input->postSubmit);
+        self::assertSame('https://example.com/thanks', $input->redirectUrl);
+    }
+
+    public function test_redirect_without_url_is_rejected(): void
+    {
+        $this->expectException(ValidationException::class);
+        ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'post_submit' => 'redirect',
+        ]);
+    }
+
+    public function test_non_http_redirect_url_is_rejected(): void
+    {
+        $this->expectException(ValidationException::class);
+        ContactFormBodyValidator::parse([
+            ...$this->body([['field_type' => 'text', 'name' => 'name', 'label' => ['ja' => 'お名前'], 'required' => true]]),
+            'post_submit' => 'redirect',
+            'redirect_url' => 'javascript:alert(1)',
+        ]);
+    }
 }
