@@ -4,8 +4,21 @@ import type { ReactNode } from 'react';
 // 確定版ロゴ (brand/nene-mark.svg): a rounded square in the brand colour with the origami
 // paper-plane glyph knocked out, so the background shows through the plane. Fill follows the
 // theme brand token. Inline (no asset path) so it works under any base path.
-export function BrandMark({ size = 30 }: { size?: number }): ReactNode {
+//
+// `on` renders the white-plane safe variant (solid brand tile, white plane, brand crease) for
+// placement over dark/coloured surfaces such as the login brand panel — the knockout version
+// would otherwise show the panel colour through the plane.
+export function BrandMark({ size = 30, on = false }: { size?: number; on?: boolean }): ReactNode {
   const maskId = useId();
+  if (on) {
+    return (
+      <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="NeNe Contact">
+        <rect x="2" y="2" width="44" height="44" rx="12" fill="var(--ex-brand)" />
+        <path d="M24 4 L6 40 L24 29 L42 40 Z" fill="#ffffff" />
+        <path d="M24 4 L24 29" stroke="var(--ex-brand)" strokeWidth="1.7" strokeLinecap="round" />
+      </svg>
+    );
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 48 48" role="img" aria-label="NeNe Contact">
       <mask id={maskId} maskUnits="userSpaceOnUse" x="0" y="0" width="48" height="48">

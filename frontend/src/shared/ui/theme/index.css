@@ -3659,272 +3659,455 @@ h3 {
 }
 
 /* ============================================================
-   Pro Console — auth screen (login / signup / reset)
-   Standalone (no app shell). Deep-teal brand panel + form.
+   Pro Console — auth screen (login)
+   Standalone (no app shell). DirAC: a deep-teal brand panel with a
+   folded-paper SVG layer + large-serif display, paired with an
+   editorial form kit. Adopted from the delivered design spec (#272).
    ============================================================ */
-.au {
-  min-height: 100vh;
-  display: flex;
+.lp {
+  height: 100vh;
+  width: 100%;
+  position: relative;
+  overflow: hidden;
   background: var(--ex-surface);
   font-family: var(--ex-font-ui);
   color: var(--ex-text);
-  position: relative;
+  --teal: oklch(0.315 0.05 196);
+  --teal-deep: oklch(0.255 0.045 196);
+  --teal-line: color-mix(in srgb, #fff 12%, transparent);
+  --teal-ink: rgba(255, 255, 255, 0.74);
+  --teal-faint: rgba(255, 255, 255, 0.5);
+  --serif: 'Spectral', 'Noto Serif JP', Georgia, serif;
+  --mono: var(--ex-font-mono);
 }
-.au-lang {
+
+/* language toggle, pinned over the form pane */
+.lp-lang {
   position: absolute;
   top: 18px;
   right: 18px;
-  z-index: 2;
+  z-index: 3;
 }
-.au-brand {
-  width: 42%;
-  flex: none;
-  background: oklch(0.32 0.05 196);
-  color: #fff;
-  padding: 46px 42px;
-  display: flex;
-  flex-direction: column;
-}
-.au-mkrow {
+
+/* brand lockup (tile + wordmark) */
+.lp-mark {
   display: flex;
   align-items: center;
   gap: 11px;
 }
-.au-mk {
-  width: 34px;
-  height: 34px;
+.lp-mark__tile {
+  width: 38px;
+  height: 38px;
   flex: none;
   display: block;
 }
-.au-mk svg {
+.lp-mark__tile svg {
+  width: 100%;
+  height: 100%;
   display: block;
+  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.22));
 }
-.au-name {
+.lp-mark__name {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: -0.02em;
+  color: #fff;
 }
-.au-tag {
-  font-family: var(--ex-font-display);
-  font-size: 33px;
-  font-weight: 600;
-  line-height: 1.32;
-  letter-spacing: -0.01em;
+
+/* ---- AC layout: editorial split (left brand / right form) ---- */
+.lp-ac {
+  display: grid;
+  grid-template-columns: 1.12fr 1fr;
+}
+.lp-ac__brand {
+  position: relative;
+  background: var(--teal);
+  color: #fff;
+  padding: 62px 64px 54px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  min-width: 0;
+}
+/* warm glow, lower-left */
+.lp-ac__brand::before {
+  content: '';
+  position: absolute;
+  width: 680px;
+  height: 680px;
+  left: -220px;
+  bottom: -260px;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--ex-brand) 64%, transparent) 0%,
+    transparent 64%
+  );
+  opacity: 0.46;
+  pointer-events: none;
+}
+/* folded-paper creases — hairlines + faint facet shading radiating from an
+   upper-right focal point (origami, tied to the paper-plane mark), faded
+   toward the copy. Rendered as the .lp-ac__folds SVG in markup. */
+.lp-ac__folds {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+  pointer-events: none;
+  mask-image: radial-gradient(125% 125% at 93% 11%, #000 0%, #000 44%, transparent 84%);
+  -webkit-mask-image: radial-gradient(125% 125% at 93% 11%, #000 0%, #000 44%, transparent 84%);
+}
+.lp-ac__top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: relative;
+  z-index: 1;
+}
+.lp-ac__idx {
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.14em;
+  color: var(--teal-faint);
+}
+.lp-ac__mid {
   margin-top: auto;
-  white-space: pre-line;
+  position: relative;
+  z-index: 1;
 }
-.au-foot {
-  font-size: 12.5px;
-  color: rgba(255, 255, 255, 0.72);
-  margin-top: 16px;
-  line-height: 1.75;
+.lp-ac__kicker {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font: 600 11.5px/1 var(--mono);
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--teal-faint);
+  margin-bottom: 26px;
 }
-.au-form {
-  flex: 1;
+.lp-ac__kicker .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ex-brand);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--ex-brand) 26%, transparent);
+}
+.lp-ac__display {
+  font: 600 62px/1.16 var(--serif);
+  letter-spacing: -0.02em;
+  color: #fff;
+  margin: 0;
+}
+.lp-ac__display .v {
+  color: var(--ex-brand);
+}
+.lp-ac__lede {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--teal-ink);
+  margin: 28px 0 0;
+  max-width: 40ch;
+}
+.lp-ac__trust {
+  margin-top: 44px;
+  padding-top: 26px;
+  border-top: 1px solid var(--teal-line);
+  position: relative;
+  z-index: 1;
+}
+/* quiet footer credit (replaces the old social-proof badge) */
+.lp-ac__trust--credit .t {
+  font: 500 11.5px/1.5 var(--mono);
+  letter-spacing: 0.04em;
+  color: var(--teal-faint);
+}
+.lp-ac__trust--credit .t b {
+  font-weight: 600;
+  color: var(--teal-ink);
+}
+.lp-ac__form {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
+  padding: 48px;
+  background: var(--ex-surface);
+  min-width: 0;
 }
-.au-box {
-  width: 344px;
-  max-width: 100%;
+
+/* ---- shared form kit (.lpf) ---- */
+.lpf {
+  width: 100%;
+  max-width: 372px;
 }
-.au-h1 {
-  font-family: var(--ex-font-display);
-  font-size: 25px;
-  font-weight: 700;
+.lpf__eyebrow {
+  font: 600 11.5px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ex-brand);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.lpf__eyebrow::before {
+  content: '';
+  width: 18px;
+  height: 1.5px;
+  background: var(--ex-brand);
+}
+.lpf__h1 {
+  font: 600 30px/1.1 var(--serif);
   letter-spacing: -0.01em;
-  margin: 0;
   color: var(--ex-text);
+  margin: 0;
 }
-.au-sub {
-  font-size: 13px;
+.lpf__sub {
+  font-size: 13.5px;
   color: var(--ex-muted);
-  margin: 8px 0 26px;
+  margin: 10px 0 28px;
   line-height: 1.6;
 }
-.au-field {
-  margin-bottom: 15px;
+.lpf__field {
+  margin-bottom: 16px;
 }
-.au-field .l {
-  display: block;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--ex-muted);
-  margin-bottom: 6px;
-}
-.au-lrow {
+.lpf__lrow {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
-.au-lrow .l {
-  margin: 0;
-}
-.au-inp {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  border: 1px solid var(--ex-border);
-  border-radius: var(--ex-radius);
-  padding: 11px 13px;
-  font-size: 13.5px;
-  font-family: inherit;
-  color: var(--ex-text);
-  background: var(--ex-surface);
-}
-.au-inp::placeholder {
-  color: var(--ex-faint);
-}
-.au-inp:focus {
-  outline: none;
-  border-color: var(--ex-brand);
-  box-shadow: 0 0 0 3px var(--ex-brand-weak);
-}
-.au-inp[aria-invalid='true'] {
-  border-color: var(--ex-danger);
-}
-.au-link {
-  color: var(--ex-brand);
-  font-weight: 600;
+.lpf__label {
   font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-muted);
+  letter-spacing: 0.01em;
+}
+.lpf__link {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--ex-brand);
+  cursor: pointer;
   border: 0;
   background: transparent;
   font-family: inherit;
-  cursor: pointer;
   padding: 0;
 }
-.au-link:hover {
+.lpf__link:hover {
   text-decoration: underline;
 }
-.au-err {
+.lpf__inwrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.lpf__inwrap > svg {
+  position: absolute;
+  left: 14px;
+  width: 17px;
+  height: 17px;
+  color: var(--ex-faint);
+  pointer-events: none;
+  transition: color 0.15s;
+}
+.lpf__input {
+  width: 100%;
+  box-sizing: border-box;
+  height: 46px;
+  padding: 0 14px 0 42px;
+  border: 1.5px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  background: var(--ex-surface);
+  font: 500 14px/1 var(--ex-font-ui);
+  color: var(--ex-text);
+  transition:
+    border-color 0.16s,
+    box-shadow 0.16s;
+  outline: none;
+}
+.lpf__input::placeholder {
+  color: var(--ex-faint);
+  font-weight: 400;
+}
+.lpf__input:focus {
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3.5px var(--ex-brand-weak);
+}
+.lpf__inwrap:focus-within > svg {
+  color: var(--ex-brand);
+}
+.lpf__input[aria-invalid='true'] {
+  border-color: var(--ex-danger);
+}
+.lpf__eye {
+  position: absolute;
+  right: 8px;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--ex-faint);
+  cursor: pointer;
+  border-radius: 7px;
+}
+.lpf__eye:hover {
+  color: var(--ex-muted);
+  background: var(--ex-surface2);
+}
+.lpf__eye svg {
+  width: 17px;
+  height: 17px;
+}
+.lpf__err {
   color: var(--ex-danger);
   font-size: 11.5px;
   margin-top: 6px;
   display: block;
 }
-.au-btn {
-  display: block;
-  width: 100%;
-  box-sizing: border-box;
-  margin-top: 6px;
-  padding: 12px;
-  border: 0;
-  border-radius: var(--ex-radius);
-  background: var(--ex-brand);
-  color: var(--ex-brand-ink);
-  font-weight: 700;
-  font-size: 13.5px;
-  font-family: inherit;
-  text-align: center;
-  cursor: pointer;
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand) 35%, transparent);
-}
-.au-btn:hover {
-  background: color-mix(in srgb, var(--ex-brand) 90%, #000 10%);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 18px color-mix(in srgb, var(--ex-brand) 32%, transparent);
-}
-.au-btn:disabled {
-  opacity: 0.6;
-  cursor: default;
-  transform: none;
-}
-.au-div {
+.lpf__remember {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin: 18px 0;
+  gap: 9px;
+  margin: 4px 0 22px;
+  cursor: pointer;
+  user-select: none;
+  border: 0;
+  background: transparent;
+  font-family: inherit;
+  padding: 0;
+}
+.lpf__cb {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1.5px solid var(--ex-border);
+  flex: none;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  transition:
+    background 0.15s,
+    border-color 0.15s;
+}
+.lpf__cb.on {
+  background: var(--ex-brand);
+  border-color: var(--ex-brand);
+}
+.lpf__cb svg {
+  width: 12px;
+  height: 12px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.lpf__cb.on svg {
+  opacity: 1;
+}
+.lpf__remember span {
+  font-size: 12.5px;
+  color: var(--ex-muted);
+}
+.lpf__btn {
+  width: 100%;
+  height: 48px;
+  border: 0;
+  border-radius: var(--ex-radius);
+  cursor: pointer;
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  font: 700 14px/1 var(--ex-font-ui);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 2px 5px color-mix(in srgb, var(--ex-brand) 32%, transparent);
+  transition:
+    transform 0.12s cubic-bezier(0.2, 0.7, 0.3, 1),
+    box-shadow 0.2s,
+    background 0.16s;
+}
+.lpf__btn svg {
+  width: 17px;
+  height: 17px;
+  transition: transform 0.18s;
+}
+.lpf__btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--ex-brand) 92%, #000);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ex-brand) 38%, transparent);
+  transform: translateY(-1px);
+}
+.lpf__btn:hover:not(:disabled) svg {
+  transform: translateX(3px);
+}
+.lpf__btn:active:not(:disabled) {
+  transform: translateY(0) scale(0.99);
+}
+.lpf__btn:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
+.lpf__div {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 20px 0;
   color: var(--ex-faint);
   font-size: 11.5px;
+  font-weight: 500;
 }
-.au-div::before,
-.au-div::after {
+.lpf__div::before,
+.lpf__div::after {
   content: '';
   height: 1px;
   background: var(--ex-border);
   flex: 1;
 }
-.au-alt {
+.lpf__sso {
+  width: 100%;
+  height: 46px;
+  border: 1.5px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  cursor: pointer;
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  font: 600 13.5px/1 var(--ex-font-ui);
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 9px;
-  box-sizing: border-box;
-  width: 100%;
-  padding: 11px;
-  border: 1px solid var(--ex-border);
-  border-radius: var(--ex-radius);
-  font-size: 13px;
-  font-weight: 600;
-  font-family: inherit;
-  color: var(--ex-text);
-  background: var(--ex-surface);
-  cursor: pointer;
+  gap: 10px;
+  transition:
+    border-color 0.16s,
+    background 0.16s;
 }
-.au-alt:hover {
+.lpf__sso svg {
+  width: 17px;
+  height: 17px;
+}
+.lpf__sso:hover {
+  border-color: var(--ex-faint);
   background: var(--ex-surface2);
 }
-.au-alt svg {
-  width: 16px;
-  height: 16px;
-}
-.au-foot2 {
+.lpf__foot {
   text-align: center;
   font-size: 12.5px;
   color: var(--ex-muted);
-  margin-top: 22px;
+  margin-top: 24px;
 }
-.au-check {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  font-size: 12px;
-  color: var(--ex-muted);
-  margin-bottom: 18px;
-  line-height: 1.55;
-}
-.au-cb {
-  width: 17px;
-  height: 17px;
-  border-radius: 5px;
-  border: 1.5px solid var(--ex-border);
-  flex: none;
-  margin-top: 1px;
-  display: grid;
-  place-items: center;
-  color: #fff;
-  background: transparent;
+.lpf__foot .k {
+  color: var(--ex-brand);
+  font-weight: 700;
   cursor: pointer;
-  padding: 0;
-}
-.au-cb.on {
-  background: var(--ex-brand);
-  border-color: var(--ex-brand);
-}
-.au-cb svg {
-  width: 11px;
-  height: 11px;
-}
-.au-back {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--ex-muted);
-  font-size: 12.5px;
-  font-weight: 600;
-  margin-top: 22px;
   border: 0;
   background: transparent;
   font-family: inherit;
-  cursor: pointer;
+  font-size: inherit;
+  padding: 0;
 }
-.au-back svg {
-  width: 14px;
-  height: 14px;
+.lpf__foot .k:hover {
+  text-decoration: underline;
 }
+
+/* shared alert pill — used across the console (not only the auth screen) */
 .au-note {
   margin: -4px 0 16px;
   padding: 9px 12px;
@@ -3935,9 +4118,36 @@ h3 {
   font-size: 11.5px;
   line-height: 1.5;
 }
-@media (max-width: 720px) {
-  .au-brand {
+
+/* ---- responsive: one column; brand collapses to a slim header ---- */
+@media (max-width: 960px) {
+  .lp,
+  .lp-ac {
+    height: auto;
+    min-height: 100vh;
+  }
+  .lp-ac {
+    grid-template-columns: 1fr;
+  }
+  .lp-ac__brand {
+    padding: clamp(28px, 6vw, 44px) clamp(24px, 6vw, 48px);
+  }
+  .lp-ac__mid {
+    margin-top: 28px;
+  }
+  /* the slim header would otherwise collide with the pinned language toggle */
+  .lp-ac__idx {
     display: none;
+  }
+  .lp-ac__display {
+    font-size: clamp(34px, 8vw, 46px);
+  }
+  .lp-ac__lede,
+  .lp-ac__trust {
+    display: none;
+  }
+  .lp-ac__form {
+    padding: clamp(28px, 8vw, 48px) clamp(24px, 6vw, 48px) 56px;
   }
 }
 
