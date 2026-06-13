@@ -1,19 +1,10 @@
 import { useState, type ReactNode } from 'react';
 import type { ChannelType } from '@/entities/notification-channel';
+import { CHANNEL_TYPES, CHANNEL_ICON } from '@/entities/notification-channel';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import type { IconName } from '@/shared/ui';
 import { useChannels } from '@/features/manage-channels/hooks/use-channels';
-
-const CHANNEL_TYPES: ChannelType[] = ['email', 'slack', 'chatwork', 'webhook'];
-
-const TYPE_ICON: Record<ChannelType, IconName> = {
-  email: 'mail',
-  slack: 'slack',
-  chatwork: 'chat',
-  webhook: 'code',
-};
 
 const CONFIG_FIELDS: Record<ChannelType, { key: string; inputType: string }[]> = {
   email: [{ key: 'recipient', inputType: 'email' }],
@@ -73,7 +64,7 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
                   <tr key={channel.id}>
                     <td>
                       <span className="ch-type">
-                        <Icon name={TYPE_ICON[channel.channelType]} size={16} />
+                        <Icon name={CHANNEL_ICON[channel.channelType]} size={16} />
                         {t(`channel.type.${channel.channelType}`)}
                       </span>
                     </td>
@@ -117,7 +108,7 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
                     setConfig({});
                   }}
                 >
-                  <Icon name={TYPE_ICON[type]} size={15} />
+                  <Icon name={CHANNEL_ICON[type]} size={15} />
                   {t(`channel.type.${type}`)}
                 </button>
               ))}
