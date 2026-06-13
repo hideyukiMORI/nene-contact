@@ -44,7 +44,7 @@ describe('FormBuilder', () => {
     const labelInput = screen.getByLabelText('ラベル');
     await user.clear(labelInput);
     await user.type(labelInput, 'お名前');
-    await user.click(screen.getByRole('button', { name: '保存して公開' }));
+    await user.click(screen.getByRole('button', { name: '公開' }));
 
     await waitFor(() => {
       expect(onCreated).toHaveBeenCalledOnce();
@@ -64,7 +64,7 @@ describe('FormBuilder', () => {
 
     renderWithProviders(<FormBuilder onCreated={onCreated} />);
 
-    await user.click(screen.getByRole('button', { name: '保存して公開' }));
+    await user.click(screen.getByRole('button', { name: '公開' }));
 
     expect(await screen.findByRole('alert')).toHaveTextContent('フォーム名と1つ以上のフィールド');
     expect(onCreated).not.toHaveBeenCalled();

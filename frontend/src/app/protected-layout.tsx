@@ -91,6 +91,7 @@ export function ProtectedLayout(): ReactNode {
   const { t, locale, setLocale } = useI18n();
   const { theme, toggleTheme } = useTheme();
   const pageCrumbs = usePageCrumbs();
+  const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -106,6 +107,18 @@ export function ProtectedLayout(): ReactNode {
   const initial = (session.email.at(0) ?? '?').toUpperCase();
   const isDark = theme === 'dark';
   const crumbs: Crumb[] = [{ label: t('crumb.home') }, ...pageCrumbs];
+
+  // Full-screen focus (builder IA, 採用A): while editing a form, hide the host shell
+  // (sidebar + breadcrumb + theme/lang/avatar). The builder owns the screen with its own
+  // toolbar + tabs; `← 戻る` is the only exit back to the list.
+  const fullscreen = /^\/contact-forms\/(new|[^/]+\/edit)$/.test(pathname);
+  if (fullscreen) {
+    return (
+      <div className="ex-fullscreen">
+        <Outlet context={context} />
+      </div>
+    );
+  }
 
   return (
     <div className="ex-frame" data-drawer={drawerOpen ? 'open' : 'closed'}>
