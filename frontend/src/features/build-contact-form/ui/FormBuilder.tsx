@@ -116,6 +116,35 @@ export function FormBuilder({
   const [tab, setTab] = useState<BuilderTab>('fields');
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
+  // Honest dirty-state: nothing is auto-saved, so the toolbar reflects the draft vs. the last
+  // persisted snapshot. The baseline is the seed the builder opened with (an existing form or an
+  // empty new form), so the "unsaved changes" hint only appears after a real edit.
+  const serialized = JSON.stringify(draft);
+  const [savedSnapshot, setSavedSnapshot] = useState(serialized);
+  const dirty = serialized !== savedSnapshot;
+
+  // Warn before a full page unload (reload/close) while there are unsaved changes.
+  useEffect(() => {
+    if (!dirty) {
+      return;
+    }
+    const onBeforeUnload = (e: BeforeUnloadEvent): void => {
+      e.preventDefault();
+    };
+    window.addEventListener('beforeunload', onBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', onBeforeUnload);
+    };
+  }, [dirty]);
+
+  // Leaving via 戻る discards in-memory edits (there is no draft persistence), so guard it.
+  const handleBack = (): void => {
+    if (dirty && !window.confirm(t('builder.leaveConfirm'))) {
+      return;
+    }
+    onBack?.();
+  };
+
   const sensors = useSensors(
     useSensor(PointerSensor),
     useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
@@ -198,10 +227,14 @@ export function FormBuilder({
       setValidationMessage(t('builder.validation'));
       return;
     }
+    // Capture the exact draft being saved so a concurrent edit during the request still reads
+    // as dirty afterwards (the snapshot reflects what actually reached the server).
+    const savedDraft = JSON.stringify(draft);
     void builder.submit().then(
       () => {
         const now = new Date();
         const hhmm = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+        setSavedSnapshot(savedDraft);
         setSavedAt(hhmm);
         // Editing stays in the full-screen builder; a brand-new form returns to the list.
         if (!isEditing) {
@@ -265,7 +298,7 @@ export function FormBuilder({
           className="st-back"
           aria-label={t('builder.backToList')}
           title={t('builder.backToList')}
-          onClick={onBack}
+          onClick={handleBack}
         >
           <Icon name="arrowLeft" size={16} />
         </button>
@@ -289,6 +322,11 @@ export function FormBuilder({
           <span className="bd-toolbar-alert" role="alert">
             <Icon name="warn" size={14} />
             {alert}
+          </span>
+        ) : dirty ? (
+          <span className="st-saved st-unsaved">
+            <span className="d" />
+            {t('builder.unsaved')}
           </span>
         ) : savedAt !== null ? (
           <span className="st-saved">{t('builder.savedAt', { time: savedAt })}</span>

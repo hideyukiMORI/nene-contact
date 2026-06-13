@@ -578,6 +578,8 @@ export const en: Partial<MessageCatalog> = {
   'builder.tab2.publish': 'Share & publish',
   'builder.publishBtn': 'Publish',
   'builder.savedAt': 'Saved · {time}',
+  'builder.unsaved': 'Unsaved changes',
+  'builder.leaveConfirm': 'You have unsaved changes. Leaving this page will discard them. Continue?',
   'settingsTab.lead':
     'Basic info, submit behaviour and notifications for the whole form. Field contents are edited in the Fields tab.',
   'settingsTab.basic': 'Basic information',

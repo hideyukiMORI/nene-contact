@@ -829,7 +829,9 @@ export const ja = {
   'builder.tab2.design': 'デザイン',
   'builder.tab2.publish': '連携・公開',
   'builder.publishBtn': '公開',
-  'builder.savedAt': '自動保存しました · {time}',
+  'builder.savedAt': '保存しました · {time}',
+  'builder.unsaved': '未保存の変更があります',
+  'builder.leaveConfirm': '未保存の変更があります。このページを離れると失われます。よろしいですか？',
   'settingsTab.lead':
     'このフォーム全体の基本情報・送信時の挙動・通知。フィールドの中身は「フィールド」タブで編集します。',
   'settingsTab.basic': '基本情報',
