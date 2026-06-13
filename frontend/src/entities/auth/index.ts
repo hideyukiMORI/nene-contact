@@ -1,3 +1,3 @@
-export { useLoginMutation } from '@/entities/auth/mutations';
+export { useLoginMutation, useChangePasswordMutation } from '@/entities/auth/mutations';
 export { toSession } from '@/entities/auth/mapper';
-export type { Session, Credentials, Role } from '@/entities/auth/model';
+export type { Session, Credentials, PasswordChange, Role } from '@/entities/auth/model';

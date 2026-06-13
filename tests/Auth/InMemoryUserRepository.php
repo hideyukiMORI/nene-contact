@@ -91,4 +91,20 @@ final class InMemoryUserRepository implements UserRepositoryInterface
         );
     }
 
+    public function updatePassword(int $id, string $passwordHash): void
+    {
+        $existing = $this->users[$id] ?? null;
+        if ($existing === null) {
+            return;
+        }
+
+        $this->users[$id] = new User(
+            id: $existing->id,
+            email: $existing->email,
+            passwordHash: $passwordHash,
+            role: $existing->role,
+            organizationId: $existing->organizationId,
+            status: $existing->status,
+        );
+    }
 }

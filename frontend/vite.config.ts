@@ -34,6 +34,7 @@ export default defineConfig(({ mode }) => {
       port: frontendPort,
       proxy: {
         '/admin/auth': target,
+        '/admin/account': target,
         '/admin/organizations': target,
         '/admin/contact-forms': target,
         '/admin/submissions': target,

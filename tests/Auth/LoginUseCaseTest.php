@@ -61,6 +61,10 @@ final class LoginUseCaseTest extends TestCase
             public function update(int $id, string $role, string $status): void
             {
             }
+
+            public function updatePassword(int $id, string $passwordHash): void
+            {
+            }
         };
     }
 

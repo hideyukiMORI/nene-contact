@@ -11,3 +11,8 @@ export interface Credentials {
   email: string;
   password: string;
 }
+
+export interface PasswordChange {
+  currentPassword: string;
+  newPassword: string;
+}

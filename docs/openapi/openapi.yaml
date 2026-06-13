@@ -63,6 +63,25 @@ paths:
         '401': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
 
+  /admin/account/password:
+    post:
+      tags: [Auth]
+      operationId: changeOwnPassword
+      summary: Change the authenticated operator's own password
+      description: >
+        Verifies the current password and sets a new one for the token actor. Acts only on
+        the caller (the user id comes from the JWT, never a path parameter), so it cannot
+        change another user's password. Audited as user.password_changed.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/ChangePasswordRequest' }
+      responses:
+        '204': { description: Password changed }
+        '401': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
   /admin/users:
     get:
       tags: [User]
@@ -1048,6 +1067,13 @@ components:
         password: { type: string, minLength: 8 }
         role: { type: string, enum: [admin, editor] }
       required: [email, password, role]
+
+    ChangePasswordRequest:
+      type: object
+      properties:
+        current_password: { type: string }
+        new_password: { type: string, minLength: 8 }
+      required: [current_password, new_password]
 
     UpdateUserRequest:
       type: object

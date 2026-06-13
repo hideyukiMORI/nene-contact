@@ -80,6 +80,9 @@ function usePageCrumbs(): Crumb[] {
   if (segments[0] === 'audit-log') {
     return [{ label: t('nav.auditLog') }];
   }
+  if (segments[0] === 'account') {
+    return [{ label: t('account.title') }];
+  }
   return [{ label: t('nav.dashboard') }];
 }
 
@@ -238,6 +241,18 @@ export function ProtectedLayout(): ReactNode {
                       </div>
                     </div>
                     <div className="mn-list">
+                      <Link
+                        to="/account"
+                        className="mn-item"
+                        role="menuitem"
+                        onClick={() => {
+                          setMenuOpen(false);
+                        }}
+                      >
+                        <Icon name="user" size={16} />
+                        {t('account.title')}
+                      </Link>
+                      <div className="mn-sep" />
                       <button
                         type="button"
                         className="mn-item danger"
