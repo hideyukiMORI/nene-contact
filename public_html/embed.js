@@ -10,8 +10,8 @@
  * requests only (GET schema, multipart upload, text/plain JSON submit) so no preflight.
  *
  * Display mode comes from appearance.mode (modal | chat | inline); data-trigger overrides it.
- * NOTE: chat currently renders via the modal launcher; the conversational one-by-one stepper
- * is a dedicated follow-up.
+ * chat opens a docked conversational panel that asks each field one at a time (the stepper);
+ * modal opens the full themed form behind a launcher; inline renders the form in page flow.
  */
 (function () {
   'use strict';
@@ -107,6 +107,7 @@
     var md = a.modal && typeof a.modal === 'object' ? a.modal : {};
     var lc = a.launcher && typeof a.launcher === 'object' ? a.launcher : {};
     var il = a.inline && typeof a.inline === 'object' ? a.inline : {};
+    var ch = a.chat && typeof a.chat === 'object' ? a.chat : {};
     var h = a.hero && typeof a.hero === 'object' ? a.hero : {};
     return {
       mode: pick(a, 'mode', isOneOf(['modal', 'chat', 'inline']), 'modal'),
@@ -158,6 +159,11 @@
         label: isStr(lc.label) ? lc.label : 'お問い合わせ'
       },
       inline: { align: pick(il, 'align', isOneOf(['left', 'center', 'right']), 'center') },
+      chat: {
+        oneByOne: ch.oneByOne !== false,
+        progress: ch.progress !== false,
+        typing: ch.typing !== false
+      },
       hero: {
         on: h.on !== false,
         media: isStr(h.media) ? h.media : 'm-team',
@@ -293,6 +299,37 @@
       '.pv-launcher.right{right:20px}.pv-launcher.left{left:20px}',
       '.pv-launcher.circle{width:56px;height:56px;padding:0;justify-content:center}',
       '.pv-launcher svg{width:19px;height:19px}',
+      /* chat: a docked conversational panel (mirrors the studio .pv-chat preview) */
+      '.pv-chat{position:fixed;bottom:20px;z-index:2147483002;width:360px;max-width:calc(100vw - 40px);height:480px;max-height:calc(100vh - 40px);background:var(--pv-surface);color:var(--pv-text);font-family:var(--pv-font);border-radius:var(--pv-r-form);box-shadow:0 24px 60px rgba(0,0,0,.26);display:flex;flex-direction:column;overflow:hidden}',
+      '.pv-chat.right{right:20px}.pv-chat.left{left:20px}',
+      '.pv-chat__hd{padding:15px 16px;background:var(--pv-accent);color:var(--pv-btn-text);display:flex;align-items:center;gap:10px}',
+      '.pv-chat__hd .av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.22);display:grid;place-items:center;flex:none}',
+      '.pv-chat__hd .av svg{width:17px;height:17px}',
+      '.pv-chat__meta{min-width:0;flex:1}',
+      '.pv-chat__hd .nm{font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}',
+      '.pv-chat__hd .ol{font-size:10.5px;opacity:.85;display:flex;align-items:center;gap:5px}',
+      '.pv-chat__hd .ol i{width:6px;height:6px;border-radius:50%;background:#7ef0a8}',
+      '.pv-chat__x{flex:none;width:26px;height:26px;border:0;border-radius:7px;cursor:pointer;background:rgba(255,255,255,.18);color:var(--pv-btn-text);display:grid;place-items:center;font-size:17px;line-height:1}',
+      '.pv-prog{height:3px;background:color-mix(in srgb,var(--pv-text) 8%,transparent)}',
+      '.pv-prog>i{display:block;height:100%;width:0;background:var(--pv-accent);border-radius:0 2px 2px 0;transition:width .3s}',
+      '.pv-chat__body{flex:1;min-height:0;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:12px}',
+      '.pv-bubble{max-width:80%;padding:10px 13px;border-radius:13px;font-size:12.5px;line-height:1.5;white-space:pre-wrap;word-break:break-word}',
+      '.pv-bubble.bot{align-self:flex-start;background:color-mix(in srgb,var(--pv-text) 6%,var(--pv-surface));color:var(--pv-text);border-bottom-left-radius:4px}',
+      '.pv-bubble.me{align-self:flex-end;background:var(--pv-accent);color:var(--pv-btn-text);border-bottom-right-radius:4px}',
+      '.pv-bubble.err{align-self:flex-start;background:color-mix(in srgb,var(--pv-error) 12%,var(--pv-surface));color:var(--pv-error);border-bottom-left-radius:4px}',
+      '.pv-typing{align-self:flex-start;display:inline-flex;gap:4px;padding:12px 14px;background:color-mix(in srgb,var(--pv-text) 6%,var(--pv-surface));border-radius:13px;border-bottom-left-radius:4px}',
+      '.pv-typing i{width:6px;height:6px;border-radius:50%;background:var(--pv-muted);animation:pv-blink 1.2s infinite}',
+      '.pv-typing i:nth-child(2){animation-delay:.2s}.pv-typing i:nth-child(3){animation-delay:.4s}',
+      '@keyframes pv-blink{0%,60%,100%{opacity:.3}30%{opacity:1}}',
+      '.pv-chat__ft{padding:12px 14px;border-top:var(--pv-bw) var(--pv-bstyle) var(--pv-bcolor);display:flex;gap:9px;align-items:center;flex-wrap:wrap}',
+      '.pv-chat__in{flex:1;min-width:0;padding:10px 12px;border:var(--pv-bw) var(--pv-bstyle) var(--pv-bcolor);border-radius:var(--pv-r-input);font-size:12.5px;font-family:inherit;color:var(--pv-text);background:var(--pv-input-bg);outline:none}',
+      '.pv-chat__in:focus{border-color:var(--pv-focus)}',
+      'textarea.pv-chat__in{resize:none;min-height:40px}',
+      '.pv-chat__send{flex:none;width:38px;height:38px;border:0;border-radius:var(--pv-r-btn);cursor:pointer;background:var(--pv-accent);color:var(--pv-btn-text);display:grid;place-items:center}',
+      '.pv-chat__send:disabled{opacity:.6;cursor:default}',
+      '.pv-chat__send svg{width:17px;height:17px}',
+      '.pv-qr{flex:1 1 auto;padding:10px 14px;border:1.5px solid var(--pv-accent);border-radius:var(--pv-r-btn);cursor:pointer;background:transparent;color:var(--pv-accent);font:600 12.5px/1 var(--pv-font)}',
+      '.pv-qr:active{transform:translateY(1px)}',
       '.pv-overlay{position:fixed;inset:0;z-index:2147483001}',
       '.pv-backdrop{position:absolute;inset:0;background:rgba(18,24,33,var(--pv-backdrop))}',
       '.pv-modal{position:absolute;box-sizing:border-box;width:var(--pv-modal-w);max-width:calc(100% - 40px);max-height:calc(100% - 40px);overflow:auto;padding:24px 24px 22px;background:var(--pv-surface);border-radius:var(--pv-r-form);box-shadow:0 30px 70px rgba(0,0,0,.3)}',
@@ -331,7 +368,8 @@
       return;
     }
 
-    // modal + chat (interim): a launcher opens the themed form in a centered/right modal.
+    // modal + chat: a launcher opens the themed form, either in a modal or a conversational
+    // chat panel (the one-by-one stepper) depending on the mode.
     var launcher = el('button', { type: 'button', 'class': 'pv-launcher ' + a.launcher.side + ' ' + a.launcher.shape });
     launcher.appendChild(icon('chat'));
     if (a.launcher.shape === 'pill') {
@@ -339,7 +377,11 @@
     }
     root.appendChild(launcher);
     launcher.addEventListener('click', function () {
-      openModal(root, schema, locale, a);
+      if (mode === 'chat') {
+        openChat(root, schema, locale, a);
+      } else {
+        openModal(root, schema, locale, a);
+      }
     });
   }
 
@@ -368,6 +410,283 @@
     requestAnimationFrame(function () {
       requestAnimationFrame(function () { anim.setAttribute('data-in', '1'); });
     });
+  }
+
+  // Conversational chat mode: ask each field one at a time as bot bubbles, the visitor answers
+  // in the footer, then submit through the same pipeline as the modal/inline forms.
+  function openChat(root, schema, locale, a) {
+    if (root.querySelector('.pv-chat')) {
+      return;
+    }
+    var en = locale === 'en';
+    var allFields = Array.isArray(schema.fields) ? schema.fields : [];
+    var askable = [];
+    var values = {};
+    var fileMap = {};
+    allFields.forEach(function (field) {
+      if (field.field_type === 'honeypot') {
+        values[field.name] = '';
+      } else {
+        askable.push(field);
+      }
+    });
+
+    var panel = el('div', { 'class': 'pv-chat ' + a.launcher.side });
+    var hd = el('div', { 'class': 'pv-chat__hd' });
+    var av = el('span', { 'class': 'av' });
+    av.appendChild(icon('chat'));
+    var meta = el('div', { 'class': 'pv-chat__meta' });
+    meta.appendChild(el('div', { 'class': 'nm' },
+      (schema.name && (localized(typeof schema.name === 'object' ? schema.name : null, locale) || schema.name)) || (en ? 'Contact' : 'お問い合わせ')));
+    var ol = el('div', { 'class': 'ol' });
+    ol.appendChild(el('i'));
+    ol.appendChild(el('span', null, en ? 'Online' : 'オンライン'));
+    meta.appendChild(ol);
+    var x = el('button', { type: 'button', 'class': 'pv-chat__x', 'aria-label': 'Close' }, '×');
+    hd.appendChild(av);
+    hd.appendChild(meta);
+    hd.appendChild(x);
+    panel.appendChild(hd);
+
+    var progBar = null;
+    if (a.chat.progress) {
+      var prog = el('div', { 'class': 'pv-prog' });
+      progBar = el('i');
+      prog.appendChild(progBar);
+      panel.appendChild(prog);
+    }
+
+    var body = el('div', { 'class': 'pv-chat__body' });
+    var ft = el('div', { 'class': 'pv-chat__ft' });
+    panel.appendChild(body);
+    panel.appendChild(ft);
+    root.appendChild(panel);
+    x.addEventListener('click', function () { panel.remove(); });
+
+    var idx = 0;
+    var consentGiven = false;
+    var totalSteps = askable.length + (schema.consent_required ? 1 : 0);
+
+    function bubble(cls, text) {
+      var b = el('div', { 'class': 'pv-bubble ' + cls }, text);
+      body.appendChild(b);
+      body.scrollTop = body.scrollHeight;
+      return b;
+    }
+    function clearFooter() {
+      while (ft.firstChild) { ft.removeChild(ft.firstChild); }
+    }
+    function setProgress(done) {
+      if (progBar) {
+        progBar.style.width = (totalSteps ? Math.round((done / totalSteps) * 100) : 0) + '%';
+      }
+    }
+    function sendButton(onGo) {
+      var btn = el('button', { type: 'button', 'class': 'pv-chat__send', 'aria-label': 'Send' });
+      btn.appendChild(icon('send'));
+      btn.addEventListener('click', onGo);
+      return btn;
+    }
+
+    function advance(field, value, display) {
+      values[field.name] = value;
+      bubble('me', display);
+      idx++;
+      ask();
+    }
+
+    function askText(field) {
+      clearFooter();
+      var area = field.field_type === 'textarea';
+      var input = area
+        ? el('textarea', { 'class': 'pv-chat__in', rows: '2' })
+        : el('input', { type: field.field_type === 'email' ? 'email' : field.field_type === 'date' ? 'date' : 'text', 'class': 'pv-chat__in' });
+      if (isStr(field.placeholder) && field.placeholder) { input.setAttribute('placeholder', field.placeholder); }
+      var go = function () {
+        var v = (input.value || '').replace(/^\s+|\s+$/g, '');
+        if (field.required && v === '') {
+          bubble('err', en ? 'This field is required.' : 'この項目は必須です。');
+          input.focus();
+          return;
+        }
+        advance(field, v, v || '—');
+      };
+      input.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && !area) { e.preventDefault(); go(); }
+      });
+      ft.appendChild(input);
+      ft.appendChild(sendButton(go));
+      input.focus();
+    }
+
+    function askSelect(field) {
+      clearFooter();
+      var sel = el('select', { 'class': 'pv-chat__in' });
+      sel.appendChild(el('option', { value: '' }, en ? 'Select…' : '選択してください'));
+      var opts = Array.isArray(field.options) ? field.options : [];
+      opts.forEach(function (opt) {
+        var value = opt && (opt.value != null ? String(opt.value) : (opt.name != null ? String(opt.name) : ''));
+        sel.appendChild(el('option', { value: value }, localized(opt && opt.label, locale) || value));
+      });
+      var go = function () {
+        var v = sel.value;
+        if (field.required && v === '') {
+          bubble('err', en ? 'Please choose an option.' : '選択してください。');
+          return;
+        }
+        var label = v ? (sel.options[sel.selectedIndex] ? sel.options[sel.selectedIndex].textContent : v) : '—';
+        advance(field, v, label);
+      };
+      ft.appendChild(sel);
+      ft.appendChild(sendButton(go));
+    }
+
+    function askChoice(field) {
+      // checkbox-style boolean: a pair of quick-reply buttons.
+      clearFooter();
+      var yes = el('button', { type: 'button', 'class': 'pv-qr' }, en ? 'Yes' : 'はい');
+      var no = el('button', { type: 'button', 'class': 'pv-qr' }, en ? 'No' : 'いいえ');
+      yes.addEventListener('click', function () { advance(field, '1', en ? 'Yes' : 'はい'); });
+      no.addEventListener('click', function () {
+        if (field.required) {
+          bubble('err', en ? 'This field is required.' : 'この項目は必須です。');
+          return;
+        }
+        advance(field, '', en ? 'No' : 'いいえ');
+      });
+      ft.appendChild(yes);
+      ft.appendChild(no);
+    }
+
+    function askFile(field) {
+      clearFooter();
+      var input = el('input', { type: 'file', 'class': 'pv-chat__in' });
+      var go = function () {
+        var files = input.files;
+        if ((!files || !files.length) && field.required) {
+          bubble('err', en ? 'A file is required.' : 'ファイルが必要です。');
+          return;
+        }
+        if (files && files.length) {
+          fileMap[field.name] = files;
+          var names = [];
+          for (var i = 0; i < files.length; i++) { names.push(files[i].name); }
+          advance(field, '', names.join(', '));
+        } else {
+          advance(field, '', '—');
+        }
+      };
+      ft.appendChild(input);
+      ft.appendChild(sendButton(go));
+    }
+
+    function askConsent() {
+      bubble('bot', localized(schema.consent_label, locale) || (en ? 'Do you agree to the privacy policy?' : 'プライバシーポリシーに同意しますか？'));
+      clearFooter();
+      var yes = el('button', { type: 'button', 'class': 'pv-qr' }, en ? 'I agree' : '同意する');
+      var no = el('button', { type: 'button', 'class': 'pv-qr' }, en ? 'No' : '同意しない');
+      yes.addEventListener('click', function () {
+        consentGiven = true;
+        bubble('me', en ? 'I agree' : '同意する');
+        idx++;
+        setProgress(idx);
+        finish();
+      });
+      no.addEventListener('click', function () {
+        bubble('err', en ? 'Consent is required to submit.' : '送信には同意が必要です。');
+      });
+      ft.appendChild(yes);
+      ft.appendChild(no);
+    }
+
+    function ask() {
+      setProgress(idx);
+      if (idx >= askable.length) {
+        if (schema.consent_required && !consentGiven) { askConsent(); return; }
+        finish();
+        return;
+      }
+      var field = askable[idx];
+      bubble('bot', localized(field.label, locale) || field.name);
+      var type = field.field_type;
+      if (type === 'select') { askSelect(field); }
+      else if (type === 'checkbox') { askChoice(field); }
+      else if (type === 'file') { askFile(field); }
+      else { askText(field); }
+    }
+
+    function finish() {
+      clearFooter();
+      var typing = el('div', { 'class': 'pv-typing' });
+      typing.appendChild(el('i'));
+      typing.appendChild(el('i'));
+      typing.appendChild(el('i'));
+      body.appendChild(typing);
+      body.scrollTop = body.scrollHeight;
+
+      submitChat(schema, locale, values, fileMap, consentGiven).then(function (res) {
+        typing.remove();
+        if (res.ok) {
+          if (schema.post_submit === 'redirect' && isStr(schema.redirect_url) && schema.redirect_url) {
+            location.href = schema.redirect_url;
+            return;
+          }
+          bubble('bot', localized(schema.success_message, locale) || (en ? 'Thank you — your message was sent.' : '送信しました。ありがとうございます。'));
+          return;
+        }
+        if (res.fieldError) {
+          bubble('err', res.fieldError);
+        } else {
+          bubble('err', en ? 'Could not send. Please try again later.' : '送信できませんでした。時間をおいて再度お試しください。');
+        }
+      });
+    }
+
+    // Greeting then the first question.
+    bubble('bot', isStr(schema.description) && schema.description
+      ? schema.description
+      : (en ? 'Hi! I’ll ask a few quick questions.' : 'こんにちは！いくつか順番にお伺いします。'));
+    ask();
+  }
+
+  function submitChat(schema, locale, values, fileMap, consentGiven) {
+    var en = locale === 'en';
+    var uploads = [];
+    var name;
+    for (name in fileMap) {
+      if (Object.prototype.hasOwnProperty.call(fileMap, name)) {
+        var files = fileMap[name];
+        for (var i = 0; i < files.length; i++) { uploads.push(uploadOne(files[i])); }
+      }
+    }
+    return Promise.all(uploads)
+      .then(function (ids) {
+        var attachmentIds = ids.filter(function (id) { return id != null; });
+        var payload = { attachment_ids: attachmentIds, source_url: location.href, locale: locale };
+        if (schema.consent_required) { payload.consent = !!consentGiven; }
+        var k;
+        for (k in values) {
+          if (Object.prototype.hasOwnProperty.call(values, k)) { payload[k] = values[k]; }
+        }
+        return fetch(api + '/submissions', {
+          method: 'POST',
+          credentials: 'omit',
+          headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+          body: JSON.stringify(payload)
+        });
+      })
+      .then(function (r) {
+        if (r.status === 201 || r.status === 204) { return { ok: true }; }
+        if (r.status === 422) {
+          return r.json().then(function (body) {
+            var errs = body && Array.isArray(body.errors) ? body.errors : [];
+            var first = errs.length && errs[0] ? errs[0].message : null;
+            return { ok: false, fieldError: first || (en ? 'Please check your input.' : '入力内容をご確認ください。') };
+          }, function () { return { ok: false }; });
+        }
+        return { ok: false };
+      })
+      .catch(function () { return { ok: false }; });
   }
 
   // Minimal inline SVG icons (CSP-safe; built via DOM, not innerHTML).

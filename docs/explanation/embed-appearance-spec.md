@@ -65,7 +65,7 @@ Today `appearance.mode` is the form's stored default; the snippet's `data-trigge
 | --- | --- | --- |
 | `modal` (explicit) | Same as `button` but documented as its own mode so the launcher style is a separate axis from "opens in a modal" | Mostly a taxonomy cleanup |
 | `drawer` / `slide-in` | Launcher opens a panel that slides from the right/bottom edge instead of a centered modal | Medium effort; new layout + animation |
-| `chat` (Phase 2) | Conversational: **one field per step**, progress indicator, prev/next, answer bubbles, typing affordance | Large: new render engine in embed.js + builder preview + per-step validation |
+| `chat` ✅ built (#302) | Conversational: **one field per step** in a docked panel, progress indicator, answer bubbles. embed.js `openChat` stepper (text/select/checkbox/file inputs, per-step required validation, consent step), reusing the studio `.pv-chat*` design + the shared submit/upload pipeline | Builder preview already existed (StudioPreview ChatPanel) |
 | `fullscreen` | Launcher opens a full-viewport takeover form | Small variant of modal |
 
 ---
@@ -118,7 +118,7 @@ Grouped so you can pick tiers. Each item is per-form `appearance` unless noted. 
 - [ ] Inline vs replace-form success state (S)
 
 ### H. Modes (the big one)
-- [ ] `chat` conversational mode — see §2; treat as its own milestone (L)
+- [x] `chat` conversational mode — see §2; built in #302 (embed.js `openChat` stepper)
 
 ---
 
