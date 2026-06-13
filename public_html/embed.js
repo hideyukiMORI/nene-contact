@@ -28,7 +28,7 @@
     return;
   }
 
-  var trigger = script.getAttribute('data-trigger') || 'floating';
+  var triggerAttr = script.getAttribute('data-trigger') || '';
   var langAttr = script.getAttribute('data-lang') || '';
   var buttonLabel = script.getAttribute('data-button-label') || '';
 
@@ -42,11 +42,39 @@
       return r.json();
     })
     .then(function (schema) {
-      mount(schema);
+      mount(schema, resolveAppearance(schema));
     })
     .catch(function () {
       /* fail silently — never break the host page */
     });
+
+  // Per-form theme + chrome from the schema (appearance v1), merged over safe defaults that
+  // reproduce the widget's original look. Fonts are web-safe stacks only (no host dependency).
+  var FONTS = {
+    system: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',
+    sans: 'Arial,Helvetica,sans-serif',
+    serif: 'Georgia,"Times New Roman",serif'
+  };
+  var MODES = { floating: 1, button: 1, inline: 1 };
+
+  function resolveAppearance(schema) {
+    var a = schema && typeof schema.appearance === 'object' && schema.appearance ? schema.appearance : {};
+    var radius = typeof a.radius === 'number' && a.radius >= 0 && a.radius <= 24 ? a.radius : 8;
+    return {
+      mode: MODES[a.mode] ? a.mode : 'floating',
+      accent: typeof a.accent === 'string' ? a.accent : '#2563eb',
+      surface: typeof a.surface === 'string' ? a.surface : '#ffffff',
+      text: typeof a.text === 'string' ? a.text : '#111827',
+      radius: radius,
+      font: FONTS[a.font] || FONTS.system,
+      header: a.header !== false,
+      hero: a.hero === true
+    };
+  }
+
+  function resolveTrigger(ap) {
+    return MODES[triggerAttr] ? triggerAttr : ap.mode;
+  }
 
   function resolveLocale(schema) {
     var locales = Array.isArray(schema.locales) && schema.locales.length ? schema.locales : ['ja'];
@@ -85,43 +113,54 @@
     return node;
   }
 
-  function styles() {
+  function styles(ap) {
+    var r = ap.radius;
     return [
-      ':host{all:initial}',
-      '*{box-sizing:border-box;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}',
-      '.nene-contact-form{display:flex;flex-direction:column;gap:12px;max-width:420px}',
+      ':host{all:initial;'
+        + '--nc-accent:' + ap.accent + ';'
+        + '--nc-surface:' + ap.surface + ';'
+        + '--nc-text:' + ap.text + ';'
+        + '--nc-radius:' + r + 'px;'
+        + '--nc-radius-lg:' + (r + 4) + 'px;'
+        + '--nc-font:' + ap.font + '}',
+      '*{box-sizing:border-box;font-family:var(--nc-font)}',
+      '.nene-contact-form{display:flex;flex-direction:column;gap:12px;max-width:420px;color:var(--nc-text)}',
       '.nene-contact-field{display:flex;flex-direction:column;gap:4px}',
-      '.nene-contact-label{font-size:13px;font-weight:600;color:#1f2937}',
+      '.nene-contact-label{font-size:13px;font-weight:600;color:var(--nc-text)}',
       '.nene-contact-req{color:#dc2626;margin-left:2px}',
-      '.nene-contact-input,.nene-contact-textarea,.nene-contact-select{padding:8px 10px;border:1px solid #d1d5db;border-radius:6px;font-size:14px;width:100%}',
+      '.nene-contact-input,.nene-contact-textarea,.nene-contact-select{padding:8px 10px;border:1px solid #d1d5db;border-radius:var(--nc-radius);font-size:14px;width:100%;color:var(--nc-text)}',
       '.nene-contact-textarea{min-height:88px;resize:vertical}',
-      '.nene-contact-consent{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:#374151}',
+      '.nene-contact-consent{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--nc-text)}',
       '.nene-contact-error{color:#dc2626;font-size:12px}',
-      '.nene-contact-submit{padding:10px 14px;background:#2563eb;color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}',
+      '.nene-contact-submit{padding:10px 14px;background:var(--nc-accent);color:#fff;border:0;border-radius:var(--nc-radius);font-size:14px;font-weight:600;cursor:pointer}',
       '.nene-contact-submit:disabled{opacity:.6;cursor:default}',
-      '.nene-contact-msg{font-size:14px;padding:8px 10px;border-radius:6px}',
+      '.nene-contact-msg{font-size:14px;padding:8px 10px;border-radius:var(--nc-radius)}',
       '.nene-contact-msg.ok{background:#ecfdf5;color:#065f46}',
       '.nene-contact-msg.err{background:#fef2f2;color:#991b1b}',
       '.nene-contact-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}',
-      '.nene-contact-launch{position:fixed;right:20px;bottom:20px;z-index:2147483000;padding:12px 18px;background:#2563eb;color:#fff;border:0;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)}',
-      '.nene-contact-btn{padding:10px 16px;background:#2563eb;color:#fff;border:0;border-radius:6px;font-size:14px;font-weight:600;cursor:pointer}',
+      '.nene-contact-launch{position:fixed;right:20px;bottom:20px;z-index:2147483000;padding:12px 18px;background:var(--nc-accent);color:#fff;border:0;border-radius:999px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 4px 14px rgba(0,0,0,.2)}',
+      '.nene-contact-btn{padding:10px 16px;background:var(--nc-accent);color:#fff;border:0;border-radius:var(--nc-radius);font-size:14px;font-weight:600;cursor:pointer}',
       '.nene-contact-overlay{position:fixed;inset:0;z-index:2147483001;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;padding:16px}',
-      '.nene-contact-panel{background:#fff;border-radius:12px;padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto;position:relative}',
+      '.nene-contact-panel{background:var(--nc-surface);border-radius:var(--nc-radius-lg);padding:20px;max-width:460px;width:100%;max-height:90vh;overflow:auto;position:relative}',
       '.nene-contact-close{position:absolute;top:10px;right:12px;background:none;border:0;font-size:22px;line-height:1;cursor:pointer;color:#6b7280}',
-      '.nene-contact-title{font-size:18px;font-weight:700;margin:0 0 12px;color:#111827}'
-      + '.nene-contact-desc{font-size:13px;line-height:1.6;margin:-4px 0 16px;color:#6b7280}'
+      '.nene-contact-title{font-size:18px;font-weight:700;margin:0 0 12px;color:var(--nc-text)}',
+      '.nene-contact-desc{font-size:13px;line-height:1.6;margin:-4px 0 16px;color:#6b7280}',
+      '.nene-contact-hero{margin:0 0 16px;padding:18px;border-radius:var(--nc-radius-lg);background:color-mix(in srgb,var(--nc-accent) 10%,transparent)}',
+      '.nene-contact-hero .nene-contact-title{font-size:22px;margin:0}',
+      '.nene-contact-hero .nene-contact-desc{margin:6px 0 0}'
     ].join('');
   }
 
-  function mount(schema) {
+  function mount(schema, ap) {
     var locale = resolveLocale(schema);
+    var trigger = resolveTrigger(ap);
     var host = el('div', { 'data-nene-contact': formKey });
     document.body.appendChild(host);
     var root = host.attachShadow ? host.attachShadow({ mode: 'open' }) : host;
-    root.appendChild(el('style', null, styles()));
+    root.appendChild(el('style', null, styles(ap)));
 
     if (trigger === 'inline') {
-      root.appendChild(buildForm(schema, locale));
+      root.appendChild(buildForm(schema, locale, ap));
       if (script.parentNode) {
         script.parentNode.insertBefore(host, script);
       }
@@ -132,11 +171,11 @@
       buttonLabel || localized(schema.name && typeof schema.name === 'object' ? schema.name : null, locale) || schema.name || 'Contact');
     root.appendChild(launcher);
     launcher.addEventListener('click', function () {
-      openModal(root, schema, locale);
+      openModal(root, schema, locale, ap);
     });
   }
 
-  function openModal(root, schema, locale) {
+  function openModal(root, schema, locale, ap) {
     if (root.querySelector('.nene-contact-overlay')) {
       return;
     }
@@ -146,21 +185,35 @@
     close.addEventListener('click', function () { overlay.remove(); });
     overlay.addEventListener('click', function (e) { if (e.target === overlay) { overlay.remove(); } });
     panel.appendChild(close);
-    panel.appendChild(buildForm(schema, locale));
+    panel.appendChild(buildForm(schema, locale, ap));
     overlay.appendChild(panel);
     root.appendChild(overlay);
   }
 
-  function buildForm(schema, locale) {
+  function buildForm(schema, locale, ap) {
+    ap = ap || resolveAppearance(schema);
     var form = el('form', { 'class': 'nene-contact-form', novalidate: 'novalidate' });
     var fields = Array.isArray(schema.fields) ? schema.fields : [];
 
-    if (schema.name) {
-      form.appendChild(el('h2', { 'class': 'nene-contact-title' }, localized(typeof schema.name === 'object' ? schema.name : null, locale) || schema.name));
-    }
+    var titleText = schema.name
+      ? (localized(typeof schema.name === 'object' ? schema.name : null, locale) || schema.name)
+      : '';
+    var title = ap.header && titleText
+      ? el('h2', { 'class': 'nene-contact-title' }, titleText)
+      : null;
+    var desc = schema.description
+      ? el('p', { 'class': 'nene-contact-desc' }, schema.description)
+      : null;
 
-    if (schema.description) {
-      form.appendChild(el('p', { 'class': 'nene-contact-desc' }, schema.description));
+    if (ap.hero && (title || desc)) {
+      // Hero band: title + description in an accent-tinted block.
+      var hero = el('div', { 'class': 'nene-contact-hero' });
+      if (title) { hero.appendChild(title); }
+      if (desc) { hero.appendChild(desc); }
+      form.appendChild(hero);
+    } else {
+      if (title) { form.appendChild(title); }
+      if (desc) { form.appendChild(desc); }
     }
 
     var controls = {};

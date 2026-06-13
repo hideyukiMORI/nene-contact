@@ -1201,10 +1201,24 @@ components:
         consent_required: { type: boolean }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         retention_days: { type: [integer, 'null'], description: 'Per-form retention; null uses the documented default (charter §5).' }
+        appearance: { $ref: '#/components/schemas/Appearance' }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
       required: [id, name, public_form_key, default_locale, locales, fields]
+
+    Appearance:
+      type: object
+      description: 'Per-form embed theme + chrome (builder spec — appearance v1). Missing keys fall back to defaults.'
+      properties:
+        mode: { type: string, enum: [floating, button, inline], description: 'Display mode of the embed widget.' }
+        accent: { type: string, description: 'Accent/button colour (hex).' }
+        surface: { type: string, description: 'Panel/form background colour (hex).' }
+        text: { type: string, description: 'Body text colour (hex).' }
+        radius: { type: integer, minimum: 0, maximum: 24, description: 'Corner radius in px.' }
+        font: { type: string, enum: [system, sans, serif] }
+        header: { type: boolean, description: 'Show the form title.' }
+        hero: { type: boolean, description: 'Render the title + description as a hero band.' }
 
     ContactFormListResponse:
       type: object
@@ -1230,6 +1244,9 @@ components:
           allOf: [{ $ref: '#/components/schemas/LocaleMap' }]
           description: Per-locale consent copy (ja/en); required for the default locale when consent_required is true (charter §3).
         retention_days: { type: integer, minimum: 1, description: 'Optional per-form retention in days; omit to use the documented default (charter §5).' }
+        appearance:
+          allOf: [{ $ref: '#/components/schemas/Appearance' }]
+          description: 'Optional embed appearance; missing/partial fills from defaults (full-replace on update).'
         fields:
           type: array
           items:
@@ -1256,6 +1273,7 @@ components:
         locales: { type: array, items: { type: string, enum: [ja, en] } }
         consent_required: { type: boolean }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
+        appearance: { $ref: '#/components/schemas/Appearance' }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\Submission;
 
 use Nene2\Database\DatabaseQueryExecutorInterface;
+use NeneContact\ContactForm\Appearance;
 use NeneContact\ContactForm\ContactForm;
 use NeneContact\ContactForm\FormField;
 
@@ -18,7 +19,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm
     {
         $row = $this->query->fetchOne(
-            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, created_at, updated_at
+            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, appearance_json, created_at, updated_at
              FROM contact_forms WHERE public_form_key = ?',
             [$publicFormKey],
         );
@@ -68,6 +69,10 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         $consentLabel = isset($row['consent_label_json'])
             ? (array) json_decode((string) $row['consent_label_json'], true, 512, JSON_THROW_ON_ERROR)
             : null;
+        /** @var array<string, mixed>|null $appearance */
+        $appearance = isset($row['appearance_json'])
+            ? (array) json_decode((string) $row['appearance_json'], true, 512, JSON_THROW_ON_ERROR)
+            : null;
 
         return new ContactForm(
             organizationId: (int) $row['organization_id'],
@@ -81,6 +86,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
             status: (string) $row['status'],
             consentRequired: (bool) $row['consent_required'],
             consentLabel: $consentLabel,
+            appearance: Appearance::fromStored($appearance),
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],

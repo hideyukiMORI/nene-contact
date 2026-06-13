@@ -47,6 +47,7 @@ final readonly class CreateContactFormUseCase implements CreateContactFormUseCas
             consentRequired: $input->consentRequired,
             consentLabel: $input->consentLabel,
             retentionDays: $input->retentionDays,
+            appearance: $input->appearance,
         );
 
         $id = $this->forms->save($form);
