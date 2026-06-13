@@ -10,6 +10,7 @@ export {
   toContactFormDetail,
   toCreateContactFormDto,
   defaultChoiceConfig,
+  defaultAppearance,
 } from '@/entities/contact-form/mapper';
 export { defaultFieldTypeConfig } from '@/entities/contact-form/field-defaults';
 export { contactFormKeys } from '@/entities/contact-form/query-keys';
@@ -18,6 +19,9 @@ export type {
   ContactFormList,
   ContactFormDetail,
   ContactFormDraft,
+  Appearance,
+  AppearanceMode,
+  AppearanceFont,
   DraftField,
   DraftFieldOption,
   ChoiceConfig,

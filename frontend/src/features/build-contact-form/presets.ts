@@ -1,4 +1,8 @@
-import { defaultChoiceConfig, defaultFieldTypeConfig } from '@/entities/contact-form';
+import {
+  defaultAppearance,
+  defaultChoiceConfig,
+  defaultFieldTypeConfig,
+} from '@/entities/contact-form';
 import type { ContactFormDraft, DraftField, DraftFieldOption } from '@/entities/contact-form';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 
@@ -60,6 +64,7 @@ function draft(fields: DraftField[], consentRequired: boolean): ContactFormDraft
     consentRequired,
     consentLabel: consentRequired ? { ...CONSENT_LABEL } : null,
     retentionDays: null,
+    appearance: defaultAppearance(),
     fields,
   };
 }

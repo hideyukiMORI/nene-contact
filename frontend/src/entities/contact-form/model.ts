@@ -15,6 +15,25 @@ export interface ContactFormList {
   total: number;
 }
 
+// Embed appearance (builder spec — appearance v1). Mirrors backend NeneContact\ContactForm\Appearance.
+export type AppearanceMode = 'floating' | 'button' | 'inline';
+export type AppearanceFont = 'system' | 'sans' | 'serif';
+
+export interface Appearance {
+  mode: AppearanceMode;
+  // Theme colours as hex (#rgb or #rrggbb).
+  accent: string;
+  surface: string;
+  text: string;
+  // Corner radius in px (0–24).
+  radius: number;
+  font: AppearanceFont;
+  // Show the form title.
+  header: boolean;
+  // Render the title + description as an accent-tinted hero band.
+  hero: boolean;
+}
+
 export interface DraftFieldOption {
   // Stable id that ChoiceConfig.defaults reference (persisted as the option `value`).
   value: string;
@@ -149,6 +168,7 @@ export interface ContactFormDraft {
   consentRequired: boolean;
   consentLabel: Record<string, string> | null;
   retentionDays: number | null;
+  appearance: Appearance;
   fields: DraftField[];
 }
 

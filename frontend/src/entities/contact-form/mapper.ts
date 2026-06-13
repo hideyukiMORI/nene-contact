@@ -5,6 +5,9 @@ import type {
 } from '@/entities/contact-form/api-types';
 import { defaultFieldTypeConfig } from '@/entities/contact-form/field-defaults';
 import type {
+  Appearance,
+  AppearanceFont,
+  AppearanceMode,
   ChoiceCardLayout,
   ChoiceConfig,
   ChoiceRatio,
@@ -17,6 +20,46 @@ import type {
   DraftFieldOption,
   FieldTypeConfig,
 } from '@/entities/contact-form/model';
+
+const APPEARANCE_MODES: readonly AppearanceMode[] = ['floating', 'button', 'inline'];
+const APPEARANCE_FONTS: readonly AppearanceFont[] = ['system', 'sans', 'serif'];
+
+// The widget's default theme (reproduces the original hardcoded look); mirrors backend
+// NeneContact\ContactForm\Appearance::defaults().
+export function defaultAppearance(): Appearance {
+  return {
+    mode: 'floating',
+    accent: '#2563eb',
+    surface: '#ffffff',
+    text: '#111827',
+    radius: 8,
+    font: 'system',
+    header: true,
+    hero: false,
+  };
+}
+
+function toAppearance(raw: unknown): Appearance {
+  const d = defaultAppearance();
+  if (typeof raw !== 'object' || raw === null) {
+    return d;
+  }
+  const a = raw as Record<string, unknown>;
+  const mode = APPEARANCE_MODES.find((m) => m === a.mode) ?? d.mode;
+  const font = APPEARANCE_FONTS.find((f) => f === a.font) ?? d.font;
+  const radius =
+    typeof a.radius === 'number' && a.radius >= 0 && a.radius <= 24 ? a.radius : d.radius;
+  return {
+    mode,
+    accent: typeof a.accent === 'string' ? a.accent : d.accent,
+    surface: typeof a.surface === 'string' ? a.surface : d.surface,
+    text: typeof a.text === 'string' ? a.text : d.text,
+    radius,
+    font,
+    header: typeof a.header === 'boolean' ? a.header : d.header,
+    hero: typeof a.hero === 'boolean' ? a.hero : d.hero,
+  };
+}
 
 // Types whose config is the per-type FieldTypeConfig (everything but select / checkbox / honeypot).
 const TYPE_CONFIG_TYPES = new Set(['text', 'email', 'phone', 'textarea', 'date', 'file']);
@@ -322,6 +365,7 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
     consentRequired: dto.consent_required ?? false,
     consentLabel: dto.consent_label ?? null,
     retentionDays: dto.retention_days ?? null,
+    appearance: toAppearance((dto as { appearance?: unknown }).appearance),
     fields,
   };
 }
@@ -347,6 +391,7 @@ export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFo
     consent_required: draft.consentRequired,
     ...(draft.consentLabel !== null ? { consent_label: draft.consentLabel } : {}),
     ...(draft.retentionDays !== null ? { retention_days: draft.retentionDays } : {}),
+    appearance: { ...draft.appearance },
     fields: draft.fields.map((field) => ({
       field_type: field.fieldType as CreateContactFormDto['fields'][number]['field_type'],
       name: field.name,
