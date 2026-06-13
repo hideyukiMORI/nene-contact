@@ -57,8 +57,15 @@ export const MEDIA: MediaItem[] = [
   },
 ];
 
-export function mediaCss(id: string | null): string {
-  const m = MEDIA.find((x) => x.id === id);
+// An uploaded asset is referenced by its public path/URL; a built-in starter is a gradient id.
+export function mediaCss(media: string | null): string {
+  if (media === null || media === '') {
+    return 'none';
+  }
+  if (/^(https?:|data:|\/)/.test(media)) {
+    return `url("${media.replace(/"/g, '\\"')}")`;
+  }
+  const m = MEDIA.find((x) => x.id === media);
   return m ? m.css : 'none';
 }
 

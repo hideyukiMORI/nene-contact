@@ -572,4 +572,6 @@ export const en: Partial<MessageCatalog> = {
   'studio.pv.chatGreeting': 'Hi! We will ask a few quick questions.',
   'studio.pv.chatAskName': 'First, what is your name?',
   'studio.pv.chatAskEmail': 'What is your email address?',
+  'studio.media.uploaded': 'Uploaded image',
+  'studio.media.uploading': 'Uploading…',
 };

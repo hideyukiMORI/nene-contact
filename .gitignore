@@ -17,3 +17,6 @@
 /frontend/node_modules/
 /frontend/dist/
 /frontend/.vitest.cache/
+
+# Uploaded media library assets (served statically; not source)
+public_html/media/

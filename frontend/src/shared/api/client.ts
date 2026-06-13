@@ -49,8 +49,36 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   return parsed as T;
 }
 
+async function upload<T>(path: string, form: FormData): Promise<T> {
+  const headers: Record<string, string> = {};
+  if (authToken !== null) {
+    headers.Authorization = `Bearer ${authToken}`;
+  }
+
+  let response: Response;
+  try {
+    // No Content-Type: the browser sets multipart/form-data with the boundary.
+    response = await fetch(`${env.apiBaseUrl}${path}`, {
+      method: 'POST',
+      headers,
+      body: form,
+      credentials: 'omit',
+    });
+  } catch {
+    throw new AppError(0, 'network-error', 'Network Error', '');
+  }
+
+  const text = await response.text();
+  const parsed: unknown = text === '' ? null : (JSON.parse(text) as unknown);
+  if (!response.ok) {
+    throw toAppError(response.status, parsed);
+  }
+  return parsed as T;
+}
+
 export const apiClient = {
   get: <T>(path: string): Promise<T> => request<T>('GET', path),
+  upload,
   post: <T>(path: string, body?: unknown): Promise<T> => request<T>('POST', path, body),
   put: <T>(path: string, body?: unknown): Promise<T> => request<T>('PUT', path, body),
   patch: <T>(path: string, body?: unknown): Promise<T> => request<T>('PATCH', path, body),

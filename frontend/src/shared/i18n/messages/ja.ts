@@ -824,6 +824,8 @@ export const ja = {
   'studio.pv.chatGreeting': 'こんにちは！お問い合わせ内容を順番にお伺いします',
   'studio.pv.chatAskName': 'まず、お名前を教えてください。',
   'studio.pv.chatAskEmail': 'メールアドレスはお持ちですか？',
+  'studio.media.uploaded': 'アップロード画像',
+  'studio.media.uploading': 'アップロード中…',
 } as const;
 
 export type MessageKey = keyof typeof ja;

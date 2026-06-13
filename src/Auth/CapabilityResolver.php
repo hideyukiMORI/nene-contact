@@ -22,7 +22,7 @@ final class CapabilityResolver
             return Capability::ManageUsers;
         }
 
-        if (str_starts_with($path, '/admin/contact-forms') || str_starts_with($path, '/admin/form-fields') || str_starts_with($path, '/admin/records')) {
+        if (str_starts_with($path, '/admin/contact-forms') || str_starts_with($path, '/admin/form-fields') || str_starts_with($path, '/admin/records') || str_starts_with($path, '/admin/media')) {
             return Capability::ManageForms;
         }
 

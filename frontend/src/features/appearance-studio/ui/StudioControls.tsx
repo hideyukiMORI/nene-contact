@@ -1,11 +1,12 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import type { KeyboardEvent, ReactNode } from 'react';
 import type { Appearance } from '@/entities/contact-form';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
-import { MEDIA, PRESETS } from '@/features/appearance-studio/model/studio-model';
+import { useMediaQuery, useUploadMediaMutation } from '@/entities/media';
+import { MEDIA, mediaCss, PRESETS } from '@/features/appearance-studio/model/studio-model';
 
 export type SetPath = (path: string[], value: unknown) => void;
 
@@ -226,11 +227,35 @@ const FONT_OPTS: SegOpt[] = [
   { v: 'serif', labelKey: 'studio.font.serif' },
 ];
 
-// ---- HERO group (with the mock media library) ----
+// ---- HERO group (media library: uploaded assets + built-in gradients) ----
 function HeroGroup({ a, set }: { a: Appearance; set: SetPath }): ReactNode {
   const { t } = useI18n();
   const [lib, setLib] = useState(false);
-  const sel = MEDIA.find((m) => m.id === a.hero.media);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const { data: uploaded } = useMediaQuery();
+  const upload = useUploadMediaMutation();
+
+  const media = a.hero.media;
+  const hasMedia = media !== '';
+  const selUpload = (uploaded ?? []).find((m) => m.url === media);
+  const selMock = MEDIA.find((m) => m.id === media);
+  const selLabel = selUpload
+    ? (selUpload.originalName ?? t('studio.media.uploaded'))
+    : selMock
+      ? t(selMock.labelKey)
+      : t('studio.media.none');
+
+  const onPick = (file: File | undefined): void => {
+    if (file === undefined) {
+      return;
+    }
+    upload.mutate(file, {
+      onSuccess: (asset) => {
+        set(['hero', 'media'], asset.url);
+      },
+    });
+  };
+
   return (
     <>
       <Toggle
@@ -245,26 +270,34 @@ function HeroGroup({ a, set }: { a: Appearance; set: SetPath }): ReactNode {
         <>
           <div className="st-media">
             <span
-              className={'st-media__thumb' + (sel ? '' : ' empty')}
-              style={sel ? { background: sel.css, backgroundSize: 'cover' } : undefined}
+              className={'st-media__thumb' + (hasMedia ? '' : ' empty')}
+              style={
+                hasMedia
+                  ? {
+                      backgroundImage: mediaCss(media),
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }
+                  : undefined
+              }
             >
-              {!sel ? <Icon name="image" size={18} /> : null}
+              {!hasMedia ? <Icon name="image" size={18} /> : null}
             </span>
             <div className="st-media__meta">
-              <div className="n">{sel ? t(sel.labelKey) : t('studio.media.none')}</div>
+              <div className="n">{selLabel}</div>
               <div className="acts">
                 <span
                   {...clickProps(() => {
                     setLib((o) => !o);
                   })}
                 >
-                  {sel ? t('studio.media.change') : t('studio.media.choose')}
+                  {hasMedia ? t('studio.media.change') : t('studio.media.choose')}
                 </span>
-                {sel ? (
+                {hasMedia ? (
                   <span
                     className="rm"
                     {...clickProps(() => {
-                      set(['hero', 'media'], null);
+                      set(['hero', 'media'], '');
                     })}
                   >
                     {t('studio.media.remove')}
@@ -287,22 +320,60 @@ function HeroGroup({ a, set }: { a: Appearance; set: SetPath }): ReactNode {
                   <Icon name="x" size={14} />
                 </span>
               </div>
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/png,image/jpeg,image/gif"
+                hidden
+                onChange={(e) => {
+                  onPick(e.target.files?.[0]);
+                  e.target.value = '';
+                }}
+              />
               <div className="st-mediagrid">
-                <div className="st-mediaup" title={t('studio.media.uploadSoon')}>
+                <button
+                  type="button"
+                  className="st-mediaup"
+                  disabled={upload.isPending}
+                  onClick={() => {
+                    fileRef.current?.click();
+                  }}
+                >
                   <Icon name="plus" size={15} />
-                  {t('studio.media.upload')}
-                </div>
+                  {upload.isPending ? t('studio.media.uploading') : t('studio.media.upload')}
+                </button>
+                {(uploaded ?? []).map((m) => (
+                  <div
+                    key={m.id}
+                    className={'st-mediacell' + (media === m.url ? ' on' : '')}
+                    style={{
+                      backgroundImage: `url("${m.url}")`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }}
+                    {...clickProps(() => {
+                      set(['hero', 'media'], m.url);
+                      setLib(false);
+                    })}
+                  >
+                    {media === m.url ? (
+                      <span className="ck">
+                        <Icon name="check" size={11} />
+                      </span>
+                    ) : null}
+                  </div>
+                ))}
                 {MEDIA.map((m) => (
                   <div
                     key={m.id}
-                    className={'st-mediacell' + (a.hero.media === m.id ? ' on' : '')}
+                    className={'st-mediacell' + (media === m.id ? ' on' : '')}
                     style={{ background: m.css }}
                     {...clickProps(() => {
                       set(['hero', 'media'], m.id);
                       setLib(false);
                     })}
                   >
-                    {a.hero.media === m.id ? (
+                    {media === m.id ? (
                       <span className="ck">
                         <Icon name="check" size={11} />
                       </span>

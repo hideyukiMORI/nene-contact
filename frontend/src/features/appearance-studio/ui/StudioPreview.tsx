@@ -45,8 +45,10 @@ function Hero({ a, title, desc }: { a: Appearance; title: string; desc: string }
       style={{
         height: a.hero.height,
         margin: a.hero.inset,
-        background: mediaCss(a.hero.media),
+        backgroundImage: mediaCss(a.hero.media),
         backgroundSize: a.hero.fit,
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
       }}
     >
       <div

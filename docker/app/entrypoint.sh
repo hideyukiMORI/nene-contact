@@ -39,6 +39,11 @@ mkdir -p var/attachments
 chown -R www-data:www-data var/attachments
 chmod -R u+rwX var/attachments
 
+# Media library (appearance HERO images): publicly-served upload dir, writable by www-data.
+mkdir -p public_html/media
+chown -R www-data:www-data public_html/media
+chmod -R u+rwX public_html/media
+
 # Apply database migrations on every boot. Phinx records applied migrations in
 # `phinxlog`, so this is idempotent and safe to re-run; a fresh container comes
 # up fully migrated with no manual step. Works for both mysql and sqlite.

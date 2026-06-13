@@ -27,6 +27,9 @@ use NeneContact\ContactForm\ContactFormRouteRegistrar;
 use NeneContact\ContactForm\ContactFormServiceProvider;
 use NeneContact\Handoff\HandoffRouteRegistrar;
 use NeneContact\Handoff\HandoffServiceProvider;
+use NeneContact\Media\MediaNotFoundExceptionHandler;
+use NeneContact\Media\MediaRouteRegistrar;
+use NeneContact\Media\MediaServiceProvider;
 use NeneContact\Notification\NotificationChannelRouteRegistrar;
 use NeneContact\Notification\NotificationChannelServiceProvider;
 use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
@@ -76,6 +79,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
         $builder->addProvider(new HandoffServiceProvider());
         $builder->addProvider(new ApiServiceProvider());
         $builder->addProvider(new RecordsServiceProvider());
+        $builder->addProvider(new MediaServiceProvider());
 
         $builder
             ->set(
@@ -92,6 +96,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $records = $container->get(RecordsRouteRegistrar::class);
                     $notificationChannel = $container->get(NotificationChannelRouteRegistrar::class);
                     $audit = $container->get(AuditRouteRegistrar::class);
+                    $media = $container->get(MediaRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
                         throw new LogicException('Auth route registrar service is invalid.');
@@ -137,6 +142,10 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Audit route registrar service is invalid.');
                     }
 
+                    if (!$media instanceof MediaRouteRegistrar) {
+                        throw new LogicException('Media route registrar service is invalid.');
+                    }
+
                     return [
                         $auth,
                         $userAdmin,
@@ -149,6 +158,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $api,
                         $records,
                         $audit,
+                        $media,
                     ];
                 },
             )
@@ -163,8 +173,9 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $contactFormNotFound = $container->get(ContactFormNotFoundExceptionHandler::class);
                     $submissionNotFound = $container->get(SubmissionNotFoundExceptionHandler::class);
                     $attachmentNotFound = $container->get(AttachmentNotFoundExceptionHandler::class);
+                    $mediaNotFound = $container->get(MediaNotFoundExceptionHandler::class);
 
-                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound] as $handler) {
+                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound, $mediaNotFound] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
@@ -179,6 +190,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $contactFormNotFound,
                         $submissionNotFound,
                         $attachmentNotFound,
+                        $mediaNotFound,
                     ];
                 },
             );

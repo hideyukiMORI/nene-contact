@@ -22,6 +22,7 @@ tags:
   - name: Audit
   - name: Attachment
   - name: Handoff
+  - name: Media
   - name: Records
   - name: Agent
   - name: Public
@@ -336,6 +337,60 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/media:
+    get:
+      tags: [Media]
+      operationId: listMedia
+      summary: List the organization's media assets
+      responses:
+        '200':
+          description: Media assets (newest first)
+          content:
+            application/json:
+              schema: { type: array, items: { $ref: '#/components/schemas/MediaAsset' } }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Media]
+      operationId: uploadMedia
+      summary: Upload a media asset (image)
+      description: >-
+        Multipart upload of an image (JPEG/PNG/GIF). The server re-encodes the pixels through GD
+        — stripping EXIF/metadata — downscales oversized images, and stores the result on a
+        public, cacheable, unguessable path. Audited as media.uploaded.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                file: { type: string, format: binary }
+              required: [file]
+      responses:
+        '201':
+          description: Uploaded
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/MediaAsset' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
+  /admin/media/{id}:
+    delete:
+      tags: [Media]
+      operationId: deleteMedia
+      summary: Delete a media asset
+      description: 'Soft-deletes the metadata (ADR 0016) and erases the public file. Audited as media.deleted.'
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
 
   /admin/audit-events:
     get:
@@ -1074,6 +1129,20 @@ components:
         current_password: { type: string }
         new_password: { type: string, minLength: 8 }
       required: [current_password, new_password]
+
+    MediaAsset:
+      type: object
+      description: 'An uploaded media asset (e.g. a HERO image). url is the public, cacheable path.'
+      properties:
+        id: { type: integer }
+        url: { type: string, description: 'Public path (e.g. /media/{org}/{hash}.jpg).' }
+        mime: { type: string }
+        width: { type: [integer, 'null'] }
+        height: { type: [integer, 'null'] }
+        byte_size: { type: integer }
+        original_name: { type: [string, 'null'] }
+        created_at: { type: [string, 'null'], format: date-time }
+      required: [id, url, mime, byte_size]
 
     UpdateUserRequest:
       type: object
