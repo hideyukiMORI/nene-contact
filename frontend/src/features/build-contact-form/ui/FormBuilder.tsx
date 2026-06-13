@@ -30,6 +30,7 @@ import {
   draftFieldToChoiceState,
 } from '@/features/build-contact-form/lib/choice-bridge';
 import type { ChoiceState } from '@/features/build-contact-form/lib/choice-core';
+import { AppearanceStudio } from '@/features/appearance-studio';
 import { SortableFieldCard } from '@/features/build-contact-form/ui/SortableFieldCard';
 import { FieldConfigPanel } from '@/features/build-contact-form/ui/field-config/FieldConfigPanel';
 import { ChoiceCanvasField } from '@/features/build-contact-form/ui/choice/ChoiceCanvasField';
@@ -104,6 +105,7 @@ export function FormBuilder({
   const [panelTab, setPanelTab] = useState<PanelTab>('field');
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [view, setView] = useState<'build' | 'design'>('build');
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -296,201 +298,232 @@ export function FormBuilder({
         </button>
       </div>
 
-      <div className="bd-wrap" style={{ position: 'relative' }}>
-        <div className="bd-canvas" ref={canvasRef}>
-          <div className="bd-sheet">
-            <div className="bd-sheethead">
-              <input
-                className="fb-title-in"
-                aria-label={t('builder.formName')}
-                value={draft.name}
-                placeholder={t('builder.untitled')}
-                onChange={(e) => {
-                  builder.setName(e.target.value);
-                }}
-              />
-              <textarea
-                className="fb-desc-in"
-                rows={1}
-                aria-label={t('builder.description')}
-                value={draft.description}
-                placeholder={t('builder.descPlaceholder')}
-                onChange={(e) => {
-                  builder.setDescription(e.target.value);
-                }}
-              />
-            </div>
+      <div className="bd-views">
+        <button
+          type="button"
+          className={'bd-view' + (view === 'build' ? ' on' : '')}
+          onClick={() => {
+            setView('build');
+          }}
+        >
+          <Icon name="lines" size={15} />
+          {t('builder.view.build')}
+        </button>
+        <button
+          type="button"
+          className={'bd-view' + (view === 'design' ? ' on' : '')}
+          onClick={() => {
+            setView('design');
+          }}
+        >
+          <Icon name="bulb" size={15} />
+          {t('builder.view.design')}
+        </button>
+      </div>
 
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
-              <SortableContext
-                items={draft.fields.map((f) => f.id)}
-                strategy={verticalListSortingStrategy}
+      {view === 'design' ? (
+        <AppearanceStudio value={draft.appearance} onChange={builder.setAppearance} />
+      ) : (
+        <div className="bd-wrap" style={{ position: 'relative' }}>
+          <div className="bd-canvas" ref={canvasRef}>
+            <div className="bd-sheet">
+              <div className="bd-sheethead">
+                <input
+                  className="fb-title-in"
+                  aria-label={t('builder.formName')}
+                  value={draft.name}
+                  placeholder={t('builder.untitled')}
+                  onChange={(e) => {
+                    builder.setName(e.target.value);
+                  }}
+                />
+                <textarea
+                  className="fb-desc-in"
+                  rows={1}
+                  aria-label={t('builder.description')}
+                  value={draft.description}
+                  placeholder={t('builder.descPlaceholder')}
+                  onChange={(e) => {
+                    builder.setDescription(e.target.value);
+                  }}
+                />
+              </div>
+
+              <DndContext
+                sensors={sensors}
+                collisionDetection={closestCenter}
+                onDragEnd={onDragEnd}
               >
-                {draft.fields.map((field) =>
-                  field.fieldType === 'select' && field.id === selectedId ? (
-                    <SortableChoiceSlot key={field.id} id={field.id}>
-                      <ChoiceCanvasField
-                        choice={choice}
+                <SortableContext
+                  items={draft.fields.map((f) => f.id)}
+                  strategy={verticalListSortingStrategy}
+                >
+                  {draft.fields.map((field) =>
+                    field.fieldType === 'select' && field.id === selectedId ? (
+                      <SortableChoiceSlot key={field.id} id={field.id}>
+                        <ChoiceCanvasField
+                          choice={choice}
+                          label={fieldLabel(field)}
+                          onOpenGallery={() => {
+                            setGalleryOpen(true);
+                          }}
+                          onDelete={() => {
+                            deleteField(field.id);
+                          }}
+                          onDuplicate={() => {
+                            duplicateField(field.id);
+                          }}
+                        />
+                      </SortableChoiceSlot>
+                    ) : (
+                      <SortableFieldCard
+                        key={field.id}
+                        field={field}
                         label={fieldLabel(field)}
-                        onOpenGallery={() => {
-                          setGalleryOpen(true);
+                        selected={field.id === selectedId}
+                        onSelect={() => {
+                          selectField(field.id);
                         }}
                         onDelete={() => {
                           deleteField(field.id);
                         }}
-                        onDuplicate={() => {
-                          duplicateField(field.id);
-                        }}
                       />
-                    </SortableChoiceSlot>
-                  ) : (
-                    <SortableFieldCard
-                      key={field.id}
-                      field={field}
-                      label={fieldLabel(field)}
-                      selected={field.id === selectedId}
-                      onSelect={() => {
-                        selectField(field.id);
+                    ),
+                  )}
+                </SortableContext>
+              </DndContext>
+
+              <button
+                type="button"
+                className="bd-add"
+                onClick={() => {
+                  addField('text');
+                }}
+              >
+                <Icon name="plus" size={15} />
+                {t('builder.addField')}
+              </button>
+            </div>
+          </div>
+
+          <div className="bd-panel">
+            <div className="bd-ptabs">
+              <button
+                type="button"
+                className={'bd-ptab' + (panelTab === 'field' ? ' on' : '')}
+                onClick={() => {
+                  setPanelTab('field');
+                }}
+              >
+                {t('builder.tab.field')}
+              </button>
+              <button
+                type="button"
+                className={'bd-ptab' + (panelTab === 'form' ? ' on' : '')}
+                onClick={() => {
+                  setPanelTab('form');
+                }}
+              >
+                {t('builder.tab.form')}
+              </button>
+            </div>
+
+            <div className="cf-panelscroll">
+              {panelTab === 'form' ? (
+                <FormSettingsSection builder={builder} readOnlyKey={isEditing} />
+              ) : selected === null ? (
+                <div className="bd-psec">
+                  <p className="fb-empty-sel">{t('builder.noSelection')}</p>
+                </div>
+              ) : (
+                <>
+                  <div className="bd-pinhead">
+                    <span className="bd-typechip">
+                      <Icon name={FIELD_TYPE_ICON[selected.fieldType] ?? 'text'} size={14} />
+                      {t(`builder.type.${selected.fieldType}` as MessageKey)}
+                    </span>
+                    <span className="nm">{selectedLabel}</span>
+                  </div>
+                  {isChoiceSelected ? (
+                    <ChoicePanel
+                      choice={choice}
+                      label={selectedRawLabel}
+                      onLabel={(v) => {
+                        builder.setFieldLabel(selected.id, locale, v);
                       }}
-                      onDelete={() => {
-                        deleteField(field.id);
+                      onOpenGallery={() => {
+                        setGalleryOpen(true);
                       }}
                     />
-                  ),
-                )}
-              </SortableContext>
-            </DndContext>
-
-            <button
-              type="button"
-              className="bd-add"
-              onClick={() => {
-                addField('text');
-              }}
-            >
-              <Icon name="plus" size={15} />
-              {t('builder.addField')}
-            </button>
-          </div>
-        </div>
-
-        <div className="bd-panel">
-          <div className="bd-ptabs">
-            <button
-              type="button"
-              className={'bd-ptab' + (panelTab === 'field' ? ' on' : '')}
-              onClick={() => {
-                setPanelTab('field');
-              }}
-            >
-              {t('builder.tab.field')}
-            </button>
-            <button
-              type="button"
-              className={'bd-ptab' + (panelTab === 'form' ? ' on' : '')}
-              onClick={() => {
-                setPanelTab('form');
-              }}
-            >
-              {t('builder.tab.form')}
-            </button>
-          </div>
-
-          <div className="cf-panelscroll">
-            {panelTab === 'form' ? (
-              <FormSettingsSection builder={builder} readOnlyKey={isEditing} />
-            ) : selected === null ? (
-              <div className="bd-psec">
-                <p className="fb-empty-sel">{t('builder.noSelection')}</p>
-              </div>
-            ) : (
-              <>
-                <div className="bd-pinhead">
-                  <span className="bd-typechip">
-                    <Icon name={FIELD_TYPE_ICON[selected.fieldType] ?? 'text'} size={14} />
-                    {t(`builder.type.${selected.fieldType}` as MessageKey)}
-                  </span>
-                  <span className="nm">{selectedLabel}</span>
-                </div>
-                {isChoiceSelected ? (
-                  <ChoicePanel
-                    choice={choice}
-                    label={selectedRawLabel}
-                    onLabel={(v) => {
-                      builder.setFieldLabel(selected.id, locale, v);
-                    }}
-                    onOpenGallery={() => {
-                      setGalleryOpen(true);
-                    }}
-                  />
-                ) : (
-                  <FieldConfigPanel
-                    field={selected}
-                    label={selectedRawLabel}
-                    typeLabel={t(`builder.type.${selected.fieldType}` as MessageKey)}
-                    onLabel={(v) => {
-                      builder.setFieldLabel(selected.id, locale, v);
-                    }}
-                    update={(patch) => {
-                      builder.updateField(selected.id, patch);
-                    }}
-                  />
-                )}
-                <div className="bd-psec">
-                  <button
-                    type="button"
-                    className="bd-fielddel"
-                    onClick={() => {
-                      deleteField(selected.id);
-                    }}
-                  >
-                    <Icon name="trash" size={15} />
-                    {t('builder.deleteField')}
-                  </button>
-                </div>
-                <div className="bd-psec">
-                  <h4>{t('builder.addField')}</h4>
-                  <div className="bd-pal">
-                    {PALETTE.map((type) => (
-                      <button
-                        key={type}
-                        type="button"
-                        className="bd-palitem"
-                        onClick={() => {
-                          addField(type);
-                        }}
-                      >
-                        <Icon name={FIELD_TYPE_ICON[type] ?? 'text'} size={16} />
-                        {t(`builder.type.${type}` as MessageKey)}
-                      </button>
-                    ))}
+                  ) : (
+                    <FieldConfigPanel
+                      field={selected}
+                      label={selectedRawLabel}
+                      typeLabel={t(`builder.type.${selected.fieldType}` as MessageKey)}
+                      onLabel={(v) => {
+                        builder.setFieldLabel(selected.id, locale, v);
+                      }}
+                      update={(patch) => {
+                        builder.updateField(selected.id, patch);
+                      }}
+                    />
+                  )}
+                  <div className="bd-psec">
+                    <button
+                      type="button"
+                      className="bd-fielddel"
+                      onClick={() => {
+                        deleteField(selected.id);
+                      }}
+                    >
+                      <Icon name="trash" size={15} />
+                      {t('builder.deleteField')}
+                    </button>
                   </div>
-                </div>
-              </>
-            )}
+                  <div className="bd-psec">
+                    <h4>{t('builder.addField')}</h4>
+                    <div className="bd-pal">
+                      {PALETTE.map((type) => (
+                        <button
+                          key={type}
+                          type="button"
+                          className="bd-palitem"
+                          onClick={() => {
+                            addField(type);
+                          }}
+                        >
+                          <Icon name={FIELD_TYPE_ICON[type] ?? 'text'} size={16} />
+                          {t(`builder.type.${type}` as MessageKey)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
           </div>
-        </div>
 
-        {isChoiceSelected && galleryOpen ? (
-          <StyleGallery
-            choice={choice}
-            onClose={() => {
-              setGalleryOpen(false);
-            }}
-          />
-        ) : null}
-        {isChoiceSelected && previewOpen ? (
-          <RespondentForm
-            choice={choice}
-            formName={draft.name}
-            formDescription={draft.description}
-            fieldLabel={selectedLabel}
-            onClose={() => {
-              setPreviewOpen(false);
-            }}
-          />
-        ) : null}
-      </div>
+          {isChoiceSelected && galleryOpen ? (
+            <StyleGallery
+              choice={choice}
+              onClose={() => {
+                setGalleryOpen(false);
+              }}
+            />
+          ) : null}
+          {isChoiceSelected && previewOpen ? (
+            <RespondentForm
+              choice={choice}
+              formName={draft.name}
+              formDescription={draft.description}
+              fieldLabel={selectedLabel}
+              onClose={() => {
+                setPreviewOpen(false);
+              }}
+            />
+          ) : null}
+        </div>
+      )}
     </div>
   );
 }
