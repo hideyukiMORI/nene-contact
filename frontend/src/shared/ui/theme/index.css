@@ -10844,6 +10844,19 @@ a.t:hover {
 .st-saved {
   font-size: 11.5px;
   color: var(--ex-faint);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+/* Unsaved-changes hint: an amber dot + text, distinct from the muted "saved" state. */
+.st-unsaved {
+  color: var(--ex-warn, #b45309);
+}
+.st-unsaved .d {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
 }
 .st-btn {
   height: 34px;

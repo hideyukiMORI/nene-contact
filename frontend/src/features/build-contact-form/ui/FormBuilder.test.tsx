@@ -58,6 +58,51 @@ describe('FormBuilder', () => {
     expect(captured.value?.fields?.[0]?.name).toMatch(/^field_/);
   });
 
+  it('shows an honest unsaved-changes hint after editing, then a saved timestamp after publishing', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          {
+            id: 1,
+            name: 'Sales',
+            public_form_key: 'k',
+            default_locale: 'ja',
+            locales: ['ja'],
+            fields: [],
+          },
+          { status: 201 },
+        ),
+      ),
+    );
+    const onCreated = vi.fn();
+    const user = userEvent.setup();
+
+    renderWithProviders(<FormBuilder onCreated={onCreated} />);
+
+    // A pristine builder shows no unsaved hint (nothing has changed from the seed).
+    expect(screen.queryByText('未保存の変更があります')).toBeNull();
+
+    const titleInputs = screen.getAllByLabelText('フォーム名');
+    await user.type(titleInputs[0] as HTMLElement, 'Sales');
+    // Editing makes the draft dirty — the toolbar says so honestly.
+    expect(screen.getByText('未保存の変更があります')).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+    const labelInput = screen.getByLabelText('ラベル');
+    await user.clear(labelInput);
+    await user.type(labelInput, 'お名前');
+    await user.click(screen.getByRole('button', { name: '公開' }));
+
+    await waitFor(() => {
+      expect(onCreated).toHaveBeenCalledOnce();
+    });
+    // After a successful save the hint clears and a saved timestamp appears.
+    await waitFor(() => {
+      expect(screen.queryByText('未保存の変更があります')).toBeNull();
+    });
+    expect(screen.getByText(/保存しました/)).toBeInTheDocument();
+  });
+
   it('blocks creation without a name or fields', async () => {
     const onCreated = vi.fn();
     const user = userEvent.setup();
