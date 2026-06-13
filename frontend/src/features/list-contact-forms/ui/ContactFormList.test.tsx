@@ -1,33 +1,43 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
-import { MemoryRouter } from 'react-router-dom';
+import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import type { ReactNode } from 'react';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
 import { ContactFormList } from '@/features/list-contact-forms';
 
 const URL = 'http://localhost/admin/contact-forms';
 
+function LocationProbe(): ReactNode {
+  return <div data-testid="loc">{useLocation().pathname}</div>;
+}
+
+function withOneForm(): void {
+  server.use(
+    http.get(URL, () =>
+      HttpResponse.json({
+        items: [
+          {
+            id: 1,
+            name: 'Contact us',
+            public_form_key: 'key-1',
+            default_locale: 'ja',
+            locales: ['ja', 'en'],
+            status: 'active',
+            fields: [],
+          },
+        ],
+        total: 1,
+      }),
+    ),
+  );
+}
+
 describe('ContactFormList', () => {
   it('renders a row per form on success', async () => {
-    server.use(
-      http.get(URL, () =>
-        HttpResponse.json({
-          items: [
-            {
-              id: 1,
-              name: 'Contact us',
-              public_form_key: 'key-1',
-              default_locale: 'ja',
-              locales: ['ja', 'en'],
-              status: 'active',
-              fields: [],
-            },
-          ],
-          total: 1,
-        }),
-      ),
-    );
+    withOneForm();
 
     renderWithProviders(
       <MemoryRouter>
@@ -42,6 +52,43 @@ describe('ContactFormList', () => {
     expect(screen.getByText('en')).toBeInTheDocument();
     // active status renders the localized badge
     expect(screen.getByText('公開中')).toBeInTheDocument();
+  });
+
+  it('opens the form detail when the row (not just the name) is clicked', async () => {
+    withOneForm();
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <MemoryRouter initialEntries={['/contact-forms']}>
+        <Routes>
+          <Route path="/contact-forms" element={<ContactFormList />} />
+        </Routes>
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    // Click the status badge — a non-action part of the row, away from the name link.
+    await user.click(await screen.findByText('公開中'));
+
+    expect(screen.getByTestId('loc')).toHaveTextContent('/contact-forms/1');
+  });
+
+  it('keeps per-form action links navigating to their own target, not the detail', async () => {
+    withOneForm();
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <MemoryRouter initialEntries={['/contact-forms']}>
+        <Routes>
+          <Route path="/contact-forms" element={<ContactFormList />} />
+        </Routes>
+        <LocationProbe />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('link', { name: '編集' }));
+
+    expect(screen.getByTestId('loc')).toHaveTextContent('/contact-forms/1/edit');
   });
 
   it('renders the empty state when there are no forms', async () => {

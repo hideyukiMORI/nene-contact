@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import type { ReactNode } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Modal } from '@/shared/ui';
 import { useContactForms } from '@/features/list-contact-forms/hooks/use-contact-forms';
@@ -49,6 +49,7 @@ export function ContactFormList({
   query?: string;
 }): ReactNode {
   const { t } = useI18n();
+  const navigate = useNavigate();
   const { forms, isLoading, error, refetch } = useContactForms();
   const [embedForm, setEmbedForm] = useState<ContactForm | null>(null);
   const [deleteForm, setDeleteForm] = useState<ContactForm | null>(null);
@@ -108,80 +109,105 @@ export function ContactFormList({
               </tr>
             </thead>
             <tbody>
-              {visible.map((form) => (
-                <tr key={form.id}>
-                  <td>
-                    <div className="fm-name">
-                      <span className="fm-ic">
-                        <Icon name="forms" size={19} />
-                      </span>
-                      <div>
-                        <Link className="t" to={`/contact-forms/${String(form.id)}`}>
-                          {form.name}
-                        </Link>
-                        <div className="u">
-                          {form.publicFormKey}
-                          <CopyKeyButton value={form.publicFormKey} />
+              {visible.map((form) => {
+                const open = (): void => {
+                  void navigate(`/contact-forms/${String(form.id)}`);
+                };
+                const onRowClick = (e: MouseEvent<HTMLTableRowElement>): void => {
+                  // Per-form actions (embed / edit / notify / delete) and the copy-key button
+                  // own their own behaviour; a click on any of them must not open the form.
+                  if ((e.target as HTMLElement).closest('a, button') !== null) return;
+                  open();
+                };
+                const onRowKeyDown = (e: KeyboardEvent<HTMLTableRowElement>): void => {
+                  // Only when the row itself has focus — Enter/Space on a child link or button
+                  // (edit / notify / delete) bubbles here but must keep its own behaviour.
+                  if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) {
+                    e.preventDefault();
+                    open();
+                  }
+                };
+                return (
+                  <tr
+                    key={form.id}
+                    className="clickable"
+                    role="link"
+                    tabIndex={0}
+                    aria-label={t('contactForms.open', { name: form.name })}
+                    onClick={onRowClick}
+                    onKeyDown={onRowKeyDown}
+                  >
+                    <td>
+                      <div className="fm-name">
+                        <span className="fm-ic">
+                          <Icon name="forms" size={19} />
+                        </span>
+                        <div>
+                          <span className="t">{form.name}</span>
+                          <div className="u">
+                            {form.publicFormKey}
+                            <CopyKeyButton value={form.publicFormKey} />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  </td>
-                  <td>
-                    <span className="fm-langs">
-                      {form.locales.map((locale) => (
-                        <span key={locale} className="fm-lang">
-                          {locale}
+                    </td>
+                    <td>
+                      <span className="fm-langs">
+                        {form.locales.map((locale) => (
+                          <span key={locale} className="fm-lang">
+                            {locale}
+                          </span>
+                        ))}
+                      </span>
+                    </td>
+                    <td>
+                      {form.status === 'active' ? (
+                        <span className="fm-st live">
+                          <span className="d" />
+                          {t('contactForms.status.active')}
                         </span>
-                      ))}
-                    </span>
-                  </td>
-                  <td>
-                    {form.status === 'active' ? (
-                      <span className="fm-st live">
-                        <span className="d" />
-                        {t('contactForms.status.active')}
-                      </span>
-                    ) : (
-                      <span className="fm-st ended">
-                        <span className="d" />
-                        {t('contactForms.status.disabled')}
-                      </span>
-                    )}
-                  </td>
-                  <td>
-                    <div className="fm-actions">
-                      <button
-                        type="button"
-                        className="fm-gbtn"
-                        onClick={() => {
-                          setEmbedForm(form);
-                        }}
-                      >
-                        <Icon name="code" size={14} />
-                        {t('contactForms.embed')}
-                      </button>
-                      <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/edit`}>
-                        <Icon name="edit" size={14} />
-                        {t('contactForms.edit')}
-                      </Link>
-                      <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/channels`}>
-                        <Icon name="bell" size={14} />
-                        {t('contactForms.notify')}
-                      </Link>
-                      <button
-                        type="button"
-                        className="fm-kbtn"
-                        aria-label={t('contactForms.delete')}
-                        onClick={() => {
-                          setDeleteForm(form);
-                        }}
-                      >
-                        <Icon name="trash" size={16} />
-                      </button>
-                    </div>
-                  </td>
-                </tr>
-              ))}
+                      ) : (
+                        <span className="fm-st ended">
+                          <span className="d" />
+                          {t('contactForms.status.disabled')}
+                        </span>
+                      )}
+                    </td>
+                    <td>
+                      <div className="fm-actions">
+                        <button
+                          type="button"
+                          className="fm-gbtn"
+                          onClick={() => {
+                            setEmbedForm(form);
+                          }}
+                        >
+                          <Icon name="code" size={14} />
+                          {t('contactForms.embed')}
+                        </button>
+                        <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/edit`}>
+                          <Icon name="edit" size={14} />
+                          {t('contactForms.edit')}
+                        </Link>
+                        <Link className="fm-gbtn" to={`/contact-forms/${String(form.id)}/channels`}>
+                          <Icon name="bell" size={14} />
+                          {t('contactForms.notify')}
+                        </Link>
+                        <button
+                          type="button"
+                          className="fm-kbtn"
+                          aria-label={t('contactForms.delete')}
+                          onClick={() => {
+                            setDeleteForm(form);
+                          }}
+                        >
+                          <Icon name="trash" size={16} />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

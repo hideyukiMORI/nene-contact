@@ -216,6 +216,7 @@ export const ja = {
   'contactForms.column.locales': '言語',
   'contactForms.column.status': '状態',
   'contactForms.column.actions': '操作',
+  'contactForms.open': '「{name}」を開く',
   'contactForms.new': '新規フォーム',
   'contactForms.embed': '埋め込み',
   'contactForms.edit': '編集',
