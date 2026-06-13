@@ -1,184 +1,94 @@
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import type { Session } from '@/entities/auth';
 import { useI18n } from '@/shared/i18n';
-import { BrandMark, Icon } from '@/shared/ui';
+import { BrandMark } from '@/shared/ui';
 import { Login } from '@/features/login';
 
-type Variant = 'login' | 'signup' | 'reset';
-
-// Auth is a standalone two-pane screen (deep-teal brand panel + form). Only `login`
-// talks to the API; `signup` / `reset` (and the Google button) are non-functional
-// design placeholders — flagged with a demo note — since the platform issues operator
-// accounts via tools/create-user.php (no self-serve signup).
+// Standalone two-pane login screen (DirAC, design spec #272): a deep-teal brand panel with the
+// origami "folded-paper" layer + large-serif display, paired with the editorial form kit. The
+// folded facets radiate from an upper-right focal point and fade toward the copy via a mask.
 export function LoginPage({
   onAuthenticated,
 }: {
   onAuthenticated: (session: Session) => void;
 }): ReactNode {
   const { t, locale, setLocale } = useI18n();
-  const [variant, setVariant] = useState<Variant>('login');
 
   return (
-    <div className="au">
-      <div className="au-lang ex-lang">
-        <button
-          type="button"
-          className={locale === 'ja' ? 'on' : ''}
-          onClick={() => {
-            setLocale('ja');
-          }}
+    <div className="exwrap pr acc-vt1 lp lp-ac">
+      <div className="lp-ac__brand">
+        <svg
+          className="lp-ac__folds"
+          viewBox="0 0 760 900"
+          preserveAspectRatio="xMidYMid slice"
+          aria-hidden="true"
         >
-          日本語
-        </button>
-        <button
-          type="button"
-          className={locale === 'en' ? 'on' : ''}
-          onClick={() => {
-            setLocale('en');
-          }}
-        >
-          EN
-        </button>
+          <polygon points="706,128 0,150 0,372" fill="#fff" opacity="0.024" />
+          <polygon points="706,128 0,372 0,566" fill="#000" opacity="0.032" />
+          <polygon points="706,128 0,566 150,900 470,900" fill="#fff" opacity="0.016" />
+          <polygon points="706,128 470,900 760,900 760,430" fill="#000" opacity="0.030" />
+          <g stroke="#fff" strokeWidth="1" fill="none" strokeLinecap="round">
+            <line x1="706" y1="128" x2="0" y2="372" opacity="0.11" />
+            <line x1="706" y1="128" x2="0" y2="566" opacity="0.07" />
+            <line x1="706" y1="128" x2="150" y2="900" opacity="0.09" />
+            <line x1="706" y1="128" x2="470" y2="900" opacity="0.06" />
+            <line x1="706" y1="128" x2="760" y2="430" opacity="0.05" />
+          </g>
+        </svg>
+
+        <div className="lp-ac__top">
+          <div className="lp-mark">
+            <span className="lp-mark__tile">
+              <BrandMark on size={38} />
+            </span>
+            <span className="lp-mark__name">NeNe Contact</span>
+          </div>
+          <span className="lp-ac__idx">{t('auth.idx')}</span>
+        </div>
+
+        <div className="lp-ac__mid">
+          <div className="lp-ac__kicker">
+            <span className="dot" />
+            {t('auth.welcomeKicker')}
+          </div>
+          <h2 className="lp-ac__display">
+            {t('auth.taglineLead')}
+            <br />
+            <span className="v">{t('auth.taglineAccent')}</span>
+          </h2>
+          <p className="lp-ac__lede">{t('auth.brandFoot')}</p>
+        </div>
+
+        <div className="lp-ac__trust lp-ac__trust--credit">
+          <div className="t">
+            {t('auth.poweredBy')} <b>NENE2</b> · 2026 © AYANE
+          </div>
+        </div>
       </div>
 
-      <aside className="au-brand">
-        <div className="au-mkrow">
-          <span className="au-mk">
-            <BrandMark size={34} />
-          </span>
-          <span className="au-name">NeNe Contact</span>
+      <main className="lp-ac__form">
+        <div className="lp-lang ex-lang">
+          <button
+            type="button"
+            className={locale === 'ja' ? 'on' : ''}
+            onClick={() => {
+              setLocale('ja');
+            }}
+          >
+            日本語
+          </button>
+          <button
+            type="button"
+            className={locale === 'en' ? 'on' : ''}
+            onClick={() => {
+              setLocale('en');
+            }}
+          >
+            EN
+          </button>
         </div>
-        <div className="au-tag">{t('auth.tagline')}</div>
-        <div className="au-foot">{t('auth.brandFoot')}</div>
-      </aside>
 
-      <main className="au-form">
-        {variant === 'login' ? (
-          <div className="au-box">
-            <h1 className="au-h1">{t('login.welcome')}</h1>
-            <div className="au-sub">{t('login.subtitle')}</div>
-            <Login
-              onAuthenticated={onAuthenticated}
-              onForgot={() => {
-                setVariant('reset');
-              }}
-            />
-            <div className="au-div">{t('auth.or')}</div>
-            <button type="button" className="au-alt">
-              <Icon name="globe" size={16} />
-              {t('auth.google')}
-            </button>
-            <div className="au-foot2">
-              {t('auth.noAccount')}{' '}
-              <button
-                type="button"
-                className="au-link"
-                onClick={() => {
-                  setVariant('signup');
-                }}
-              >
-                {t('auth.signupLink')}
-              </button>
-            </div>
-          </div>
-        ) : null}
-
-        {variant === 'signup' ? (
-          <div className="au-box">
-            <h1 className="au-h1">{t('auth.signupTitle')}</h1>
-            <div className="au-sub">{t('auth.signupSub')}</div>
-            <div className="au-note">{t('auth.demoNote')}</div>
-            <div className="au-field">
-              <label className="l" htmlFor="signup-name">
-                {t('auth.name')}
-              </label>
-              <input
-                id="signup-name"
-                className="au-inp"
-                type="text"
-                placeholder={t('auth.namePh')}
-              />
-            </div>
-            <div className="au-field">
-              <label className="l" htmlFor="signup-email">
-                {t('login.email')}
-              </label>
-              <input
-                id="signup-email"
-                className="au-inp"
-                type="email"
-                placeholder={t('auth.emailPh')}
-              />
-            </div>
-            <div className="au-field">
-              <label className="l" htmlFor="signup-password">
-                {t('login.password')}
-              </label>
-              <input
-                id="signup-password"
-                className="au-inp"
-                type="password"
-                placeholder={t('auth.passwordHint')}
-              />
-            </div>
-            <div className="au-check">
-              <span className="au-cb on" aria-hidden="true">
-                <Icon name="check" size={11} />
-              </span>
-              <span>{t('auth.agree')}</span>
-            </div>
-            <button type="button" className="au-btn" disabled>
-              {t('auth.signupSubmit')}
-            </button>
-            <div className="au-foot2">
-              {t('auth.haveAccount')}{' '}
-              <button
-                type="button"
-                className="au-link"
-                onClick={() => {
-                  setVariant('login');
-                }}
-              >
-                {t('auth.loginLink')}
-              </button>
-            </div>
-          </div>
-        ) : null}
-
-        {variant === 'reset' ? (
-          <div className="au-box">
-            <h1 className="au-h1">{t('auth.resetTitle')}</h1>
-            <div className="au-sub">{t('auth.resetSub')}</div>
-            <div className="au-note">{t('auth.demoNote')}</div>
-            <div className="au-field">
-              <label className="l" htmlFor="reset-email">
-                {t('login.email')}
-              </label>
-              <input
-                id="reset-email"
-                className="au-inp"
-                type="email"
-                placeholder={t('auth.emailPh')}
-              />
-            </div>
-            <button type="button" className="au-btn" disabled>
-              {t('auth.resetSubmit')}
-            </button>
-            <div className="au-foot2">
-              <button
-                type="button"
-                className="au-back"
-                onClick={() => {
-                  setVariant('login');
-                }}
-              >
-                <Icon name="arrowLeft" size={14} />
-                {t('auth.backToLogin')}
-              </button>
-            </div>
-          </div>
-        ) : null}
+        <Login onAuthenticated={onAuthenticated} />
       </main>
     </div>
   );
