@@ -22,6 +22,7 @@ export type {
   Appearance,
   AppearanceMode,
   AppearanceFont,
+  Density,
   DraftField,
   DraftFieldOption,
   ChoiceConfig,
