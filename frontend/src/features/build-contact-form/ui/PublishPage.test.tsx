@@ -1,5 +1,5 @@
 import { http, HttpResponse } from 'msw';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { MemoryRouter } from 'react-router-dom';
 import { screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
@@ -10,11 +10,14 @@ import { PublishPage } from '@/features/build-contact-form/ui/PublishPage';
 import { resolvePublicBase } from '@/features/build-contact-form/lib/public-base';
 
 const CHANNELS_URL = 'http://localhost/admin/notification-channels';
+const MANIFEST_URL = '*/embed/manifest.json';
 
 describe('resolvePublicBase', () => {
   it('falls back to the current origin when no public host is configured', () => {
     expect(resolvePublicBase('', 'http://localhost:8902')).toBe('http://localhost:8902');
-    expect(resolvePublicBase('   ', 'https://contact.example.com')).toBe('https://contact.example.com');
+    expect(resolvePublicBase('   ', 'https://contact.example.com')).toBe(
+      'https://contact.example.com',
+    );
   });
 
   it('uses the configured public host and strips a trailing slash', () => {
@@ -38,6 +41,29 @@ function Harness({ formId }: { formId: number | undefined }): ReactNode {
 }
 
 describe('PublishPage notifications', () => {
+  // The embed snippet fetches the production manifest; default to "no build" so the snippet falls
+  // back to the plain /embed.js. Individual tests can override this.
+  beforeEach(() => {
+    server.use(http.get(MANIFEST_URL, () => new HttpResponse(null, { status: 404 })));
+  });
+
+  it('uses the hashed filename + SRI in the snippet when a build manifest is present', async () => {
+    server.use(
+      http.get(MANIFEST_URL, () =>
+        HttpResponse.json({
+          file: 'embed/embed.deadbeef1234.js',
+          integrity: 'sha384-TESTHASH',
+          bytes: 1,
+        }),
+      ),
+    );
+
+    renderWithProviders(<Harness formId={undefined} />);
+
+    expect(await screen.findByText(/integrity="sha384-TESTHASH"/)).toBeInTheDocument();
+    expect(screen.getByText(/embed\/embed\.deadbeef1234\.js/)).toBeInTheDocument();
+  });
+
   it('prompts to save first when the form is new (no id yet)', () => {
     renderWithProviders(<Harness formId={undefined} />);
 

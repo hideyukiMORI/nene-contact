@@ -1,12 +1,17 @@
 import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
 import { useNotificationChannelsQuery, CHANNEL_ICON } from '@/entities/notification-channel';
 import { env } from '@/shared/config/env';
 import { resolvePublicBase } from '@/features/build-contact-form/lib/public-base';
+import {
+  buildEmbedSnippet,
+  fetchEmbedManifest,
+} from '@/features/build-contact-form/lib/embed-snippet';
 import type { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
 
 type Builder = ReturnType<typeof useFormBuilder>;
@@ -33,9 +38,15 @@ export function PublishPage({
   const base = resolvePublicBase(env.publicBaseUrl, window.location.origin);
   const key = draft.publicFormKey.trim() === '' ? 'your-form-key' : draft.publicFormKey;
   const publicUrl = `${base}/public/forms/${key}`;
-  const snippet =
-    `<script src="${base}/embed.js" data-form="${key}"\n` +
-    `        data-trigger="${mode}" async></script>`;
+  // Prefer the production build (hashed filename + SRI) when its manifest is reachable; fall back
+  // to the plain /embed.js otherwise (dev, or before `npm run build:embed`). #334.
+  const manifestQuery = useQuery({
+    queryKey: ['embed-manifest', base],
+    queryFn: () => fetchEmbedManifest(base),
+    retry: false,
+    staleTime: Infinity,
+  });
+  const snippet = buildEmbedSnippet(base, key, mode, manifestQuery.data ?? null);
 
   const copy = (text: string): void => {
     void navigator.clipboard.writeText(text).then(
