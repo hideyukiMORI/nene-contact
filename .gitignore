@@ -20,3 +20,6 @@
 
 # Uploaded media library assets (served statically; not source)
 public_html/media/
+
+# ClaudeDesign hand-off packages (audit briefs, screenshots, zips) — local artifacts, not source
+/handoff/
