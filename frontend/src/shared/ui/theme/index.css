@@ -9038,6 +9038,41 @@ a.t:hover {
   margin-top: 9px;
   justify-content: flex-end;
 }
+/* Records import panel (#316). */
+.cf-rec-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.cf-rec-input {
+  flex: 1;
+  box-sizing: border-box;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font: inherit;
+  font-size: 12.5px;
+  color: var(--ex-text);
+  background: var(--ex-surface);
+}
+.cf-rec-input:focus {
+  outline: none;
+  border-color: var(--ex-brand);
+  box-shadow: 0 0 0 3px var(--ex-brand-weak);
+}
+.cf-rec-err {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--ex-danger);
+}
+.cf-rec-confirm {
+  margin-top: 10px;
+  font-size: 12px;
+  color: var(--ex-text);
+}
 
 /* per-row image affordance on canvas (case C rows) */
 .cf-ce-img {

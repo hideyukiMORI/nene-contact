@@ -40,6 +40,8 @@ export interface ChoiceField extends ChoiceState {
   updateOption: (id: string, patch: Partial<ChoiceEditorOption>) => void;
   move: (from: number, to: number) => void;
   bulkReplace: (text: string) => void;
+  setOptions: (options: { id: string; label: string }[]) => void;
+  importOptions: (items: { value: string; label: string }[]) => void;
   toggleImg: (id: string) => void;
   setOther: (value: BoolUpdater) => void;
   patchOther: (patch: Partial<ChoiceOtherConfig>) => void;
@@ -158,6 +160,27 @@ export function useChoiceField(
     }));
   }, []);
 
+  // Replace the options with an explicit id/label set, preserving the given ids (unlike addOption /
+  // bulkReplace, which mint new ones). Used by the Records import so a Records value stays the option
+  // value (choice-bridge persists id as the option value). Defaults reset for the new value set.
+  const setOptions = useCallback((options: { id: string; label: string }[]) => {
+    if (options.length === 0) {
+      return;
+    }
+    setState((s) => ({
+      ...s,
+      options: options.map((o) => ({ id: o.id, label: o.label })),
+      defaults: [],
+    }));
+  }, []);
+
+  const importOptions = useCallback(
+    (items: { value: string; label: string }[]) => {
+      setOptions(items.map((it) => ({ id: it.value, label: it.label })));
+    },
+    [setOptions],
+  );
+
   const toggleImg = useCallback((id: string) => {
     setState((s) => ({
       ...s,
@@ -210,6 +233,8 @@ export function useChoiceField(
     updateOption,
     move,
     bulkReplace,
+    setOptions,
+    importOptions,
     toggleImg,
     setOther,
     patchOther,
