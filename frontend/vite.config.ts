@@ -50,6 +50,11 @@ export default defineConfig(({ mode }) => {
         '/api': target,
         '/public': target,
         '/health': target,
+        // The operator install snippet loads /embed.js (and the demo page) from the console
+        // origin. In dev that origin is Vite, which serves the SPA under /console/ and would 404
+        // these — proxy them to the app host so a copied snippet works locally (#327, req A).
+        '/embed.js': target,
+        '/embed-demo.html': target,
       },
     },
   };
