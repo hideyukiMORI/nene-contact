@@ -320,6 +320,7 @@ export const en: Partial<MessageCatalog> = {
   'builder.fieldHasError': 'Please check this field.',
   'builder.type.text': 'Text',
   'builder.type.email': 'Email',
+  'builder.type.phone': 'Phone',
   'builder.type.textarea': 'Textarea',
   'builder.type.select': 'Select',
   'builder.type.checkbox': 'Checkbox',

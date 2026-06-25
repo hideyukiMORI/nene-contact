@@ -44,6 +44,7 @@ import { RespondentForm } from '@/features/build-contact-form/ui/choice/Responde
 import {
   FIELD_DEFAULT_KEYS,
   FIELD_TYPE_ICON,
+  fieldTypeLabelKey,
   PALETTE,
 } from '@/features/build-contact-form/lib/field-types';
 
@@ -285,9 +286,7 @@ export function FormBuilder({
 
   const fieldLabel = (field: DraftField): string => {
     const raw = field.label[locale];
-    return raw !== undefined && raw.trim() !== ''
-      ? raw
-      : t(`builder.type.${field.fieldType}` as MessageKey);
+    return raw !== undefined && raw.trim() !== '' ? raw : t(fieldTypeLabelKey(field.fieldType));
   };
 
   const selectedLabel = selected !== null ? fieldLabel(selected) : '';
@@ -532,7 +531,7 @@ export function FormBuilder({
                   <div className="bd-pinhead">
                     <span className="bd-typechip">
                       <Icon name={FIELD_TYPE_ICON[selected.fieldType] ?? 'text'} size={14} />
-                      {t(`builder.type.${selected.fieldType}` as MessageKey)}
+                      {t(fieldTypeLabelKey(selected.fieldType))}
                     </span>
                     <span className="nm">{selectedLabel}</span>
                   </div>
@@ -551,7 +550,7 @@ export function FormBuilder({
                     <FieldConfigPanel
                       field={selected}
                       label={selectedRawLabel}
-                      typeLabel={t(`builder.type.${selected.fieldType}` as MessageKey)}
+                      typeLabel={t(fieldTypeLabelKey(selected.fieldType))}
                       onLabel={(v) => {
                         builder.setFieldLabel(selected.id, locale, v);
                       }}
@@ -585,7 +584,7 @@ export function FormBuilder({
                           }}
                         >
                           <Icon name={FIELD_TYPE_ICON[type] ?? 'text'} size={16} />
-                          {t(`builder.type.${type}` as MessageKey)}
+                          {t(fieldTypeLabelKey(type))}
                         </button>
                       ))}
                     </div>
