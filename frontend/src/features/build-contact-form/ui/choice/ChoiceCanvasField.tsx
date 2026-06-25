@@ -1,6 +1,9 @@
 import { useRef, useState, type KeyboardEvent, type ReactNode } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
+import { AppError } from '@/shared/api/errors';
+import { recordsOptionsQuery, type RecordsOption } from '@/entities/records';
 import {
   countRuleText,
   pressable,
@@ -252,8 +255,15 @@ export function ChoiceCanvasField({
   onDuplicate: () => void;
 }): ReactNode {
   const { t } = useI18n();
+  const queryClient = useQueryClient();
   const [bulk, setBulk] = useState(false);
   const [bulkText, setBulkText] = useState('');
+  // Records import (#316): a source-key input → fetch → confirm-replace.
+  const [recOpen, setRecOpen] = useState(false);
+  const [source, setSource] = useState('');
+  const [fetching, setFetching] = useState(false);
+  const [recError, setRecError] = useState<string | null>(null);
+  const [pendingImport, setPendingImport] = useState<RecordsOption[] | null>(null);
   const style = STYLE_BY_ID[choice.style];
   const listStyle = choice.style === 'radio' || choice.style === 'checkbox';
   const showStrip = !listStyle || choice.imgMode;
@@ -266,6 +276,43 @@ export function ChoiceCanvasField({
   const applyBulk = (): void => {
     choice.bulkReplace(bulkText);
     setBulk(false);
+  };
+
+  const runRecordsFetch = (): void => {
+    setRecError(null);
+    setPendingImport(null);
+    if (source.trim() === '') {
+      setRecError(t('choice.records.errorSource'));
+      return;
+    }
+    setFetching(true);
+    void queryClient
+      .fetchQuery(recordsOptionsQuery(source))
+      .then((items) => {
+        if (items.length === 0) {
+          setRecError(t('choice.records.empty'));
+          return;
+        }
+        setPendingImport(items);
+      })
+      .catch((e: unknown) => {
+        const status = e instanceof AppError ? e.status : 0;
+        setRecError(
+          status === 422 ? t('choice.records.errorSource') : t('choice.records.errorUpstream'),
+        );
+      })
+      .finally(() => {
+        setFetching(false);
+      });
+  };
+
+  const applyRecordsImport = (): void => {
+    if (pendingImport !== null) {
+      choice.importOptions(pendingImport);
+      setPendingImport(null);
+      setRecOpen(false);
+      setSource('');
+    }
   };
 
   return (
@@ -342,6 +389,20 @@ export function ChoiceCanvasField({
           <Icon name="lines" size={16} />
           <span className="tip">{t('choice.tip.bulk')}</span>
         </button>
+        <button
+          type="button"
+          className={'cf-fbtn' + (recOpen ? ' on' : '')}
+          aria-pressed={recOpen}
+          aria-label={t('choice.records.import')}
+          onClick={() => {
+            setRecOpen((v) => !v);
+            setRecError(null);
+            setPendingImport(null);
+          }}
+        >
+          <Icon name="external" size={16} />
+          <span className="tip">{t('choice.records.import')}</span>
+        </button>
         <div className="div" />
         <button
           type="button"
@@ -409,6 +470,55 @@ export function ChoiceCanvasField({
               {t('choice.bulk.replace')}
             </button>
           </div>
+        </div>
+      ) : null}
+
+      {recOpen ? (
+        <div className="cf-ce-bulk">
+          <h5>{t('choice.records.import')}</h5>
+          <p>{t('choice.records.desc')}</p>
+          <div className="cf-rec-row">
+            <input
+              className="cf-rec-input"
+              value={source}
+              onChange={(e) => {
+                setSource(e.target.value);
+              }}
+              placeholder={t('choice.records.sourcePh')}
+              aria-label={t('choice.records.sourceLabel')}
+            />
+            <button type="button" className="ex-btn" disabled={fetching} onClick={runRecordsFetch}>
+              {fetching ? t('choice.records.loading') : t('choice.records.fetch')}
+            </button>
+          </div>
+          {recError !== null ? (
+            <div className="cf-rec-err" role="alert">
+              <Icon name="warn" size={13} />
+              {recError}
+            </div>
+          ) : null}
+          {pendingImport !== null ? (
+            <div className="cf-rec-confirm">
+              <span>
+                {t('choice.records.confirmReplace', { n: String(choice.options.length) })}
+              </span>
+              <div className="cf-ce-bulk-act">
+                <button
+                  type="button"
+                  className="ex-btn ghost"
+                  onClick={() => {
+                    setPendingImport(null);
+                  }}
+                >
+                  {t('choice.cancel')}
+                </button>
+                <button type="button" className="ex-btn" onClick={applyRecordsImport}>
+                  <Icon name="check" size={14} />
+                  {t('choice.records.replace')}
+                </button>
+              </div>
+            </div>
+          ) : null}
         </div>
       ) : null}
 
