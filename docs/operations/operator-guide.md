@@ -121,6 +121,46 @@ Every mutation and every PII view/export is **audit-logged** (who / what / when)
 
 Copy `.env.example` to `.env` and fill these in. Never commit `.env`.
 
+The console build also reads two Vite build-time vars (`VITE_NENE_CONTACT_API_BASE_URL`,
+`VITE_NENE_CONTACT_PUBLIC_BASE_URL`) — see `.env.example`. Leave the public base unset for a
+single-host deploy; set it when `embed.js`/`/public/*` are served from a different host than the
+console (e.g. a CDN).
+
+---
+
+## 8. Production embed.js build & install snippet
+
+`public_html/embed.js` is the readable source. For production, build a minified, content-hashed,
+integrity-checked artifact:
+
+```
+cd frontend && npm run build:embed
+```
+
+This writes (the `public_html/embed/` dir is git-ignored build output):
+
+- `public_html/embed/embed.<hash>.js` — minified widget. The hash is derived from the bytes, so the
+  filename changes only when the widget changes — serve it **immutable, long-cache**
+  (`Cache-Control: public, max-age=31536000, immutable`).
+- `public_html/embed/manifest.json` — `{ file, bytes, integrity, snippet }`. `integrity` is the
+  `sha384-…` Subresource Integrity hash (ADR 0010 §7); `snippet` is the ready production install
+  snippet (replace `{host}` / `{public_form_key}`):
+
+```html
+<script src="https://{host}/embed/embed.<hash>.js" data-form="{public_form_key}"
+        data-trigger="modal" integrity="sha384-…"
+        crossorigin="anonymous" async></script>
+```
+
+Notes:
+- The build runs a CSP guard — it fails if the widget ever introduces `eval` / `new Function` /
+  `innerHTML` / `document.write` / `insertAdjacentHTML`, keeping it CSP-friendly (no `eval`, no
+  inline script from API responses).
+- The raw `/embed.js` stays available for simple installs; serve it with a **short** cache. The
+  hashed artifact is the cache-busting + SRI path for production.
+- The widget resolves its API base from its own `<script src>` origin, so serve `embed.js`, the
+  hashed artifact, and `/public/*` from the same host (or set `VITE_NENE_CONTACT_PUBLIC_BASE_URL`).
+
 ---
 
 ## Related
