@@ -5,8 +5,8 @@
 **M2 — Compliance hardening (binding gap closure)** ✅ complete on `main` (2026-06-04)
 **No-physical-deletion policy (ADR 0016)** ✅ complete on `main` (2026-06-04)
 **M4 — Channels + webhooks + attachments** ✅ complete on `main` (2026-06-04)
-**M3 — Forms + embed MVP** 🚧 core landed on `main` (2026-06-04) — embed.js + admin SPA
-**M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04)
+**M3 — Forms + embed MVP** ✅ MVP complete on `main` (2026-06-14) — embed.js + admin console; builder & inbox to spec v1; **Appearance Studio v2** beyond MVP
+**M5 — Sibling handoff** ✅ Deal + Vault handoff on `main` (2026-06-04); **submission-detail UI buttons still pending**
 **M6 — AI / MCP** ✅ agent read `/api/*` + MCP stdio + ingest + write/confirm + Invoice + Records on `main` (2026-06-04)
 **M7 — GA / acceptance** 🚧 A1–A8 audit + operator guide done (2026-06-04); prod embed.js + final reviews remain
 
@@ -64,18 +64,21 @@ raw values).
 - [x] File attachments — upload/store/caps/scan-hook + admin list/download (audited) (#88 → #89)
 - [x] Attachment retention erase-in-place + orphan cleanup (ADR 0016) (#90 → #91)
 
-## M3 — Forms + embed MVP 🚧 (core landed)
+## M3 — Forms + embed MVP ✅ (MVP complete 2026-06-14)
 
 - [x] Per-form CORS for public endpoints (embed prerequisite) (#93 → #94)
 - [x] `embed.js` widget — floating/button/inline, schema-driven, consent + file upload (#95 → #96)
-- [x] Admin SPA scaffold + login (React/TS/Vite → `public_html/admin/`) (#97 → #98)
+- [x] Admin SPA scaffold + login (React/TS/Vite → `public_html/console/`) (#97 → #98)
 - [x] Contact-form list (#99 → #100)
 - [x] Submissions inbox list with paging (#101 → #102)
 - [x] Submission detail — status update + notes (write pattern) (#103)
 - [x] Form builder — palette + dnd-kit reorder + create (ADR 0015) (#104 → #105)
 - [x] Notification channel management (#106 → #107)
 - [x] User management (list / create / role+status) (#108 → #109)
-- [ ] Follow-ups: form edit/delete, inbox delete/correct/CSV buttons, org-switch UI, `data-theme`
+- [x] Form edit / delete (soft) + read-only detail view (#196–#200)
+- [x] Earlier M3 follow-ups closed: see the 2026-06 console/builder/appearance sprint below
+- [ ] Remaining UI follow-ups: inbox CSV-export button, correction UI, org-switch UI
+      (the CSV/correction APIs already exist; single-tenant resolver works without org-switch)
 
 ## M5 — Sibling handoff ✅ (Phase 3)
 
@@ -149,17 +152,60 @@ unconfigured 502 problem; no token 401.
 - [ ] Production `embed.js` build: hashed long-cache filename, CSP-friendly (no eval/inline)
 - [ ] Compliance/governance/backend/frontend reviews pass on the release
 
+## 2026-06 — Console, builder & appearance sprint ✅ (2026-06-10 → 06-14)
+
+A sustained push (#110–#303) that finished the operator console UX and took the embed beyond
+the MVP. Grouped by theme:
+
+- **Pro Console design system** — full reskin of every admin screen (foundation + app shell,
+  auth, dashboard, forms list, builder, inbox, submission detail, users, channels, embed modal)
+  (#172–#191); i18n key cleanup (#192); responsive shell + parity (#210/#212); centered
+  wide-screen app window + favicon (#206); login redesigned to the DirAC spec (#272).
+- **Inbox / submissions** — rebuilt as the two-pane 確定版 (#194); sender label name-then-email
+  (#202); pager + status/sort controls (#224); submission detail redesigned to spec v1 (#237);
+  capture & store `source_url` (#227) and submission `locale` (#236).
+- **Reception-metadata staged disclosure (ADR 0018)** — audited `technical-meta` endpoint (#228);
+  inbox detail reception meta + audited reveal (#229/#234).
+- **Audit log** — admin list API (#218) + viewer screen to spec (#220/#222); humanized action
+  labels via ja/en dictionary (#242); detail aligned to the shared inquiry-detail skeleton (#240);
+  organization-create now audited (#214) + a merge gate that every UseCase is audited (#216).
+- **Contact-form CRUD** — update/edit mode (#196), soft delete + confirm (#198), read-only
+  detail as the builder view (#200/#208).
+- **Form builder spec v1** — rebuilt to `fb-*` spec (#246); persist description (#248),
+  placeholder (#250), field `config` (#258); choice-field management UI (#254); date (#244) and
+  phone field types; custom public form key / slug on create (#252); builder chrome to spec
+  (#270) → full-screen focus + 4-tab chrome (フィールド/フォーム設定/デザイン/連携・公開) (#294);
+  honest dirty-state save indicator (#298); pane-scroll fixes (#260–#268).
+- **Appearance Studio v2 (beyond MVP)** — per-form `appearance_json` model + API + schema +
+  embed theming (#280); soft-deleted fields excluded from the public schema (#282); Design tab +
+  live preview (#284); nested-token model v2 + validation + schema (#286); embed render v2
+  (`--pv-*` theming, inline/modal, HERO, focus) (#288); Studio UI — live preview + presets +
+  icon-rail groups (#290); per-org media library for HERO images (#292).
+- **Submit experience & channels** — submit button label + completion message + post-submit
+  redirect (#296); notification channels wired into the builder 連携・公開 tab (#300).
+- **Embed** — conversational chat mode (one-by-one stepper) (#302).
+- **Self-service** — Account screen password change (#278); removed the unwired Settings
+  preview screen (#276).
+- **Tooling** — frontend Vite dev server pinned to the 89xx lane (port 8902) (#304).
+
 ## Next up
 
-- [ ] M7 production `embed.js` build + final reviews (above)
-- [ ] Admin SPA: handoff buttons + Records-options import in the builder (M5/M6 UI follow-ups)
+- [ ] **M7 production `embed.js` build** — hashed long-cache filename, CSP-friendly (no eval/inline)
+- [ ] **M7 final reviews** — refresh `docs/review/{compliance,governance,backend-api,frontend}.md`
+      for the release
+- [ ] **Submission-detail handoff buttons** — "Send to Deal" / "Archive to Vault" / "Draft in
+      Invoice" + retry (M5/M6; the APIs exist, the UI does not)
+- [ ] **Records-options import in the builder** — wire `GET /admin/records/options` into the
+      choice-field editor (M6; API exists, UI does not)
+- [ ] **Inbox CSV-export button + correction UI** — surface the existing export/correct APIs
 - [ ] Concierge signed-post verification (`NENE_CONCIERGE_WEBHOOK_SECRET`) — optional
+- [ ] Org-switch UI — only when multi-tenant resolution moves past single-tenant
 
 ## Handoff notes
 
 - Concierge boundary: ADR 0009 — no scenario engine in Contact.
 - Locale scope: ADR 0011 — bilingual `ja`/`en` only; `contact_form` carries `locales[]` + `default_locale`.
 - Invoice handoff: draft contract in `docs/integrations/invoice-handoff-contract.md`; awaits Invoice `/api/*` endpoints.
-- Local ports: API **8900**, phpMyAdmin **8901**, MySQL **3391**.
+- Local ports: API **8900**, phpMyAdmin **8901**, frontend dev (Vite) **8902**, MySQL **3391**.
 
-Last updated: 2026-06-04
+Last updated: 2026-06-25

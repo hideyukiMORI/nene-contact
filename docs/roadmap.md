@@ -9,7 +9,7 @@ milestone is delivered within the binding
 charter (APPI / Japan law only); where any goal conflicts with the charter, compliance
 wins (ADR 0012).
 
-## Where we are (2026-06-04)
+## Where we are (2026-06-25)
 
 - **Phase 0 — Governance** ✅ complete (2026-06-03).
 - **Phase 1 — Runtime foundation** ✅ complete: org, tenant resolution, JWT/RBAC, audit,
@@ -20,8 +20,11 @@ wins (ADR 0012).
 - **No-physical-deletion policy** ✅ ([ADR 0016](./adr/0016-no-physical-deletion-pii-erase-in-place.md)):
   records are soft-deleted / append-only; PII is erased in place; the DB user has no `DELETE`.
 - **M4 Channels + webhooks + attachments** ✅: Slack/Chatwork dispatch, signed webhooks, file attachments.
-- **M3 Forms + embed MVP** 🚧: `embed.js` widget ✅; admin SPA (React/TS/Vite → `public_html/console/`, served at `/console/`)
-  with login, form builder (dnd-kit), inbox list/detail (status + notes), channels, users ✅.
+- **M3 Forms + embed MVP** ✅ (MVP complete 2026-06-14): `embed.js` widget ✅; admin console
+  (React/TS/Vite → `public_html/console/`, served at `/console/`) with login, form builder
+  (dnd-kit, rebuilt to spec v1), inbox two-pane (status + notes + audited metadata reveal),
+  channels, users, audit-log viewer ✅. **Appearance Studio v2** (per-form theming, 3 modes,
+  HERO, media library) landed beyond the MVP bar. See [`todo/current.md`](./todo/current.md).
 - **M5 Sibling handoff** ✅: Contact → Deal opportunity handoff + Contact → Vault attachment
   archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited).
 - **M6 AI/MCP** ✅: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
@@ -42,7 +45,7 @@ Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./
 | [M2](./milestones/m2-compliance-hardening.md) | Compliance hardening (binding gap closure) | 1–2 | ✅ done |
 | — | No physical deletion / PII erase-in-place (ADR 0016) | 2 | ✅ done |
 | [M4](./milestones/m4-channels-webhooks.md) | Channels + webhooks + attachments | 3 | ✅ done |
-| [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin SPA) | 2 | 🚧 core done |
+| [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin console) | 2 | ✅ done |
 | [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ✅ done |
 | [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ✅ done |
 | [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | 🚧 A1–A8 verified |
