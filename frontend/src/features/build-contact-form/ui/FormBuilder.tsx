@@ -109,7 +109,14 @@ export function FormBuilder({
   const builder = useFormBuilder(initialDraft, formId);
   const isEditing = formId !== undefined;
   const { draft } = builder;
-  const locale = draft.defaultLocale;
+  // The locale whose labels are being edited (#314). Defaults to the form's default locale; the
+  // toggle only appears when en is enabled. New fields still seed their base label in the default
+  // locale (see addField) so the required default-locale label is never missing. The effective
+  // value is clamped to the enabled locales (derived, so disabling en falls back without an effect).
+  const [editLocaleState, setEditLocale] = useState(draft.defaultLocale);
+  const editLocale = draft.locales.includes(editLocaleState)
+    ? editLocaleState
+    : draft.defaultLocale;
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
   // Per-field + form-level server validation errors from the last failed save, mapped to the
@@ -177,16 +184,16 @@ export function FormBuilder({
   // The single choice-state source. Seeded from the selected select field; re-seeds on selection
   // change. Every edit mirrors back into the draft so the draft stays the persisted truth.
   const choiceSeed = isChoiceSelected
-    ? draftFieldToChoiceState(selected, locale)
+    ? draftFieldToChoiceState(selected, editLocale)
     : EMPTY_CHOICE_STATE;
   const choice = useChoiceField(
     choiceSeed,
-    isChoiceSelected ? selected.id : '__none__',
+    isChoiceSelected ? `${selected.id}:${editLocale}` : '__none__',
     (state) => {
       if (selected === null || selected.fieldType !== 'select') {
         return;
       }
-      const patch = choiceStateToFieldPatch(state, locale, selected.options);
+      const patch = choiceStateToFieldPatch(state, editLocale, selected.options);
       builder.updateField(selected.id, {
         required: patch.required,
         options: patch.options,
@@ -198,17 +205,20 @@ export function FormBuilder({
   const addField = (fieldType: string): void => {
     const id = builder.addField(fieldType);
     const keys = FIELD_DEFAULT_KEYS[fieldType];
+    // New fields seed their base label/options in the DEFAULT locale (not the editing locale), so the
+    // required default-locale label is always present even when editing en (#314).
+    const base = draft.defaultLocale;
     if (keys !== undefined) {
-      builder.setFieldLabel(id, locale, t(keys.label));
+      builder.setFieldLabel(id, base, t(keys.label));
       builder.updateField(id, { placeholder: t(keys.placeholder) });
     }
     if (fieldType === 'select') {
       // Seed a few starter options so a new choice field is immediately previewable and valid.
       builder.updateField(id, {
         options: [
-          { value: newOptionValue(), label: { [locale]: t('choice.starter.opt1') } },
-          { value: newOptionValue(), label: { [locale]: t('choice.starter.opt2') } },
-          { value: newOptionValue(), label: { [locale]: t('choice.starter.opt3') } },
+          { value: newOptionValue(), label: { [base]: t('choice.starter.opt1') } },
+          { value: newOptionValue(), label: { [base]: t('choice.starter.opt2') } },
+          { value: newOptionValue(), label: { [base]: t('choice.starter.opt3') } },
         ],
         choice: defaultChoiceConfig(),
       });
@@ -286,14 +296,14 @@ export function FormBuilder({
   };
 
   const fieldLabel = (field: DraftField): string => {
-    const raw = field.label[locale];
+    const raw = field.label[editLocale];
     return raw !== undefined && raw.trim() !== '' ? raw : t(fieldTypeLabelKey(field.fieldType));
   };
 
   const selectedLabel = selected !== null ? fieldLabel(selected) : '';
   // The label editor binds to the raw value (empty when unset) — not the type-name fallback —
   // so clearing it doesn't seed the placeholder text back into the field.
-  const selectedRawLabel = selected !== null ? (selected.label[locale] ?? '') : '';
+  const selectedRawLabel = selected !== null ? (selected.label[editLocale] ?? '') : '';
   // Hide last save's errors once the draft changes (the edit will be re-checked on the next save).
   const errorsActive = errorsAt !== null && errorsAt === serialized;
   const activeFieldErrors = errorsActive ? fieldErrors : {};
@@ -553,12 +563,32 @@ export function FormBuilder({
                     </span>
                     <span className="nm">{selectedLabel}</span>
                   </div>
+                  {draft.locales.includes('en') ? (
+                    <div className="bd-editloc" role="group" aria-label={t('builder.editLocale')}>
+                      <span className="l">{t('builder.editLocale')}</span>
+                      <div className="seg">
+                        {draft.locales.map((loc) => (
+                          <button
+                            key={loc}
+                            type="button"
+                            className={loc === editLocale ? 'on' : ''}
+                            aria-pressed={loc === editLocale}
+                            onClick={() => {
+                              setEditLocale(loc);
+                            }}
+                          >
+                            {t(`submission.language.${loc}`)}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  ) : null}
                   {isChoiceSelected ? (
                     <ChoicePanel
                       choice={choice}
                       label={selectedRawLabel}
                       onLabel={(v) => {
-                        builder.setFieldLabel(selected.id, locale, v);
+                        builder.setFieldLabel(selected.id, editLocale, v);
                       }}
                       onOpenGallery={() => {
                         setGalleryOpen(true);
@@ -570,7 +600,7 @@ export function FormBuilder({
                       label={selectedRawLabel}
                       typeLabel={t(fieldTypeLabelKey(selected.fieldType))}
                       onLabel={(v) => {
-                        builder.setFieldLabel(selected.id, locale, v);
+                        builder.setFieldLabel(selected.id, editLocale, v);
                       }}
                       update={(patch) => {
                         builder.updateField(selected.id, patch);

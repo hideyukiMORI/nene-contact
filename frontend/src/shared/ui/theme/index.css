@@ -10912,6 +10912,45 @@ a.t:hover {
   text-overflow: ellipsis;
   min-width: 0;
 }
+/* Editing-language toggle (#314) — shown in the inspector when en is enabled. */
+.bd-editloc {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--ex-border);
+}
+.bd-editloc .l {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--ex-muted);
+}
+.bd-editloc .seg {
+  display: inline-flex;
+  border: 1px solid var(--ex-border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+.bd-editloc .seg button {
+  border: 0;
+  background: var(--ex-surface);
+  color: var(--ex-faint);
+  font: inherit;
+  font-size: 12px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+.bd-editloc .seg button + button {
+  border-left: 1px solid var(--ex-border);
+}
+.bd-editloc .seg button.on {
+  background: var(--ex-brand);
+  color: #fff;
+}
+.bd-editloc .seg button:focus-visible {
+  outline: 2px solid var(--ex-brand);
+  outline-offset: -2px;
+}
 
 /* full-width "delete this field" button at the bottom of the field inspector */
 .bd-fielddel {

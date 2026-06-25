@@ -229,6 +229,59 @@ describe('FormBuilder', () => {
     });
   });
 
+  it('edits ja/en field labels via the editing-locale toggle, preserving ja (#314)', async () => {
+    interface Posted {
+      fields?: { label: Record<string, string> }[];
+    }
+    const captured: { value: Posted | null } = { value: null };
+    server.use(
+      http.post(URL, async ({ request }) => {
+        captured.value = (await request.json()) as Posted;
+        return HttpResponse.json(
+          {
+            id: 1,
+            name: 'お問い合わせ',
+            public_form_key: 'k',
+            default_locale: 'ja',
+            locales: ['ja', 'en'],
+            fields: [],
+          },
+          { status: 201 },
+        );
+      }),
+    );
+    const user = userEvent.setup();
+    renderWithProviders(<FormBuilder onCreated={vi.fn()} />);
+
+    const titleInputs = screen.getAllByLabelText('フォーム名');
+    await user.type(titleInputs[0] as HTMLElement, 'お問い合わせ');
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+
+    // EN is off → no editing-language toggle.
+    expect(screen.queryByText('編集言語')).toBeNull();
+
+    // Enable EN on the form settings tab, then return to the fields tab.
+    await user.click(screen.getByRole('button', { name: 'フォーム設定' }));
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    await user.click(screen.getByRole('button', { name: 'フィールド' }));
+
+    // The toggle now shows; switch to English and enter an en label.
+    expect(screen.getByText('編集言語')).toBeInTheDocument();
+    await user.click(screen.getByRole('button', { name: 'English' }));
+    const labelInput = screen.getByLabelText('ラベル');
+    expect(labelInput).toHaveValue(''); // en is empty (not copied from ja)
+    await user.type(labelInput, 'Inquiry');
+
+    await user.click(screen.getByRole('button', { name: '公開' }));
+    await user.click(screen.getByRole('button', { name: '公開する' }));
+
+    await waitFor(() => {
+      expect(captured.value).not.toBeNull();
+    });
+    // ja preserved, en added — neither overwrites the other.
+    expect(captured.value?.fields?.[0]?.label).toEqual({ ja: 'テキスト項目', en: 'Inquiry' });
+  });
+
   it('blocks creation without a name or fields', async () => {
     const onCreated = vi.fn();
     const user = userEvent.setup();
