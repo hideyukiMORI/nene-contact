@@ -20,6 +20,7 @@ import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Icon, type IconName } from '@/shared/ui';
 import { useSubmission } from '@/features/view-submission/hooks/use-submission';
 import { useSubmissionNotes } from '@/features/view-submission/hooks/use-submission-notes';
+import { HandoffPanel } from '@/features/view-submission/ui/HandoffPanel';
 
 function display(value: unknown): string {
   if (value === null || value === undefined) {
@@ -309,6 +310,8 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
                 {t('submission.addNote')}
               </button>
             </form>
+
+            <HandoffPanel submissionId={submissionId} attachments={attachmentItems} />
 
             <details
               className="tech"
