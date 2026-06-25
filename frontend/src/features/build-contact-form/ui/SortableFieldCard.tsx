@@ -14,6 +14,7 @@ export function SortableFieldCard({
   error,
   onSelect,
   onDelete,
+  onDuplicate,
 }: {
   field: DraftField;
   label: string;
@@ -21,6 +22,7 @@ export function SortableFieldCard({
   error?: string | undefined;
   onSelect: () => void;
   onDelete: () => void;
+  onDuplicate?: () => void;
 }): ReactNode {
   const { t } = useI18n();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
@@ -87,6 +89,19 @@ export function SortableFieldCard({
         <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={11} />
         {typeLabel}
       </span>
+      {onDuplicate !== undefined ? (
+        <button
+          type="button"
+          className="fb-fdup"
+          aria-label={t('builder.duplicateField')}
+          onClick={(e) => {
+            e.stopPropagation();
+            onDuplicate();
+          }}
+        >
+          <Icon name="copy" size={15} />
+        </button>
+      ) : null}
       <button
         type="button"
         className="fb-fdel"

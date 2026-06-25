@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it } from 'vitest';
 import { MemoryRouter, Route, Routes, useLocation } from 'react-router-dom';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactNode } from 'react';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
@@ -89,6 +89,56 @@ describe('ContactFormList', () => {
     await user.click(await screen.findByRole('link', { name: '編集' }));
 
     expect(screen.getByTestId('loc')).toHaveTextContent('/contact-forms/1/edit');
+  });
+
+  it('duplicates a form into a new draft with a copy-suffixed name and no key (#317)', async () => {
+    withOneForm();
+    const created: { body: Record<string, unknown> | null } = { body: null };
+    server.use(
+      // The clone fetches the full form, then POSTs a create.
+      http.get(`${URL}/1`, () =>
+        HttpResponse.json({
+          id: 1,
+          name: 'Contact us',
+          public_form_key: 'key-1',
+          default_locale: 'ja',
+          locales: ['ja'],
+          status: 'active',
+          fields: [],
+        }),
+      ),
+      http.post(URL, async ({ request }) => {
+        created.body = (await request.json()) as Record<string, unknown>;
+        return HttpResponse.json(
+          {
+            id: 2,
+            name: created.body.name,
+            public_form_key: 'key-2',
+            default_locale: 'ja',
+            locales: ['ja'],
+            status: 'draft',
+            fields: [],
+          },
+          { status: 201 },
+        );
+      }),
+    );
+    const user = userEvent.setup();
+
+    renderWithProviders(
+      <MemoryRouter>
+        <ContactFormList />
+      </MemoryRouter>,
+    );
+
+    await user.click(await screen.findByRole('button', { name: '複製' }));
+
+    await waitFor(() => {
+      expect(created.body).not.toBeNull();
+    });
+    expect(created.body?.name).toBe('Contact us のコピー');
+    // The clone never reuses the source public key — the server mints a new one.
+    expect(created.body).not.toHaveProperty('public_form_key');
   });
 
   it('renders the empty state when there are no forms', async () => {

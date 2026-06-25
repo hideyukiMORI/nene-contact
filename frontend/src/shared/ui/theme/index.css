@@ -6963,6 +6963,27 @@ a.t:hover {
   color: #9c5460;
   background: var(--ex-surface2);
 }
+/* Duplicate field — same box as delete, brand (non-destructive) hover (#317). */
+.fb-fdup {
+  flex: none;
+  color: var(--ex-faint);
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 3px;
+  border-radius: 5px;
+  align-self: flex-start;
+  display: grid;
+  place-items: center;
+}
+.fb-fdup:hover {
+  color: var(--ex-brand);
+  background: var(--ex-surface2);
+}
+.fb-fdup:focus-visible {
+  outline: 2px solid var(--ex-brand);
+  outline-offset: 2px;
+}
 .fb-add {
   display: flex;
   align-items: center;

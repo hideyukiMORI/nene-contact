@@ -6,6 +6,7 @@ import { Icon, Modal } from '@/shared/ui';
 import { useContactForms } from '@/features/list-contact-forms/hooks/use-contact-forms';
 import { EmbedModal } from '@/features/embed-form';
 import { useDeleteContactFormMutation } from '@/entities/contact-form';
+import { useDuplicateContactForm } from '@/features/list-contact-forms/hooks/use-duplicate-contact-form';
 import type { ContactForm } from '@/entities/contact-form';
 
 export type FormStatusFilter = 'all' | 'active' | 'disabled';
@@ -54,6 +55,7 @@ export function ContactFormList({
   const [embedForm, setEmbedForm] = useState<ContactForm | null>(null);
   const [deleteForm, setDeleteForm] = useState<ContactForm | null>(null);
   const deleteMutation = useDeleteContactFormMutation();
+  const duplicate = useDuplicateContactForm();
 
   if (isLoading) {
     return <div className="fm-card fm-state">{t('common.loading')}</div>;
@@ -193,6 +195,17 @@ export function ContactFormList({
                           <Icon name="bell" size={14} />
                           {t('contactForms.notify')}
                         </Link>
+                        <button
+                          type="button"
+                          className="fm-gbtn"
+                          disabled={duplicate.isPending}
+                          onClick={() => {
+                            duplicate.duplicate(form.id, form.name);
+                          }}
+                        >
+                          <Icon name="copy" size={14} />
+                          {t('contactForms.duplicate')}
+                        </button>
                         <button
                           type="button"
                           className="fm-kbtn"
