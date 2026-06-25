@@ -50,4 +50,8 @@ produce a production `embed.js` build. After M7 the product meets its GOAL.
 - [`../review/compliance.md`](../review/compliance.md), [`../review/governance.md`](../review/governance.md), [`../review/backend-api.md`](../review/backend-api.md), [`../review/frontend.md`](../review/frontend.md)
 - ADR 0010, ADR 0011, ADR 0012
 
-Last updated: 2026-06-04
+> Status note (2026-06-25): the operator console, form builder (spec v1) and Appearance Studio
+> have since landed (M3 sprint, #110–#304). The two GA items below — the production `embed.js`
+> build and the four release review docs — are still the only remaining work for this milestone.
+
+Last updated: 2026-06-25
