@@ -320,6 +320,7 @@ export const ja = {
   'builder.fieldHasError': 'この項目を確認してください。',
   'builder.type.text': 'テキスト',
   'builder.type.email': 'メール',
+  'builder.type.phone': '電話',
   'builder.type.textarea': '複数行テキスト',
   'builder.type.select': '選択',
   'builder.type.checkbox': 'チェックボックス',

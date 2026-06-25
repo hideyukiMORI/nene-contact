@@ -2,10 +2,9 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import type { CSSProperties, ReactNode } from 'react';
 import type { DraftField } from '@/entities/contact-form';
-import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import { FIELD_TYPE_ICON } from '@/features/build-contact-form/lib/field-types';
+import { FIELD_TYPE_ICON, fieldTypeLabelKey } from '@/features/build-contact-form/lib/field-types';
 import { FieldPreview } from '@/features/build-contact-form/ui/field-config/FieldPreview';
 
 export function SortableFieldCard({
@@ -33,7 +32,7 @@ export function SortableFieldCard({
     transition: transition ?? undefined,
   };
 
-  const typeLabel = t(`builder.type.${field.fieldType}` as MessageKey);
+  const typeLabel = t(fieldTypeLabelKey(field.fieldType));
 
   return (
     <div
