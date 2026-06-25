@@ -7,8 +7,25 @@ import { renderWithProviders } from '../../../../tests/render/renderWithProvider
 import { server } from '../../../../tests/msw/server';
 import { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
 import { PublishPage } from '@/features/build-contact-form/ui/PublishPage';
+import { resolvePublicBase } from '@/features/build-contact-form/lib/public-base';
 
 const CHANNELS_URL = 'http://localhost/admin/notification-channels';
+
+describe('resolvePublicBase', () => {
+  it('falls back to the current origin when no public host is configured', () => {
+    expect(resolvePublicBase('', 'http://localhost:8902')).toBe('http://localhost:8902');
+    expect(resolvePublicBase('   ', 'https://contact.example.com')).toBe('https://contact.example.com');
+  });
+
+  it('uses the configured public host and strips a trailing slash', () => {
+    expect(resolvePublicBase('https://contact.example.com', 'http://localhost')).toBe(
+      'https://contact.example.com',
+    );
+    expect(resolvePublicBase('https://contact.example.com/', 'http://localhost')).toBe(
+      'https://contact.example.com',
+    );
+  });
+});
 
 // Drives PublishPage with a real builder; formId undefined = an unsaved new form.
 function Harness({ formId }: { formId: number | undefined }): ReactNode {

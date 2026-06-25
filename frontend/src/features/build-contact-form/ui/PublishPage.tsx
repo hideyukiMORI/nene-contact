@@ -5,6 +5,8 @@ import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
 import { useNotificationChannelsQuery, CHANNEL_ICON } from '@/entities/notification-channel';
+import { env } from '@/shared/config/env';
+import { resolvePublicBase } from '@/features/build-contact-form/lib/public-base';
 import type { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
 
 type Builder = ReturnType<typeof useFormBuilder>;
@@ -28,11 +30,11 @@ export function PublishPage({
   const [mode, setMode] = useState<SnippetMode>('modal');
   const [copied, setCopied] = useState(false);
 
-  const origin = window.location.origin;
+  const base = resolvePublicBase(env.publicBaseUrl, window.location.origin);
   const key = draft.publicFormKey.trim() === '' ? 'your-form-key' : draft.publicFormKey;
-  const publicUrl = `${origin}/public/forms/${key}`;
+  const publicUrl = `${base}/public/forms/${key}`;
   const snippet =
-    `<script src="${origin}/embed.js" data-form="${key}"\n` +
+    `<script src="${base}/embed.js" data-form="${key}"\n` +
     `        data-trigger="${mode}" async></script>`;
 
   const copy = (text: string): void => {
