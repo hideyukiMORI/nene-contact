@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { describe, expect, it, vi } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
@@ -132,6 +132,33 @@ describe('FormBuilder', () => {
     // The offending field card surfaces the server's per-field message; creation is not signalled.
     expect(await screen.findByText('Label for ja is required.')).toBeInTheDocument();
     expect(onCreated).not.toHaveBeenCalled();
+  });
+
+  it('exposes accessible names on the choice editor + field card (#311)', async () => {
+    const onCreated = vi.fn();
+    const user = userEvent.setup();
+
+    renderWithProviders(<FormBuilder onCreated={onCreated} />);
+
+    // Add a text field — its card label is now a real <button> (nested-interactive resolved).
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+    expect(screen.getByRole('button', { name: 'テキスト項目' })).toBeInTheDocument();
+
+    // Add a 選択 field from the palette — the rich choice editor renders.
+    await user.click(screen.getByRole('button', { name: '選択' }));
+
+    // The floating-toolbar destructive / icon buttons expose real accessible names (scope to the
+    // toolbar — the inspector also has a like-named "delete field" affordance, which is fine).
+    await waitFor(() => {
+      expect(document.querySelector('.cf-float')).not.toBeNull();
+    });
+    const toolbar = within(document.querySelector('.cf-float') as HTMLElement);
+    expect(toolbar.getByRole('button', { name: 'このフィールドを削除' })).toBeInTheDocument();
+    expect(toolbar.getByRole('button', { name: 'フィールドを複製' })).toBeInTheDocument();
+
+    // An added option's remove button is named.
+    await user.type(screen.getByRole('textbox', { name: '選択肢を追加' }), 'A{Enter}');
+    expect(screen.getAllByRole('button', { name: '選択肢を削除' }).length).toBeGreaterThan(0);
   });
 
   it('blocks creation without a name or fields', async () => {

@@ -36,13 +36,23 @@ function OptionRows({ choice }: { choice: ChoiceField }): ReactNode {
             {...handlers}
             className={'cf-ce-opt' + (img ? ' img' : '') + (drag.over === i ? ' drag-over' : '')}
           >
-            <span
+            <button
+              type="button"
               className="cf-ce-grip"
-              title={t('choice.dragReorder')}
+              aria-label={t('choice.dragReorder')}
               style={{ paddingTop: img ? 14 : 0 }}
+              onKeyDown={(e) => {
+                if (e.key === 'ArrowUp' && i > 0) {
+                  e.preventDefault();
+                  choice.move(i, i - 1);
+                } else if (e.key === 'ArrowDown' && i < choice.options.length - 1) {
+                  e.preventDefault();
+                  choice.move(i, i + 1);
+                }
+              }}
             >
               <Icon name="drag" size={15} />
-            </span>
+            </button>
             <span
               {...pressable(() => {
                 choice.toggleDefault(o.id);
@@ -114,6 +124,7 @@ function OptionRows({ choice }: { choice: ChoiceField }): ReactNode {
               type="button"
               className="cf-ce-rm"
               title={t('choice.removeOption')}
+              aria-label={t('choice.removeOption')}
               style={{ marginTop: img ? 11 : 0 }}
               onClick={() => {
                 choice.removeOption(o.id);
@@ -176,6 +187,8 @@ function OptionRows({ choice }: { choice: ChoiceField }): ReactNode {
             type="button"
             className={'cf-other-cog' + (otherPop ? ' on' : '')}
             title={t('choice.other.settings')}
+            aria-label={t('choice.other.settings')}
+            aria-expanded={otherPop}
             onClick={() => {
               setOtherPop((v) => !v);
             }}
@@ -186,6 +199,7 @@ function OptionRows({ choice }: { choice: ChoiceField }): ReactNode {
             type="button"
             className="cf-ce-rm"
             title={t('choice.other.remove')}
+            aria-label={t('choice.other.remove')}
             onClick={() => {
               choice.setOther(false);
               setOtherPop(false);
@@ -286,6 +300,8 @@ export function ChoiceCanvasField({
           type="button"
           className={'cf-fbtn' + (choice.imgMode ? ' on' : '')}
           disabled={!choice.canImage}
+          aria-pressed={choice.imgMode}
+          aria-label={choice.canImage ? t('choice.tip.image') : t('choice.tip.imageOnly')}
           style={!choice.canImage ? { opacity: 0.32, cursor: 'not-allowed' } : undefined}
           onClick={() => {
             if (choice.canImage) {
@@ -301,6 +317,8 @@ export function ChoiceCanvasField({
         <button
           type="button"
           className={'cf-fbtn' + (choice.other ? ' on' : '')}
+          aria-pressed={choice.other}
+          aria-label={t('choice.tip.other')}
           onClick={() => {
             choice.setOther((v) => !v);
           }}
@@ -311,6 +329,8 @@ export function ChoiceCanvasField({
         <button
           type="button"
           className={'cf-fbtn' + (bulk ? ' on' : '')}
+          aria-pressed={bulk}
+          aria-label={t('choice.tip.bulk')}
           onClick={() => {
             if (bulk) {
               setBulk(false);
@@ -323,11 +343,21 @@ export function ChoiceCanvasField({
           <span className="tip">{t('choice.tip.bulk')}</span>
         </button>
         <div className="div" />
-        <button type="button" className="cf-fbtn" onClick={onDuplicate}>
+        <button
+          type="button"
+          className="cf-fbtn"
+          aria-label={t('choice.tip.duplicate')}
+          onClick={onDuplicate}
+        >
           <Icon name="copy" size={16} />
           <span className="tip">{t('choice.tip.duplicate')}</span>
         </button>
-        <button type="button" className="cf-fbtn" onClick={onDelete}>
+        <button
+          type="button"
+          className="cf-fbtn"
+          aria-label={t('choice.tip.delete')}
+          onClick={onDelete}
+        >
           <Icon name="trash" size={16} />
           <span className="tip">{t('choice.tip.delete')}</span>
         </button>

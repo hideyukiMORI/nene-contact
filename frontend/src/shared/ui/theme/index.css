@@ -6885,6 +6885,23 @@ a.t:hover {
   color: #d14343;
   margin-left: 3px;
 }
+/* The label is a <button> for keyboard selection (#311) — strip button chrome, keep .fb-flabel
+   typography (font-size/weight/colour/margin) intact; family inherits. */
+.fb-flabel-btn {
+  border: 0;
+  background: none;
+  padding: 0;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: left;
+  display: inline-flex;
+  align-items: center;
+}
+.fb-flabel-btn:focus-visible {
+  outline: 2px solid var(--ex-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
 .fb-finput {
   border: 1px solid var(--ex-border-strong);
   border-radius: var(--ex-radius);
@@ -8536,9 +8553,20 @@ a.t:hover {
   display: flex;
   flex: none;
   transition: opacity 0.12s;
+  /* Now a <button> for keyboard reorder (#311) — strip button chrome. */
+  border: 0;
+  background: none;
+  padding: 0;
 }
 .cf-ce-opt:hover .cf-ce-grip {
   opacity: 1;
+}
+/* Keyboard focus must reveal the otherwise hover-only grip. */
+.cf-ce-grip:focus-visible {
+  opacity: 1;
+  outline: 2px solid var(--ex-brand);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 .cf-ce-grip svg {
   width: 15px;
