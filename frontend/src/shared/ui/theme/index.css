@@ -4932,6 +4932,105 @@ a.t:hover {
   color: var(--ex-text);
   border-bottom-color: var(--ex-brand);
 }
+
+/* #313 responsive builder — the inspector drawer affordances are hidden on desktop, where the panel
+   is a static side column. The builder is full-screen (no sidebar), so the viewport width is the
+   panel's container width and plain @media breakpoints (aligned to the app's 980/720/560 scale) apply. */
+.bd-scrim {
+  display: none;
+}
+.bd-pclose {
+  display: none;
+}
+
+@media (max-width: 859px) {
+  /* Canvas takes the full width; the inspector becomes a right slide-over drawer over .bd-wrap. */
+  .bd-panel {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(360px, 86%);
+    z-index: 40;
+    transform: translateX(101%);
+    transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: -14px 0 40px rgba(10, 14, 20, 0.22);
+  }
+  .builder.panel-open .bd-panel {
+    transform: translateX(0);
+  }
+  .bd-scrim {
+    position: absolute;
+    inset: 0;
+    z-index: 39;
+    border: 0;
+    padding: 0;
+    background: rgba(10, 14, 20, 0.28);
+    cursor: pointer;
+  }
+  .builder.panel-open .bd-scrim {
+    display: block;
+  }
+  .bd-pclose {
+    display: grid;
+    place-items: center;
+    flex: none;
+    width: 46px;
+    border: 0;
+    border-left: 1px solid var(--ex-border);
+    background: transparent;
+    color: var(--ex-muted);
+    cursor: pointer;
+  }
+  .bd-pclose:focus-visible {
+    outline: 2px solid var(--ex-brand);
+    outline-offset: -2px;
+  }
+  /* Tabs scroll horizontally instead of wrapping. */
+  .st-tabs {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: thin;
+  }
+  .st-tab {
+    flex: none;
+    white-space: nowrap;
+  }
+  /* Condense the toolbar so the form name + primary actions fit one row. */
+  .st-toolbar {
+    gap: 8px;
+  }
+  .st-crumb,
+  .st-st,
+  .fm-st,
+  .st-saved {
+    display: none;
+  }
+  .st-btn.ghost .lab {
+    display: none;
+  }
+  /* Keep the floating choice toolbar within the (now full-width) canvas. */
+  .cf-float {
+    max-width: 100%;
+    overflow-x: auto;
+  }
+}
+
+/* Very narrow: the drawer becomes a bottom sheet. */
+@media (max-width: 520px) {
+  .bd-panel {
+    inset: auto 0 0 0;
+    width: 100%;
+    height: 80%;
+    border-left: 0;
+    border-top: 1px solid var(--ex-border);
+    border-radius: 14px 14px 0 0;
+    transform: translateY(101%);
+    box-shadow: 0 -14px 40px rgba(10, 14, 20, 0.22);
+  }
+  .builder.panel-open .bd-panel {
+    transform: translateY(0);
+  }
+}
+
 .bd-psecs {
   overflow-y: auto;
   min-height: 0;

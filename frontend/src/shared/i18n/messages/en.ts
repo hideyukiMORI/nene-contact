@@ -389,6 +389,7 @@ export const en: Partial<MessageCatalog> = {
   'builder.consentDesc': 'Ask for agreement to the privacy policy before submitting.',
   'builder.fieldLabel': 'Label',
   'builder.editLocale': 'Editing language',
+  'builder.closePanel': 'Close settings',
   'builder.placeholder': 'Placeholder',
   'builder.removeField': 'Remove field',
   'builder.duplicateField': 'Duplicate field',
