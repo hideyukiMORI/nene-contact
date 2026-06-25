@@ -35,20 +35,16 @@ export function SortableFieldCard({
   const typeLabel = t(fieldTypeLabelKey(field.fieldType));
 
   return (
+    // Mouse convenience only: clicking anywhere on the card selects it. Keyboard and screen-reader
+    // users select via the label <button> below, so onClick here is a redundant pointer enhancement,
+    // not the sole interaction — the card is intentionally not role=button (that caused nested-interactive).
+    // eslint-disable-next-line jsx-a11y/no-static-element-interactions, jsx-a11y/click-events-have-key-events
     <div
       ref={setNodeRef}
       style={style}
       className={'fb-field' + (selected ? ' sel' : '') + (error !== undefined ? ' err' : '')}
       data-selected={selected ? 'true' : undefined}
-      role="button"
-      tabIndex={0}
       onClick={onSelect}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          onSelect();
-        }
-      }}
     >
       <button
         type="button"
@@ -63,12 +59,23 @@ export function SortableFieldCard({
         <Icon name="drag" size={16} />
       </button>
       <div className="fb-fmain">
-        <div className="fb-flabel">
+        <button
+          type="button"
+          className="fb-flabel fb-flabel-btn"
+          aria-pressed={selected}
+          onClick={(e) => {
+            e.stopPropagation();
+            onSelect();
+          }}
+        >
           {label}
           {field.required ? <span className="req">＊</span> : null}
-        </div>
+        </button>
         {field.description !== '' ? <div className="fb-fdesc">{field.description}</div> : null}
-        <FieldPreview field={field} />
+        {/* Preview is non-interactive (divs only) — hide from the a11y tree / tab order. */}
+        <div className="fb-fpreview" aria-hidden="true">
+          <FieldPreview field={field} />
+        </div>
         {error !== undefined ? (
           <div className="fb-ferr" role="alert">
             <Icon name="warn" size={13} />

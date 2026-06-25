@@ -327,6 +327,17 @@ export const en: Partial<MessageCatalog> = {
   'builder.type.file': 'File',
   'builder.type.honeypot': 'Honeypot',
   'builder.type.date': 'Date',
+  // Choice-editor control names wired to aria-labels (#311). The full choice.* en catalog is #310.
+  'choice.dragReorder': 'Drag to reorder',
+  'choice.removeOption': 'Remove option',
+  'choice.tip.image': 'Show images on options',
+  'choice.tip.imageOnly': 'Images work with radio / checkbox',
+  'choice.tip.other': 'Add an “Other” option',
+  'choice.tip.bulk': 'Bulk paste',
+  'choice.tip.duplicate': 'Duplicate field',
+  'choice.tip.delete': 'Delete field',
+  'choice.other.settings': '“Other” settings',
+  'choice.other.remove': 'Remove “Other”',
   'builder.newForm': 'New form',
   'builder.editForm': 'Edit form',
   'builder.lead':
