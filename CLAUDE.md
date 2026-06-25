@@ -41,6 +41,7 @@ Embeddable contact forms — form SSOT in Contact, optional HTTP handoff to Deal
 | --- | --- |
 | API | **8900** |
 | phpMyAdmin | **8901** |
+| Frontend dev (Vite) | **8902** |
 | MySQL | **3391** |
 
 Do not use 82xx / 83xx / 84xx / 85xx lanes.

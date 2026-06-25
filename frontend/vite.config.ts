@@ -32,6 +32,10 @@ export default defineConfig(({ mode }) => {
     },
     server: {
       port: frontendPort,
+      // Fail loudly if the port is taken instead of silently bumping to 5174/5175 — the dev
+      // server is pinned to the 89xx lane (NENE_CONTACT_FRONTEND_PORT, default 8902) and a
+      // collision should surface, not drift.
+      strictPort: true,
       proxy: {
         '/admin/auth': target,
         '/admin/media': target,
