@@ -103,6 +103,37 @@ describe('FormBuilder', () => {
     expect(screen.getByText(/保存しました/)).toBeInTheDocument();
   });
 
+  it('maps a server per-field 422 onto the offending field card', async () => {
+    server.use(
+      http.post(URL, () =>
+        HttpResponse.json(
+          {
+            type: 'about:blank',
+            title: 'Unprocessable Entity',
+            detail: 'Validation failed',
+            errors: [
+              { field: 'fields.0.label', message: 'Label for ja is required.', code: 'invalid' },
+            ],
+          },
+          { status: 422 },
+        ),
+      ),
+    );
+    const onCreated = vi.fn();
+    const user = userEvent.setup();
+
+    renderWithProviders(<FormBuilder onCreated={onCreated} />);
+
+    const titleInputs = screen.getAllByLabelText('フォーム名');
+    await user.type(titleInputs[0] as HTMLElement, 'Sales');
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+    await user.click(screen.getByRole('button', { name: '公開' }));
+
+    // The offending field card surfaces the server's per-field message; creation is not signalled.
+    expect(await screen.findByText('Label for ja is required.')).toBeInTheDocument();
+    expect(onCreated).not.toHaveBeenCalled();
+  });
+
   it('blocks creation without a name or fields', async () => {
     const onCreated = vi.fn();
     const user = userEvent.setup();

@@ -28,6 +28,7 @@ import {
 } from '@/entities/contact-form';
 import { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
 import { useChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import { AppError } from '@/shared/api/errors';
 import {
   choiceStateToFieldPatch,
   draftFieldToChoiceState,
@@ -110,6 +111,13 @@ export function FormBuilder({
   const locale = draft.defaultLocale;
 
   const [validationMessage, setValidationMessage] = useState<string | null>(null);
+  // Per-field + form-level server validation errors from the last failed save, mapped to the
+  // offending field card (so the operator sees *which* field is wrong, not a generic message).
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
+  const [formErrors, setFormErrors] = useState<string[]>([]);
+  // The serialized draft the errors belong to; if the draft has since changed, they're stale and
+  // we hide them (an edit re-checks on the next save) — derived, no effect.
+  const [errorsAt, setErrorsAt] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
@@ -223,6 +231,9 @@ export function FormBuilder({
 
   const onSubmit = (): void => {
     setValidationMessage(null);
+    setFieldErrors({});
+    setFormErrors([]);
+    setErrorsAt(null);
     if (draft.name.trim() === '' || draft.fields.length === 0) {
       setValidationMessage(t('builder.validation'));
       return;
@@ -241,8 +252,33 @@ export function FormBuilder({
           onCreated();
         }
       },
-      () => {
-        // Error surfaced via builder.error (AppError).
+      (err: unknown) => {
+        // Map the server's per-field 422 (errors[].field like "fields.0.label") to the offending
+        // card so the operator sees which field is wrong, not just a generic failure.
+        if (err instanceof AppError && err.validationErrors.length > 0) {
+          const fe: Record<string, string> = {};
+          const form: string[] = [];
+          for (const ve of err.validationErrors) {
+            const m = /^fields\.(\d+)\b/.exec(ve.field);
+            const field = m !== null ? draft.fields[Number(m[1])] : undefined;
+            const msg = ve.message !== '' ? ve.message : t('builder.fieldHasError');
+            if (field !== undefined) {
+              const prev = fe[field.id];
+              fe[field.id] = prev !== undefined ? `${prev} / ${msg}` : msg;
+            } else {
+              form.push(ve.message !== '' ? ve.message : ve.field);
+            }
+          }
+          setFieldErrors(fe);
+          setFormErrors(form);
+          setErrorsAt(savedDraft);
+          if (Object.keys(fe).length > 0) {
+            setTab('fields');
+          } else if (form.length > 0) {
+            setTab('settings');
+          }
+        }
+        // Otherwise the generic builder.error surfaces via the toolbar alert.
       },
     );
   };
@@ -258,7 +294,18 @@ export function FormBuilder({
   // The label editor binds to the raw value (empty when unset) — not the type-name fallback —
   // so clearing it doesn't seed the placeholder text back into the field.
   const selectedRawLabel = selected !== null ? (selected.label[locale] ?? '') : '';
-  const alert = validationMessage ?? (builder.error !== null ? t('builder.error') : null);
+  // Hide last save's errors once the draft changes (the edit will be re-checked on the next save).
+  const errorsActive = errorsAt !== null && errorsAt === serialized;
+  const activeFieldErrors = errorsActive ? fieldErrors : {};
+  const activeFormErrors = errorsActive ? formErrors : [];
+  const serverErrorCount = Object.keys(activeFieldErrors).length + activeFormErrors.length;
+  const alert =
+    validationMessage ??
+    (serverErrorCount > 0
+      ? t('builder.saveErrors', { n: String(serverErrorCount) })
+      : builder.error !== null
+        ? t('builder.error')
+        : null);
 
   // Selection-follow: when a field is selected or added, keep it comfortably in view by scrolling
   // the canvas pane (not the page). scrollTop is computed rather than using scrollIntoView, which
@@ -364,6 +411,17 @@ export function FormBuilder({
         ))}
       </div>
 
+      {activeFormErrors.length > 0 ? (
+        <div className="bd-formerrs" role="alert">
+          {activeFormErrors.map((m, i) => (
+            <div key={i} className="fb-ferr">
+              <Icon name="warn" size={13} />
+              {m}
+            </div>
+          ))}
+        </div>
+      ) : null}
+
       {tab === 'settings' ? <FormSettingsPage builder={builder} readOnlyKey={isEditing} /> : null}
       {tab === 'design' ? (
         <AppearanceStudio value={draft.appearance} onChange={builder.setAppearance} />
@@ -413,6 +471,7 @@ export function FormBuilder({
                         <ChoiceCanvasField
                           choice={choice}
                           label={fieldLabel(field)}
+                          error={activeFieldErrors[field.id]}
                           onOpenGallery={() => {
                             setGalleryOpen(true);
                           }}
@@ -430,6 +489,7 @@ export function FormBuilder({
                         field={field}
                         label={fieldLabel(field)}
                         selected={field.id === selectedId}
+                        error={activeFieldErrors[field.id]}
                         onSelect={() => {
                           selectField(field.id);
                         }}
