@@ -161,6 +161,22 @@ describe('FormBuilder', () => {
     expect(screen.getAllByRole('button', { name: '選択肢を削除' }).length).toBeGreaterThan(0);
   });
 
+  it('duplicates a field from the card duplicate button (#317)', async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<FormBuilder onCreated={vi.fn()} />);
+
+    // One text field to start.
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+    expect(screen.getAllByRole('button', { name: 'テキスト項目' })).toHaveLength(1);
+
+    // Duplicate it — an independent copy is inserted directly below.
+    await user.click(screen.getByRole('button', { name: 'フィールドを複製' }));
+    expect(screen.getAllByRole('button', { name: 'テキスト項目' }).length).toBeGreaterThanOrEqual(
+      2,
+    );
+  });
+
   it('blocks creation without a name or fields', async () => {
     const onCreated = vi.fn();
     const user = userEvent.setup();

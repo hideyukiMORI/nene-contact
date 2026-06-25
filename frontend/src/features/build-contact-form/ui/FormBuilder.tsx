@@ -495,6 +495,9 @@ export function FormBuilder({
                         onDelete={() => {
                           deleteField(field.id);
                         }}
+                        onDuplicate={() => {
+                          duplicateField(field.id);
+                        }}
                       />
                     ),
                   )}
