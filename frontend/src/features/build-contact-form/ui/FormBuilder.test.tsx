@@ -45,6 +45,7 @@ describe('FormBuilder', () => {
     await user.clear(labelInput);
     await user.type(labelInput, 'お名前');
     await user.click(screen.getByRole('button', { name: '公開' }));
+    await user.click(screen.getByRole('button', { name: '公開する' }));
 
     await waitFor(() => {
       expect(onCreated).toHaveBeenCalledOnce();
@@ -92,6 +93,7 @@ describe('FormBuilder', () => {
     await user.clear(labelInput);
     await user.type(labelInput, 'お名前');
     await user.click(screen.getByRole('button', { name: '公開' }));
+    await user.click(screen.getByRole('button', { name: '公開する' }));
 
     await waitFor(() => {
       expect(onCreated).toHaveBeenCalledOnce();
@@ -128,6 +130,7 @@ describe('FormBuilder', () => {
     await user.type(titleInputs[0] as HTMLElement, 'Sales');
     await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
     await user.click(screen.getByRole('button', { name: '公開' }));
+    await user.click(screen.getByRole('button', { name: '公開する' }));
 
     // The offending field card surfaces the server's per-field message; creation is not signalled.
     expect(await screen.findByText('Label for ja is required.')).toBeInTheDocument();
@@ -175,6 +178,55 @@ describe('FormBuilder', () => {
     expect(screen.getAllByRole('button', { name: 'テキスト項目' }).length).toBeGreaterThanOrEqual(
       2,
     );
+  });
+
+  it('disables the not-yet-wired settings toggles (#324)', async () => {
+    const user = userEvent.setup();
+
+    renderWithProviders(<FormBuilder onCreated={vi.fn()} />);
+
+    await user.click(screen.getByRole('button', { name: 'フォーム設定' }));
+
+    expect(screen.getByRole('switch', { name: 'reCAPTCHA を有効化' })).toBeDisabled();
+    expect(screen.getByRole('switch', { name: '重複送信を防止' })).toBeDisabled();
+    expect(screen.getByRole('switch', { name: '送信者へ自動返信' })).toBeDisabled();
+  });
+
+  it('confirms before publishing a new form (#324)', async () => {
+    let posted = 0;
+    server.use(
+      http.post(URL, () => {
+        posted += 1;
+        return HttpResponse.json(
+          {
+            id: 1,
+            name: 'Sales',
+            public_form_key: 'k',
+            default_locale: 'ja',
+            locales: ['ja'],
+            fields: [],
+          },
+          { status: 201 },
+        );
+      }),
+    );
+    const user = userEvent.setup();
+
+    renderWithProviders(<FormBuilder onCreated={vi.fn()} />);
+
+    const titleInputs = screen.getAllByLabelText('フォーム名');
+    await user.type(titleInputs[0] as HTMLElement, 'Sales');
+    await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+
+    // Clicking 公開 opens a confirmation — nothing is posted yet.
+    await user.click(screen.getByRole('button', { name: '公開' }));
+    expect(posted).toBe(0);
+
+    // Confirming runs the existing publish flow.
+    await user.click(screen.getByRole('button', { name: '公開する' }));
+    await waitFor(() => {
+      expect(posted).toBe(1);
+    });
   });
 
   it('blocks creation without a name or fields', async () => {

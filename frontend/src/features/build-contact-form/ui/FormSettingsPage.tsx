@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
@@ -11,21 +10,31 @@ function Switch({
   on,
   label,
   onToggle,
+  disabled = false,
 }: {
   on: boolean;
   label: string;
-  onToggle: () => void;
+  onToggle?: () => void;
+  disabled?: boolean;
 }): ReactNode {
   return (
     <button
       type="button"
-      className={'bd-switch' + (on ? '' : ' off')}
+      className={'bd-switch' + (on ? '' : ' off') + (disabled ? ' disabled' : '')}
       role="switch"
       aria-checked={on}
       aria-label={label}
-      onClick={onToggle}
+      aria-disabled={disabled || undefined}
+      disabled={disabled}
+      onClick={disabled ? undefined : onToggle}
     />
   );
+}
+
+// A "coming soon" badge for not-yet-wired settings (#324).
+function SoonBadge(): ReactNode {
+  const { t } = useI18n();
+  return <span className="soon-badge">{t('common.comingSoon')}</span>;
 }
 
 // フォーム設定 tab — an independent, centered single-column page (builder IA spec §2). Basic
@@ -41,11 +50,6 @@ export function FormSettingsPage({
 }): ReactNode {
   const { t } = useI18n();
   const { draft } = builder;
-
-  // Local-only state for the proposed (not-yet-backed) toggles, so the UI is interactive.
-  const [autoReply, setAutoReply] = useState(false);
-  const [recaptcha, setRecaptcha] = useState(false);
-  const [dedupe, setDedupe] = useState(false);
 
   const enLocale = draft.locales.includes('en');
 
@@ -242,31 +246,25 @@ export function FormSettingsPage({
           <div className="srow">
             <div className="stog">
               <div>
-                <div className="tl">{t('settingsTab.recaptcha')}</div>
+                <div className="tl">
+                  {t('settingsTab.recaptcha')}
+                  <SoonBadge />
+                </div>
                 <div className="td">{t('settingsTab.recaptchaDesc')}</div>
               </div>
-              <Switch
-                on={recaptcha}
-                label={t('settingsTab.recaptcha')}
-                onToggle={() => {
-                  setRecaptcha((v) => !v);
-                }}
-              />
+              <Switch on={false} disabled label={t('settingsTab.recaptcha')} />
             </div>
           </div>
           <div className="srow">
             <div className="stog">
               <div>
-                <div className="tl">{t('settingsTab.dedupe')}</div>
+                <div className="tl">
+                  {t('settingsTab.dedupe')}
+                  <SoonBadge />
+                </div>
                 <div className="td">{t('settingsTab.dedupeDesc')}</div>
               </div>
-              <Switch
-                on={dedupe}
-                label={t('settingsTab.dedupe')}
-                onToggle={() => {
-                  setDedupe((v) => !v);
-                }}
-              />
+              <Switch on={false} disabled label={t('settingsTab.dedupe')} />
             </div>
           </div>
           <div className="srow">
@@ -296,16 +294,13 @@ export function FormSettingsPage({
           <div className="srow">
             <div className="stog">
               <div>
-                <div className="tl">{t('settingsTab.autoReply')}</div>
+                <div className="tl">
+                  {t('settingsTab.autoReply')}
+                  <SoonBadge />
+                </div>
                 <div className="td">{t('settingsTab.autoReplyDesc')}</div>
               </div>
-              <Switch
-                on={autoReply}
-                label={t('settingsTab.autoReply')}
-                onToggle={() => {
-                  setAutoReply((v) => !v);
-                }}
-              />
+              <Switch on={false} disabled label={t('settingsTab.autoReply')} />
             </div>
           </div>
           <p

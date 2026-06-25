@@ -147,8 +147,10 @@ export function ContactFormList({
                         <div>
                           <span className="t">{form.name}</span>
                           <div className="u">
-                            {form.publicFormKey}
-                            <CopyKeyButton value={form.publicFormKey} />
+                            <span className="fm-keychip">
+                              {t('contactForms.publicKeyLabel')}
+                              <CopyKeyButton value={form.publicFormKey} />
+                            </span>
                           </div>
                         </div>
                       </div>

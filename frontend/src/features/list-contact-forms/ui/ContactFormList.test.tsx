@@ -46,7 +46,8 @@ describe('ContactFormList', () => {
     );
 
     expect(await screen.findByText('Contact us')).toBeInTheDocument();
-    expect(screen.getByText('key-1')).toBeInTheDocument();
+    // The raw public key is no longer printed inline (#324) — a muted "公開キー" label stands in.
+    expect(screen.getByText('公開キー')).toBeInTheDocument();
     // locales render as individual chips
     expect(screen.getByText('ja')).toBeInTheDocument();
     expect(screen.getByText('en')).toBeInTheDocument();
@@ -139,6 +140,37 @@ describe('ContactFormList', () => {
     expect(created.body?.name).toBe('Contact us のコピー');
     // The clone never reuses the source public key — the server mints a new one.
     expect(created.body).not.toHaveProperty('public_form_key');
+  });
+
+  it('does not print the raw public key inline but keeps the copy action (#324)', async () => {
+    server.use(
+      http.get(URL, () =>
+        HttpResponse.json({
+          items: [
+            {
+              id: 1,
+              name: 'Contact us',
+              public_form_key: '531bd9b21fbd1581e3e6cd5655e5a395',
+              default_locale: 'ja',
+              locales: ['ja'],
+              status: 'active',
+              fields: [],
+            },
+          ],
+          total: 1,
+        }),
+      ),
+    );
+
+    renderWithProviders(
+      <MemoryRouter>
+        <ContactFormList />
+      </MemoryRouter>,
+    );
+
+    await screen.findByText('Contact us');
+    expect(screen.queryByText('531bd9b21fbd1581e3e6cd5655e5a395')).toBeNull();
+    expect(screen.getByRole('button', { name: '公開キーをコピー' })).toBeInTheDocument();
   });
 
   it('renders the empty state when there are no forms', async () => {
