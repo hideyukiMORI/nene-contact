@@ -5921,6 +5921,79 @@ a.t:hover {
   box-shadow: 0 0 0 3px var(--ex-brand-weak);
 }
 /* ── 技術情報（折りたたみ）── */
+/* Handoff (連携) section on the submission detail (#315). */
+.ho-sec {
+  margin-top: 18px;
+}
+.ho-sec .sec-lab {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--ex-muted);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.ho-note {
+  font-size: 11.5px;
+  color: var(--ex-faint);
+  line-height: 1.5;
+  margin: 0 0 10px;
+}
+.ho-vaulthead {
+  font-size: 12px;
+  font-weight: 650;
+  color: var(--ex-text);
+  margin: 14px 0 6px;
+}
+.ho-empty {
+  font-size: 12px;
+  color: var(--ex-faint);
+}
+.ho-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  margin-bottom: 8px;
+}
+.ho-main {
+  flex: 1;
+  min-width: 0;
+}
+.ho-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ex-text);
+  margin-bottom: 4px;
+  word-break: break-all;
+}
+.ho-state {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 8px;
+  font-size: 11.5px;
+}
+.ho-state.ok {
+  color: #2f8f5b;
+}
+.ho-state.err {
+  color: var(--ex-danger);
+}
+.ho-state.pending,
+.ho-state.none {
+  color: var(--ex-faint);
+}
+.ho-id {
+  font-family: var(--ex-font-mono);
+  color: var(--ex-muted);
+}
+.ho-errmsg {
+  color: var(--ex-danger);
+  word-break: break-word;
+}
 .tech {
   margin-top: 14px;
   border: 1px solid var(--ex-border);
