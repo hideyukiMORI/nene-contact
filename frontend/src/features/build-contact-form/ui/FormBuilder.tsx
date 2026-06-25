@@ -127,6 +127,11 @@ export function FormBuilder({
   // we hide them (an edit re-checks on the next save) — derived, no effect.
   const [errorsAt, setErrorsAt] = useState<string | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // On narrow screens the inspector is an overlay drawer (#313); on desktop it's a static side
+  // column and this flag is ignored by CSS. Selecting a field opens it; ×/scrim/Esc close it.
+  const [panelOpen, setPanelOpen] = useState(false);
+  const closeBtnRef = useRef<HTMLButtonElement>(null);
+  const panelTriggerRef = useRef<HTMLElement | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmPublish, setConfirmPublish] = useState(false);
@@ -177,9 +182,44 @@ export function FormBuilder({
   const selected = draft.fields.find((f) => f.id === selectedId) ?? null;
   const isChoiceSelected = selected?.fieldType === 'select';
 
+  // The builder is full-screen (no sidebar), so the viewport width is the inspector's container width.
+  const isNarrow = (): boolean =>
+    typeof window.matchMedia === 'function' && window.matchMedia('(max-width: 859px)').matches;
+
   const selectField = (id: string): void => {
     setSelectedId(id);
+    // On narrow screens, open the drawer and remember what to return focus to on close.
+    if (isNarrow()) {
+      panelTriggerRef.current = document.activeElement as HTMLElement | null;
+      setPanelOpen(true);
+    }
   };
+
+  const closePanel = (): void => {
+    setPanelOpen(false);
+    panelTriggerRef.current?.focus();
+  };
+
+  // Esc closes the inspector drawer (no-op on desktop where it's a static column).
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent): void => {
+      if (e.key === 'Escape') {
+        closePanel();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('keydown', onKey);
+    };
+  }, []);
+
+  // When the drawer opens, move focus to its close button (focusable only when the drawer is shown;
+  // a no-op on desktop where the button is display:none).
+  useEffect(() => {
+    if (panelOpen) {
+      closeBtnRef.current?.focus();
+    }
+  }, [panelOpen]);
 
   // The single choice-state source. Seeded from the selected select field; re-seeds on selection
   // change. Every edit mirrors back into the draft so the draft stays the persisted truth.
@@ -348,7 +388,9 @@ export function FormBuilder({
   }, [selectedId, draft.fields.length]);
 
   return (
-    <div className="exwrap pr acc-vt1 st-root bd-editor">
+    <div
+      className={'exwrap pr acc-vt1 st-root bd-editor builder' + (panelOpen ? ' panel-open' : '')}
+    >
       <div className="st-toolbar">
         <button
           type="button"
@@ -397,7 +439,7 @@ export function FormBuilder({
           }}
         >
           <Icon name="eye" size={14} />
-          {t('builder.preview')}
+          <span className="lab">{t('builder.preview')}</span>
         </button>
         <button
           type="button"
@@ -542,10 +584,26 @@ export function FormBuilder({
             </div>
           </div>
 
+          <button
+            type="button"
+            className="bd-scrim"
+            aria-label={t('builder.closePanel')}
+            tabIndex={-1}
+            onClick={closePanel}
+          />
           <div className="bd-panel">
             <div className="bd-ptabs">
               <button type="button" className="bd-ptab on">
                 {t('builder.tab.field')}
+              </button>
+              <button
+                ref={closeBtnRef}
+                type="button"
+                className="bd-pclose"
+                aria-label={t('builder.closePanel')}
+                onClick={closePanel}
+              >
+                <Icon name="x" size={16} />
               </button>
             </div>
 

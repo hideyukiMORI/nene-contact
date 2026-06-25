@@ -282,6 +282,35 @@ describe('FormBuilder', () => {
     expect(captured.value?.fields?.[0]?.label).toEqual({ ja: 'テキスト項目', en: 'Inquiry' });
   });
 
+  it('opens the inspector as a drawer on narrow screens and closes it (#313)', async () => {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: true,
+      media: query,
+      onchange: null,
+      addListener: vi.fn(),
+      removeListener: vi.fn(),
+      addEventListener: vi.fn(),
+      removeEventListener: vi.fn(),
+      dispatchEvent: vi.fn(),
+    }));
+    try {
+      const user = userEvent.setup();
+      renderWithProviders(<FormBuilder onCreated={vi.fn()} />);
+
+      // Selecting a field (adding one selects it) opens the overlay drawer on narrow screens.
+      await user.click(screen.getByRole('button', { name: 'フィールドを追加' }));
+      expect(document.querySelector('.builder.panel-open')).not.toBeNull();
+
+      // The drawer's close button dismisses it.
+      const close = document.querySelector('.bd-pclose');
+      expect(close).not.toBeNull();
+      await user.click(close as HTMLElement);
+      expect(document.querySelector('.builder.panel-open')).toBeNull();
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it('blocks creation without a name or fields', async () => {
     const onCreated = vi.fn();
     const user = userEvent.setup();

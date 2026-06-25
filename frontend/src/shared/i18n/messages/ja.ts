@@ -367,6 +367,7 @@ export const ja = {
   'builder.consentDesc': '送信前にプライバシーポリシーへの同意を求めます。',
   'builder.fieldLabel': 'ラベル',
   'builder.editLocale': '編集言語',
+  'builder.closePanel': '設定を閉じる',
   'builder.placeholder': 'プレースホルダー',
   'builder.removeField': '項目を削除',
   'builder.duplicateField': 'フィールドを複製',
