@@ -225,12 +225,14 @@ function OptionRows({ choice }: { choice: ChoiceField }): ReactNode {
 export function ChoiceCanvasField({
   choice,
   label,
+  error,
   onOpenGallery,
   onDelete,
   onDuplicate,
 }: {
   choice: ChoiceField;
   label: string;
+  error?: string | undefined;
   onOpenGallery: () => void;
   onDelete: () => void;
   onDuplicate: () => void;
@@ -253,7 +255,16 @@ export function ChoiceCanvasField({
   };
 
   return (
-    <div className="cf-canvasfield" style={{ marginTop: 34 }}>
+    <div
+      className={'cf-canvasfield' + (error !== undefined ? ' err' : '')}
+      style={{ marginTop: 34 }}
+    >
+      {error !== undefined ? (
+        <div className="fb-ferr" role="alert" style={{ marginBottom: 8 }}>
+          <Icon name="warn" size={13} />
+          {error}
+        </div>
+      ) : null}
       <div className="cf-float">
         <button
           type="button"

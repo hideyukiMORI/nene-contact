@@ -6828,6 +6828,39 @@ a.t:hover {
 .fb-field:not(.sel):hover {
   border-color: color-mix(in srgb, var(--ex-brand) 40%, var(--ex-border));
 }
+/* Server validation error highlight on a field card / choice canvas (#318). */
+.fb-field.err {
+  border-color: var(--ex-danger);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ex-danger) 18%, transparent);
+}
+.cf-canvasfield.err {
+  outline: 2px solid var(--ex-danger);
+  outline-offset: 5px;
+  border-radius: var(--ex-radius-lg);
+}
+.fb-ferr {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 8px;
+  color: var(--ex-danger);
+  font-size: 12px;
+  line-height: 1.4;
+}
+.bd-formerrs {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 12px auto 0;
+  max-width: 760px;
+  padding: 10px 14px;
+  background: color-mix(in srgb, var(--ex-danger) 8%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ex-danger) 30%, transparent);
+  border-radius: var(--ex-radius-lg);
+}
+.bd-formerrs .fb-ferr {
+  margin-top: 0;
+}
 .fb-grip {
   color: var(--ex-faint);
   display: flex;

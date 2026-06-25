@@ -12,12 +12,14 @@ export function SortableFieldCard({
   field,
   label,
   selected,
+  error,
   onSelect,
   onDelete,
 }: {
   field: DraftField;
   label: string;
   selected: boolean;
+  error?: string | undefined;
   onSelect: () => void;
   onDelete: () => void;
 }): ReactNode {
@@ -37,7 +39,7 @@ export function SortableFieldCard({
     <div
       ref={setNodeRef}
       style={style}
-      className={'fb-field' + (selected ? ' sel' : '')}
+      className={'fb-field' + (selected ? ' sel' : '') + (error !== undefined ? ' err' : '')}
       data-selected={selected ? 'true' : undefined}
       role="button"
       tabIndex={0}
@@ -68,6 +70,12 @@ export function SortableFieldCard({
         </div>
         {field.description !== '' ? <div className="fb-fdesc">{field.description}</div> : null}
         <FieldPreview field={field} />
+        {error !== undefined ? (
+          <div className="fb-ferr" role="alert">
+            <Icon name="warn" size={13} />
+            {error}
+          </div>
+        ) : null}
       </div>
       <span className="fb-ftype">
         <Icon name={FIELD_TYPE_ICON[field.fieldType] ?? 'text'} size={11} />

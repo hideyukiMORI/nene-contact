@@ -316,6 +316,8 @@ export const ja = {
   'builder.addField': 'フィールドを追加',
   'builder.error': 'フォームを作成できませんでした。',
   'builder.validation': 'フォーム名と1つ以上のフィールドが必要です。',
+  'builder.saveErrors': '保存できませんでした。ハイライトされた項目を確認してください（{n}件）。',
+  'builder.fieldHasError': 'この項目を確認してください。',
   'builder.type.text': 'テキスト',
   'builder.type.email': 'メール',
   'builder.type.textarea': '複数行テキスト',
@@ -831,7 +833,8 @@ export const ja = {
   'builder.publishBtn': '公開',
   'builder.savedAt': '保存しました · {time}',
   'builder.unsaved': '未保存の変更があります',
-  'builder.leaveConfirm': '未保存の変更があります。このページを離れると失われます。よろしいですか？',
+  'builder.leaveConfirm':
+    '未保存の変更があります。このページを離れると失われます。よろしいですか？',
   'settingsTab.lead':
     'このフォーム全体の基本情報・送信時の挙動・通知。フィールドの中身は「フィールド」タブで編集します。',
   'settingsTab.basic': '基本情報',
@@ -862,7 +865,8 @@ export const ja = {
   'settingsTab.successMessage': '完了メッセージ',
   'settingsTab.successMessageJa': '完了メッセージ（日本語）',
   'settingsTab.successMessageEn': '完了メッセージ（English）',
-  'settingsTab.successMessagePh': 'お問い合わせありがとうございました。担当者より折り返しご連絡します。',
+  'settingsTab.successMessagePh':
+    'お問い合わせありがとうございました。担当者より折り返しご連絡します。',
   'settingsTab.redirectUrl': 'リダイレクト先URL',
   'settingsTab.redirectUrlPh': 'https://example.com/thanks',
   'settingsTab.redirectUrlHint': 'https:// または http:// で始まる完全なURLを入力してください。',

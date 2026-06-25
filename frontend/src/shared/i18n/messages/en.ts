@@ -316,6 +316,8 @@ export const en: Partial<MessageCatalog> = {
   'builder.addField': 'Add field',
   'builder.error': 'Could not create the form.',
   'builder.validation': 'A form name and at least one field are required.',
+  'builder.saveErrors': 'Could not save — please fix the highlighted field(s) ({n}).',
+  'builder.fieldHasError': 'Please check this field.',
   'builder.type.text': 'Text',
   'builder.type.email': 'Email',
   'builder.type.textarea': 'Textarea',
@@ -579,7 +581,8 @@ export const en: Partial<MessageCatalog> = {
   'builder.publishBtn': 'Publish',
   'builder.savedAt': 'Saved · {time}',
   'builder.unsaved': 'Unsaved changes',
-  'builder.leaveConfirm': 'You have unsaved changes. Leaving this page will discard them. Continue?',
+  'builder.leaveConfirm':
+    'You have unsaved changes. Leaving this page will discard them. Continue?',
   'settingsTab.lead':
     'Basic info, submit behaviour and notifications for the whole form. Field contents are edited in the Fields tab.',
   'settingsTab.basic': 'Basic information',
@@ -610,7 +613,8 @@ export const en: Partial<MessageCatalog> = {
   'settingsTab.successMessage': 'Completion message',
   'settingsTab.successMessageJa': 'Completion message (Japanese)',
   'settingsTab.successMessageEn': 'Completion message (English)',
-  'settingsTab.successMessagePh': 'Thank you for reaching out. Our team will get back to you shortly.',
+  'settingsTab.successMessagePh':
+    'Thank you for reaching out. Our team will get back to you shortly.',
   'settingsTab.redirectUrl': 'Redirect URL',
   'settingsTab.redirectUrlPh': 'https://example.com/thanks',
   'settingsTab.redirectUrlHint': 'Enter a full URL starting with https:// or http://.',
