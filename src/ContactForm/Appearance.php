@@ -200,7 +200,7 @@ final readonly class Appearance
         $hero = is_array($raw['hero'] ?? null) ? $raw['hero'] : [];
         $d['hero'] = [
             'on' => self::bool($hero, 'on', true),
-            'media' => is_string($hero['media'] ?? null) ? mb_substr((string) $hero['media'], 0, 64) : 'm-team',
+            'media' => self::heroMedia($hero, "{$prefix}.hero", $errors),
             'fit' => self::enum($hero, 'fit', self::HERO_FITS, 'cover', "{$prefix}.hero", $errors),
             'height' => self::int($hero, 'height', 80, 280, 150, "{$prefix}.hero", $errors),
             'inset' => self::int($hero, 'inset', 0, 28, 0, "{$prefix}.hero", $errors),
@@ -231,6 +231,42 @@ final readonly class Appearance
     }
 
     // ---- leaf validators (collect a ValidationError, fall back to default on bad input) ----
+
+    /**
+     * HERO background reference. Allowlisted because it lands in a CSS `url()` on both the embed
+     * widget and the studio preview (defence-in-depth on top of the client-side quote escaping):
+     * a built-in gradient token (`m-*`), an uploaded media path (`/media/...`), or an absolute
+     * http(s) URL with no CSS-breaking characters. Anything else — notably `data:` URIs and other
+     * schemes — is rejected and falls back to the default. Empty string means "no media".
+     *
+     * @param array<string, mixed>  $src
+     * @param list<ValidationError> $errors
+     */
+    private static function heroMedia(array $src, string $prefix, array &$errors): string
+    {
+        $default = 'm-team';
+        if (!array_key_exists('media', $src)) {
+            return $default;
+        }
+        $value = (string) $src['media'];
+        if ($value === '') {
+            return '';
+        }
+        $ok = preg_match('/^m-[a-z0-9-]{1,40}$/', $value) === 1
+            || preg_match('#^/media/[0-9]+(?:/[A-Za-z0-9][A-Za-z0-9._-]*){1,8}$#', $value) === 1
+            || preg_match('#^https?://[^\s"\'()<>]{1,240}$#', $value) === 1;
+        if (!$ok) {
+            $errors[] = new ValidationError(
+                "{$prefix}.media",
+                'Must be a built-in media token, an uploaded /media/ path, or an http(s) URL.',
+                'invalid',
+            );
+
+            return $default;
+        }
+
+        return $value;
+    }
 
     /**
      * @param array<string, mixed> $src

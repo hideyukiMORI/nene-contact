@@ -86,6 +86,42 @@ final class AppearanceTest extends TestCase
         self::assertEquals(Appearance::defaults()->toArray(), Appearance::fromStored(null)->toArray());
     }
 
+    public function test_valid_hero_media_is_kept_without_errors(): void
+    {
+        $valid = [
+            'm-office',                      // built-in gradient token
+            '/media/7/3f8a9c2b1d.png',       // uploaded media path
+            'https://cdn.example.com/hero.jpg', // absolute https url
+            '',                              // empty = no media
+        ];
+
+        foreach ($valid as $media) {
+            [$appearance, $errors] = Appearance::parse(['hero' => ['media' => $media]]);
+
+            self::assertSame([], $errors, "expected no errors for hero.media={$media}");
+            self::assertSame($media, $appearance->toArray()['hero']['media']);
+        }
+    }
+
+    public function test_invalid_hero_media_is_rejected_and_falls_back(): void
+    {
+        $invalid = [
+            'data:image/svg+xml,<svg/>',        // data: URI
+            'm-team");background:url(evil',      // CSS-breaking characters
+            'javascript:alert(1)',              // other scheme
+            '/media/../../etc/passwd',          // path traversal
+            123,                                 // non-string
+        ];
+
+        foreach ($invalid as $media) {
+            [$appearance, $errors] = Appearance::parse(['hero' => ['media' => $media]]);
+
+            $fields = array_map(static fn ($e): string => $e->field, $errors);
+            self::assertContains('appearance.hero.media', $fields, 'expected a hero.media error for: ' . var_export($media, true));
+            self::assertSame('m-team', $appearance->toArray()['hero']['media']);
+        }
+    }
+
     public function test_round_trips_through_to_array(): void
     {
         [$appearance] = Appearance::parse(['mode' => 'inline', 'density' => 'comfortable']);
