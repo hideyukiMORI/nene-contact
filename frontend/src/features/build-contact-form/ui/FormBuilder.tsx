@@ -16,7 +16,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import { Icon } from '@/shared/ui';
+import { Icon, Modal } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
 import { FormSettingsPage } from '@/features/build-contact-form/ui/FormSettingsPage';
 import { PublishPage } from '@/features/build-contact-form/ui/PublishPage';
@@ -122,6 +122,7 @@ export function FormBuilder({
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
+  const [confirmPublish, setConfirmPublish] = useState(false);
   const [tab, setTab] = useState<BuilderTab>('fields');
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
@@ -388,7 +389,21 @@ export function FormBuilder({
           <Icon name="eye" size={14} />
           {t('builder.preview')}
         </button>
-        <button type="button" className="st-btn" disabled={builder.isPending} onClick={onSubmit}>
+        <button
+          type="button"
+          className="st-btn"
+          disabled={builder.isPending}
+          onClick={() => {
+            // Saving an already-live edit stays immediate. A brand-new publish gets a confirmation
+            // — but only once it would actually publish; an invalid form falls through to onSubmit
+            // so its validation message shows now instead of after a pointless confirm.
+            if (isEditing || draft.name.trim() === '' || draft.fields.length === 0) {
+              onSubmit();
+            } else {
+              setConfirmPublish(true);
+            }
+          }}
+        >
           <Icon name="check" size={14} />
           {builder.isPending ? t('builder.creating') : t('builder.publishBtn')}
         </button>
@@ -617,6 +632,42 @@ export function FormBuilder({
             />
           ) : null}
         </div>
+      ) : null}
+
+      {confirmPublish ? (
+        <Modal
+          title={t('builder.publishConfirmTitle')}
+          icon={<Icon name="check" size={19} />}
+          onClose={() => {
+            setConfirmPublish(false);
+          }}
+          foot={
+            <>
+              <button
+                type="button"
+                className="ex-btn ghost"
+                onClick={() => {
+                  setConfirmPublish(false);
+                }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                className="ex-btn"
+                onClick={() => {
+                  setConfirmPublish(false);
+                  onSubmit();
+                }}
+              >
+                <Icon name="check" size={14} />
+                {t('builder.publishConfirmCta')}
+              </button>
+            </>
+          }
+        >
+          <p className="md-confirm">{t('builder.publishConfirmBody')}</p>
+        </Modal>
       ) : null}
     </div>
   );

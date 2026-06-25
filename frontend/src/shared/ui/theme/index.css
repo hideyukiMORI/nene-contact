@@ -4448,6 +4448,15 @@ a.t:hover {
   font-family: var(--ex-font-mono);
   margin-top: 2px;
 }
+/* The public key is copy-on-demand, not inline noise — a muted "公開キー" label + copy (#324). */
+.fm-keychip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--ex-faint);
+}
 .fm-copy {
   border: 0;
   background: transparent;
@@ -12617,4 +12626,28 @@ a.t:hover {
 }
 .bd-switch.off::after {
   left: 2px;
+}
+/* Not-yet-wired toggles: muted + non-interactive (#324). */
+.bd-switch.disabled {
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+.bd-switch.disabled::after {
+  left: 2px;
+  box-shadow: none;
+}
+/* "Coming soon" badge next to a not-yet-wired setting label (#324). */
+.soon-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 9px;
+  font: 700 10px/1 var(--ex-font-mono);
+  color: var(--ex-muted);
+  background: var(--ex-surface2);
+  border: 1px solid var(--ex-border);
+  padding: 4px 7px;
+  border-radius: 6px;
+  vertical-align: middle;
 }
