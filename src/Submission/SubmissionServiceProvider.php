@@ -9,6 +9,7 @@ use Nene2\Database\DatabaseQueryExecutorInterface;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
@@ -63,6 +64,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $attachments = $c->get(AttachmentPurgeRepositoryInterface::class);
                     $storage = $c->get(AttachmentStorageInterface::class);
                     $audit = $c->get(AuditRecorderInterface::class);
+                    $clock = $c->get(ClockInterface::class);
 
                     if (!$repo instanceof SubmissionPurgeRepositoryInterface) {
                         throw new LogicException('Submission purge repository service is invalid.');
@@ -80,7 +82,11 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Audit recorder service is invalid.');
                     }
 
-                    return new PurgeSubmissionsUseCase($repo, $attachments, $storage, $audit);
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new PurgeSubmissionsUseCase($repo, $attachments, $storage, $audit, $clock);
                 },
             )
             ->set(

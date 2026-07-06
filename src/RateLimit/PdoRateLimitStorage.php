@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\RateLimit;
 
 use Nene2\Database\DatabaseQueryExecutorInterface;
+use Nene2\Http\ClockInterface;
 use Nene2\Middleware\RateLimitStorageInterface;
 
 /**
@@ -18,6 +19,7 @@ final readonly class PdoRateLimitStorage implements RateLimitStorageInterface
 {
     public function __construct(
         private DatabaseQueryExecutorInterface $query,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -26,7 +28,7 @@ final readonly class PdoRateLimitStorage implements RateLimitStorageInterface
      */
     public function hit(string $key, int $windowSeconds): array
     {
-        $now = time();
+        $now = $this->clock->now()->getTimestamp();
         $row = $this->query->fetchOne('SELECT hit_count, reset_at FROM rate_limits WHERE rl_key = ?', [$key]);
 
         if ($row === null) {

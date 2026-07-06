@@ -10,6 +10,7 @@ use Nene2\Database\DatabaseQueryExecutorInterface;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
@@ -38,6 +39,7 @@ final readonly class AuthServiceProvider implements ServiceProviderInterface
                 static function (ContainerInterface $c): LoginUseCase {
                     $users = $c->get(UserRepositoryInterface::class);
                     $tokenIssuer = $c->get(TokenIssuerInterface::class);
+                    $clock = $c->get(ClockInterface::class);
 
                     if (!$users instanceof UserRepositoryInterface) {
                         throw new LogicException('User repository service is invalid.');
@@ -47,7 +49,11 @@ final readonly class AuthServiceProvider implements ServiceProviderInterface
                         throw new LogicException('Token issuer service is invalid.');
                     }
 
-                    return new LoginUseCase($users, $tokenIssuer);
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new LoginUseCase($users, $tokenIssuer, $clock);
                 },
             )
             ->set(

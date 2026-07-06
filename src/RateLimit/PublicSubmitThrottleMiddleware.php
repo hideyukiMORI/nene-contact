@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\RateLimit;
 
 use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Middleware\RateLimitStorageInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -26,6 +27,7 @@ final readonly class PublicSubmitThrottleMiddleware implements MiddlewareInterfa
     public function __construct(
         private RateLimitStorageInterface $storage,
         private ProblemDetailsResponseFactory $problemDetails,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -68,7 +70,7 @@ final readonly class PublicSubmitThrottleMiddleware implements MiddlewareInterfa
 
     private function tooMany(ServerRequestInterface $request, int $limit, int $resetAt): ResponseInterface
     {
-        $retryAfter = max(0, $resetAt - time());
+        $retryAfter = max(0, $resetAt - $this->clock->now()->getTimestamp());
 
         return $this->problemDetails
             ->create(

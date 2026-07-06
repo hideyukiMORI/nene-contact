@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace NeneContact\Api;
 
+use Nene2\Http\ClockInterface;
+
 /**
  * Stateless two-step confirmation token for agent writes (charter §11): a write tool first
  * returns a token bound to the exact intended action + arguments; the same call must echo the
@@ -17,6 +19,7 @@ final readonly class ConfirmationToken
 {
     public function __construct(
         private string $secret,
+        private ClockInterface $clock,
         private int $ttlSeconds = 300,
     ) {
     }
@@ -34,7 +37,7 @@ final readonly class ConfirmationToken
     /** Issues a token bound to ($action, $argsHash); valid for {@see ttlSeconds()} seconds. */
     public function issue(string $action, string $argsHash): string
     {
-        $exp = time() + $this->ttlSeconds;
+        $exp = $this->clock->now()->getTimestamp() + $this->ttlSeconds;
 
         return $exp . '.' . $this->sign($action, $argsHash, $exp);
     }
@@ -57,7 +60,7 @@ final readonly class ConfirmationToken
         }
 
         $exp = (int) $expRaw;
-        if ($exp < time()) {
+        if ($exp < $this->clock->now()->getTimestamp()) {
             return false;
         }
 

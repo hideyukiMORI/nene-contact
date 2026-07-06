@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NeneContact\Tests\Submission;
 
+use Nene2\Http\UtcClock;
 use NeneContact\Audit\AuditEvent;
 use NeneContact\Audit\AuditRecorder;
 use NeneContact\Submission\PurgeSubmissionsUseCase;
@@ -48,7 +49,7 @@ final class PurgeSubmissionsUseCaseTest extends TestCase
         );
         $audit = $this->auditRepo();
 
-        $result = (new PurgeSubmissionsUseCase($repo, new InMemoryAttachmentPurgeRepository(), new InMemoryAttachmentStorage(), new AuditRecorder($audit)))->execute(true);
+        $result = (new PurgeSubmissionsUseCase($repo, new InMemoryAttachmentPurgeRepository(), new InMemoryAttachmentStorage(), new AuditRecorder($audit), new UtcClock()))->execute(true);
 
         self::assertSame(1, $result->expired);
         self::assertSame(1, $result->purged);
@@ -77,7 +78,7 @@ final class PurgeSubmissionsUseCaseTest extends TestCase
         );
         $audit = $this->auditRepo();
 
-        $result = (new PurgeSubmissionsUseCase($repo, new InMemoryAttachmentPurgeRepository(), new InMemoryAttachmentStorage(), new AuditRecorder($audit)))->execute(false);
+        $result = (new PurgeSubmissionsUseCase($repo, new InMemoryAttachmentPurgeRepository(), new InMemoryAttachmentStorage(), new AuditRecorder($audit), new UtcClock()))->execute(false);
 
         self::assertSame(1, $result->expired);
         self::assertSame(1, $result->purged);
@@ -94,7 +95,7 @@ final class PurgeSubmissionsUseCaseTest extends TestCase
         $row = ['id' => 1, 'organization_id' => 7, 'submitted_at' => date('Y-m-d H:i:s', time() - (40 * 86400)), 'retention_days' => 30];
         $repo = $this->repo([$row], []);
 
-        $result = (new PurgeSubmissionsUseCase($repo, new InMemoryAttachmentPurgeRepository(), new InMemoryAttachmentStorage(), new AuditRecorder($this->auditRepo())))->execute(true);
+        $result = (new PurgeSubmissionsUseCase($repo, new InMemoryAttachmentPurgeRepository(), new InMemoryAttachmentStorage(), new AuditRecorder($this->auditRepo()), new UtcClock()))->execute(true);
 
         self::assertSame(1, $result->expired);
         self::assertSame([1], $repo->softDeletedIds);
@@ -119,7 +120,7 @@ final class PurgeSubmissionsUseCaseTest extends TestCase
         $storage->stored = ['7/aaaa' => 'x', '7/bbbb' => 'y', '7/cccc' => 'z'];
         $audit = $this->auditRepo();
 
-        $result = (new PurgeSubmissionsUseCase($repo, $attachments, $storage, new AuditRecorder($audit)))->execute(true);
+        $result = (new PurgeSubmissionsUseCase($repo, $attachments, $storage, new AuditRecorder($audit), new UtcClock()))->execute(true);
 
         // Linked attachment of the purged submission + the aged orphan are erased; fresh orphan stays.
         self::assertSame(2, $result->attachmentsErased);
