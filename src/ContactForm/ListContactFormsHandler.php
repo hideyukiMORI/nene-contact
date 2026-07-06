@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace NeneContact\ContactForm;
 
 use Nene2\Http\JsonResponseFactory;
+use Nene2\Http\PaginationQueryParser;
+use Nene2\Http\PaginationResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -19,17 +21,15 @@ final readonly class ListContactFormsHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $params = $request->getQueryParams();
-        $limit = max(1, min(100, (int) ($params['limit'] ?? 20)));
-        $offset = max(0, (int) ($params['offset'] ?? 0));
+        $pagination = PaginationQueryParser::parse($request);
 
-        $result = $this->useCase->execute($limit, $offset);
+        $result = $this->useCase->execute($pagination->limit, $pagination->offset);
 
-        return $this->response->create([
-            'items' => array_map(static fn (ContactForm $f): array => ContactFormResponse::toArray($f), $result->items),
-            'limit' => $result->limit,
-            'offset' => $result->offset,
-            'total' => $result->total,
-        ]);
+        return $this->response->create((new PaginationResponse(
+            items: array_map(static fn (ContactForm $f): array => ContactFormResponse::toArray($f), $result->items),
+            limit: $result->limit,
+            offset: $result->offset,
+            total: $result->total,
+        ))->toArray());
     }
 }

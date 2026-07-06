@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace NeneContact\Submission;
 
 use Nene2\Http\JsonResponseFactory;
+use Nene2\Http\PaginationQueryParser;
+use Nene2\Http\PaginationResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -22,10 +24,9 @@ final readonly class ListSubmissionsHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $params = $request->getQueryParams();
-        $limit = max(1, min(100, (int) ($params['limit'] ?? 20)));
-        $offset = max(0, (int) ($params['offset'] ?? 0));
+        $pagination = PaginationQueryParser::parse($request);
 
+        $params = $request->getQueryParams();
         $sort = $this->stringParam($params, 'sort');
 
         $filter = new SubmissionFilter(
@@ -39,19 +40,21 @@ final readonly class ListSubmissionsHandler implements RequestHandlerInterface
             sort: in_array($sort, self::SORTS, true) ? $sort : null,
         );
 
-        $result = $this->useCase->execute($filter, $limit, $offset);
+        $result = $this->useCase->execute($filter, $pagination->limit, $pagination->offset);
 
         // Items are masked (charter §11) — the bulk list never discloses raw PII.
-        return $this->response->create([
-            'items' => array_map(
+        $body = (new PaginationResponse(
+            items: array_map(
                 static fn (Submission $s): array => SubmissionResponse::toListItem($s),
                 $result->items,
             ),
-            'limit' => $result->limit,
-            'offset' => $result->offset,
-            'total' => $result->total,
-            'status_counts' => $result->statusCounts,
-        ]);
+            limit: $result->limit,
+            offset: $result->offset,
+            total: $result->total,
+        ))->toArray();
+        $body['status_counts'] = $result->statusCounts;
+
+        return $this->response->create($body);
     }
 
     /**
