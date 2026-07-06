@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace NeneContact\Api;
 
 use Nene2\Http\JsonResponseFactory;
+use Nene2\Http\PaginationQueryParser;
+use Nene2\Http\PaginationResponse;
 use NeneContact\Submission\Submission;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,22 +26,24 @@ final readonly class ListAgentSubmissionsHandler implements RequestHandlerInterf
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
+        $pagination = PaginationQueryParser::parse($request);
+
         $params = $request->getQueryParams();
-        $limit = max(1, min(100, (int) ($params['limit'] ?? 20)));
-        $offset = max(0, (int) ($params['offset'] ?? 0));
         $includePii = IncludePii::fromQuery($params);
 
-        $result = $this->useCase->execute($limit, $offset, $includePii);
+        $result = $this->useCase->execute($pagination->limit, $pagination->offset, $includePii);
 
-        return $this->response->create([
-            'items' => array_map(
+        $body = (new PaginationResponse(
+            items: array_map(
                 static fn (Submission $s): array => ApiSubmissionResponse::toArray($s, $includePii),
                 $result->items,
             ),
-            'limit' => $result->limit,
-            'offset' => $result->offset,
-            'total' => $result->total,
-            'pii_included' => $includePii,
-        ]);
+            limit: $result->limit,
+            offset: $result->offset,
+            total: $result->total,
+        ))->toArray();
+        $body['pii_included'] = $includePii;
+
+        return $this->response->create($body);
     }
 }

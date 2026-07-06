@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace NeneContact\Audit;
 
 use Nene2\Http\JsonResponseFactory;
+use Nene2\Http\PaginationQueryParser;
+use Nene2\Http\PaginationResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\RequestHandlerInterface;
@@ -19,27 +21,26 @@ final readonly class ListAuditEventsHandler implements RequestHandlerInterface
 
     public function handle(ServerRequestInterface $request): ResponseInterface
     {
-        $params = $request->getQueryParams();
-        $limit = max(1, min(100, (int) ($params['limit'] ?? 20)));
-        $offset = max(0, (int) ($params['offset'] ?? 0));
+        $pagination = PaginationQueryParser::parse($request);
 
+        $params = $request->getQueryParams();
         $filter = new AuditEventFilter(
             q: $this->stringParam($params, 'q'),
             from: $this->stringParam($params, 'from'),
             to: $this->stringParam($params, 'to'),
         );
 
-        $result = $this->useCase->execute($filter, $limit, $offset);
+        $result = $this->useCase->execute($filter, $pagination->limit, $pagination->offset);
 
-        return $this->response->create([
-            'items' => array_map(
+        return $this->response->create((new PaginationResponse(
+            items: array_map(
                 static fn (AuditEvent $e): array => AuditEventResponse::toArray($e),
                 $result->items,
             ),
-            'limit' => $result->limit,
-            'offset' => $result->offset,
-            'total' => $result->total,
-        ]);
+            limit: $result->limit,
+            offset: $result->offset,
+            total: $result->total,
+        ))->toArray());
     }
 
     /**
