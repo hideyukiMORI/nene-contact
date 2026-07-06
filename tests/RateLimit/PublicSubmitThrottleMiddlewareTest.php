@@ -7,6 +7,7 @@ namespace NeneContact\Tests\RateLimit;
 use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Middleware\RateLimitStorageInterface;
 use NeneContact\RateLimit\PublicSubmitThrottleMiddleware;
+use NeneContact\Tests\Support\FixedClock;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
@@ -32,7 +33,7 @@ final class PublicSubmitThrottleMiddlewareTest extends TestCase
 
         $psr17 = new Psr17Factory();
 
-        return new PublicSubmitThrottleMiddleware($storage, new ProblemDetailsResponseFactory($psr17, $psr17, 'https://nene-contact.dev/problems/'));
+        return new PublicSubmitThrottleMiddleware($storage, new ProblemDetailsResponseFactory($psr17, $psr17, 'https://nene-contact.dev/problems/'), new FixedClock());
     }
 
     private function handler(): RequestHandlerInterface

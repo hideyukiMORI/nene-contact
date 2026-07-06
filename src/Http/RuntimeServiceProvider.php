@@ -21,10 +21,12 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
 use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use Nene2\Http\ResponseEmitter;
 use Nene2\Http\RuntimeApplicationFactory;
+use Nene2\Http\UtcClock;
 use Nene2\Log\MonologLoggerFactory;
 use Nene2\Log\RequestIdHolder;
 use NeneContact\ApplicationServiceProvider;
@@ -71,6 +73,9 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
         $builder->addProvider(new ApplicationServiceProvider());
 
         $builder
+            // Single time source for the runtime. Default UtcClock keeps production
+            // behaviour identical to raw time(); tests bind a fixed clock for determinism.
+            ->set(ClockInterface::class, static fn (ContainerInterface $container): ClockInterface => new UtcClock())
             ->set(
                 ConfigLoader::class,
                 static function (ContainerInterface $container): ConfigLoader {

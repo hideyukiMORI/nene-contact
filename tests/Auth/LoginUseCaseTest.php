@@ -10,6 +10,7 @@ use NeneContact\Auth\LoginInput;
 use NeneContact\Auth\LoginUseCase;
 use NeneContact\Auth\User;
 use NeneContact\Auth\UserRepositoryInterface;
+use NeneContact\Tests\Support\FixedClock;
 use PHPUnit\Framework\TestCase;
 
 final class LoginUseCaseTest extends TestCase
@@ -71,7 +72,7 @@ final class LoginUseCaseTest extends TestCase
     public function test_issues_token_for_valid_admin_credentials(): void
     {
         $user = new User(id: 1, email: 'admin@example.com', passwordHash: password_hash('secret', PASSWORD_DEFAULT), role: 'admin', organizationId: 7);
-        $useCase = new LoginUseCase($this->repoWith($user), $this->tokenIssuer());
+        $useCase = new LoginUseCase($this->repoWith($user), $this->tokenIssuer(), new FixedClock());
 
         $output = $useCase->execute(new LoginInput(email: 'admin@example.com', password: 'secret'));
 
@@ -83,7 +84,7 @@ final class LoginUseCaseTest extends TestCase
     public function test_superadmin_token_has_null_org(): void
     {
         $user = new User(id: 1, email: 'root@example.com', passwordHash: password_hash('secret', PASSWORD_DEFAULT), role: 'superadmin', organizationId: null);
-        $useCase = new LoginUseCase($this->repoWith($user), $this->tokenIssuer());
+        $useCase = new LoginUseCase($this->repoWith($user), $this->tokenIssuer(), new FixedClock());
 
         $output = $useCase->execute(new LoginInput(email: 'root@example.com', password: 'secret'));
 
@@ -93,10 +94,39 @@ final class LoginUseCaseTest extends TestCase
     public function test_rejects_wrong_password(): void
     {
         $user = new User(id: 1, email: 'admin@example.com', passwordHash: password_hash('secret', PASSWORD_DEFAULT), role: 'admin', organizationId: 7);
-        $useCase = new LoginUseCase($this->repoWith($user), $this->tokenIssuer());
+        $useCase = new LoginUseCase($this->repoWith($user), $this->tokenIssuer(), new FixedClock());
 
         $this->expectException(InvalidCredentialsException::class);
 
         $useCase->execute(new LoginInput(email: 'admin@example.com', password: 'wrong'));
+    }
+
+    public function test_token_timestamps_are_deterministic_under_fixed_clock(): void
+    {
+        $issuer = new class () implements TokenIssuerInterface {
+            /** @var array<string, mixed> */
+            public array $captured = [];
+
+            /** @param array<string, mixed> $claims */
+            public function issue(array $claims): string
+            {
+                $this->captured = $claims;
+
+                return 'token';
+            }
+        };
+
+        // 2026-05-30T09:00:00Z → Unix 1780131600.
+        $clock = new FixedClock('2026-05-30T09:00:00+00:00');
+        $expectedIat = 1780131600;
+        $user = new User(id: 1, email: 'admin@example.com', passwordHash: password_hash('secret', PASSWORD_DEFAULT), role: 'admin', organizationId: 7);
+
+        $output = (new LoginUseCase($this->repoWith($user), $issuer, $clock))
+            ->execute(new LoginInput(email: 'admin@example.com', password: 'secret'));
+
+        // iat/exp no longer depend on wall-clock time: fully reproducible.
+        self::assertSame($expectedIat, $issuer->captured['iat']);
+        self::assertSame($expectedIat + 86400, $issuer->captured['exp']);
+        self::assertSame($expectedIat + 86400, $output->expiresAt);
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NeneContact\Submission;
 
+use Nene2\Http\ClockInterface;
 use NeneContact\Attachment\AttachmentPurgeRepositoryInterface;
 use NeneContact\Attachment\AttachmentStorageInterface;
 use NeneContact\Audit\AuditRecorderInterface;
@@ -33,12 +34,13 @@ final readonly class PurgeSubmissionsUseCase implements PurgeSubmissionsUseCaseI
         private AttachmentPurgeRepositoryInterface $attachments,
         private AttachmentStorageInterface $storage,
         private AuditRecorderInterface $audit,
+        private ClockInterface $clock,
     ) {
     }
 
     public function execute(bool $apply): PurgeResult
     {
-        $now = time();
+        $now = $this->clock->now()->getTimestamp();
         $expired = 0;
         $purged = 0;
         $attachmentsErased = 0;

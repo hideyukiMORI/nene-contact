@@ -8,6 +8,7 @@ use LogicException;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
@@ -25,12 +26,17 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
         $builder
             ->set(
                 ConfirmationToken::class,
-                static function (): ConfirmationToken {
+                static function (ContainerInterface $c): ConfirmationToken {
                     // Server-side signing secret (the caller never holds it, so it cannot forge
                     // a token without doing phase 1). Reuses the local JWT secret.
                     $secret = $_SERVER['NENE2_LOCAL_JWT_SECRET'] ?? $_ENV['NENE2_LOCAL_JWT_SECRET'] ?? getenv('NENE2_LOCAL_JWT_SECRET');
+                    $clock = $c->get(ClockInterface::class);
 
-                    return new ConfirmationToken(is_string($secret) ? $secret : '');
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new ConfirmationToken(is_string($secret) ? $secret : '', $clock);
                 },
             )
             ->set(
