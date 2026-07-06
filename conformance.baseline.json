@@ -1,0 +1,102 @@
+{
+    "version": 1,
+    "allow": [],
+    "ignore": [
+        {
+            "rule": "D4",
+            "file": "src/Api/IngestSubmissionUseCase.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Attachment/PdoAttachmentPurgeRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 2
+        },
+        {
+            "rule": "D4",
+            "file": "src/Attachment/PdoAttachmentRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 2
+        },
+        {
+            "rule": "D4",
+            "file": "src/Audit/PdoAuditEventRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Auth/PdoUserRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 3
+        },
+        {
+            "rule": "D4",
+            "file": "src/ContactForm/PdoContactFormRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 3
+        },
+        {
+            "rule": "D4",
+            "file": "src/Handoff/PdoSubmissionLinkRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Media/PdoMediaAssetRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 2
+        },
+        {
+            "rule": "D4",
+            "file": "src/Notification/PdoNotificationChannelRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Notification/WebhookChannelSender.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Organization/PdoOrganizationRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 2
+        },
+        {
+            "rule": "D4",
+            "file": "src/Submission/ExportSubmissionsHandler.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Submission/PdoSubmissionNoteRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        },
+        {
+            "rule": "D4",
+            "file": "src/Submission/PdoSubmissionPurgeRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 3
+        },
+        {
+            "rule": "D4",
+            "file": "src/Submission/PdoSubmissionRepository.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 4
+        },
+        {
+            "rule": "D4",
+            "file": "src/Submission/SubmitPublicFormUseCase.php",
+            "message": "Raw current-time read date() with no explicit timestamp. Inject Nene2\\Http\\ClockInterface (Nene2\\Http\\UtcClock in production) instead of reading the wall clock directly.",
+            "count": 1
+        }
+    ]
+}
