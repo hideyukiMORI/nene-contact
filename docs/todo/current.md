@@ -206,6 +206,6 @@ the MVP. Grouped by theme:
 - Concierge boundary: ADR 0009 — no scenario engine in Contact.
 - Locale scope: ADR 0011 — bilingual `ja`/`en` only; `contact_form` carries `locales[]` + `default_locale`.
 - Invoice handoff: draft contract in `docs/integrations/invoice-handoff-contract.md`; awaits Invoice `/api/*` endpoints.
-- Local ports: API **8900**, phpMyAdmin **8901**, frontend dev (Vite) **8902**, MySQL **3391**.
+- Local ports: API **8900**, phpMyAdmin **8901**, frontend dev (Vite) **8902**, MySQL **3392**.
 
 Last updated: 2026-06-25

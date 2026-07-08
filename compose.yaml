@@ -43,7 +43,7 @@ services:
       MYSQL_PASSWORD: ${DB_PASSWORD:-nene_contact}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-nene_contact_root}
     ports:
-      - "${NENE_CONTACT_MYSQL_PORT:-3391}:3306"
+      - "${NENE_CONTACT_MYSQL_PORT:-3392}:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./docker/mysql/init:/docker-entrypoint-initdb.d:ro
