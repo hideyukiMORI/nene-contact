@@ -111,7 +111,7 @@ The admin SPA lives in `frontend/` (React + TypeScript + Vite, [`frontend-standa
 | --- | --- |
 | PHP / API (admin SPA at `/admin/`, embed at `/embed.js`) | **8900** |
 | phpMyAdmin | **8901** |
-| MySQL | **3391** |
+| MySQL | **3392** |
 
 Use the **89xx** lane only. Do not reuse NENE2 (82xx), Clear (83xx), Profile (84xx), or Invoice (85xx) ports.
 

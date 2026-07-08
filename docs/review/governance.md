@@ -7,7 +7,7 @@ Use for Phase 0 documentation PRs.
 - [ ] No locale beyond `ja` / `en` introduced; localized strings keyed ja/en only (ADR 0011)
 - [ ] Terminology registry includes every new identifier in the PR
 - [ ] English only in `docs/` and README (ADR 0008)
-- [ ] Port 8900 / 8901 / 3391 documented in README and Cursor rules
+- [ ] Port 8900 / 8901 / 3392 documented in README and Cursor rules
 - [ ] `docs/todo/current.md` and milestone updated
 
 Last updated: 2026-06-04
