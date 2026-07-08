@@ -45,8 +45,13 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      # HealthCheckTest boots the real DI container; NotificationChannelServiceProvider
+      # requires NENE_CONTACT_ENCRYPTION_KEY (charter §6), which .env.example leaves
+      # empty on purpose — generate a throwaway key for the test run.
       - name: Prepare environment
-        run: cp .env.example .env
+        run: |
+          cp .env.example .env
+          echo "NENE_CONTACT_ENCRYPTION_KEY=$(php -r 'echo base64_encode(sodium_crypto_secretbox_keygen());')" >> .env
 
       - name: Create var directory
         run: mkdir -p var
