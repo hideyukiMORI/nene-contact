@@ -21,6 +21,9 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
   }
   if (authToken !== null) {
     headers.Authorization = `Bearer ${authToken}`;
+    // Mirror into a custom header for hosts whose front proxy strips Authorization (HETEML):
+    // the server adopts it only when Authorization is absent (AuthorizationHeaderFallback, #366).
+    headers['X-Authorization'] = `Bearer ${authToken}`;
   }
 
   const init: RequestInit = { method, headers, credentials: 'omit' };
@@ -53,6 +56,9 @@ async function upload<T>(path: string, form: FormData): Promise<T> {
   const headers: Record<string, string> = {};
   if (authToken !== null) {
     headers.Authorization = `Bearer ${authToken}`;
+    // Mirror into a custom header for hosts whose front proxy strips Authorization (HETEML):
+    // the server adopts it only when Authorization is absent (AuthorizationHeaderFallback, #366).
+    headers['X-Authorization'] = `Bearer ${authToken}`;
   }
 
   let response: Response;
