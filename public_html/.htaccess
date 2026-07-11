@@ -23,3 +23,28 @@ RewriteRule ^ /console/index.html [L]
 RewriteCond %{REQUEST_FILENAME} !-f
 RewriteCond %{REQUEST_FILENAME} !-d
 RewriteRule ^ index.php [QSA,L]
+
+# --- Cache-Control (#368) -------------------------------------------------------------------
+# FilesMatch keys on the served filename, so these hold across /console/ and /embed/ regardless
+# of the rewrites above.
+<IfModule mod_headers.c>
+    # HTML (the SPA shell + demo) must always revalidate, so a redeploy's new content-hashed
+    # asset filenames are picked up immediately instead of a stale shell referencing old hashes.
+    <FilesMatch "\.html$">
+        Header set Cache-Control "no-cache"
+    </FilesMatch>
+
+    # Content-hashed build assets — the name changes whenever the bytes do, so cache forever.
+    # Vite emits `name-<hash>.js|css|woff2`; the production embed is `embed.<hash>.js`.
+    <FilesMatch "-[A-Za-z0-9_-]{8,}\.(js|css|woff2?)$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+    <FilesMatch "^embed\.[0-9a-f]{8,}\.js$">
+        Header set Cache-Control "public, max-age=31536000, immutable"
+    </FilesMatch>
+
+    # The raw, unhashed embed source is a cache-busting-free install path — keep it short.
+    <FilesMatch "^embed\.js$">
+        Header set Cache-Control "public, max-age=300"
+    </FilesMatch>
+</IfModule>
