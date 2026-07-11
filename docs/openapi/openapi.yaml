@@ -1275,10 +1275,24 @@ components:
         post_submit: { type: string, enum: [message, redirect], description: 'After a successful submit: show a completion message or redirect.' }
         success_message: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         redirect_url: { type: [string, 'null'] }
+        autoreply: { $ref: '#/components/schemas/AutoReply' }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
       required: [id, name, public_form_key, default_locale, locales, fields]
+
+    AutoReply:
+      type: object
+      description: >
+        Per-form sender auto-reply (#360). When enabled, a successful public submit sends one
+        acknowledgement email to the address entered in the form's `email` field. Subject/body are
+        operator-authored, per-locale (ja/en), and never interpolated with submission values (fixed
+        template — backscatter mitigation). Best-effort with a per-recipient cooldown. Mirrors
+        NeneContact\ContactForm\AutoReply.
+      properties:
+        enabled: { type: boolean, description: 'When true, and subject+body exist for the default locale, an auto-reply is sent.' }
+        subject: { $ref: '#/components/schemas/LocaleMap' }
+        body: { $ref: '#/components/schemas/LocaleMap' }
 
     Appearance:
       type: object
@@ -1401,6 +1415,9 @@ components:
           allOf: [{ $ref: '#/components/schemas/LocaleMap' }]
           description: 'Optional per-locale completion message (shown when post_submit=message).'
         redirect_url: { type: string, description: 'Required when post_submit=redirect; must start with http(s)://.' }
+        autoreply:
+          allOf: [{ $ref: '#/components/schemas/AutoReply' }]
+          description: 'Optional sender auto-reply config (#360); when enabled, subject+body for the default locale are required.'
         fields:
           type: array
           items:

@@ -822,7 +822,15 @@ export interface components {
             post_submit?: "message" | "redirect";
             success_message?: components["schemas"]["LocaleMap"] | null;
             redirect_url?: string | null;
+            autoreply?: components["schemas"]["AutoReply"];
             fields: components["schemas"]["FormField"][];
+        };
+        /** @description Per-form sender auto-reply (#360). When enabled, a successful public submit sends one acknowledgement email to the address entered in the form's `email` field. Subject/body are operator-authored, per-locale (ja/en), and never interpolated with submission values (fixed template — backscatter mitigation). Best-effort with a per-recipient cooldown. Mirrors NeneContact\ContactForm\AutoReply. */
+        AutoReply: {
+            /** @description When true, and subject+body exist for the default locale, an auto-reply is sent. */
+            enabled?: boolean;
+            subject?: components["schemas"]["LocaleMap"];
+            body?: components["schemas"]["LocaleMap"];
         };
         /** @description Per-form embed theme + chrome (Appearance Studio — appearance v2). A nested token tree; missing/partial leaves fall back to defaults (current NeNe look). Mirrors NeneContact\ContactForm\Appearance. */
         Appearance: {
@@ -954,6 +962,8 @@ export interface components {
             success_message?: components["schemas"]["LocaleMap"];
             /** @description Required when post_submit=redirect; must start with http(s)://. */
             redirect_url?: string;
+            /** @description Optional sender auto-reply config (#360); when enabled, subject+body for the default locale are required. */
+            autoreply?: components["schemas"]["AutoReply"];
             fields: {
                 /** @enum {string} */
                 field_type: "text" | "email" | "phone" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
