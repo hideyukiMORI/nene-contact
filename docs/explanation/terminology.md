@@ -211,7 +211,8 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 ## 9. Audit (`audit_event`, ADR 0013, [`../development/audit-logging.md`](../development/audit-logging.md))
 
 Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
-`deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`.
+`deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`, `sent`,
+`suppressed`, `failed`.
 
 Examples: `submission.viewed`, `submission.exported`,
 `submission_technical_meta.viewed` (audited IP/UA disclosure, entity type `submission`; ADR 0018),
@@ -219,7 +220,9 @@ Examples: `submission.viewed`, `submission.exported`,
 `submission.corrected` (data-subject correction, §4), `submission.expired` (retention
 soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
 `contact_form.updated`, `notification_channel.created`, `handoff.created` (first sibling
-handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`).
+handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`),
+`autoreply.sent` / `autoreply.suppressed` (per-recipient cooldown) / `autoreply.failed`
+(sender auto-reply outcome, entity type `autoreply`, entity id = the submission; #360).
 
 | Term | Spelling | Notes |
 | --- | --- | --- |

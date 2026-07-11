@@ -13,6 +13,7 @@ final readonly class CreateContactFormInput
      * @param array<string, string>|null $consentLabel   per-locale consent copy (ja/en)
      * @param array<string, string>|null $submitLabel    per-locale submit button label (ja/en)
      * @param array<string, string>|null $successMessage per-locale completion message (ja/en)
+     * @param AutoReply|null             $autoReply      per-form sender auto-reply (#360)
      */
     public function __construct(
         public string $name,
@@ -31,6 +32,7 @@ final readonly class CreateContactFormInput
         public string $postSubmit = 'message',
         public ?array $successMessage = null,
         public ?string $redirectUrl = null,
+        public ?AutoReply $autoReply = null,
     ) {
     }
 }

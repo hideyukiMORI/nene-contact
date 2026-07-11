@@ -108,6 +108,16 @@ final readonly class ContactFormBodyValidator
             $errors[] = new ValidationError('success_message', 'Success message locales must be a subset of {ja, en}.', 'invalid');
         }
 
+        // Sender auto-reply (#360): optional per-form config. Subject/body are per-locale operator
+        // copy; when enabled, the default locale must carry both (mirrors the consent-label rule).
+        [$autoReply, $autoReplyErrors] = AutoReply::parse($body['autoreply'] ?? null);
+        foreach ($autoReplyErrors as $autoReplyError) {
+            $errors[] = $autoReplyError;
+        }
+        if ($autoReply->isEnabled() && !$autoReply->isDeliverable($defaultLocale)) {
+            $errors[] = new ValidationError('autoreply', "A subject and body for the default locale ({$defaultLocale}) are required when the auto-reply is enabled.", 'required');
+        }
+
         $postSubmit = is_string($body['post_submit'] ?? null) ? (string) $body['post_submit'] : 'message';
         if (!in_array($postSubmit, ['message', 'redirect'], true)) {
             $errors[] = new ValidationError('post_submit', 'Post-submit action must be "message" or "redirect".', 'invalid');
@@ -226,6 +236,7 @@ final readonly class ContactFormBodyValidator
             postSubmit: $postSubmit,
             successMessage: $successMessage === [] ? null : $successMessage,
             redirectUrl: $redirectUrl,
+            autoReply: $autoReply,
         );
     }
 

@@ -18,6 +18,7 @@ use NeneContact\Attachment\AttachmentRepositoryInterface;
 use NeneContact\Attachment\AttachmentStorageInterface;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
+use NeneContact\Notification\SenderAutoReplyInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
@@ -107,6 +108,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $repo = $c->get(SubmissionRepositoryInterface::class);
                     $audit = $c->get(AuditRecorderInterface::class);
                     $notifier = $c->get(SubmissionNotifierInterface::class);
+                    $autoReply = $c->get(SenderAutoReplyInterface::class);
 
                     if (!$repo instanceof SubmissionRepositoryInterface) {
                         throw new LogicException('Submission repository service is invalid.');
@@ -120,7 +122,11 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Submission notifier service is invalid.');
                     }
 
-                    return new SubmitPublicFormUseCase($repo, $audit, $notifier);
+                    if (!$autoReply instanceof SenderAutoReplyInterface) {
+                        throw new LogicException('Sender auto-reply service is invalid.');
+                    }
+
+                    return new SubmitPublicFormUseCase($repo, $audit, $notifier, $autoReply);
                 },
             )
             ->set(

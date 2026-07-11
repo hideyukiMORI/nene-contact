@@ -7,6 +7,7 @@ namespace NeneContact\Submission;
 use LogicException;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactForm;
+use NeneContact\Notification\SenderAutoReplyInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
 use Throwable;
 
@@ -16,6 +17,7 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
         private SubmissionRepositoryInterface $submissions,
         private AuditRecorderInterface $audit,
         private SubmissionNotifierInterface $notifier,
+        private SenderAutoReplyInterface $autoReply,
     ) {
     }
 
@@ -77,6 +79,15 @@ final readonly class SubmitPublicFormUseCase implements SubmitPublicFormUseCaseI
             $this->notifier->notify($form, $stored);
         } catch (Throwable) {
             // Swallowed by design; delivery is retried/observed out of band (charter §7).
+        }
+
+        // Sender auto-reply is best-effort too (#360): a delivery failure never fails the
+        // submission. The service already swallows and audits its own outcome; this is a
+        // defence-in-depth net around anything unexpected.
+        try {
+            $this->autoReply->send($form, $stored);
+        } catch (Throwable) {
+            // Swallowed by design (charter §7).
         }
 
         return $stored;

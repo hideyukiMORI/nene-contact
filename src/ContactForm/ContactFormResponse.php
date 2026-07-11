@@ -30,6 +30,7 @@ final readonly class ContactFormResponse
             'post_submit' => $form->postSubmit,
             'success_message' => $form->successMessage,
             'redirect_url' => $form->redirectUrl,
+            'autoreply' => ($form->autoReply ?? AutoReply::disabled())->toArray(),
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'id' => $f->id,

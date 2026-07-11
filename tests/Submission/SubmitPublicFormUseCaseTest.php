@@ -100,7 +100,7 @@ final class SubmitPublicFormUseCaseTest extends TestCase
             }
         };
 
-        $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($auditRepo), $notifier);
+        $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($auditRepo), $notifier, $this->nullAutoReply());
         $submission = $useCase->execute($form, ['email' => 'visitor@example.com'], '203.0.113.9', 'curl/8', 'https://shop.example.com/contact', 'ja');
 
         self::assertCount(1, $repo->created);
@@ -188,7 +188,7 @@ final class SubmitPublicFormUseCaseTest extends TestCase
             id: 3,
         );
 
-        $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($this->nullAuditRepo()), $this->nullNotifier());
+        $useCase = new SubmitPublicFormUseCase($repo, new AuditRecorder($this->nullAuditRepo()), $this->nullNotifier(), $this->nullAutoReply());
         $submission = $useCase->execute($form, ['email' => 'visitor@example.com'], null, null);
 
         self::assertNotNull($submission->consentGivenAt);
@@ -221,6 +221,15 @@ final class SubmitPublicFormUseCaseTest extends TestCase
     {
         return new class () implements \NeneContact\Notification\SubmissionNotifierInterface {
             public function notify(\NeneContact\ContactForm\ContactForm $form, Submission $submission): void
+            {
+            }
+        };
+    }
+
+    private function nullAutoReply(): \NeneContact\Notification\SenderAutoReplyInterface
+    {
+        return new class () implements \NeneContact\Notification\SenderAutoReplyInterface {
+            public function send(\NeneContact\ContactForm\ContactForm $form, Submission $submission): void
             {
             }
         };

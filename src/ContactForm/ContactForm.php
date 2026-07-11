@@ -13,6 +13,7 @@ final readonly class ContactForm
      * @param array<string, string>|null $consentLabel   per-locale consent copy (ja/en); present when $consentRequired (charter §3)
      * @param array<string, string>|null $submitLabel    per-locale submit button label (ja/en); null uses the default
      * @param array<string, string>|null $successMessage per-locale completion message (ja/en); shown when post_submit=message
+     * @param AutoReply|null             $autoReply      per-form sender auto-reply (#360); null resolves to disabled
      */
     public function __construct(
         public int $organizationId,
@@ -32,6 +33,7 @@ final readonly class ContactForm
         public string $postSubmit = 'message',
         public ?array $successMessage = null,
         public ?string $redirectUrl = null,
+        public ?AutoReply $autoReply = null,
         public ?int $id = null,
         public ?string $createdAt = null,
         public ?string $updatedAt = null,

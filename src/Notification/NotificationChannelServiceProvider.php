@@ -10,6 +10,7 @@ use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
+use Nene2\Middleware\RateLimitStorageInterface;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
@@ -92,6 +93,31 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         new ChatworkChannelSender($http, $psr17),
                         new WebhookChannelSender($http, $psr17),
                     ]);
+                },
+            )
+            ->set(
+                SenderAutoReplyInterface::class,
+                static function (ContainerInterface $c): SenderAutoReplyInterface {
+                    $mailer = $c->get(MailerInterface::class);
+                    $cooldown = $c->get(RateLimitStorageInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$mailer instanceof MailerInterface) {
+                        throw new LogicException('Mailer service is invalid.');
+                    }
+
+                    if (!$cooldown instanceof RateLimitStorageInterface) {
+                        throw new LogicException('Rate limit storage service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    $from = $_SERVER['MAIL_FROM'] ?? $_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM');
+                    $fromAddress = is_string($from) && $from !== '' ? $from : 'noreply@nene-contact.local';
+
+                    return new SenderAutoReply($mailer, $fromAddress, $cooldown, $audit);
                 },
             )
             ->set(

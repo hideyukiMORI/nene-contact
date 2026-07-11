@@ -21,6 +21,7 @@ const ENTITY_LABEL_KEYS: Record<string, MessageKey> = {
   notification_channel: 'audit.entity.notification_channel',
   attachment: 'audit.entity.attachment',
   handoff: 'audit.entity.handoff',
+  autoreply: 'audit.entity.autoreply',
   user: 'audit.entity.user',
   organization: 'audit.entity.organization',
 };
@@ -35,6 +36,9 @@ const VERB_LABEL_KEYS: Record<string, MessageKey> = {
   viewed: 'audit.verb.viewed',
   exported: 'audit.verb.exported',
   retried: 'audit.verb.retried',
+  sent: 'audit.verb.sent',
+  suppressed: 'audit.verb.suppressed',
+  failed: 'audit.verb.failed',
 };
 
 /**
