@@ -6,6 +6,7 @@ namespace NeneContact\Submission;
 
 use Nene2\Database\DatabaseQueryExecutorInterface;
 use NeneContact\ContactForm\Appearance;
+use NeneContact\ContactForm\AutoReply;
 use NeneContact\ContactForm\ContactForm;
 use NeneContact\ContactForm\FormField;
 
@@ -19,7 +20,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
     public function findByPublicFormKey(string $publicFormKey): ?ContactForm
     {
         $row = $this->query->fetchOne(
-            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, appearance_json, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at
+            'SELECT id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, appearance_json, autoreply_json, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at
              FROM contact_forms WHERE public_form_key = ?',
             [$publicFormKey],
         );
@@ -76,6 +77,12 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
         $appearance = isset($row['appearance_json'])
             ? (array) json_decode((string) $row['appearance_json'], true, 512, JSON_THROW_ON_ERROR)
             : null;
+        // Auto-reply drives the submit-path SenderAutoReply (#360). Kept out of the public
+        // schema response — it is operator-internal config, not visitor-facing.
+        /** @var array<string, mixed>|null $autoReply */
+        $autoReply = isset($row['autoreply_json'])
+            ? (array) json_decode((string) $row['autoreply_json'], true, 512, JSON_THROW_ON_ERROR)
+            : null;
         /** @var array<string, string>|null $submitLabel */
         $submitLabel = isset($row['submit_label_json'])
             ? (array) json_decode((string) $row['submit_label_json'], true, 512, JSON_THROW_ON_ERROR)
@@ -102,6 +109,7 @@ final readonly class PdoPublicFormReader implements PublicFormReaderInterface
             postSubmit: isset($row['post_submit']) ? (string) $row['post_submit'] : 'message',
             successMessage: $successMessage,
             redirectUrl: isset($row['redirect_url']) ? (string) $row['redirect_url'] : null,
+            autoReply: AutoReply::fromStored($autoReply),
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],
