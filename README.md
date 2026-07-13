@@ -38,6 +38,20 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 - **OpenAPI + MCP** — documented HTTP boundaries for humans and AI agents
 - **Compliant by design** — binding APPI/Japan-law charter, professional-review-ready; no money means no sign-off gate ([compliance charter](./docs/explanation/data-protection-compliance.md), [ADR 0012](./docs/adr/0012-data-protection-compliance-binding.md))
 
+## Non-goals
+
+Permanent product boundaries (binding, [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contract.md) DON'T table) — never a deferred backlog item:
+
+- Not visual chat scenarios or step-based conversation state — that's **NeNe Concierge**
+- Not quotes, invoices, PDFs, or payment records — that's **NeNe Invoice**
+- Not bank-deposit reconciliation or dunning — that's **NeNe Clear**
+- Not a full CRM pipeline (stages, forecast, kanban SSOT) — that's **NeNe Deal**
+- Not a CMS or entity platform — that's **NeNe Records**
+- Not a shared database with any sibling — HTTP only ([ADR 0002](./docs/adr/0002-separate-from-sibling-products.md))
+- Not locales beyond `ja` / `en` or a general i18n framework ([ADR 0011](./docs/adr/0011-bilingual-japanese-english-scope.md))
+
+Full list: [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contract.md) (DON'T table).
+
 ## Documentation (read first)
 
 | Topic | Document |
@@ -57,18 +71,18 @@ in admin — on [NENE2](https://github.com/hideyukiMORI/NENE2).
 
 ## Status
 
-Backend foundation and the compliance core are in place; the admin SPA and embed widget are landing.
+| Phase | Scope | Status |
+| --- | --- | --- |
+| 0 | Governance | ✅ |
+| 1 | Runtime foundation — multi-tenant, JWT/RBAC auth, audit, contact-form & submission domains | ✅ |
+| M2 | Compliance hardening — consent, prohibited-field registry, retention + purge, data-subject delete/correct, channel-secret encryption; no physical row deletion, PII erased in place ([ADR 0016](./docs/adr/0016-no-physical-deletion-pii-erase-in-place.md)) | ✅ |
+| M3 | Forms + embed MVP — form builder, `public_html/embed.js`, admin console (`frontend/`) | ✅ MVP |
+| M4 | Channels + webhooks + attachments — email / Slack / Chatwork dispatch, signed outbound webhooks | ✅ |
+| M5 | Sibling handoff — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP, idempotent/retry/audited ([ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)) | ✅ (submission-detail UI buttons still pending) |
+| M6 | AI / MCP — agent read surface `/api/*`, local MCP stdio server, Concierge ingest, MCP write tools with confirmation token, Contact → Invoice draft handoff, Contact → Records read-only options | ✅ |
+| M7 | GA / acceptance — A1–A8 audit, operator guide | 🚧 In progress |
 
-- ✅ **Runtime + multi-tenant + auth** (org/JWT/RBAC), audit, contact-form & submission domains, rate limiting, OpenAPI 3.1 gate, org-scoped user management.
-- ✅ **Compliance hardening (M2)** — consent, prohibited-field registry, retention + purge, data-subject delete/correct, channel-secret encryption; **no physical row deletion** (PII erased in place, [ADR 0016](./docs/adr/0016-no-physical-deletion-pii-erase-in-place.md)).
-- ✅ **Notifications + webhooks + attachments (M4)** — email / Slack / Chatwork dispatch, signed outbound webhooks, file attachments.
-- ✅ **Embed widget** (`public_html/embed.js`) — floating / button / inline, schema-driven.
-- 🚧 **Admin SPA** (`frontend/`, React + TS + Vite → `public_html/console/`, served at `/console/`) — login, form builder, inbox (list/detail/status/notes), channels, users landed.
-- ✅ **Sibling handoff (M5)** — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP (`src/Upstream/`, idempotent, retry, non-destructive, audited; [ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)).
-- ✅ **AI / MCP (M6)** — agent read surface `/api/*` (machine-key auth, redacted by default, audited `include_pii`), a local **MCP stdio server** (`tools/local-mcp-server.php`, [docs](./docs/integrations/mcp.md)), **Concierge ingest** (`POST /api/submissions`, `source=concierge` → one inbox), **MCP write tools** behind a two-step confirmation token, the **Contact → Invoice** draft-client handoff, and **Contact → Records** read-only select options.
-- ⏳ Next: M7 GA acceptance (A1–A8), operator docs, production `embed.js` build.
-
-See [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).
+Remaining for M7: production `embed.js` build (hashed, CSP-friendly), final compliance/governance/backend/frontend reviews. Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).
 
 ## Quick Start
 
@@ -111,9 +125,10 @@ The admin SPA lives in `frontend/` (React + TypeScript + Vite, [`frontend-standa
 | --- | --- |
 | PHP / API (admin SPA at `/admin/`, embed at `/embed.js`) | **8900** |
 | phpMyAdmin | **8901** |
+| Frontend dev (Vite) | **8902** |
 | MySQL | **3392** |
 
-Use the **89xx** lane only. Do not reuse NENE2 (82xx), Clear (83xx), Profile (84xx), or Invoice (85xx) ports.
+Use the **89xx** lane only — full fixed-port policy: [`CLAUDE.md`](./CLAUDE.md).
 
 ## Ecosystem layer
 
