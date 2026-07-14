@@ -27,35 +27,3 @@ export class AppError extends Error {
     return this.status === 422;
   }
 }
-
-interface ProblemShape {
-  type?: unknown;
-  title?: unknown;
-  detail?: unknown;
-  errors?: unknown;
-}
-
-export function toAppError(status: number, body: unknown): AppError {
-  const problem: ProblemShape = typeof body === 'object' && body !== null ? body : {};
-  const type = typeof problem.type === 'string' ? problem.type : 'about:blank';
-  const title = typeof problem.title === 'string' ? problem.title : 'Error';
-  const detail = typeof problem.detail === 'string' ? problem.detail : '';
-
-  const validationErrors: ValidationFieldError[] = Array.isArray(problem.errors)
-    ? problem.errors.flatMap((e: unknown) => {
-        if (typeof e !== 'object' || e === null) {
-          return [];
-        }
-        const rec = e as Record<string, unknown>;
-        return [
-          {
-            field: typeof rec.field === 'string' ? rec.field : '',
-            message: typeof rec.message === 'string' ? rec.message : '',
-            code: typeof rec.code === 'string' ? rec.code : '',
-          },
-        ];
-      })
-    : [];
-
-  return new AppError(status, type, title, detail, validationErrors);
-}

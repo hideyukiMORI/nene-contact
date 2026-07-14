@@ -112,6 +112,11 @@ describe('FormBuilder', () => {
           {
             type: 'about:blank',
             title: 'Unprocessable Entity',
+            // Real Problem Details bodies always carry `status` (NENE2
+            // ProblemDetailsResponseFactory sets it unconditionally); this fixture
+            // was missing it, which the fleet transport's stricter Problem Details
+            // guard (`isProblemDetails`) now surfaces (#373).
+            status: 422,
             detail: 'Validation failed',
             errors: [
               { field: 'fields.0.label', message: 'Label for ja is required.', code: 'invalid' },
