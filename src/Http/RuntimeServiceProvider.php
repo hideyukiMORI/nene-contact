@@ -380,6 +380,11 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         machineApiKeyProtectedPathPrefixes: ['/api/'],
                         requestMaxBodyBytes: 64 * 1024,
                         problemDetailsBaseUrl: $config->problemDetailsBaseUrl,
+                        // Opt-in の X-Authorization フォールバック受け口（NENE2 #1558・ADR 0019）。
+                        // 前段 proxy が標準 Authorization を剥がす共有ホスティング（HETEML 型 Tier A）で、
+                        // console が全リクエストに付与する `X-Authorization: Bearer` ミラーを
+                        // Authorization 不在/空のときのみ採用する。標準ヘッダが届く環境ではバイト不変。
+                        enableAuthorizationHeaderFallback: true,
                     );
                 },
             )

@@ -3,7 +3,6 @@
 declare(strict_types=1);
 
 use Nene2\Http\ResponseEmitter;
-use NeneContact\Http\AuthorizationHeaderFallback;
 use NeneContact\Http\RuntimeContainerFactory;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7Server\ServerRequestCreator;
@@ -22,9 +21,6 @@ $serverRequestCreator = new ServerRequestCreator(
 );
 
 $request = $serverRequestCreator->fromGlobals();
-// Recover the Bearer token on hosts whose front proxy strips `Authorization` (HETEML): the
-// console mirrors it into `X-Authorization`, adopted only when the standard header is absent.
-$request = AuthorizationHeaderFallback::apply($request);
 $application = $container->get(RequestHandlerInterface::class);
 assert($application instanceof RequestHandlerInterface);
 $response = $application->handle($request);
