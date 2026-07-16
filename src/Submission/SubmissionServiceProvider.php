@@ -18,6 +18,7 @@ use NeneContact\Attachment\AttachmentRepositoryInterface;
 use NeneContact\Attachment\AttachmentStorageInterface;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
+use NeneContact\Http\RuntimeServiceProvider;
 use NeneContact\Notification\SenderAutoReplyInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
@@ -173,6 +174,33 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     }
 
                     return new GetPublicFormSchemaHandler($reader, $json, $pd);
+                },
+            )
+            ->set(
+                PublicFormPageHandler::class,
+                static function (ContainerInterface $c): PublicFormPageHandler {
+                    $reader = $c->get(PublicFormReaderInterface::class);
+                    $psr17 = $c->get(Psr17Factory::class);
+                    $pd = $c->get(ProblemDetailsResponseFactory::class);
+                    $root = $c->get(RuntimeServiceProvider::PROJECT_ROOT);
+
+                    if (!$reader instanceof PublicFormReaderInterface) {
+                        throw new LogicException('Public form reader service is invalid.');
+                    }
+
+                    if (!$psr17 instanceof Psr17Factory) {
+                        throw new LogicException('PSR-17 factory service is invalid.');
+                    }
+
+                    if (!$pd instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    if (!is_string($root)) {
+                        throw new LogicException('Project root is invalid.');
+                    }
+
+                    return new PublicFormPageHandler($reader, $psr17, $pd, $root . '/public_html/embed/manifest.json');
                 },
             )
             ->set(
@@ -539,6 +567,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $addNote = $c->get(AddSubmissionNoteHandler::class);
                     $listNotes = $c->get(ListSubmissionNotesHandler::class);
                     $export = $c->get(ExportSubmissionsHandler::class);
+                    $page = $c->get(PublicFormPageHandler::class);
 
                     if (!$schema instanceof GetPublicFormSchemaHandler) {
                         throw new LogicException('Schema handler service is invalid.');
@@ -584,7 +613,11 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Export submissions handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $technicalMeta, $updateStatus, $delete, $correct, $addNote, $listNotes, $export);
+                    if (!$page instanceof PublicFormPageHandler) {
+                        throw new LogicException('Public form page handler service is invalid.');
+                    }
+
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $technicalMeta, $updateStatus, $delete, $correct, $addNote, $listNotes, $export, $page);
                 },
             );
     }

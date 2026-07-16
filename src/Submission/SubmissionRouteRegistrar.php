@@ -21,6 +21,7 @@ final readonly class SubmissionRouteRegistrar
         private AddSubmissionNoteHandler $addNoteHandler,
         private ListSubmissionNotesHandler $listNotesHandler,
         private ExportSubmissionsHandler $exportHandler,
+        private PublicFormPageHandler $pageHandler,
     ) {
     }
 
@@ -38,8 +39,11 @@ final readonly class SubmissionRouteRegistrar
         $listNotes = $this->listNotesHandler;
 
         // Public (no auth) — org resolved via public_form_key
+        $page = $this->pageHandler;
         $router->get('/public/forms/{public_form_key}/schema', static fn (ServerRequestInterface $r) => $schema->handle($r));
         $router->post('/public/forms/{public_form_key}/submissions', static fn (ServerRequestInterface $r) => $submit->handle($r));
+        // Hosted single-form page (link target where a host page's sanitizer strips the embed snippet)
+        $router->get('/form/{public_form_key}', static fn (ServerRequestInterface $r) => $page->handle($r));
 
         // Admin inbox
         $export = $this->exportHandler;
