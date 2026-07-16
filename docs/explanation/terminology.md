@@ -244,12 +244,14 @@ handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`)
 | Embed script path | `/embed.js` |
 | Public schema path | `/public/forms/{public_form_key}/schema` |
 | Public submit path | `/public/forms/{public_form_key}/submissions` |
+| Hosted form page path | `/form/{public_form_key}` (minimal HTML page loading embed.js inline; link target where a host sanitizer strips the embed snippet) |
 | Service ingest path | `/api/submissions` |
 | Trigger attribute | `data-trigger` values: `floating`, `button`, `inline` |
 | Locale attribute | `data-lang` values: `ja`, `en` |
 
 Route prefixes: `/admin/*` (JWT), `/api/*` (service token), `/public/*` (origin + rate
-limit). Paths are lowercase kebab-case (`/admin/contact-forms`).
+limit), `/form/*` (public hosted form page, unauthenticated). Paths are lowercase kebab-case
+(`/admin/contact-forms`).
 
 ---
 
