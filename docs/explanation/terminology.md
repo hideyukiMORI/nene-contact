@@ -351,6 +351,29 @@ camelCase `{verb}{Resource}`, stable (never renamed after release). Registered:
 
 ---
 
+## 17. Provisioning CLIs (`tools/`)
+
+Pattern: **`{verb}-{entity}.php`** (kebab-case, entity as registered in §2), run as
+`php tools/{name}.php …`. They bootstrap the runtime container, scope `organization_id`
+exactly as the tenant middleware does, and go through the same validator + use case as the
+HTTP API — so they are audited (ADR 0013) and enforce identical rules. Used where the admin
+API is out of reach (a host whose reverse proxy strips `Authorization`) or where the console
+has no UI for the field. Form content is passed at runtime; no site-specific values in the repo.
+
+| CLI | Purpose |
+| --- | --- |
+| `create-organization.php` | Bootstrap a tenant |
+| `create-user.php` | Bootstrap an operator account |
+| `create-contact-form.php` | Create a `contact_form` from a full JSON body; idempotent on a pinned `public_form_key` (#363) |
+| `update-contact-form.php` | Update a `contact_form` from a **partial** JSON body merged over the current one; `--dry-run` prints without writing (#378) |
+| `purge-submissions.php` | Erase PII past retention (charter §5, ADR 0016) |
+
+| Concept | Spelling | Notes |
+| --- | --- | --- |
+| Form body patch | `ContactFormBodyPatch` | SSOT for which body keys are patchable: shallow-merges a partial body over the current one, rejecting unknown keys and the identity keys (`id`, `public_form_key`, `organization_id`, `status`, `created_at`, `updated_at`) |
+
+---
+
 ## Change procedure & enforcement
 
 - Adding/renaming any identifier **MUST** update this file in the same PR; product concepts
@@ -359,4 +382,4 @@ camelCase `{verb}{Resource}`, stable (never renamed after release). Registered:
   [`../review/frontend.md`](../review/frontend.md) check identifiers against this registry.
 - A deviation (e.g. a deliberate rename) requires an ADR (self-authority, ADR 0012 model).
 
-Last updated: 2026-06-04
+Last updated: 2026-07-16
