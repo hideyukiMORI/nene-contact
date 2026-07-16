@@ -8,7 +8,6 @@
 /.phpstan.cache/
 /.php-cs-fixer.cache
 /var/
-/composer.lock
 /public_html/assets/
 /public_html/console/*
 /public_html/embed/*
