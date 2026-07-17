@@ -20,7 +20,7 @@ use Nene2\Validation\ValidationError;
 final readonly class Appearance
 {
     /** @var list<string> */
-    public const MODES = ['modal', 'chat', 'inline'];
+    public const MODES = ['modal', 'chat', 'inline', 'button'];
     /** @var list<string> */
     public const THEMES = ['light', 'dark'];
     /** @var list<string> */

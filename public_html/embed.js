@@ -35,6 +35,7 @@
 
   var triggerAttr = script.getAttribute('data-trigger') || '';
   var langAttr = script.getAttribute('data-lang') || '';
+  var buttonLabelAttr = script.getAttribute('data-button-label') || '';
 
   var api = base + '/public/forms/' + encodeURIComponent(formKey);
 
@@ -66,7 +67,7 @@
     'm-desk': 'linear-gradient(120deg,#7c6a58,#b39c83 55%,#e0d2bf)',
     'm-dark': 'linear-gradient(125deg,#1a2230,#2b3a4f 60%,#46607d)'
   };
-  var MODES = { modal: 1, chat: 1, inline: 1 };
+  var MODES = { modal: 1, chat: 1, inline: 1, button: 1 };
 
   fetch(api + '/schema', { credentials: 'omit' })
     .then(function (r) {
@@ -116,7 +117,7 @@
     var ch = a.chat && typeof a.chat === 'object' ? a.chat : {};
     var h = a.hero && typeof a.hero === 'object' ? a.hero : {};
     return {
-      mode: pick(a, 'mode', isOneOf(['modal', 'chat', 'inline']), 'modal'),
+      mode: pick(a, 'mode', isOneOf(['modal', 'chat', 'inline', 'button']), 'modal'),
       theme: pick(a, 'theme', isOneOf(['light', 'dark']), 'light'),
       font: pick(a, 'font', isOneOf(['system', 'sans', 'serif', 'brand']), 'sans'),
       fontH: pick(a, 'fontH', isOneOf(['system', 'sans', 'serif', 'brand']), 'sans'),
@@ -314,6 +315,10 @@
       /* launcher + modal: fixed to the viewport in production */
       '.pv-launcher{position:fixed;bottom:20px;z-index:2147483000;padding:0 18px;height:48px;border:0;border-radius:999px;cursor:pointer;display:inline-flex;align-items:center;gap:9px;background:var(--pv-accent);color:var(--pv-btn-text);font:700 13px/1 var(--pv-font);box-shadow:0 8px 24px color-mix(in srgb,var(--pv-accent) 40%,transparent)}',
       '.pv-launcher.right{right:20px}.pv-launcher.left{left:20px}',
+      // In-flow trigger button (data-trigger="button") — placed wherever the script sits, opens the modal.
+      '.pv-trigger{display:inline-flex;align-items:center;gap:9px;padding:0 18px;height:46px;border:0;border-radius:var(--pv-r-btn);cursor:pointer;background:var(--pv-accent);color:var(--pv-btn-text);font:700 13.5px/1 var(--pv-font);box-shadow:0 8px 24px color-mix(in srgb,var(--pv-accent) 30%,transparent)}',
+      '.pv-trigger:active{transform:translateY(1px)}',
+      '.pv-trigger svg{width:17px;height:17px;flex:none}',
       '.pv-launcher.circle{width:56px;height:56px;padding:0;justify-content:center}',
       '.pv-launcher svg{width:19px;height:19px}',
       /* chat: a docked conversational panel (mirrors the studio .pv-chat preview) */
@@ -412,6 +417,24 @@
       if (script.parentNode) {
         script.parentNode.insertBefore(host, script);
       }
+      return;
+    }
+
+    // `button`: render an in-flow trigger button exactly where the script tag sits (not a fixed
+    // launcher), so an operator can place a "contact" button anywhere in the page — click opens
+    // the same modal. Multiple placements are fine (each script tag renders its own button).
+    if (mode === 'button') {
+      host.setAttribute('style', 'display:inline-block');
+      var trigger = el('button', { type: 'button', 'class': 'pv-trigger' });
+      trigger.appendChild(icon('chat'));
+      trigger.appendChild(el('span', null, buttonLabelAttr || a.launcher.label));
+      root.appendChild(trigger);
+      if (script.parentNode) {
+        script.parentNode.insertBefore(host, script);
+      }
+      trigger.addEventListener('click', function () {
+        openModal(root, schema, locale, a);
+      });
       return;
     }
 
