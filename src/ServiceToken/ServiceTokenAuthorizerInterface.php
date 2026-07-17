@@ -9,9 +9,12 @@ namespace NeneContact\ServiceToken;
  *
  * Unlike {@see ServiceTokenRepositoryInterface}, lookups here are **not** org-scoped: the
  * `jti` is globally unique and the request org is derived from the token itself, so revocation
- * must be enforceable before any org scoping is trusted. Tokens issued before the registry
- * existed carry no `jti` and are not checked here (the JWT signature + `exp` remain
- * authoritative for them).
+ * must be enforceable before any org scoping is trusted.
+ *
+ * Contact service tokens always carry a `jti` from issuance — there is no pre-registry token
+ * population (this is Contact's first service-token primitive). A token lacking the `jti` claim
+ * is therefore never exempt from revocation: the auth dispatcher MUST reject it as invalid
+ * (401) and never fall through to signature-only trust.
  */
 interface ServiceTokenAuthorizerInterface
 {
