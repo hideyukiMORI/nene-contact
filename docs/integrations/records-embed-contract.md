@@ -80,6 +80,45 @@ Spam/abuse content filtering and per-visitor throttling are Records' responsibil
 - Client-side JavaScript embed on the Records site (案2, records#937 — pocketed).
 - Any change to the public embed widget or the hosted form page (`/form/{public_form_key}`).
 
+## Quickstart (records developers)
+
+Exercise the full server-to-server path against a local Contact before wiring the block/SSR. (Local ports: API `8900`, MySQL `3392`.)
+
+```bash
+# 1. Start Contact locally (applies migrations, incl. service_tokens).
+docker compose up -d
+
+# 2. Get an admin JWT (any admin operator of the org).
+ADMIN=$(curl -s -X POST localhost:8900/admin/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"<admin-email>","password":"<password>"}' | jq -r .token)
+
+# 3. Issue a connect token (or use the console: /console → 連携トークン → 発行).
+#    The plaintext `token` is in this response only — store it; it is never shown again.
+SVC=$(curl -s -X POST localhost:8900/admin/service-tokens \
+  -H "Authorization: Bearer $ADMIN" -H 'Content-Type: application/json' \
+  -d '{"label":"records dev","scopes":["ingest:submissions"]}' | jq -r .token)
+
+# 4. Relay a submission server-to-server (this is what the records backend does).
+#    source=first_party; contact_form_id + field names come from the form schema
+#    (GET /public/forms/{public_form_key}/schema); consent:true when the form requires it.
+curl -i -X POST localhost:8900/api/submissions \
+  -H "Authorization: Bearer $SVC" -H 'Content-Type: application/json' \
+  -d '{"source":"first_party","contact_form_id":123,"consent":true,
+       "field_values":{"name":"Test","email":"t@example.com","message":"hi"}}'
+# → 201 { "id", "status":"open", "source":"first_party" }
+```
+
+**Reading errors** (RFC 9457 Problem Details; check the `type` slug):
+
+| Status / `type` | Meaning | Fix on the records side |
+| --- | --- | --- |
+| `401 unauthorized` | Bad/expired token, or a token with no `jti` | Re-issue the token; send it verbatim as `Authorization: Bearer` |
+| `401 service-token-revoked` | The token was revoked | Issue a new token and swap it in |
+| `403 insufficient-scope` | Not a service token, or missing `ingest:submissions` | Issue with `scopes:["ingest:submissions"]` |
+| `422 validation-failed` | Field/consent validation failed | See `errors[]` (`field`/`code`); send required fields + `consent:true` |
+| `429 rate-limited` | Per-org (300/min) or per-form (120/min) ceiling hit | Back off; honour `Retry-After` |
+
 ## Related
 
 - [`sibling-products.md`](./sibling-products.md), [`concierge-ingest-contract.md`](./concierge-ingest-contract.md)
