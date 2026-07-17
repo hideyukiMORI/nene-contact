@@ -12,7 +12,7 @@ import {
   buildEmbedSnippet,
   fetchEmbedManifest,
 } from '@/features/build-contact-form/lib/embed-snippet';
-import type { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
+import type { useFormBuilder } from '@/features/build-contact-form/model/use-form-builder';
 
 type Builder = ReturnType<typeof useFormBuilder>;
 type SnippetMode = 'chat' | 'modal' | 'inline';

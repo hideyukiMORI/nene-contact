@@ -26,8 +26,8 @@ import {
   type ContactFormDraft,
   type DraftField,
 } from '@/entities/contact-form';
-import { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
-import { useChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import { useFormBuilder } from '@/features/build-contact-form/model/use-form-builder';
+import { useChoiceField } from '@/features/build-contact-form/model/use-choice-field';
 import { AppError } from '@/shared/api/errors';
 import {
   choiceStateToFieldPatch,

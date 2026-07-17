@@ -11,7 +11,7 @@ import type {
   SubmissionSort,
   SubmissionStatus,
 } from '@/entities/submission';
-import { useSubmissions } from '@/features/list-submissions/hooks/use-submissions';
+import { useSubmissions } from '@/features/list-submissions/model/use-submissions';
 
 // Server-paginated conversation list: status / sort / cross-field search all run
 // server-side (the list is masked, so PII is never searched or held in bulk).

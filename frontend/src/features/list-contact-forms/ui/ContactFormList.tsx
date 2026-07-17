@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import type { KeyboardEvent, MouseEvent, ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Modal } from '@/shared/ui';
-import { useContactForms } from '@/features/list-contact-forms/hooks/use-contact-forms';
+import { useContactForms } from '@/features/list-contact-forms/model/use-contact-forms';
 import { EmbedModal } from '@/features/embed-form';
 import { useDeleteContactFormMutation } from '@/entities/contact-form';
-import { useDuplicateContactForm } from '@/features/list-contact-forms/hooks/use-duplicate-contact-form';
+import { useDuplicateContactForm } from '@/features/list-contact-forms/model/use-duplicate-contact-form';
 import type { ContactForm } from '@/entities/contact-form';
 
 export type FormStatusFilter = 'all' | 'active' | 'disabled';

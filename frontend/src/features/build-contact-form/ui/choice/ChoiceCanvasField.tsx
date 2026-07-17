@@ -13,7 +13,7 @@ import { LivePreview } from '@/features/build-contact-form/lib/choice-preview';
 import {
   useDragList,
   type ChoiceField,
-} from '@/features/build-contact-form/hooks/use-choice-field';
+} from '@/features/build-contact-form/model/use-choice-field';
 import { OtherConfig } from '@/features/build-contact-form/ui/choice/OtherConfig';
 
 // Editable option rows (案C, source of truth). Includes the add row and, when enabled, the

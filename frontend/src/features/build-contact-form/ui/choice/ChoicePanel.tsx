@@ -2,7 +2,7 @@ import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import { countRuleText, STYLE_BY_ID } from '@/features/build-contact-form/lib/choice-core';
-import type { ChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import type { ChoiceField } from '@/features/build-contact-form/model/use-choice-field';
 import { OtherConfig } from '@/features/build-contact-form/ui/choice/OtherConfig';
 import type { ChoiceCardLayout, ChoiceRatio } from '@/entities/contact-form';
 

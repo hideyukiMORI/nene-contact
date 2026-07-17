@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import { countRuleText, pressable } from '@/features/build-contact-form/lib/choice-core';
-import type { ChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import type { ChoiceField } from '@/features/build-contact-form/model/use-choice-field';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import type { ChoiceRatio } from '@/entities/contact-form';
 

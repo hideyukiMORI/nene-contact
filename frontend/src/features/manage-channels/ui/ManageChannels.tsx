@@ -4,7 +4,7 @@ import { CHANNEL_TYPES, CHANNEL_ICON } from '@/entities/notification-channel';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import { useChannels } from '@/features/manage-channels/hooks/use-channels';
+import { useChannels } from '@/features/manage-channels/model/use-channels';
 
 const CONFIG_FIELDS: Record<ChannelType, { key: string; inputType: string }[]> = {
   email: [{ key: 'recipient', inputType: 'email' }],

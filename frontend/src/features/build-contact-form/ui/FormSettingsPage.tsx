@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import type { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
+import type { useFormBuilder } from '@/features/build-contact-form/model/use-form-builder';
 
 type Builder = ReturnType<typeof useFormBuilder>;
 
