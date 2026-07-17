@@ -248,7 +248,7 @@ handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`)
 | Public submit path | `/public/forms/{public_form_key}/submissions` |
 | Hosted form page path | `/form/{public_form_key}` (minimal HTML page loading embed.js inline; link target where a host sanitizer strips the embed snippet) |
 | Service ingest path | `/api/submissions` |
-| Trigger attribute | `data-trigger` values: `floating`, `button`, `inline` |
+| Trigger attribute | `data-trigger` values: `modal`, `chat`, `inline`, `button` (overrides `appearance.mode`) |
 | Locale attribute | `data-lang` values: `ja`, `en` |
 
 Route prefixes: `/admin/*` (JWT), `/api/*` (machine key `X-NENE2-API-Key` for the MCP read

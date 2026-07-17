@@ -19,9 +19,9 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 | Attribute | Required | Values |
 | --- | --- | --- |
 | `data-form` | yes | Public form key (not internal ULID) |
-| `data-trigger` | no | `floating` (default), `button`, `inline` |
+| `data-trigger` | no | `modal` / `chat` / `inline` / `button` — overrides the form's `appearance.mode` when set |
 | `data-lang` | no | `ja` or `en` only (ADR 0011); must be one of the form's `locales` |
-| `data-button-label` | no | Label when `trigger=button` |
+| `data-button-label` | no | Label for the `button` trigger (falls back to `appearance.launcher.label`) |
 
 ---
 
@@ -41,9 +41,10 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 
 | Mode | Behavior |
 | --- | --- |
-| `floating` | Fixed corner launcher opens modal form |
-| `button` | Renders `<button>`; click opens modal |
-| `inline` | Renders form in place of script tag |
+| `modal` | Fixed corner launcher (FAB, `launcher.side` left/right) opens the form in a centered modal |
+| `chat` | Fixed corner launcher opens a conversational (one-field-at-a-time) chat panel |
+| `inline` | Renders the form in place of the script tag |
+| `button` | Renders an in-flow `<button>` where the script tag sits (place it anywhere; multiple allowed); click opens the modal |
 
 ---
 
