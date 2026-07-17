@@ -43,8 +43,14 @@
   var FONTS = {
     system: 'system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',
     sans: '"Helvetica Neue",Arial,sans-serif',
-    serif: 'Georgia,"Times New Roman",serif'
+    serif: 'Georgia,"Times New Roman",serif',
+    // Brand stack: self-hosted Zen Kaku Gothic New (see ensureBrandFonts) with web-safe JP
+    // fallbacks so text stays readable before the woff2 loads / if font-src is blocked.
+    brand: '"Zen Kaku Gothic New",-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Noto Sans JP","Yu Gothic Medium",Meiryo,sans-serif'
   };
+  // Monospace slot for the hero kicker (eyebrow). Self-hosted IBM Plex Mono when the brand
+  // fonts are injected; falls back to the platform monospace otherwise.
+  var FONT_MONO = '"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace';
   var DENSITY = {
     compact: { y: 8, x: 11, gap: 10, mb: 5 },
     cozy: { y: 11, x: 13, gap: 14, mb: 6 },
@@ -112,8 +118,8 @@
     return {
       mode: pick(a, 'mode', isOneOf(['modal', 'chat', 'inline']), 'modal'),
       theme: pick(a, 'theme', isOneOf(['light', 'dark']), 'light'),
-      font: pick(a, 'font', isOneOf(['system', 'sans', 'serif']), 'sans'),
-      fontH: pick(a, 'fontH', isOneOf(['system', 'sans', 'serif']), 'sans'),
+      font: pick(a, 'font', isOneOf(['system', 'sans', 'serif', 'brand']), 'sans'),
+      fontH: pick(a, 'fontH', isOneOf(['system', 'sans', 'serif', 'brand']), 'sans'),
       colors: {
         accent: pick(c, 'accent', isStr, '#dc5b34'),
         surface: pick(c, 'surface', isStr, '#ffffff'),
@@ -122,6 +128,7 @@
         border: pick(c, 'border', isStr, '#e2e6eb'),
         inputBg: pick(c, 'inputBg', isStr, '#ffffff'),
         error: pick(c, 'error', isStr, '#d14343'),
+        success: pick(c, 'success', isStr, '#16a34a'),
         buttonText: pick(c, 'buttonText', isStr, '#ffffff')
       },
       radius: {
@@ -166,6 +173,8 @@
       },
       hero: {
         on: h.on !== false,
+        solid: h.solid === true,
+        kicker: isStr(h.kicker) ? h.kicker : '',
         media: isStr(h.media) ? h.media : 'm-team',
         fit: pick(h, 'fit', isOneOf(['cover', 'contain']), 'cover'),
         height: pick(h, 'height', inRange(0, 600), 150),
@@ -205,6 +214,8 @@
       '--pv-focus-w:' + a.focus.width + 'px;' +
       '--pv-font:' + (FONTS[a.font] || FONTS.sans) + ';' +
       '--pv-font-h:' + (FONTS[a.fontH] || FONTS.sans) + ';' +
+      '--pv-font-mono:' + FONT_MONO + ';' +
+      '--pv-ok:' + a.colors.success + ';' +
       '--pv-gap:' + d.gap + 'px;' +
       '--pv-fpad:' + d.y + 'px ' + d.x + 'px;' +
       '--pv-fpad-y:' + d.y + 'px;' +
@@ -283,7 +294,7 @@
       '.pv-foot{text-align:center;font-size:11.5px;color:var(--pv-muted);margin-top:16px}',
       '.pv-err{color:var(--pv-error);font-size:11.5px;margin-top:4px}',
       '.pv-msg{font-size:13px;padding:9px 11px;border-radius:var(--pv-r-input);margin-top:4px}',
-      '.pv-msg.ok{background:color-mix(in srgb,#16a34a 12%,var(--pv-surface));color:#15803d}',
+      '.pv-msg.ok{background:color-mix(in srgb,var(--pv-ok) 12%,var(--pv-surface));color:var(--pv-ok)}',
       '.pv-msg.err{background:color-mix(in srgb,var(--pv-error) 12%,var(--pv-surface));color:var(--pv-error)}',
       '.pv-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}',
       '.pv-hero{position:relative;overflow:hidden;background-position:center;background-repeat:no-repeat;border-radius:calc(var(--pv-r-form) * .72);margin-bottom:18px}',
@@ -291,6 +302,12 @@
       '.pv-hero__txt{position:absolute;left:0;right:0;bottom:0;padding:16px 18px;color:#fff}',
       '.pv-hero__txt .ttl{color:#fff;margin:0;font-size:19px;font-weight:700;letter-spacing:-0.01em;font-family:var(--pv-font-h)}',
       '.pv-hero__txt .desc{color:rgba(255,255,255,.86);margin:5px 0 0;font-size:12px;line-height:1.5}',
+      // Solid-accent hero band + brand top rule + mono kicker (AYANE skin, #402).
+      '.pv-hero__txt .kick{display:block;margin-bottom:8px;font-family:var(--pv-font-mono);font-size:10.5px;font-weight:600;letter-spacing:.28em;text-transform:uppercase;color:var(--pv-btn-text);opacity:.9}',
+      '.pv-hero--solid{background:var(--pv-accent)}',
+      '.pv-hero--solid .pv-hero__ov{background:linear-gradient(90deg,rgba(20,18,15,.20),rgba(20,18,15,0) 60%)}',
+      '.pv-hero--solid::before{content:"";position:absolute;top:0;left:0;right:0;height:5px;background:var(--pv-text)}',
+      '.pv-hero--solid .pv-hero__txt .ttl{font-weight:900}',
       /* inline: a card placed in the host page flow */
       '.pv-embed{width:var(--pv-modal-w);max-width:100%;padding:26px 26px 24px;background:var(--pv-surface);border:var(--pv-bw) var(--pv-bstyle) var(--pv-bcolor);border-radius:var(--pv-r-form);box-shadow:0 10px 34px rgba(18,28,38,.10)}',
       '.pv-embed.center{margin:0 auto}.pv-embed.right{margin-left:auto}.pv-embed.left{margin-right:auto}',
@@ -350,8 +367,38 @@
     ].join('');
   }
 
+  // @font-face must be registered at the document level — declarations inside a shadow root are
+  // not reliably applied. This appends a single <style> with the self-hosted brand faces to the
+  // host document's head, using absolute URLs derived from the widget's own origin (`base`). It
+  // is font-family registration only (no visual rules leak into the host page) and CSP-safe
+  // (font-src must allow the contact origin on the host page). Called only when a form actually
+  // uses the brand font / kicker, so other forms load nothing extra.
+  var brandFontsInjected = false;
+  function ensureBrandFonts() {
+    if (brandFontsInjected) { return; }
+    brandFontsInjected = true;
+    var fb = base + '/embed-fonts/';
+    function face(family, weight, file) {
+      return "@font-face{font-family:'" + family + "';font-style:normal;font-display:swap;font-weight:" +
+        weight + ";src:url('" + fb + file + "') format('woff2')}";
+    }
+    var css = [
+      face('Zen Kaku Gothic New', 400, 'zen-kaku-gothic-new-jp-subset-400.woff2'),
+      face('Zen Kaku Gothic New', 500, 'zen-kaku-gothic-new-jp-subset-500.woff2'),
+      face('Zen Kaku Gothic New', 700, 'zen-kaku-gothic-new-jp-subset-700.woff2'),
+      face('Zen Kaku Gothic New', 900, 'zen-kaku-gothic-new-jp-subset-900.woff2'),
+      face('IBM Plex Mono', 400, 'ibm-plex-mono-latin-400-normal.woff2'),
+      face('IBM Plex Mono', 500, 'ibm-plex-mono-latin-500-normal.woff2'),
+      face('IBM Plex Mono', 600, 'ibm-plex-mono-latin-600-normal.woff2')
+    ].join('');
+    (document.head || document.documentElement).appendChild(el('style', null, css));
+  }
+
   function mount(schema, a) {
     var locale = resolveLocale(schema);
+    if (a.font === 'brand' || a.fontH === 'brand' || a.hero.kicker) {
+      ensureBrandFonts();
+    }
     var mode = MODES[triggerAttr] ? triggerAttr : a.mode;
     var host = el('div', { 'data-nene-contact': formKey });
     document.body.appendChild(host);
@@ -813,15 +860,21 @@
   }
 
   function buildHero(a, titleText, descText) {
-    var hero = el('div', { 'class': 'pv-hero' });
-    hero.setAttribute(
-      'style',
-      'height:' + a.hero.height + 'px;margin:' + a.hero.inset + 'px;' +
-        'background-image:' + heroBackground(a.hero.media) + ';background-size:' + a.hero.fit + ';'
-    );
-    hero.appendChild(el('div', { 'class': 'pv-hero__ov', style: 'background:rgba(10,14,20,' + a.hero.overlay + ')' }));
-    if (a.hero.overlayTitle && (titleText || descText)) {
+    var solid = a.hero.solid;
+    var hero = el('div', { 'class': 'pv-hero' + (solid ? ' pv-hero--solid' : '') });
+    var style = 'height:' + a.hero.height + 'px;margin:' + a.hero.inset + 'px;';
+    if (!solid) {
+      // Image/gradient hero: background + flat overlay tint.
+      style += 'background-image:' + heroBackground(a.hero.media) + ';background-size:' + a.hero.fit + ';';
+    }
+    hero.setAttribute('style', style);
+    // Solid hero uses the gradient overlay from the CSS rule; image hero uses a flat rgba tint.
+    var ov = el('div', { 'class': 'pv-hero__ov' });
+    if (!solid) { ov.setAttribute('style', 'background:rgba(10,14,20,' + a.hero.overlay + ')'); }
+    hero.appendChild(ov);
+    if (a.hero.overlayTitle && (titleText || descText || a.hero.kicker)) {
       var txt = el('div', { 'class': 'pv-hero__txt' });
+      if (a.hero.kicker) { txt.appendChild(el('span', { 'class': 'kick' }, a.hero.kicker)); }
       if (titleText) { txt.appendChild(el('h3', { 'class': 'ttl' }, titleText)); }
       if (descText) { txt.appendChild(el('p', { 'class': 'desc' }, descText)); }
       hero.appendChild(txt);

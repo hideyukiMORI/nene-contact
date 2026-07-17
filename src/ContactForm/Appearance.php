@@ -24,7 +24,7 @@ final readonly class Appearance
     /** @var list<string> */
     public const THEMES = ['light', 'dark'];
     /** @var list<string> */
-    public const FONTS = ['system', 'sans', 'serif'];
+    public const FONTS = ['system', 'sans', 'serif', 'brand'];
     /** @var list<string> */
     public const BORDER_STYLES = ['solid', 'dashed', 'dotted'];
     /** @var list<string> */
@@ -46,9 +46,9 @@ final readonly class Appearance
     /** @var list<string> */
     public const HERO_FITS = ['cover', 'contain'];
 
-    /** @var list<string> the eight individually-themeable colour keys (§4B) */
+    /** @var list<string> the individually-themeable colour keys (§4B; `success` added for the AYANE skin, #402) */
     private const COLOR_KEYS = [
-        'accent', 'surface', 'text', 'muted', 'border', 'inputBg', 'error', 'buttonText',
+        'accent', 'surface', 'text', 'muted', 'border', 'inputBg', 'error', 'success', 'buttonText',
     ];
 
     /** @param array<string, mixed> $data normalized, complete token tree */
@@ -74,6 +74,7 @@ final readonly class Appearance
                 'border' => '#e2e6eb',
                 'inputBg' => '#ffffff',
                 'error' => '#d14343',
+                'success' => '#16a34a',
                 'buttonText' => '#ffffff',
             ],
             'radius' => ['form' => 14, 'input' => 8, 'button' => 8],
@@ -88,6 +89,8 @@ final readonly class Appearance
             'inline' => ['align' => 'center'],
             'hero' => [
                 'on' => true,
+                'solid' => false,
+                'kicker' => '',
                 'media' => 'm-team',
                 'fit' => 'cover',
                 'height' => 150,
@@ -200,6 +203,8 @@ final readonly class Appearance
         $hero = is_array($raw['hero'] ?? null) ? $raw['hero'] : [];
         $d['hero'] = [
             'on' => self::bool($hero, 'on', true),
+            'solid' => self::bool($hero, 'solid', false),
+            'kicker' => is_string($hero['kicker'] ?? null) ? mb_substr((string) $hero['kicker'], 0, 40) : '',
             'media' => self::heroMedia($hero, "{$prefix}.hero", $errors),
             'fit' => self::enum($hero, 'fit', self::HERO_FITS, 'cover', "{$prefix}.hero", $errors),
             'height' => self::int($hero, 'height', 80, 280, 150, "{$prefix}.hero", $errors),
