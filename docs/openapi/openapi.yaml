@@ -24,6 +24,7 @@ tags:
   - name: Handoff
   - name: Media
   - name: Records
+  - name: ServiceToken
   - name: Agent
   - name: Public
 
@@ -839,6 +840,57 @@ paths:
               schema: { $ref: '#/components/schemas/AgentFormListResponse' }
         '401': { $ref: '#/components/responses/Problem' }
 
+  /admin/service-tokens:
+    get:
+      tags: [ServiceToken]
+      operationId: listServiceTokens
+      summary: List service tokens for the organization (metadata only, never the token value)
+      responses:
+        '200':
+          description: Service token list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceTokenListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [ServiceToken]
+      operationId: issueServiceToken
+      summary: Issue a service token (the plaintext token is returned exactly once)
+      description: >
+        Issues a per-organization service token (embed 案1, #388). Mints a stateless HMAC JWT
+        and registers its `jti` for revocation; the plaintext token is in the 201 response only
+        and is never retrievable again. Requires the ManageSettings capability.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/IssueServiceTokenRequest' }
+      responses:
+        '201':
+          description: Created — includes the plaintext token exactly once
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ServiceTokenCreatedResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+  /admin/service-tokens/{id}:
+    delete:
+      tags: [ServiceToken]
+      operationId: revokeServiceToken
+      summary: Revoke a service token (idempotent)
+      description: >
+        Sets `revoked_at` so the request-time authorizer rejects the token immediately.
+        Idempotent: re-revoking an already-revoked token still returns 204. Requires ManageSettings.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '204': { description: Revoked }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /api/submissions:
     get:
       tags: [Agent]
@@ -863,13 +915,18 @@ paths:
     post:
       tags: [Agent]
       operationId: agentIngestSubmission
-      summary: Ingest a submission from a service client (e.g. Concierge) into the inbox
+      summary: Ingest a submission from a service client (Concierge or a first-party relay) into the inbox
       description: >
-        Creates a submission from a service client (concierge-ingest-contract). `contact_form_id`
-        must belong to the resolved organization. Field values are validated against the form
-        (required, email, consent) like the public submit; audited (`submission.created`) and
-        notified. No autonomous outbound action on personal data (charter §11).
+        Creates a submission from a service client. Two auth modes: the machine key
+        (`X-NENE2-API-Key`, e.g. Concierge, concierge-ingest-contract) or a per-organization
+        Bearer service token (`source=first_party`, records native embed, #388). A `Bearer`
+        header commits to the service-token path (org from the token) with no fall-through.
+        `contact_form_id` must belong to the resolved organization. Field values are validated
+        against the form (required, email, consent) like the public submit; audited
+        (`submission.created`) and notified. Throttled per-org (300/min) and per-form (120/min)
+        across **both** auth modes (records-embed-contract §Rate limiting).
       security:
+        - bearerServiceToken: []
         - machineApiKey: []
       requestBody:
         required: true
@@ -883,7 +940,9 @@ paths:
             application/json:
               schema: { $ref: '#/components/schemas/IngestSubmissionResponse' }
         '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
+        '429': { $ref: '#/components/responses/Problem' }
 
   /api/submissions/{id}:
     get:
@@ -998,6 +1057,16 @@ components:
       description: >
         Machine API key (NENE2 `ApiKeyAuthenticationMiddleware`, env `NENE2_MACHINE_API_KEY`).
         Gates the agent read surface `/api/*` that MCP tools map to (ADR 0002).
+    bearerServiceToken:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: >
+        Per-organization service token (embed 案1 / records native embed, #388). A stateless
+        HMAC JWT carrying `org`, `scopes`, and `jti` claims, issued via `POST /admin/service-tokens`
+        and revocable by `jti`. Accepted on `POST /api/submissions` for a first-party relay
+        (records); org is taken from the token, not the URL. A `Bearer` header commits to this
+        path with no fall-through to the machine key.
 
   parameters:
     IdPath:
@@ -1556,7 +1625,7 @@ components:
     IngestSubmissionRequest:
       type: object
       properties:
-        source: { type: string, enum: [concierge, import, api] }
+        source: { type: string, enum: [concierge, import, api, first_party] }
         contact_form_id: { type: integer }
         field_values: { type: object, additionalProperties: true }
         consent: { type: boolean, description: required when the form requires consent }
@@ -1569,6 +1638,50 @@ components:
         status: { type: string }
         source: { type: string }
       required: [id, status, source]
+
+    IssueServiceTokenRequest:
+      type: object
+      properties:
+        label: { type: string, maxLength: 255 }
+        scopes:
+          type: array
+          minItems: 1
+          items: { type: string, enum: [ingest:submissions] }
+        subject: { type: string, maxLength: 255, description: 'calling-system identity; defaults to service:records' }
+        ttl_seconds: { type: integer, minimum: 3600, maximum: 31536000, description: '1 hour … 1 year; defaults to 31536000 (1 year)' }
+      required: [label, scopes]
+
+    ServiceTokenResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        subject: { type: string }
+        label: { type: string }
+        scopes: { type: array, items: { type: string } }
+        created_by: { type: [integer, 'null'] }
+        created_at: { type: string, format: date-time }
+        expires_at: { type: string, format: date-time }
+        revoked_at: { type: [string, 'null'], format: date-time }
+        status: { type: string, enum: [active, revoked] }
+      required: [id, subject, label, scopes, status]
+
+    ServiceTokenListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceTokenResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
+
+    ServiceTokenCreatedResponse:
+      allOf:
+        - { $ref: '#/components/schemas/ServiceTokenResponse' }
+        - type: object
+          properties:
+            token: { type: string, description: 'plaintext JWT — returned once, never retrievable again' }
+          required: [token]
 
     AgentStatusUpdateRequest:
       type: object
