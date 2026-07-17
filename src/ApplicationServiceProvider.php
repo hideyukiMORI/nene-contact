@@ -39,6 +39,7 @@ use NeneContact\Organization\OrganizationSlugConflictExceptionHandler;
 use NeneContact\RateLimit\RateLimitServiceProvider;
 use NeneContact\Records\RecordsRouteRegistrar;
 use NeneContact\Records\RecordsServiceProvider;
+use NeneContact\ServiceToken\ServiceTokenServiceProvider;
 use NeneContact\Submission\SubmissionNotFoundExceptionHandler;
 use NeneContact\Submission\SubmissionRouteRegistrar;
 use NeneContact\Submission\SubmissionServiceProvider;
@@ -80,6 +81,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
         $builder->addProvider(new ApiServiceProvider());
         $builder->addProvider(new RecordsServiceProvider());
         $builder->addProvider(new MediaServiceProvider());
+        $builder->addProvider(new ServiceTokenServiceProvider());
 
         $builder
             ->set(
