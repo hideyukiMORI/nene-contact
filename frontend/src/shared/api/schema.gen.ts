@@ -539,6 +539,47 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/service-tokens": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List service tokens for the organization (metadata only, never the token value) */
+        get: operations["listServiceTokens"];
+        put?: never;
+        /**
+         * Issue a service token (the plaintext token is returned exactly once)
+         * @description Issues a per-organization service token (embed 案1, #388). Mints a stateless HMAC JWT and registers its `jti` for revocation; the plaintext token is in the 201 response only and is never retrievable again. Requires the ManageSettings capability.
+         */
+        post: operations["issueServiceToken"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/service-tokens/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Revoke a service token (idempotent)
+         * @description Sets `revoked_at` so the request-time authorizer rejects the token immediately. Idempotent: re-revoking an already-revoked token still returns 204. Requires ManageSettings.
+         */
+        delete: operations["revokeServiceToken"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/submissions": {
         parameters: {
             query?: never;
@@ -553,8 +594,8 @@ export interface paths {
         get: operations["agentListSubmissions"];
         put?: never;
         /**
-         * Ingest a submission from a service client (e.g. Concierge) into the inbox
-         * @description Creates a submission from a service client (concierge-ingest-contract). `contact_form_id` must belong to the resolved organization. Field values are validated against the form (required, email, consent) like the public submit; audited (`submission.created`) and notified. No autonomous outbound action on personal data (charter §11).
+         * Ingest a submission from a service client (Concierge or a first-party relay) into the inbox
+         * @description Creates a submission from a service client. Two auth modes: the machine key (`X-NENE2-API-Key`, e.g. Concierge, concierge-ingest-contract) or a per-organization Bearer service token (`source=first_party`, records native embed, #388). A `Bearer` header commits to the service-token path (org from the token) with no fall-through. `contact_form_id` must belong to the resolved organization. Field values are validated against the form (required, email, consent) like the public submit; audited (`submission.created`) and notified. Throttled per-org (300/min) and per-form (120/min) across **both** auth modes (records-embed-contract §Rate limiting).
          */
         post: operations["agentIngestSubmission"];
         delete?: never;
@@ -1081,7 +1122,7 @@ export interface components {
         };
         IngestSubmissionRequest: {
             /** @enum {string} */
-            source: "concierge" | "import" | "api";
+            source: "concierge" | "import" | "api" | "first_party";
             contact_form_id: number;
             field_values: {
                 [key: string]: unknown;
@@ -1093,6 +1134,39 @@ export interface components {
             id: number;
             status: string;
             source: string;
+        };
+        IssueServiceTokenRequest: {
+            label: string;
+            scopes: "ingest:submissions"[];
+            /** @description calling-system identity; defaults to service:records */
+            subject?: string;
+            /** @description 1 hour … 1 year; defaults to 31536000 (1 year) */
+            ttl_seconds?: number;
+        };
+        ServiceTokenResponse: {
+            id: number;
+            subject: string;
+            label: string;
+            scopes: string[];
+            created_by?: number | null;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            expires_at?: string;
+            /** Format: date-time */
+            revoked_at?: string | null;
+            /** @enum {string} */
+            status: "active" | "revoked";
+        };
+        ServiceTokenListResponse: {
+            items?: components["schemas"]["ServiceTokenResponse"][];
+            limit?: number;
+            offset?: number;
+            total?: number;
+        };
+        ServiceTokenCreatedResponse: components["schemas"]["ServiceTokenResponse"] & {
+            /** @description plaintext JWT — returned once, never retrievable again */
+            token: string;
         };
         AgentStatusUpdateRequest: {
             /** @enum {string} */
@@ -2291,6 +2365,78 @@ export interface operations {
             401: components["responses"]["Problem"];
         };
     };
+    listServiceTokens: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Service token list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceTokenListResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+        };
+    };
+    issueServiceToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["IssueServiceTokenRequest"];
+            };
+        };
+        responses: {
+            /** @description Created — includes the plaintext token exactly once */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ServiceTokenCreatedResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    revokeServiceToken: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Revoked */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
     agentListSubmissions: {
         parameters: {
             query?: {
@@ -2340,7 +2486,9 @@ export interface operations {
                 };
             };
             401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
+            429: components["responses"]["Problem"];
         };
     };
     agentGetSubmission: {
