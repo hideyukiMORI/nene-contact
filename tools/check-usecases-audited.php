@@ -38,6 +38,7 @@ const READ_ONLY_USE_CASES = [
     'Organization/GetOrganizationByIdUseCase.php' => 'fetches one organization (read)',
     'Organization/ListOrganizationsUseCase.php' => 'lists organizations (read)',
     'Records/FetchRecordsOptionsUseCase.php' => 'fetches option lists from the Records sibling (read)',
+    'ServiceToken/ListServiceTokensUseCase.php' => 'lists service tokens for the org (read)',
     'Submission/GetSubmissionByIdUseCase.php' => 'admin submission detail read (masking/audit handled at the agent surface)',
     'Submission/ListSubmissionNotesUseCase.php' => 'lists internal notes (read)',
     'Submission/ListSubmissionsUseCase.php' => 'admin submission list read (masked)',

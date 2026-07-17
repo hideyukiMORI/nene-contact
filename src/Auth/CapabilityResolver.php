@@ -30,7 +30,7 @@ final class CapabilityResolver
             return Capability::ManageChannels;
         }
 
-        if (str_starts_with($path, '/admin/settings')) {
+        if (str_starts_with($path, '/admin/settings') || str_starts_with($path, '/admin/service-tokens')) {
             return Capability::ManageSettings;
         }
 

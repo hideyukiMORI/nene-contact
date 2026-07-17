@@ -39,6 +39,8 @@ use NeneContact\Organization\OrganizationSlugConflictExceptionHandler;
 use NeneContact\RateLimit\RateLimitServiceProvider;
 use NeneContact\Records\RecordsRouteRegistrar;
 use NeneContact\Records\RecordsServiceProvider;
+use NeneContact\ServiceToken\ServiceTokenNotFoundExceptionHandler;
+use NeneContact\ServiceToken\ServiceTokenRouteRegistrar;
 use NeneContact\ServiceToken\ServiceTokenServiceProvider;
 use NeneContact\Submission\SubmissionNotFoundExceptionHandler;
 use NeneContact\Submission\SubmissionRouteRegistrar;
@@ -99,6 +101,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $notificationChannel = $container->get(NotificationChannelRouteRegistrar::class);
                     $audit = $container->get(AuditRouteRegistrar::class);
                     $media = $container->get(MediaRouteRegistrar::class);
+                    $serviceToken = $container->get(ServiceTokenRouteRegistrar::class);
 
                     if (!$auth instanceof AuthRouteRegistrar) {
                         throw new LogicException('Auth route registrar service is invalid.');
@@ -148,6 +151,10 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         throw new LogicException('Media route registrar service is invalid.');
                     }
 
+                    if (!$serviceToken instanceof ServiceTokenRouteRegistrar) {
+                        throw new LogicException('Service token route registrar service is invalid.');
+                    }
+
                     return [
                         $auth,
                         $userAdmin,
@@ -161,6 +168,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $records,
                         $audit,
                         $media,
+                        $serviceToken,
                     ];
                 },
             )
@@ -176,8 +184,9 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $submissionNotFound = $container->get(SubmissionNotFoundExceptionHandler::class);
                     $attachmentNotFound = $container->get(AttachmentNotFoundExceptionHandler::class);
                     $mediaNotFound = $container->get(MediaNotFoundExceptionHandler::class);
+                    $serviceTokenNotFound = $container->get(ServiceTokenNotFoundExceptionHandler::class);
 
-                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound, $mediaNotFound] as $handler) {
+                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound, $mediaNotFound, $serviceTokenNotFound] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
@@ -193,6 +202,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $submissionNotFound,
                         $attachmentNotFound,
                         $mediaNotFound,
+                        $serviceTokenNotFound,
                     ];
                 },
             );

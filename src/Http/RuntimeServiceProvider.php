@@ -39,6 +39,8 @@ use NeneContact\Organization\Resolution\OrgResolverMiddleware;
 use NeneContact\Organization\Resolution\PathPrefixResolutionStrategy;
 use NeneContact\Organization\Resolution\SubdomainResolutionStrategy;
 use NeneContact\RateLimit\PublicSubmitThrottleMiddleware;
+use NeneContact\ServiceApi\ServiceApiAuthMiddleware;
+use NeneContact\ServiceToken\ServiceTokenAuthorizerInterface;
 use NeneContact\Submission\PublicFormReaderInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
@@ -366,6 +368,24 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
 
                     $cors = new PublicCorsMiddleware($publicFormReader);
 
+                    // Unified auth for the records ingest endpoint POST /api/submissions (embed
+                    // 案1, #388). This one path is carved out of the NENE2 static-key gate below
+                    // (machineApiKeyExcludedPaths) so a Bearer service token can reach it; the
+                    // dispatcher owns Bearer-vs-static-key selection with no fall-through.
+                    $serviceTokenAuthorizer = $container->get(ServiceTokenAuthorizerInterface::class);
+
+                    if (!$serviceTokenAuthorizer instanceof ServiceTokenAuthorizerInterface) {
+                        throw new LogicException('Service token authorizer service is invalid.');
+                    }
+
+                    $serviceApiAuth = new ServiceApiAuthMiddleware(
+                        $problemDetails,
+                        $tokenVerifier,
+                        $orgIdHolder,
+                        $serviceTokenAuthorizer,
+                        $machineApiKey,
+                    );
+
                     return new RuntimeApplicationFactory(
                         responseFactory: $responseFactory,
                         streamFactory: $streamFactory,
@@ -374,9 +394,13 @@ final readonly class RuntimeServiceProvider implements ServiceProviderInterface
                         domainExceptionHandlers: $exceptionHandlers,
                         requestIdHolder: $requestIdHolder,
                         routeRegistrars: $routeRegistrars,
-                        authMiddleware: [$cors, $throttle, $orgResolver, $adminAuth, $capability],
+                        authMiddleware: [$cors, $throttle, $orgResolver, $serviceApiAuth, $adminAuth, $capability],
                         debug: $config->debug,
                         machineApiKeyProtectedPaths: [],
+                        // The MCP agent read surface stays on the static machine key; the records
+                        // ingest write is excluded here and authed by ServiceApiAuthMiddleware
+                        // (embed 案1, #388) so a Bearer service token can reach it.
+                        machineApiKeyExcludedPaths: ['/api/submissions'],
                         machineApiKeyProtectedPathPrefixes: ['/api/'],
                         requestMaxBodyBytes: 64 * 1024,
                         problemDetailsBaseUrl: $config->problemDetailsBaseUrl,

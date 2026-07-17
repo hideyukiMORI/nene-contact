@@ -4,8 +4,11 @@ declare(strict_types=1);
 
 namespace NeneContact\Api;
 
+use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonRequestBodyParser;
 use Nene2\Http\JsonResponseFactory;
+use Nene2\Middleware\RateLimitStorageInterface;
 use Nene2\Validation\ValidationError;
 use Nene2\Validation\ValidationException;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
@@ -23,12 +26,25 @@ use Psr\Http\Server\RequestHandlerInterface;
 final readonly class IngestSubmissionHandler implements RequestHandlerInterface
 {
     /** @var list<string> */
-    private const SOURCES = ['concierge', 'import', 'api'];
+    private const SOURCES = ['concierge', 'import', 'api', 'first_party'];
+
+    /**
+     * Per-org/per-form ingest throttle (embed 案1, #388). The public submit throttle
+     * ({@see \NeneContact\RateLimit\PublicSubmitThrottleMiddleware}) is keyed per client IP —
+     * useless here because a first-party relay (records) submits from a single fixed IP, so the
+     * ingest surface is bounded per organization and per form instead.
+     */
+    private const THROTTLE_WINDOW_SECONDS = 60;
+    private const PER_ORG_LIMIT = 300;
+    private const PER_FORM_LIMIT = 120;
 
     public function __construct(
         private ContactFormRepositoryInterface $forms,
         private IngestSubmissionUseCaseInterface $useCase,
         private JsonResponseFactory $response,
+        private RateLimitStorageInterface $rateLimit,
+        private ProblemDetailsResponseFactory $problemDetails,
+        private ClockInterface $clock,
     ) {
     }
 
@@ -50,6 +66,18 @@ final readonly class IngestSubmissionHandler implements RequestHandlerInterface
             throw new ValidationException([
                 new ValidationError('contact_form_id', 'No active form with this id in this organization.', 'invalid'),
             ]);
+        }
+
+        // Per-org/per-form throttle (fixed window). Exceeding either bucket returns 429; the
+        // form is only ever looked up within the resolved org, so the org key is safe to trust.
+        $orgResult = $this->rateLimit->hit('ingest:org:' . $form->organizationId, self::THROTTLE_WINDOW_SECONDS);
+        if ($orgResult['count'] > self::PER_ORG_LIMIT) {
+            return $this->tooManyRequests(self::PER_ORG_LIMIT, $orgResult['reset_at'], $request);
+        }
+
+        $formResult = $this->rateLimit->hit('ingest:form:' . (int) $form->id, self::THROTTLE_WINDOW_SECONDS);
+        if ($formResult['count'] > self::PER_FORM_LIMIT) {
+            return $this->tooManyRequests(self::PER_FORM_LIMIT, $formResult['reset_at'], $request);
         }
 
         $fieldValues = is_array($body['field_values'] ?? null) ? $body['field_values'] : [];
@@ -97,5 +125,23 @@ final readonly class IngestSubmissionHandler implements RequestHandlerInterface
             'status' => $submission->status,
             'source' => $submission->source,
         ], 201);
+    }
+
+    private function tooManyRequests(int $limit, int $resetAt, ServerRequestInterface $request): ResponseInterface
+    {
+        $retryAfter = max(0, $resetAt - $this->clock->now()->getTimestamp());
+
+        return $this->problemDetails
+            ->create(
+                $request,
+                'rate-limited',
+                'Too Many Requests',
+                429,
+                sprintf('Rate limit of %d requests per %d seconds exceeded. Try again in %d seconds.', $limit, self::THROTTLE_WINDOW_SECONDS, $retryAfter),
+            )
+            ->withHeader('Retry-After', (string) $retryAfter)
+            ->withHeader('X-RateLimit-Limit', (string) $limit)
+            ->withHeader('X-RateLimit-Remaining', '0')
+            ->withHeader('X-RateLimit-Reset', (string) $resetAt);
     }
 }

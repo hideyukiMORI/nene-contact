@@ -184,7 +184,7 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 | `success_message` | `contact_form` | optional per-locale completion message shown when `post_submit=message` (submit experience) |
 | `redirect_url` | `contact_form` | absolute `http(s)` URL; required when `post_submit=redirect` (submit experience) |
 | `consent_given_at` | `submission` | immutable consent timestamp (charter §3) |
-| `source` | `submission` | origin: `form` (public/embed) or service ingest `concierge` / `import` / `api` (M6) |
+| `source` | `submission` | origin: `form` (public/embed) or service ingest `concierge` / `import` / `api` / `first_party` (M6; `first_party` = records native embed relay via a service token, #388) |
 | `source_url` | `submission` | embed host page the form was submitted from (referer); non-PII reception meta shown by default (ADR 0018); null for service ingest |
 | `locale` | `submission` | locale the visitor submitted in (one of the form's locales); non-PII reception meta; null when unknown |
 | `deleted_at` | `submission` | soft-delete marker (ADR 0016); excluded from inbox |
@@ -212,7 +212,7 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 
 Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
 `deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`, `sent`,
-`suppressed`, `failed`.
+`suppressed`, `failed`, `issued`, `revoked`.
 
 Examples: `submission.viewed`, `submission.exported`,
 `submission_technical_meta.viewed` (audited IP/UA disclosure, entity type `submission`; ADR 0018),
@@ -222,7 +222,9 @@ soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.cr
 `contact_form.updated`, `notification_channel.created`, `handoff.created` (first sibling
 handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`),
 `autoreply.sent` / `autoreply.suppressed` (per-recipient cooldown) / `autoreply.failed`
-(sender auto-reply outcome, entity type `autoreply`, entity id = the submission; #360).
+(sender auto-reply outcome, entity type `autoreply`, entity id = the submission; #360),
+`service_token.issued` / `service_token.revoked` (machine credential lifecycle, entity type
+`service_token`; embed 案1, #388 — snapshot carries non-secret metadata only, never the token or jti).
 
 | Term | Spelling | Notes |
 | --- | --- | --- |
@@ -249,9 +251,23 @@ handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`)
 | Trigger attribute | `data-trigger` values: `floating`, `button`, `inline` |
 | Locale attribute | `data-lang` values: `ja`, `en` |
 
-Route prefixes: `/admin/*` (JWT), `/api/*` (service token), `/public/*` (origin + rate
-limit), `/form/*` (public hosted form page, unauthenticated). Paths are lowercase kebab-case
-(`/admin/contact-forms`).
+Route prefixes: `/admin/*` (JWT), `/api/*` (machine key `X-NENE2-API-Key` for the MCP read
+surface; the `POST /api/submissions` ingest write additionally accepts a Bearer service token,
+#388), `/public/*` (origin + rate limit), `/form/*` (public hosted form page, unauthenticated).
+Paths are lowercase kebab-case (`/admin/contact-forms`).
+
+### Service tokens (embed 案1 / records native embed — #386/#388)
+
+| Term | Spelling | Notes |
+| --- | --- | --- |
+| Entity / table | `service_token` / `service_tokens` | registry of issued machine credentials; the token value is **never stored** (only `jti` + metadata); revocation is soft (`revoked_at`, ADR 0016) |
+| Revocation key | `jti` | JWT id claim; globally unique; the registry row keys revocation |
+| Scope column / claim | `scopes` | comma-separated in the row; list claim in the JWT |
+| Scope value | `ingest:submissions` | the only scope today; authorizes `POST /api/submissions` (`ingest:form:{id}` is a deferred, optional variant) |
+| Subject | `service:records` | default `sub` claim (calling system identity); other first-party sites issue under their own `service:{name}` |
+| Admin routes | `/admin/service-tokens` (`GET` list / `POST` issue / `DELETE /{id}` revoke) | ManageSettings; org-scoped |
+| Presented as | `Authorization: Bearer <jwt>` | on `POST /api/submissions`; org resolved from the token's `org` claim, not the URL |
+| Repository / authorizer | `PdoServiceTokenRepository` / `PdoServiceTokenAuthorizer` | registry read/write (org-scoped) / request-time revocation check (not org-scoped) |
 
 ---
 
@@ -276,6 +292,9 @@ Base URI `https://nene-contact.dev/problems/`. Slugs are kebab-case and **stable
 | `contact-form-not-found` | 404 |
 | `unauthorized` | 401 |
 | `forbidden` | 403 |
+| `service-token-revoked` | 401 |
+| `insufficient-scope` | 403 |
+| `service-token-not-found` | 404 |
 | `origin-not-allowed` | 403 |
 | `org-not-found` | 404 |
 | `org-not-resolved` | 404 |
