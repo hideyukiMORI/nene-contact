@@ -152,12 +152,27 @@ This writes (the `public_html/embed/` dir is git-ignored build output):
         crossorigin="anonymous" async></script>
 ```
 
+The build also writes a **stable alias** `public_html/embed/embed.js` (same bytes, fixed name)
+plus `stable` / `stableSnippet` in the manifest. Embed it once and it follows every redeploy —
+no hash churn, no 404 on the old file (unlike the hashed URL). It is **not** SRI-pinned (the URL
+is mutable by design; an `integrity` attribute would break on the next deploy), so **serve
+`/embed/embed.js` no-cache / short-TTL**, never long-cache-immutable:
+
+```html
+<script src="https://{host}/embed/embed.js" data-form="{public_form_key}"
+        data-trigger="modal" async></script>
+```
+
+Prefer the stable alias for first-party sites that redeploy the widget often (e.g. the AYANE
+embed); prefer the hashed + SRI snippet for third-party installs that want pinning.
+
 Notes:
 - The build runs a CSP guard — it fails if the widget ever introduces `eval` / `new Function` /
   `innerHTML` / `document.write` / `insertAdjacentHTML`, keeping it CSP-friendly (no `eval`, no
   inline script from API responses).
 - The raw `/embed.js` stays available for simple installs; serve it with a **short** cache. The
-  hashed artifact is the cache-busting + SRI path for production.
+  hashed artifact is the cache-busting + SRI path for production; the stable alias
+  `/embed/embed.js` is the redeploy-safe path (short cache, no SRI).
 - The widget resolves its API base from its own `<script src>` origin, so serve `embed.js`, the
   hashed artifact, and `/public/*` from the same host (or set `VITE_NENE_CONTACT_PUBLIC_BASE_URL`).
 

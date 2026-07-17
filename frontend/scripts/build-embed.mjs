@@ -50,11 +50,21 @@ const file = `embed.${hash}.js`;
 const integrity = 'sha384-' + createHash('sha384').update(bytes).digest('base64');
 
 mkdirSync(OUT_DIR, { recursive: true });
-// Drop any previous hashed builds so the dir holds exactly the current artifact.
+// Drop any previous hashed builds so the dir holds exactly the current artifact. The stable
+// alias (`embed.js`, no hash segment) never matches this pattern, so it is preserved/updated.
 for (const f of readdirSync(OUT_DIR)) {
   if (/^embed\.[0-9a-f]+\.js$/.test(f)) rmSync(path.join(OUT_DIR, f));
 }
 writeFileSync(path.join(OUT_DIR, file), bytes);
+
+// Stable alias: a fixed name that always holds the latest widget bytes, so a caller can embed
+// `/embed/embed.js` once and never touch the tag again across redeploys (unlike the hashed URL,
+// which changes every build and 404s the old one). It is intentionally NOT SRI-pinned — the URL
+// is mutable by design, so an `integrity` attribute would break on the next deploy. Long-cache
+// must NOT be applied to this file (serve it no-cache / short TTL); the hashed artifact remains
+// the immutable + SRI path for callers who want pinning.
+const STABLE = 'embed.js';
+writeFileSync(path.join(OUT_DIR, STABLE), bytes);
 
 const manifest = {
   source: 'public_html/embed.js',
@@ -66,11 +76,19 @@ const manifest = {
     `<script src="https://{host}/embed/${file}" data-form="{public_form_key}"\n` +
     `        data-trigger="modal" integrity="${integrity}"\n` +
     `        crossorigin="anonymous" async></script>`,
+  // Stable alias: fixed URL that follows the latest build (no hash churn, no 404 on redeploy).
+  // No `integrity` — the URL is mutable by design (SRI would break on the next deploy). Prefer
+  // this for first-party sites that redeploy the widget often (e.g. the AYANE embed).
+  stable: `embed/${STABLE}`,
+  stableSnippet:
+    `<script src="https://{host}/embed/${STABLE}" data-form="{public_form_key}"\n` +
+    `        data-trigger="modal" async></script>`,
 };
 writeFileSync(path.join(OUT_DIR, 'manifest.json'), JSON.stringify(manifest, null, 2) + '\n');
 
 const srcBytes = Buffer.byteLength(source, 'utf8');
 console.log(`✓ built public_html/embed/${file}`);
+console.log(`  + stable alias public_html/embed/${STABLE} (mutable URL, no SRI)`);
 console.log(
   `  ${srcBytes}B → ${bytes.length}B minified (${Math.round((1 - bytes.length / srcBytes) * 100)}% smaller)`,
 );
