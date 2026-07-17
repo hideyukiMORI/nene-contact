@@ -11,6 +11,7 @@ use Nene2\Error\ProblemDetailsResponseFactory;
 use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
+use Nene2\Middleware\RateLimitStorageInterface;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
@@ -170,6 +171,9 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                     $forms = $c->get(ContactFormRepositoryInterface::class);
                     $uc = $c->get(IngestSubmissionUseCaseInterface::class);
                     $json = $c->get(JsonResponseFactory::class);
+                    $rateLimit = $c->get(RateLimitStorageInterface::class);
+                    $problemDetails = $c->get(ProblemDetailsResponseFactory::class);
+                    $clock = $c->get(ClockInterface::class);
 
                     if (!$forms instanceof ContactFormRepositoryInterface) {
                         throw new LogicException('Contact form repository service is invalid.');
@@ -183,7 +187,19 @@ final readonly class ApiServiceProvider implements ServiceProviderInterface
                         throw new LogicException('JSON response factory service is invalid.');
                     }
 
-                    return new IngestSubmissionHandler($forms, $uc, $json);
+                    if (!$rateLimit instanceof RateLimitStorageInterface) {
+                        throw new LogicException('Rate limit storage service is invalid.');
+                    }
+
+                    if (!$problemDetails instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new IngestSubmissionHandler($forms, $uc, $json, $rateLimit, $problemDetails, $clock);
                 },
             )
             ->set(
