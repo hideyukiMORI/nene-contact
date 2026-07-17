@@ -5,7 +5,7 @@ import { screen, waitFor } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
-import { useFormBuilder } from '@/features/build-contact-form/hooks/use-form-builder';
+import { useFormBuilder } from '@/features/build-contact-form/model/use-form-builder';
 import { PublishPage } from '@/features/build-contact-form/ui/PublishPage';
 import { resolvePublicBase } from '@/features/build-contact-form/lib/public-base';
 

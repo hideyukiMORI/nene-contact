@@ -7,7 +7,7 @@ import type { Session } from '@/entities/auth';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
-import { useLogin } from '@/features/login/hooks/use-login';
+import { useLogin } from '@/features/login/model/use-login';
 
 const schema = z.object({
   email: z.string().min(1, 'login.error.emailRequired'),

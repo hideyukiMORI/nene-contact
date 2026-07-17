@@ -6,7 +6,7 @@ import { actionLabel, actorLabel } from '@/features/list-audit-events/lib/labels
 import {
   AUDIT_PERIODS,
   type AuditPeriod,
-} from '@/features/list-audit-events/hooks/use-audit-events';
+} from '@/features/list-audit-events/model/use-audit-events';
 
 const TODAY = new Date().toISOString().slice(0, 10);
 

@@ -1,6 +1,6 @@
 import { useState, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import type { ChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import type { ChoiceField } from '@/features/build-contact-form/model/use-choice-field';
 
 // 「その他」自由記述 settings — shared by the right panel and the on-canvas gear popover.
 export function OtherConfig({

@@ -3,7 +3,7 @@ import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import { STYLES, type ChoiceLogic } from '@/features/build-contact-form/lib/choice-core';
 import { GalleryMini } from '@/features/build-contact-form/lib/choice-preview';
-import type { ChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import type { ChoiceField } from '@/features/build-contact-form/model/use-choice-field';
 
 // Style gallery modal (案B): pick the display style from preview-bearing cards, grouped by
 // single / multiple. Picking a style closes the modal.

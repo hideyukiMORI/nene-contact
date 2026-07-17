@@ -8,7 +8,7 @@ import {
 } from '@/entities/user';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Modal } from '@/shared/ui';
-import { useUsers } from '@/features/manage-users/hooks/use-users';
+import { useUsers } from '@/features/manage-users/model/use-users';
 
 const AVATAR_TONES = ['c1', 'c2', 'c3'] as const;
 

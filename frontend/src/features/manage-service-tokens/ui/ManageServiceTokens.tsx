@@ -6,7 +6,7 @@ import {
 } from '@/entities/service-token';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Modal } from '@/shared/ui';
-import { useServiceTokens } from '@/features/manage-service-tokens/hooks/use-service-tokens';
+import { useServiceTokens } from '@/features/manage-service-tokens/model/use-service-tokens';
 
 export function ManageServiceTokens(): ReactNode {
   const { t } = useI18n();

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { defaultChoiceConfig } from '@/entities/contact-form';
 import { draftFieldToChoiceState } from '@/features/build-contact-form/lib/choice-bridge';
-import { useChoiceField } from '@/features/build-contact-form/hooks/use-choice-field';
+import { useChoiceField } from '@/features/build-contact-form/model/use-choice-field';
 
 const seed = draftFieldToChoiceState(
   {

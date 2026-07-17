@@ -6,7 +6,7 @@ import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { AppError } from '@/shared/api/errors';
 import { useI18n } from '@/shared/i18n';
 import { Button, TextField } from '@/shared/ui';
-import { useChangePassword } from '@/features/change-password/hooks/use-change-password';
+import { useChangePassword } from '@/features/change-password/model/use-change-password';
 
 const MIN_LENGTH = 8;
 

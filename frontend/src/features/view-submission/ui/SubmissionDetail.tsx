@@ -18,8 +18,8 @@ import {
 import { useI18n } from '@/shared/i18n';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Icon, type IconName } from '@/shared/ui';
-import { useSubmission } from '@/features/view-submission/hooks/use-submission';
-import { useSubmissionNotes } from '@/features/view-submission/hooks/use-submission-notes';
+import { useSubmission } from '@/features/view-submission/model/use-submission';
+import { useSubmissionNotes } from '@/features/view-submission/model/use-submission-notes';
 import { HandoffPanel } from '@/features/view-submission/ui/HandoffPanel';
 
 function display(value: unknown): string {
