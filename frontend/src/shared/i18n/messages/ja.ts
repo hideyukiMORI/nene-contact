@@ -932,6 +932,40 @@ export const ja = {
   'publishTab.manageChannels': '通知先を管理',
   'publishTab.channelOn': '有効',
   'publishTab.channelOff': '無効',
+  'nav.serviceTokens': '連携トークン',
+  'serviceTokens.title': '連携トークン',
+  'serviceTokens.lede':
+    'records などの自社サイトから、サーバー間でフォーム送信を受け取るための組織単位トークンです。発行時に一度だけ表示され、以後は再取得できません。失効するとただちに無効になります。',
+  'serviceTokens.count': 'トークン {n}',
+  'serviceTokens.issue': 'トークンを発行',
+  'serviceTokens.issueSub': '用途がわかるラベルを付けて、連携トークンを発行します。',
+  'serviceTokens.issuing': '発行中…',
+  'serviceTokens.issueError': 'トークンを発行できませんでした。入力内容をご確認ください。',
+  'serviceTokens.error': 'トークンを読み込めませんでした。',
+  'serviceTokens.revokeError': 'トークンを失効できませんでした。',
+  'serviceTokens.empty': '発行済みの連携トークンはありません。',
+  'serviceTokens.label': 'ラベル',
+  'serviceTokens.labelPlaceholder': '例：records 本番サイト',
+  'serviceTokens.scopeHint':
+    'このトークンは問い合わせの受け取り（ingest:submissions）に限定されます。',
+  'serviceTokens.issuedTitle': 'トークンを発行しました',
+  'serviceTokens.issuedSub': 'この値はいまだけ表示されます。安全な場所に保管してください。',
+  'serviceTokens.issuedWarning':
+    'このトークンは二度と表示されません。閉じる前に必ずコピーして保管してください。',
+  'serviceTokens.copy': 'コピー',
+  'serviceTokens.copied': 'コピーしました',
+  'serviceTokens.revoke': '失効',
+  'serviceTokens.revokeTitle': 'トークンを失効しますか？',
+  'serviceTokens.revokeConfirm':
+    '失効すると、このトークンを使った送信の受け取りはただちに拒否されます。この操作は取り消せません。',
+  'serviceTokens.column.label': 'ラベル',
+  'serviceTokens.column.subject': '主体',
+  'serviceTokens.column.scopes': 'スコープ',
+  'serviceTokens.column.status': '状態',
+  'serviceTokens.column.expires': '有効期限',
+  'serviceTokens.column.actions': '操作',
+  'serviceTokens.status.active': '有効',
+  'serviceTokens.status.revoked': '失効済み',
 } as const;
 
 export type MessageKey = keyof typeof ja;

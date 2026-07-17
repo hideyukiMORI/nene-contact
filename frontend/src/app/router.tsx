@@ -12,6 +12,7 @@ import {
 } from '@/pages/contact-forms';
 import { SubmissionsPage } from '@/pages/submissions';
 import { UsersPage } from '@/pages/users';
+import { ServiceTokensPage } from '@/pages/service-tokens';
 import { AuditLogPage } from '@/pages/audit-log';
 import { AccountPage } from '@/pages/account';
 
@@ -38,6 +39,7 @@ const router = createBrowserRouter(
         { path: 'submissions', element: <SubmissionsPage /> },
         { path: 'submissions/:id', element: <SubmissionsPage /> },
         { path: 'users', element: <UsersPage /> },
+        { path: 'service-tokens', element: <ServiceTokensPage /> },
         { path: 'audit-log', element: <AuditLogPage /> },
         { path: 'account', element: <AccountPage /> },
       ],
