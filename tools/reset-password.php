@@ -102,7 +102,12 @@ function read_new_password_from_stdin(): string
 
     if ($isTty) {
         fwrite(STDERR, 'New password (input hidden): ');
-        // Best-effort echo suppression; harmless if `stty` is unavailable.
+        // Restore the terminal's echo even if the script dies while it is off — otherwise a
+        // crash mid-read leaves the operator's shell silently non-echoing (a real hazard for a
+        // late-night emergency tool). Best-effort; harmless if `stty` is unavailable.
+        register_shutdown_function(static function (): void {
+            exec('stty echo 2>/dev/null');
+        });
         exec('stty -echo 2>/dev/null');
     }
 
