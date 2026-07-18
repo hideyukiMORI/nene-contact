@@ -82,7 +82,7 @@ Full list: [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contr
 | M6 | AI / MCP — agent read surface `/api/*`, local MCP stdio server, Concierge ingest, MCP write tools with confirmation token, Contact → Invoice draft handoff, Contact → Records read-only options | ✅ |
 | M7 | GA / acceptance — A1–A8 audit, operator guide | 🚧 In progress |
 
-Remaining for M7: production `embed.js` build (hashed, CSP-friendly), final compliance/governance/backend/frontend reviews. Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and [`docs/todo/current.md`](./docs/todo/current.md).
+Remaining for M7: production `embed.js` build (hashed, CSP-friendly), final compliance/governance/backend/frontend reviews. Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and the private `nene-origin/internal-docs/contact/todo/current.md` (operational logs moved there in P3).
 
 ## Quick Start
 

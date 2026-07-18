@@ -15,7 +15,7 @@ NeNe Contact inherits [NENE2 workflow](https://github.com/hideyukiMORI/NENE2/blo
 ## Standard Flow
 
 1. **Create one GitHub Issue for the task** (reuse only if it is genuinely the same task).
-2. Read `docs/roadmap.md`, `docs/milestones/`, `docs/todo/current.md`.
+2. Read `docs/roadmap.md`, `docs/milestones/`, and the private `nene-origin/internal-docs/contact/todo/current.md`.
 3. Branch `type/issue-number-summary` from `main`.
 4. Implement the smallest useful change.
 5. Update docs when decisions change.
