@@ -103,6 +103,23 @@ final readonly class AuthServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                AdminResetPasswordUseCaseInterface::class,
+                static function (ContainerInterface $c): AdminResetPasswordUseCaseInterface {
+                    $users = $c->get(UserRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$users instanceof UserRepositoryInterface) {
+                        throw new LogicException('User repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new AdminResetPasswordUseCase($users, $audit);
+                },
+            )
+            ->set(
                 ChangePasswordHandler::class,
                 static function (ContainerInterface $c): ChangePasswordHandler {
                     $uc = $c->get(ChangePasswordUseCaseInterface::class);

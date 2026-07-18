@@ -221,6 +221,10 @@ Examples: `submission.viewed`, `submission.exported`,
 soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
 `contact_form.updated`, `notification_channel.created`, `handoff.created` (first sibling
 handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`),
+`user.password_changed` — one event for two paths, told apart by the actor: a **self-service
+change** carries the changer's own `actor_user_id`; an **admin reset** (bootstrap
+`reset-password.php`, lost-password recovery) carries **actor=null** because the CLI has no
+authenticated operator (#410),
 `autoreply.sent` / `autoreply.suppressed` (per-recipient cooldown) / `autoreply.failed`
 (sender auto-reply outcome, entity type `autoreply`, entity id = the submission; #360),
 `service_token.issued` / `service_token.revoked` (machine credential lifecycle, entity type
@@ -387,6 +391,7 @@ has no UI for the field. Form content is passed at runtime; no site-specific val
 | `create-user.php` | Bootstrap an operator account |
 | `create-contact-form.php` | Create a `contact_form` from a full JSON body; idempotent on a pinned `public_form_key` (#363) |
 | `update-contact-form.php` | Update a `contact_form` from a **partial** JSON body merged over the current one; `--dry-run` prints without writing (#378) |
+| `reset-password.php` | Reset an operator's password out-of-band (lost-password recovery) via `AdminResetPasswordUseCase`; addresses the user by email, reads the new password from **STDIN** (never argv), audits `user.password_changed` with **actor=null**; `--dry-run` prints the target without writing (#410) |
 | `purge-submissions.php` | Erase PII past retention (charter §5, ADR 0016) |
 
 | Concept | Spelling | Notes |
