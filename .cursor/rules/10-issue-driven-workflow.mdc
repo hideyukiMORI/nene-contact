@@ -7,7 +7,7 @@ alwaysApply: true
 
 - **One task = one Issue = one PR (MANDATORY).** Every task **MUST** have its own GitHub
   Issue created **before** any edit. No Issue, no edit. Split multi-part work into separate Issues.
-- Before starting: read `docs/roadmap.md`, `docs/milestones/`, `docs/todo/current.md`, and related Issues/PRs.
+- Before starting: read `docs/roadmap.md`, `docs/milestones/`, the private `nene-origin/internal-docs/contact/todo/current.md`, and related Issues/PRs.
 - **Never commit or push directly to `main`.** Branch name: `type/issue-number-summary`.
 - **Auto-merge on completion (MANDATORY).** Completion is: commit → push → PR
   (`Closes #number` + self-review checklist) → **merge automatically**
