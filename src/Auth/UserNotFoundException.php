@@ -8,8 +8,8 @@ use RuntimeException;
 
 final class UserNotFoundException extends RuntimeException
 {
-    public function __construct(int $id)
+    public function __construct(int|string $identifier)
     {
-        parent::__construct("User {$id} not found.");
+        parent::__construct("User {$identifier} not found.");
     }
 }
