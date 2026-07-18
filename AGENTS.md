@@ -23,7 +23,7 @@ See [ADR 0009](docs/adr/0009-separate-from-nene-concierge.md).
 - **Sibling integrations:** `docs/integrations/sibling-products.md`
 - **NENE2 inheritance:** `docs/inheritance-from-nene2.md`
 - **Coding standards (binding):** `docs/development/coding-standards.md`
-- **Current work:** `docs/todo/current.md`
+- **Current work (private):** `nene-origin/internal-docs/contact/todo/current.md` — operational logs (`docs/todo`, `docs/daily`) moved to the private mirror (P3)
 - **Roadmap:** `docs/roadmap.md`
 
 ## Operating Rules
