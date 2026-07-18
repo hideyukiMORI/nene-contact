@@ -12,8 +12,13 @@ Agent guide for this repository. Cursor summaries live in `.cursor/rules/`.
 | Agent entry | `AGENTS.md` |
 | Workflow | `docs/workflow.md` |
 | Commits | `docs/development/commit-conventions.md` |
-| Current tasks | `docs/todo/current.md` |
+| Current tasks (private) | `nene-origin/internal-docs/contact/todo/current.md` |
 | Roadmap | `docs/roadmap.md` |
+
+> **Operational logs moved (P3):** the live work status, handoffs, and daily
+> records (`docs/todo`, `docs/daily`, field-trials equivalent) now live in the
+> **private** `nene-origin/internal-docs/contact/`. Read and write them there,
+> not here. Public docs keep only Diátaxis + ADR + CHANGELOG.
 
 ## Quick Rules
 
@@ -50,4 +55,5 @@ Do not use 82xx / 83xx / 84xx / 85xx lanes.
 
 Backend foundation + compliance core + notifications/attachments done; admin SPA (`frontend/`)
 and embed widget (`public_html/embed.js`) landing. Physical row deletion is forbidden — PII is
-erased in place (ADR 0016). See `docs/todo/current.md` and `docs/roadmap.md`.
+erased in place (ADR 0016). See `nene-origin/internal-docs/contact/todo/current.md`
+(private) and `docs/roadmap.md`.
