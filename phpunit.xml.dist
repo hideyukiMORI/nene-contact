@@ -10,6 +10,12 @@
     </testsuite>
   </testsuites>
   <php>
+    <!-- Declare the test environment explicitly. NENE2 M-2 (#1600) resolves an unset
+         APP_ENV to "production" and then ignores the dev-secret opt-in below (fail-closed),
+         which would break CI the moment nene2 is bumped past v1.11.0. This is an honest
+         "this is the test environment" declaration, not a way around the production
+         fail-closed path — production throw tests still assert against APP_ENV=production. -->
+    <env name="APP_ENV" value="test" />
     <!-- HealthCheckTest boots the real DI container; GuardedJwtSecretResolver fails
          closed without this local-only opt-in when no real secret is configured. -->
     <env name="NENE2_ALLOW_DEV_SECRET" value="1" />
