@@ -53,7 +53,7 @@ final class AdminNotificationTemplate
             'submitted_at' => $submission->submittedAt ?? '',
             'email' => self::firstOfType($form, $submission, FieldType::Email->value),
             'name' => self::name($form, $submission),
-            'message' => SubmissionSummary::text($form, $submission),
+            'message' => SubmissionSummary::fields($form, $submission),
         ];
     }
 
