@@ -33,6 +33,8 @@ final readonly class CreateContactFormInput
         public ?array $successMessage = null,
         public ?string $redirectUrl = null,
         public ?AutoReply $autoReply = null,
+        public ?string $adminNotificationSubject = null,
+        public ?string $adminNotificationBody = null,
     ) {
     }
 }

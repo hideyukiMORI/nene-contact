@@ -69,6 +69,8 @@ function draft(fields: DraftField[], consentRequired: boolean): ContactFormDraft
     postSubmit: 'message',
     successMessage: null,
     redirectUrl: null,
+    adminNotificationSubject: null,
+    adminNotificationBody: null,
     fields,
   };
 }

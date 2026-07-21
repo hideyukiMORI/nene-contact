@@ -52,6 +52,8 @@ describe('contact-form mappers', () => {
       postSubmit: 'message',
       successMessage: null,
       redirectUrl: null,
+      adminNotificationSubject: null,
+      adminNotificationBody: null,
       fields: [
         {
           id: 'f1',

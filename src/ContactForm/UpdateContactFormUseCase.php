@@ -51,6 +51,8 @@ final readonly class UpdateContactFormUseCase implements UpdateContactFormUseCas
             successMessage: $input->successMessage,
             redirectUrl: $input->redirectUrl,
             autoReply: $input->autoReply,
+            adminNotificationSubject: $input->adminNotificationSubject,
+            adminNotificationBody: $input->adminNotificationBody,
             id: $before->id,
             createdAt: $before->createdAt,
         );

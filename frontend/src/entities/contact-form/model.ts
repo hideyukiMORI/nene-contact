@@ -210,6 +210,8 @@ export interface ContactFormDraft {
   postSubmit: PostSubmitAction;
   successMessage: Record<string, string> | null;
   redirectUrl: string | null;
+  adminNotificationSubject: string | null;
+  adminNotificationBody: string | null;
   fields: DraftField[];
 }
 
