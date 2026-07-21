@@ -53,6 +53,17 @@ export function FormSettingsPage({
 
   const enLocale = draft.locales.includes('en');
 
+  // Admin-notification variable cheat-sheet: reserved tokens + every non-honeypot field by name.
+  const reservedVarNames = ['form_name', 'submitted_at', 'message'];
+  const adminVarList = [
+    `{form_name}（${t('settingsTab.varFormName')}）`,
+    `{submitted_at}（${t('settingsTab.varSubmittedAt')}）`,
+    `{message}（${t('settingsTab.varMessage')}）`,
+    ...draft.fields
+      .filter((f) => f.fieldType !== 'honeypot' && !reservedVarNames.includes(f.name))
+      .map((f) => `{${f.name}}（${f.label[draft.defaultLocale] ?? f.name}）`),
+  ].join(' / ');
+
   return (
     <div className="bd-sheetscroll">
       <div className="bd-sheet-page">
@@ -347,7 +358,7 @@ export function FormSettingsPage({
             className="td"
             style={{ fontSize: '11.5px', color: 'var(--ex-faint)', margin: '2px 0 0' }}
           >
-            {t('settingsTab.adminVars')}
+            {t('settingsTab.adminVarsLabel')} {adminVarList}
           </p>
         </div>
       </div>
