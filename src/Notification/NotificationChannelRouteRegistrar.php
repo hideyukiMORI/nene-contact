@@ -15,6 +15,7 @@ final readonly class NotificationChannelRouteRegistrar
         private CreateNotificationChannelHandler $createHandler,
         private UpdateNotificationChannelHandler $updateHandler,
         private DeleteNotificationChannelHandler $deleteHandler,
+        private TestNotificationChannelHandler $testHandler,
     ) {
     }
 
@@ -25,11 +26,13 @@ final readonly class NotificationChannelRouteRegistrar
         $create = $this->createHandler;
         $update = $this->updateHandler;
         $delete = $this->deleteHandler;
+        $test = $this->testHandler;
 
         $router->get('/admin/notification-channels', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->get('/admin/notification-channels/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
         $router->post('/admin/notification-channels', static fn (ServerRequestInterface $r) => $create->handle($r));
         $router->patch('/admin/notification-channels/{id}', static fn (ServerRequestInterface $r) => $update->handle($r));
         $router->delete('/admin/notification-channels/{id}', static fn (ServerRequestInterface $r) => $delete->handle($r));
+        $router->post('/admin/notification-channels/{id}/test', static fn (ServerRequestInterface $r) => $test->handle($r));
     }
 }

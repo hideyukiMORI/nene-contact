@@ -212,7 +212,7 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 
 Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
 `deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`, `sent`,
-`suppressed`, `failed`, `issued`, `revoked`.
+`suppressed`, `failed`, `issued`, `revoked`, `tested`.
 
 Examples: `submission.viewed`, `submission.exported`,
 `submission_technical_meta.viewed` (audited IP/UA disclosure, entity type `submission`; ADR 0018),
@@ -220,7 +220,8 @@ Examples: `submission.viewed`, `submission.exported`,
 `submission.corrected` (data-subject correction, §4), `submission.expired` (retention
 soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
 `contact_form.updated`, `notification_channel.created` / `notification_channel.updated`
-(config or enabled-flag edit) / `notification_channel.deleted` (soft-delete, ADR 0016),
+(config or enabled-flag edit) / `notification_channel.deleted` (soft-delete, ADR 0016) /
+`notification_channel.tested` (operator test send; snapshot carries channel_type + outcome, no secret),
 `handoff.created` (first sibling
 handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`),
 `user.password_changed` — one event for two paths, told apart by the actor: a **self-service
