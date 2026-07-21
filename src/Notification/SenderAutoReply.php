@@ -35,7 +35,7 @@ final readonly class SenderAutoReply implements SenderAutoReplyInterface
 
     public function __construct(
         private MailerInterface $mailer,
-        private string $fromAddress,
+        private OrganizationMailSettingsResolver $mailSettings,
         private RateLimitStorageInterface $cooldown,
         private AuditRecorderInterface $audit,
     ) {
@@ -68,14 +68,15 @@ final readonly class SenderAutoReply implements SenderAutoReplyInterface
         }
 
         $locale = $submission->locale ?? $form->defaultLocale;
+        $settings = $this->mailSettings->resolve($form->organizationId);
 
         try {
             $this->mailer->send(
                 (new Email())
-                    ->from($this->fromAddress)
+                    ->from($settings->from)
                     ->to($recipient)
                     ->subject($autoReply->subjectFor($locale, $form->defaultLocale))
-                    ->text($autoReply->bodyFor($locale, $form->defaultLocale)),
+                    ->text($settings->applyTo($autoReply->bodyFor($locale, $form->defaultLocale))),
             );
             $this->record($form, $submission, $recipient, 'autoreply.sent');
         } catch (Throwable) {

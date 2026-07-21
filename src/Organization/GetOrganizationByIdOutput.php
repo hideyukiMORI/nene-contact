@@ -15,6 +15,7 @@ final readonly class GetOrganizationByIdOutput
         public ?string $externalId,
         public ?string $customDomain,
         public ?string $senderDisplayName,
+        public ?string $emailSignature,
         public ?string $createdAt,
         public ?string $updatedAt,
     ) {

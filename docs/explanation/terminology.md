@@ -197,6 +197,7 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 | `config_json` | `notification_channel` | encrypted at rest |
 | `deleted_at` | `notification_channel` | soft-delete marker (ADR 0016); excluded from admin reads + dispatch (#429) |
 | `sender_display_name` | `organization` | email From display name; null falls back to the organization `name` (email-wording wave a, #442) |
+| `email_signature` | `organization` | signature appended to outgoing notification + auto-reply emails; null = none (email-wording wave b, #444) |
 | `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
 | `attachment_id` | `submission_link` | per-attachment targets (Vault) set this; submission-level targets (Deal) leave it null |
 | `handoff_status` | `submission_link` | `pending` / `succeeded` / `failed` |

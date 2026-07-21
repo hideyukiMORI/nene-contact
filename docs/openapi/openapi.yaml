@@ -1371,11 +1371,12 @@ components:
       type: object
       description: >-
         Settings update for the caller's own organization. sender_display_name is the email From
-        display name; an empty string clears it (From falls back to the organization name).
-        Max 100 chars, no control characters.
+        display name (max 100 chars, no control chars). email_signature is appended to outgoing
+        emails (max 2000 chars, newlines allowed). An empty string clears either field.
       properties:
         sender_display_name: { type: [string, 'null'], maxLength: 100 }
-      required: [sender_display_name]
+        email_signature: { type: [string, 'null'], maxLength: 2000 }
+      required: [sender_display_name, email_signature]
 
     OrganizationSettingsResponse:
       type: object
@@ -1384,6 +1385,7 @@ components:
         id: { type: integer }
         name: { type: string }
         sender_display_name: { type: [string, 'null'] }
+        email_signature: { type: [string, 'null'] }
       required: [id, name]
 
     FormField:

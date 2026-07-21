@@ -16,7 +16,7 @@ final readonly class EmailChannelSender implements ChannelSenderInterface
 {
     public function __construct(
         private MailerInterface $mailer,
-        private string $fromAddress,
+        private OrganizationMailSettingsResolver $mailSettings,
     ) {
     }
 
@@ -32,12 +32,14 @@ final readonly class EmailChannelSender implements ChannelSenderInterface
             return;
         }
 
+        $settings = $this->mailSettings->resolve($form->organizationId);
+
         $this->mailer->send(
             (new Email())
-                ->from($this->fromAddress)
+                ->from($settings->from)
                 ->to($recipient)
                 ->subject('New submission: ' . $form->name)
-                ->text(SubmissionSummary::text($form, $submission)),
+                ->text($settings->applyTo(SubmissionSummary::text($form, $submission))),
         );
     }
 }

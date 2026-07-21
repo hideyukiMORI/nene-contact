@@ -20,6 +20,8 @@ final readonly class UpdateOrganizationHandler implements RequestHandlerInterfac
 {
     private const MAX_DISPLAY_NAME = 100;
 
+    private const MAX_SIGNATURE = 2000;
+
     public function __construct(
         private UpdateOrganizationUseCaseInterface $useCase,
         private JsonResponseFactory $response,
@@ -36,18 +38,26 @@ final readonly class UpdateOrganizationHandler implements RequestHandlerInterfac
             ]);
         }
 
+        if (!array_key_exists('email_signature', $body)) {
+            throw new ValidationException([
+                new ValidationError('email_signature', 'email_signature is required.', 'required'),
+            ]);
+        }
+
         $senderDisplayName = $this->parseDisplayName($body['sender_display_name']);
+        $emailSignature = $this->parseSignature($body['email_signature']);
 
         $claims = $request->getAttribute('nene2.auth.claims');
         $actorUserId = is_array($claims) && isset($claims['uid']) && is_int($claims['uid']) ? $claims['uid'] : null;
         $callerOrgId = is_array($claims) && isset($claims['org_id']) && is_int($claims['org_id']) ? $claims['org_id'] : null;
 
-        $org = $this->useCase->execute($actorUserId, $callerOrgId, new UpdateOrganizationInput($senderDisplayName));
+        $org = $this->useCase->execute($actorUserId, $callerOrgId, new UpdateOrganizationInput($senderDisplayName, $emailSignature));
 
         return $this->response->create([
             'id' => $org->id,
             'name' => $org->name,
             'sender_display_name' => $org->senderDisplayName,
+            'email_signature' => $org->emailSignature,
         ]);
     }
 
@@ -81,6 +91,43 @@ final readonly class UpdateOrganizationHandler implements RequestHandlerInterfac
         if (preg_match('/[\x00-\x1F\x7F]/u', $trimmed) === 1) {
             throw new ValidationException([
                 new ValidationError('sender_display_name', 'sender_display_name must not contain control characters.', 'invalid'),
+            ]);
+        }
+
+        return $trimmed;
+    }
+
+    /**
+     * The signature is a multi-line block, so newlines are allowed; a blank value clears it.
+     * Other control characters are rejected.
+     */
+    private function parseSignature(mixed $raw): ?string
+    {
+        if ($raw === null) {
+            return null;
+        }
+
+        if (!is_string($raw)) {
+            throw new ValidationException([
+                new ValidationError('email_signature', 'email_signature must be a string.', 'invalid'),
+            ]);
+        }
+
+        $trimmed = trim($raw);
+        if ($trimmed === '') {
+            return null;
+        }
+
+        if (mb_strlen($trimmed) > self::MAX_SIGNATURE) {
+            throw new ValidationException([
+                new ValidationError('email_signature', 'email_signature must be at most ' . self::MAX_SIGNATURE . ' characters.', 'too_long'),
+            ]);
+        }
+
+        // Allow tab (\x09), LF (\x0A), CR (\x0D); reject other control chars.
+        if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/u', $trimmed) === 1) {
+            throw new ValidationException([
+                new ValidationError('email_signature', 'email_signature must not contain control characters.', 'invalid'),
             ]);
         }
 

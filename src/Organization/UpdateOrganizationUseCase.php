@@ -42,6 +42,7 @@ final readonly class UpdateOrganizationUseCase implements UpdateOrganizationUseC
             externalId: $before->externalId,
             customDomain: $before->customDomain,
             senderDisplayName: $input->senderDisplayName,
+            emailSignature: $input->emailSignature,
             createdAt: $before->createdAt,
         ));
 
@@ -58,8 +59,16 @@ final readonly class UpdateOrganizationUseCase implements UpdateOrganizationUseC
             'organization.updated',
             'organization',
             $callerOrgId,
-            ['name' => $before->name, 'sender_display_name' => $before->senderDisplayName],
-            ['name' => $after->name, 'sender_display_name' => $after->senderDisplayName],
+            [
+                'name' => $before->name,
+                'sender_display_name' => $before->senderDisplayName,
+                'email_signature' => $before->emailSignature,
+            ],
+            [
+                'name' => $after->name,
+                'sender_display_name' => $after->senderDisplayName,
+                'email_signature' => $after->emailSignature,
+            ],
         );
 
         return $after;

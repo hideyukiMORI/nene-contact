@@ -9,7 +9,10 @@ use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\AutoReply;
 use NeneContact\ContactForm\ContactForm;
 use NeneContact\ContactForm\FormField;
+use NeneContact\Notification\OrganizationMailSettingsResolver;
 use NeneContact\Notification\SenderAutoReply;
+use NeneContact\Organization\Organization;
+use NeneContact\Organization\OrganizationRepositoryInterface;
 use NeneContact\Submission\Submission;
 use PHPUnit\Framework\TestCase;
 use RuntimeException;
@@ -20,11 +23,86 @@ use Symfony\Component\Mime\RawMessage;
 
 final class SenderAutoReplyTest extends TestCase
 {
+    /**
+     * A mail-settings resolver over a fake org repo. With no org (default) the From is the bare
+     * env address, matching the existing assertions; pass an Organization to exercise the display
+     * name + signature.
+     */
+    private function resolver(?Organization $org = null): OrganizationMailSettingsResolver
+    {
+        $repo = new class ($org) implements OrganizationRepositoryInterface {
+            public function __construct(private ?Organization $org)
+            {
+            }
+
+            public function findById(int $id): ?Organization
+            {
+                return $this->org;
+            }
+
+            public function findBySlug(string $slug): ?Organization
+            {
+                return null;
+            }
+
+            public function findByCustomDomain(string $domain): ?Organization
+            {
+                return null;
+            }
+
+            /** @return list<Organization> */
+            public function findAll(int $limit, int $offset): array
+            {
+                return [];
+            }
+
+            public function count(): int
+            {
+                return 0;
+            }
+
+            public function save(Organization $organization): int
+            {
+                return 0;
+            }
+
+            public function update(Organization $organization): void
+            {
+            }
+        };
+
+        return new OrganizationMailSettingsResolver($repo, 'noreply@ayane.co.jp');
+    }
+
+    public function test_applies_org_display_name_and_signature(): void
+    {
+        $mailer = new RecordingMailer();
+        $org = new Organization(
+            name: 'AYANE',
+            slug: 'ayane',
+            plan: 'free',
+            isActive: true,
+            id: 7,
+            senderDisplayName: 'AYANE（自動送信）',
+            emailSignature: "-- \nAYANE Support",
+        );
+        $service = new SenderAutoReply($mailer, $this->resolver($org), new CountingCooldown(), new RecordingAudit());
+
+        $service->send($this->form(), $this->submission(['email' => 'visitor@example.com'], 'ja'));
+
+        $email = $mailer->sent[0];
+        self::assertSame('AYANE（自動送信）', $email->getFrom()[0]->getName());
+        self::assertSame('noreply@ayane.co.jp', $email->getFrom()[0]->getAddress());
+        $body = $email->getTextBody();
+        self::assertIsString($body);
+        self::assertStringEndsWith("-- \nAYANE Support\n", $body);
+    }
+
     public function test_sends_one_reply_and_audits_when_enabled(): void
     {
         $mailer = new RecordingMailer();
         $audit = new RecordingAudit();
-        $service = new SenderAutoReply($mailer, 'noreply@ayane.co.jp', new CountingCooldown(), $audit);
+        $service = new SenderAutoReply($mailer, $this->resolver(), new CountingCooldown(), $audit);
 
         $service->send($this->form(), $this->submission(['email' => 'visitor@example.com'], 'ja'));
 
@@ -45,7 +123,7 @@ final class SenderAutoReplyTest extends TestCase
     public function test_does_not_echo_submission_values_into_the_body(): void
     {
         $mailer = new RecordingMailer();
-        $service = new SenderAutoReply($mailer, 'noreply@ayane.co.jp', new CountingCooldown(), new RecordingAudit());
+        $service = new SenderAutoReply($mailer, $this->resolver(), new CountingCooldown(), new RecordingAudit());
 
         $service->send(
             $this->form(),
@@ -61,7 +139,7 @@ final class SenderAutoReplyTest extends TestCase
     {
         $mailer = new RecordingMailer();
         $audit = new RecordingAudit();
-        $service = new SenderAutoReply($mailer, 'noreply@ayane.co.jp', new CountingCooldown(), $audit);
+        $service = new SenderAutoReply($mailer, $this->resolver(), new CountingCooldown(), $audit);
 
         $service->send($this->form(enabled: false), $this->submission(['email' => 'visitor@example.com'], 'ja'));
 
@@ -72,7 +150,7 @@ final class SenderAutoReplyTest extends TestCase
     public function test_no_email_field_value_sends_nothing(): void
     {
         $mailer = new RecordingMailer();
-        $service = new SenderAutoReply($mailer, 'noreply@ayane.co.jp', new CountingCooldown(), new RecordingAudit());
+        $service = new SenderAutoReply($mailer, $this->resolver(), new CountingCooldown(), new RecordingAudit());
 
         $service->send($this->form(), $this->submission(['email' => 'not-an-email'], 'ja'));
 
@@ -84,7 +162,7 @@ final class SenderAutoReplyTest extends TestCase
         $mailer = new RecordingMailer();
         $audit = new RecordingAudit();
         $cooldown = new CountingCooldown();
-        $service = new SenderAutoReply($mailer, 'noreply@ayane.co.jp', $cooldown, $audit);
+        $service = new SenderAutoReply($mailer, $this->resolver(), $cooldown, $audit);
 
         $service->send($this->form(), $this->submission(['email' => 'visitor@example.com'], 'ja'));
         $service->send($this->form(), $this->submission(['email' => 'VISITOR@example.com'], 'ja'));
@@ -98,7 +176,7 @@ final class SenderAutoReplyTest extends TestCase
     public function test_delivery_failure_is_best_effort_and_audited(): void
     {
         $audit = new RecordingAudit();
-        $service = new SenderAutoReply(new ThrowingMailer(), 'noreply@ayane.co.jp', new CountingCooldown(), $audit);
+        $service = new SenderAutoReply(new ThrowingMailer(), $this->resolver(), new CountingCooldown(), $audit);
 
         // Must not throw.
         $service->send($this->form(), $this->submission(['email' => 'visitor@example.com'], 'ja'));
@@ -110,7 +188,7 @@ final class SenderAutoReplyTest extends TestCase
     public function test_uses_submission_locale_then_falls_back_to_default(): void
     {
         $mailer = new RecordingMailer();
-        $service = new SenderAutoReply($mailer, 'noreply@ayane.co.jp', new CountingCooldown(), new RecordingAudit());
+        $service = new SenderAutoReply($mailer, $this->resolver(), new CountingCooldown(), new RecordingAudit());
 
         // en submission → en copy.
         $service->send($this->form(), $this->submission(['email' => 'a@example.com'], 'en'));

@@ -734,6 +734,10 @@ export const en: Partial<MessageCatalog> = {
   'orgSettings.senderName.hint':
     'Leave blank to use the organization name “{name}”. Shown as the sender name on admin notification emails and on auto-replies to the submitter.',
   'orgSettings.senderName.placeholder': 'e.g. AYANE Support',
+  'orgSettings.signature.label': 'Email signature',
+  'orgSettings.signature.hint':
+    'Appended to the end of admin notification and auto-reply emails. Leave blank for none. Line breaks are preserved.',
+  'orgSettings.signature.placeholder': 'e.g.\n──────────\nAYANE\nhttps://ayane.co.jp',
   'orgSettings.save': 'Save',
   'orgSettings.saving': 'Saving…',
   'orgSettings.saved': 'Saved.',

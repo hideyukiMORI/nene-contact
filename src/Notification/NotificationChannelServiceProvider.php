@@ -16,6 +16,7 @@ use Nene2\Middleware\RateLimitStorageInterface;
 use NeneContact\ApplicationServiceProvider;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
+use NeneContact\Organization\OrganizationRepositoryInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Client\ClientInterface;
@@ -71,11 +72,27 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 static fn (): ClientInterface => new Psr18Client(),
             )
             ->set(
+                OrganizationMailSettingsResolver::class,
+                static function (ContainerInterface $c): OrganizationMailSettingsResolver {
+                    $orgs = $c->get(OrganizationRepositoryInterface::class);
+
+                    if (!$orgs instanceof OrganizationRepositoryInterface) {
+                        throw new LogicException('Organization repository service is invalid.');
+                    }
+
+                    $from = $_SERVER['MAIL_FROM'] ?? $_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM');
+                    $fromAddress = is_string($from) && $from !== '' ? $from : 'noreply@nene-contact.local';
+
+                    return new OrganizationMailSettingsResolver($orgs, $fromAddress);
+                },
+            )
+            ->set(
                 self::CHANNEL_SENDERS,
                 static function (ContainerInterface $c): array {
                     $mailer = $c->get(MailerInterface::class);
                     $http = $c->get(ClientInterface::class);
                     $psr17 = $c->get(Psr17Factory::class);
+                    $mailSettings = $c->get(OrganizationMailSettingsResolver::class);
 
                     if (!$mailer instanceof MailerInterface) {
                         throw new LogicException('Mailer service is invalid.');
@@ -89,11 +106,12 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         throw new LogicException('PSR-17 factory service is invalid.');
                     }
 
-                    $from = $_SERVER['MAIL_FROM'] ?? $_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM');
-                    $fromAddress = is_string($from) && $from !== '' ? $from : 'noreply@nene-contact.local';
+                    if (!$mailSettings instanceof OrganizationMailSettingsResolver) {
+                        throw new LogicException('Organization mail settings resolver service is invalid.');
+                    }
 
                     return [
-                        new EmailChannelSender($mailer, $fromAddress),
+                        new EmailChannelSender($mailer, $mailSettings),
                         new SlackChannelSender($http, $psr17),
                         new ChatworkChannelSender($http, $psr17),
                         new WebhookChannelSender($http, $psr17),
@@ -124,6 +142,7 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                     $mailer = $c->get(MailerInterface::class);
                     $cooldown = $c->get(RateLimitStorageInterface::class);
                     $audit = $c->get(AuditRecorderInterface::class);
+                    $mailSettings = $c->get(OrganizationMailSettingsResolver::class);
 
                     if (!$mailer instanceof MailerInterface) {
                         throw new LogicException('Mailer service is invalid.');
@@ -137,10 +156,11 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         throw new LogicException('Audit recorder service is invalid.');
                     }
 
-                    $from = $_SERVER['MAIL_FROM'] ?? $_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM');
-                    $fromAddress = is_string($from) && $from !== '' ? $from : 'noreply@nene-contact.local';
+                    if (!$mailSettings instanceof OrganizationMailSettingsResolver) {
+                        throw new LogicException('Organization mail settings resolver service is invalid.');
+                    }
 
-                    return new SenderAutoReply($mailer, $fromAddress, $cooldown, $audit);
+                    return new SenderAutoReply($mailer, $mailSettings, $cooldown, $audit);
                 },
             )
             ->set(
