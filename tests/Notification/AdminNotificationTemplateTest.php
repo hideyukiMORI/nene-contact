@@ -86,6 +86,15 @@ final class AdminNotificationTemplateTest extends TestCase
         self::assertSame('花子', AdminNotificationTemplate::subject($form, $submission));
     }
 
+    public function test_message_variable_has_no_english_header(): void
+    {
+        [$form, $submission] = $this->context(['name' => '山田', 'message' => 'こんにちは'], null, '{message}');
+        $body = AdminNotificationTemplate::body($form, $submission);
+
+        self::assertStringNotContainsString('New submission', $body);
+        self::assertStringContainsString('本文: こんにちは', $body);
+    }
+
     public function test_unknown_variable_is_left_literal(): void
     {
         [$form, $submission] = $this->context(['name' => 'x'], '{unknown} {form_name}');

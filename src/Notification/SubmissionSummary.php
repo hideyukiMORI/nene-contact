@@ -17,6 +17,24 @@ final class SubmissionSummary
 {
     public static function text(ContactForm $form, Submission $submission): string
     {
+        $lines = array_merge(['New submission for "' . $form->name . '":', ''], self::fieldLines($form, $submission));
+
+        return implode("\n", $lines) . "\n";
+    }
+
+    /**
+     * Just the "label: value" lines — no header. Used for the {message} template variable so a
+     * Japanese (or custom) email body isn't prefixed with the English header {@see self::text()}
+     * carries for the Slack/Chatwork/Webhook channels.
+     */
+    public static function fields(ContactForm $form, Submission $submission): string
+    {
+        return implode("\n", self::fieldLines($form, $submission));
+    }
+
+    /** @return list<string> */
+    private static function fieldLines(ContactForm $form, Submission $submission): array
+    {
         $labels = [];
         foreach ($form->fields as $field) {
             if ($field->fieldType === FieldType::Honeypot->value) {
@@ -25,13 +43,13 @@ final class SubmissionSummary
             $labels[$field->name] = self::label($field, $form->defaultLocale);
         }
 
-        $lines = ['New submission for "' . $form->name . '":', ''];
+        $lines = [];
         foreach ($submission->fieldValues as $name => $value) {
             $label = $labels[$name] ?? $name;
             $lines[] = $label . ': ' . (is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR));
         }
 
-        return implode("\n", $lines) . "\n";
+        return $lines;
     }
 
     private static function label(FormField $field, string $locale): string
