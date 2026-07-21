@@ -24,6 +24,9 @@ use Symfony\Component\Mailer\MailerInterface;
 
 final readonly class NotificationChannelServiceProvider implements ServiceProviderInterface
 {
+    /** Container key for the shared list<ChannelSenderInterface> (dispatch + test send). */
+    public const CHANNEL_SENDERS = 'nene-contact.channel_senders';
+
     public function register(ContainerBuilder $builder): void
     {
         $builder
@@ -68,16 +71,11 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 static fn (): ClientInterface => new Psr18Client(),
             )
             ->set(
-                SubmissionNotifierInterface::class,
-                static function (ContainerInterface $c): SubmissionNotifierInterface {
-                    $channels = $c->get(NotificationChannelRepositoryInterface::class);
+                self::CHANNEL_SENDERS,
+                static function (ContainerInterface $c): array {
                     $mailer = $c->get(MailerInterface::class);
                     $http = $c->get(ClientInterface::class);
                     $psr17 = $c->get(Psr17Factory::class);
-
-                    if (!$channels instanceof NotificationChannelRepositoryInterface) {
-                        throw new LogicException('Notification channel repository service is invalid.');
-                    }
 
                     if (!$mailer instanceof MailerInterface) {
                         throw new LogicException('Mailer service is invalid.');
@@ -94,12 +92,30 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                     $from = $_SERVER['MAIL_FROM'] ?? $_ENV['MAIL_FROM'] ?? getenv('MAIL_FROM');
                     $fromAddress = is_string($from) && $from !== '' ? $from : 'noreply@nene-contact.local';
 
-                    return new CompositeSubmissionNotifier($channels, [
+                    return [
                         new EmailChannelSender($mailer, $fromAddress),
                         new SlackChannelSender($http, $psr17),
                         new ChatworkChannelSender($http, $psr17),
                         new WebhookChannelSender($http, $psr17),
-                    ]);
+                    ];
+                },
+            )
+            ->set(
+                SubmissionNotifierInterface::class,
+                static function (ContainerInterface $c): SubmissionNotifierInterface {
+                    $channels = $c->get(NotificationChannelRepositoryInterface::class);
+                    $senders = $c->get(self::CHANNEL_SENDERS);
+
+                    if (!$channels instanceof NotificationChannelRepositoryInterface) {
+                        throw new LogicException('Notification channel repository service is invalid.');
+                    }
+
+                    if (!is_array($senders)) {
+                        throw new LogicException('Channel senders service is invalid.');
+                    }
+
+                    /** @var list<ChannelSenderInterface> $senders */
+                    return new CompositeSubmissionNotifier($channels, $senders);
                 },
             )
             ->set(
@@ -214,6 +230,34 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 },
             )
             ->set(
+                TestNotificationChannelUseCaseInterface::class,
+                static function (ContainerInterface $c): TestNotificationChannelUseCaseInterface {
+                    $channels = $c->get(NotificationChannelRepositoryInterface::class);
+                    $forms = $c->get(ContactFormRepositoryInterface::class);
+                    $senders = $c->get(self::CHANNEL_SENDERS);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$channels instanceof NotificationChannelRepositoryInterface) {
+                        throw new LogicException('Notification channel repository service is invalid.');
+                    }
+
+                    if (!$forms instanceof ContactFormRepositoryInterface) {
+                        throw new LogicException('Contact form repository service is invalid.');
+                    }
+
+                    if (!is_array($senders)) {
+                        throw new LogicException('Channel senders service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    /** @var list<ChannelSenderInterface> $senders */
+                    return new TestNotificationChannelUseCase($channels, $forms, $senders, $audit);
+                },
+            )
+            ->set(
                 CreateNotificationChannelHandler::class,
                 static function (ContainerInterface $c): CreateNotificationChannelHandler {
                     $uc = $c->get(CreateNotificationChannelUseCaseInterface::class);
@@ -299,6 +343,23 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 },
             )
             ->set(
+                TestNotificationChannelHandler::class,
+                static function (ContainerInterface $c): TestNotificationChannelHandler {
+                    $uc = $c->get(TestNotificationChannelUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof TestNotificationChannelUseCaseInterface) {
+                        throw new LogicException('TestNotificationChannel use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new TestNotificationChannelHandler($uc, $json);
+                },
+            )
+            ->set(
                 NotificationChannelNotFoundExceptionHandler::class,
                 static function (ContainerInterface $c): NotificationChannelNotFoundExceptionHandler {
                     $problemDetails = $c->get(ProblemDetailsResponseFactory::class);
@@ -318,6 +379,7 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                     $create = $c->get(CreateNotificationChannelHandler::class);
                     $update = $c->get(UpdateNotificationChannelHandler::class);
                     $delete = $c->get(DeleteNotificationChannelHandler::class);
+                    $test = $c->get(TestNotificationChannelHandler::class);
 
                     if (!$list instanceof ListNotificationChannelsHandler) {
                         throw new LogicException('ListNotificationChannels handler service is invalid.');
@@ -339,7 +401,11 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         throw new LogicException('DeleteNotificationChannel handler service is invalid.');
                     }
 
-                    return new NotificationChannelRouteRegistrar($list, $get, $create, $update, $delete);
+                    if (!$test instanceof TestNotificationChannelHandler) {
+                        throw new LogicException('TestNotificationChannel handler service is invalid.');
+                    }
+
+                    return new NotificationChannelRouteRegistrar($list, $get, $create, $update, $delete, $test);
                 },
             );
     }

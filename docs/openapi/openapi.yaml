@@ -387,6 +387,30 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /admin/notification-channels/{id}/test:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer }
+    post:
+      tags: [NotificationChannel]
+      operationId: testNotificationChannel
+      summary: Send a sample notification to confirm the channel works
+      description: >-
+        Dispatches a sample message through the channel's sender. A dispatch failure returns 200
+        with `ok:false` and a non-secret `error` (the test ran; the channel is what failed) so an
+        operator can discover a silently-failing channel. Audited as notification_channel.tested.
+      responses:
+        '200':
+          description: Test outcome
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationChannelTestResult' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /admin/media:
     get:
       tags: [Media]
@@ -1926,6 +1950,13 @@ components:
             chatwork: api_token, room_id; webhook: url, secret (HMAC-SHA256 signing).
         is_enabled: { type: boolean }
       required: [contact_form_id, channel_type, config]
+
+    NotificationChannelTestResult:
+      type: object
+      properties:
+        ok: { type: boolean }
+        error: { type: string, nullable: true, description: Non-secret failure reason when ok is false. }
+      required: [ok]
 
     UpdateNotificationChannelRequest:
       type: object
