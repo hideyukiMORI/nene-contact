@@ -190,6 +190,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/notification-channels/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        /** Get a notification channel (config secrets redacted) */
+        get: operations["getNotificationChannel"];
+        put?: never;
+        post?: never;
+        /** Soft-delete a notification channel (ADR 0016 — never a physical row deletion) */
+        delete: operations["deleteNotificationChannel"];
+        options?: never;
+        head?: never;
+        /** Update a notification channel's config and/or enabled flag */
+        patch: operations["updateNotificationChannel"];
+        trace?: never;
+    };
+    "/admin/notification-channels/{id}/test": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Send a sample notification to confirm the channel works
+         * @description Dispatches a sample message through the channel's sender. A dispatch failure returns 200 with `ok:false` and a non-secret `error` (the test ran; the channel is what failed) so an operator can discover a silently-failing channel. Audited as notification_channel.tested.
+         */
+        post: operations["testNotificationChannel"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/media": {
         parameters: {
             query?: never;
@@ -1288,12 +1331,15 @@ export interface components {
         AddSubmissionNoteRequest: {
             body: string;
         };
+        /** @description The config (webhook URLs / API tokens) is never returned — only type, form, enabled flag, and timestamps are exposed (charter §6/§10). */
         NotificationChannelResponse: {
             id: number;
             contact_form_id: number;
             /** @enum {string} */
             channel_type: "email" | "slack" | "chatwork" | "webhook";
             is_enabled?: boolean;
+            created_at?: string | null;
+            updated_at?: string | null;
         };
         NotificationChannelListResponse: {
             items?: components["schemas"]["NotificationChannelResponse"][];
@@ -1307,6 +1353,19 @@ export interface components {
                 [key: string]: unknown;
             };
             is_enabled?: boolean;
+        };
+        NotificationChannelTestResult: {
+            ok: boolean;
+            /** @description Non-secret failure reason when ok is false. */
+            error?: string | null;
+        };
+        /** @description Partial update. Provide is_enabled and/or config. In config, provided non-empty values overwrite the stored value; omitted or blank keys keep it (so a secret token need not be re-entered to toggle the channel or fix another field). channel_type and contact_form_id are immutable. chatwork room_id is normalized (a pasted `rid` prefix is stripped) and must be digits only; slack webhook_url must start with https://hooks.slack.com/. */
+        UpdateNotificationChannelRequest: {
+            is_enabled?: boolean;
+            /** @description Channel-specific keys to merge over the stored config (encrypted at rest). */
+            config?: {
+                [key: string]: unknown;
+            };
         };
     };
     responses: {
@@ -1777,6 +1836,109 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
+        };
+    };
+    getNotificationChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Channel detail */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationChannelResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    deleteNotificationChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Soft-deleted; the channel drops out of every read and dispatch */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    updateNotificationChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateNotificationChannelRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationChannelResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    testNotificationChannel: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Test outcome */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["NotificationChannelTestResult"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
         };
     };
     listMedia: {
