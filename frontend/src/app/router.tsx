@@ -15,6 +15,7 @@ import { UsersPage } from '@/pages/users';
 import { ServiceTokensPage } from '@/pages/service-tokens';
 import { AuditLogPage } from '@/pages/audit-log';
 import { AccountPage } from '@/pages/account';
+import { OrganizationSettingsPage } from '@/pages/settings';
 
 function LoginRoute(): ReactNode {
   const { session, signIn } = useAuth();
@@ -41,6 +42,7 @@ const router = createBrowserRouter(
         { path: 'users', element: <UsersPage /> },
         { path: 'service-tokens', element: <ServiceTokensPage /> },
         { path: 'audit-log', element: <AuditLogPage /> },
+        { path: 'settings/organization', element: <OrganizationSettingsPage /> },
         { path: 'account', element: <AccountPage /> },
       ],
     },

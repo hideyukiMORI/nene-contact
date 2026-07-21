@@ -208,6 +208,48 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  # NOTE: /admin/organizations is superadmin cross-tenant org management (ManageOrganizations).
+  # An organization's own self-service settings live under /admin/settings/organization
+  # (ManageSettings, always the caller's own org — no path id) — keep the two surfaces separate.
+  /admin/settings/organization:
+    get:
+      tags: [Organization]
+      operationId: getOrganizationSettings
+      summary: Get the caller's own organization settings
+      description: The caller's own organization (from the token org_id claim); ManageSettings.
+      responses:
+        '200':
+          description: Organization settings
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrganizationSettingsResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [Organization]
+      operationId: updateOrganizationSettings
+      summary: Update the caller's own organization settings
+      description: >-
+        Updates the caller's own organization (token org_id claim; ManageSettings).
+        sender_display_name is the email From display name; blank clears it (From then falls back
+        to the organization name).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateOrganizationRequest' }
+      responses:
+        '200':
+          description: Updated organization settings
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/OrganizationSettingsResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+
   /admin/contact-forms:
     get:
       tags: [ContactForm]
@@ -1300,6 +1342,7 @@ components:
         slug: { type: string }
         external_id: { type: [string, 'null'] }
         custom_domain: { type: [string, 'null'] }
+        sender_display_name: { type: [string, 'null'], description: Email From display name; null falls back to name. }
         plan: { type: string }
         is_active: { type: boolean }
       required: [id, name, slug]
@@ -1323,6 +1366,25 @@ components:
         external_id: { type: string }
         custom_domain: { type: string }
       required: [name, slug]
+
+    UpdateOrganizationRequest:
+      type: object
+      description: >-
+        Settings update for the caller's own organization. sender_display_name is the email From
+        display name; an empty string clears it (From falls back to the organization name).
+        Max 100 chars, no control characters.
+      properties:
+        sender_display_name: { type: [string, 'null'], maxLength: 100 }
+      required: [sender_display_name]
+
+    OrganizationSettingsResponse:
+      type: object
+      description: The caller's own organization settings surface (name + email-wording fields).
+      properties:
+        id: { type: integer }
+        name: { type: string }
+        sender_display_name: { type: [string, 'null'] }
+      required: [id, name]
 
     FormField:
       type: object

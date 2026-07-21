@@ -14,6 +14,7 @@ final readonly class GetOrganizationByIdOutput
         public bool $isActive,
         public ?string $externalId,
         public ?string $customDomain,
+        public ?string $senderDisplayName,
         public ?string $createdAt,
         public ?string $updatedAt,
     ) {
