@@ -229,7 +229,11 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
                         ))}
                       </div>
                     ) : (
-                      <div className={text === '' ? 'v empty' : 'v'}>
+                      <div
+                        className={
+                          text === '' ? 'v empty' : row.fieldType === 'textarea' ? 'v pre' : 'v'
+                        }
+                      >
                         {text === '' ? '—' : text}
                       </div>
                     )}

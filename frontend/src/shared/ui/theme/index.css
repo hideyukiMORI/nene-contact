@@ -5969,6 +5969,11 @@ a.t:hover {
 .kv .v.empty {
   color: var(--ex-faint);
 }
+/* textarea values keep the line breaks they were typed with (not the flex/one-line layout). */
+.kv .v.pre {
+  display: block;
+  white-space: pre-wrap;
+}
 @media (max-width: 560px) {
   .kv .kv-row {
     grid-template-columns: 1fr;
