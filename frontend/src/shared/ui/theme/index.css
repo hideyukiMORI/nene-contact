@@ -1508,8 +1508,15 @@ td.col-actions {
 }
 .ch-actions {
   display: flex;
-  flex-wrap: wrap;
+  flex-flow: row nowrap;
+  align-items: center;
   gap: 6px;
+}
+/* Compact buttons for the actions column; the table wrapper scrolls on narrow viewports. */
+.ch-actions .ex-btn {
+  flex: 0 0 auto;
+  padding: 5px 9px;
+  font-size: 12px;
 }
 .ch-editrow > td {
   background: var(--surface-2, rgba(127, 127, 127, 0.05));
