@@ -15,6 +15,7 @@ final readonly class Organization
         public ?string $externalId = null,
         public ?string $customDomain = null,
         public ?string $senderDisplayName = null,
+        public ?string $emailSignature = null,
         public ?string $createdAt = null,
         public ?string $updatedAt = null,
     ) {

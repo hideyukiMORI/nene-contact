@@ -108,7 +108,7 @@ final class UpdateOrganizationUseCaseTest extends TestCase
         $audit = $this->auditRepo();
 
         $useCase = new UpdateOrganizationUseCase($repo, new AuditRecorder($audit));
-        $result = $useCase->execute(5, 7, new UpdateOrganizationInput('AYANE（自動送信）'));
+        $result = $useCase->execute(5, 7, new UpdateOrganizationInput('AYANE（自動送信）', null));
 
         self::assertSame('AYANE（自動送信）', $result->senderDisplayName);
         self::assertSame('AYANE（自動送信）', $repo->findById(7)?->senderDisplayName);
@@ -136,7 +136,7 @@ final class UpdateOrganizationUseCaseTest extends TestCase
         $repo = $this->repoWithOrg($withName);
 
         $useCase = new UpdateOrganizationUseCase($repo, new AuditRecorder($this->auditRepo()));
-        $result = $useCase->execute(5, 7, new UpdateOrganizationInput(null));
+        $result = $useCase->execute(5, 7, new UpdateOrganizationInput(null, null));
 
         self::assertNull($result->senderDisplayName);
     }
@@ -150,7 +150,7 @@ final class UpdateOrganizationUseCaseTest extends TestCase
         $useCase = new UpdateOrganizationUseCase($repo, new AuditRecorder($this->auditRepo()));
 
         $this->expectException(OrganizationNotFoundException::class);
-        $useCase->execute(5, null, new UpdateOrganizationInput('x'));
+        $useCase->execute(5, null, new UpdateOrganizationInput('x', null));
     }
 
     public function test_missing_org_is_not_found(): void
@@ -160,6 +160,6 @@ final class UpdateOrganizationUseCaseTest extends TestCase
         $useCase = new UpdateOrganizationUseCase($repo, new AuditRecorder($this->auditRepo()));
 
         $this->expectException(OrganizationNotFoundException::class);
-        $useCase->execute(5, 7, new UpdateOrganizationInput('x'));
+        $useCase->execute(5, 7, new UpdateOrganizationInput('x', null));
     }
 }

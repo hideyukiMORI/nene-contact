@@ -844,15 +844,17 @@ export interface components {
             external_id?: string;
             custom_domain?: string;
         };
-        /** @description Settings update for the caller's own organization. sender_display_name is the email From display name; an empty string clears it (From falls back to the organization name). Max 100 chars, no control characters. */
+        /** @description Settings update for the caller's own organization. sender_display_name is the email From display name (max 100 chars, no control chars). email_signature is appended to outgoing emails (max 2000 chars, newlines allowed). An empty string clears either field. */
         UpdateOrganizationRequest: {
             sender_display_name: string | null;
+            email_signature: string | null;
         };
         /** @description The caller's own organization settings surface (name + email-wording fields). */
         OrganizationSettingsResponse: {
             id: number;
             name: string;
             sender_display_name?: string | null;
+            email_signature?: string | null;
         };
         FormField: {
             id?: number;

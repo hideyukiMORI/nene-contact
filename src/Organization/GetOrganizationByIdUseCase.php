@@ -28,6 +28,7 @@ final readonly class GetOrganizationByIdUseCase implements GetOrganizationByIdUs
             externalId: $org->externalId,
             customDomain: $org->customDomain,
             senderDisplayName: $org->senderDisplayName,
+            emailSignature: $org->emailSignature,
             createdAt: $org->createdAt,
             updatedAt: $org->updatedAt,
         );

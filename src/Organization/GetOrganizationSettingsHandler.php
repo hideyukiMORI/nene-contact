@@ -37,6 +37,7 @@ final readonly class GetOrganizationSettingsHandler implements RequestHandlerInt
             'id' => $output->id,
             'name' => $output->name,
             'sender_display_name' => $output->senderDisplayName,
+            'email_signature' => $output->emailSignature,
         ]);
     }
 }

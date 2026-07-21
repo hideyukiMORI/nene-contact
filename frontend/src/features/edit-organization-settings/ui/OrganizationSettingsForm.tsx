@@ -11,8 +11,9 @@ export function OrganizationSettingsForm(): ReactNode {
   const query = useOrganizationSettingsQuery();
   const mutation = useUpdateOrganizationSettingsMutation();
 
-  // `draft === null` means "untouched" — show the stored value; once edited we track the draft.
-  const [draft, setDraft] = useState<string | null>(null);
+  // A `null` draft means "untouched" — show the stored value; once edited we track the draft.
+  const [nameDraft, setNameDraft] = useState<string | null>(null);
+  const [sigDraft, setSigDraft] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
 
   if (query.isPending) {
@@ -28,16 +29,22 @@ export function OrganizationSettingsForm(): ReactNode {
   }
 
   const org = query.data;
-  const value = draft !== null ? draft : (org.senderDisplayName ?? '');
+  const name = nameDraft !== null ? nameDraft : (org.senderDisplayName ?? '');
+  const signature = sigDraft !== null ? sigDraft : (org.emailSignature ?? '');
 
   const onSave = (): void => {
-    const trimmed = value.trim();
+    const trimmedName = name.trim();
+    const trimmedSig = signature.trim();
     setSaved(false);
     mutation.mutate(
-      { senderDisplayName: trimmed === '' ? null : trimmed },
+      {
+        senderDisplayName: trimmedName === '' ? null : trimmedName,
+        emailSignature: trimmedSig === '' ? null : trimmedSig,
+      },
       {
         onSuccess: () => {
-          setDraft(null);
+          setNameDraft(null);
+          setSigDraft(null);
           setSaved(true);
         },
       },
@@ -54,14 +61,32 @@ export function OrganizationSettingsForm(): ReactNode {
           id="org-sender-name"
           type="text"
           maxLength={100}
-          value={value}
+          value={name}
           placeholder={t('orgSettings.senderName.placeholder')}
           onChange={(e) => {
-            setDraft(e.target.value);
+            setNameDraft(e.target.value);
             setSaved(false);
           }}
         />
         <p className="ac-lead">{t('orgSettings.senderName.hint', { name: org.name })}</p>
+      </div>
+
+      <div className="bd-frow">
+        <label className="l" htmlFor="org-signature">
+          {t('orgSettings.signature.label')}
+        </label>
+        <textarea
+          id="org-signature"
+          rows={5}
+          maxLength={2000}
+          value={signature}
+          placeholder={t('orgSettings.signature.placeholder')}
+          onChange={(e) => {
+            setSigDraft(e.target.value);
+            setSaved(false);
+          }}
+        />
+        <p className="ac-lead">{t('orgSettings.signature.hint')}</p>
       </div>
 
       {mutation.error !== null ? (

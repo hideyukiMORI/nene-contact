@@ -973,6 +973,10 @@ export const ja = {
   'orgSettings.senderName.hint':
     '空欄にすると組織名「{name}」が使われます。管理宛の通知メールと、送信者への自動返信メールの送信者名として表示されます。',
   'orgSettings.senderName.placeholder': '例: AYANE（自動送信）',
+  'orgSettings.signature.label': 'メールの署名',
+  'orgSettings.signature.hint':
+    '管理宛の通知メールと自動返信メールの末尾に付きます。空欄なら付きません。改行はそのまま反映されます。',
+  'orgSettings.signature.placeholder': '例:\n──────────\nAYANE\nhttps://ayane.co.jp',
   'orgSettings.save': '保存',
   'orgSettings.saving': '保存中…',
   'orgSettings.saved': '保存しました。',
