@@ -1,35 +1,112 @@
 import { useState, type ReactNode } from 'react';
-import type { ChannelType } from '@/entities/notification-channel';
-import { CHANNEL_TYPES, CHANNEL_ICON } from '@/entities/notification-channel';
-import type { MessageKey } from '@/shared/i18n/messages/ja';
+import type {
+  ChannelType,
+  NotificationChannel,
+  NotificationChannelTestResult,
+} from '@/entities/notification-channel';
+import {
+  CHANNEL_ICON,
+  CHANNEL_TYPES,
+  normalizeChannelConfig,
+  validateChannelConfig,
+} from '@/entities/notification-channel';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import { useChannels } from '@/features/manage-channels/model/use-channels';
+import { ChannelConfigFields } from '@/features/manage-channels/ui/ChannelConfigFields';
 
-const CONFIG_FIELDS: Record<ChannelType, { key: string; inputType: string }[]> = {
-  email: [{ key: 'recipient', inputType: 'email' }],
-  slack: [{ key: 'webhook_url', inputType: 'url' }],
-  chatwork: [
-    { key: 'api_token', inputType: 'password' },
-    { key: 'room_id', inputType: 'text' },
-  ],
-  webhook: [
-    { key: 'url', inputType: 'url' },
-    { key: 'secret', inputType: 'password' },
-  ],
-};
+function onlyFilled(config: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = {};
+  for (const [key, value] of Object.entries(config)) {
+    if (value !== '') {
+      out[key] = value;
+    }
+  }
+  return out;
+}
 
 export function ManageChannels({ contactFormId }: { contactFormId: number }): ReactNode {
   const { t } = useI18n();
-  const { channels, isLoading, error, create, isCreating, createError } =
-    useChannels(contactFormId);
+  const {
+    channels,
+    isLoading,
+    error,
+    create,
+    isCreating,
+    createError,
+    update,
+    isUpdating,
+    updateError,
+    remove,
+    isRemoving,
+    test,
+    isTesting,
+  } = useChannels(contactFormId);
+
+  // Add form.
   const [channelType, setChannelType] = useState<ChannelType>('email');
   const [config, setConfig] = useState<Record<string, string>>({});
+  const [addErrors, setAddErrors] = useState<Record<string, string>>({});
+
+  // Per-row state.
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editConfig, setEditConfig] = useState<Record<string, string>>({});
+  const [editEnabled, setEditEnabled] = useState(true);
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [testResults, setTestResults] = useState<Record<number, NotificationChannelTestResult>>({});
+  const [testingId, setTestingId] = useState<number | null>(null);
 
   const onCreate = (): void => {
-    void create({ contactFormId, channelType, config, isEnabled: true }).then(() => {
+    const normalized = normalizeChannelConfig(channelType, config);
+    const errs = validateChannelConfig(channelType, normalized, true);
+    setAddErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      return;
+    }
+    void create({ contactFormId, channelType, config: normalized, isEnabled: true }).then(() => {
       setConfig({});
+      setAddErrors({});
     });
+  };
+
+  const startEdit = (channel: NotificationChannel): void => {
+    setEditingId(channel.id);
+    setEditConfig({});
+    setEditEnabled(channel.isEnabled);
+    setEditErrors({});
+    setConfirmDeleteId(null);
+  };
+
+  const onSaveEdit = (channel: NotificationChannel): void => {
+    const normalized = normalizeChannelConfig(channel.channelType, editConfig);
+    const errs = validateChannelConfig(channel.channelType, normalized, false);
+    setEditErrors(errs);
+    if (Object.keys(errs).length > 0) {
+      return;
+    }
+    const filled = onlyFilled(normalized);
+    void update({
+      id: channel.id,
+      update: {
+        ...(Object.keys(filled).length > 0 ? { config: filled } : {}),
+        isEnabled: editEnabled,
+      },
+    }).then(() => {
+      setEditingId(null);
+      setEditConfig({});
+    });
+  };
+
+  const onTest = (id: number): void => {
+    setTestingId(id);
+    void test(id)
+      .then((result) => {
+        setTestResults((m) => ({ ...m, [id]: result }));
+      })
+      .finally(() => {
+        setTestingId(null);
+      });
   };
 
   return (
@@ -57,32 +134,58 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
                 <tr>
                   <th>{t('channels.column.type')}</th>
                   <th>{t('channels.column.enabled')}</th>
+                  <th className="act">{t('channels.column.actions')}</th>
                 </tr>
               </thead>
               <tbody>
-                {channels.map((channel) => (
-                  <tr key={channel.id}>
-                    <td>
-                      <span className="ch-type">
-                        <Icon name={CHANNEL_ICON[channel.channelType]} size={16} />
-                        {t(`channel.type.${channel.channelType}`)}
-                      </span>
-                    </td>
-                    <td>
-                      {channel.isEnabled ? (
-                        <span className="ex-badge done">
-                          <span className="dot" />
-                          {t('channels.on')}
-                        </span>
-                      ) : (
-                        <span className="fm-st ended">
-                          <span className="d" />
-                          {t('channels.off')}
-                        </span>
-                      )}
-                    </td>
-                  </tr>
-                ))}
+                {channels.map((channel) => {
+                  const result = testResults[channel.id];
+                  return (
+                    <ChannelRow
+                      key={channel.id}
+                      channel={channel}
+                      isEditing={editingId === channel.id}
+                      editConfig={editConfig}
+                      editEnabled={editEnabled}
+                      editErrors={editErrors}
+                      isUpdating={isUpdating}
+                      updateError={updateError}
+                      isRemoving={isRemoving}
+                      isTesting={isTesting && testingId === channel.id}
+                      testResult={result}
+                      confirmDelete={confirmDeleteId === channel.id}
+                      onStartEdit={() => {
+                        startEdit(channel);
+                      }}
+                      onCancelEdit={() => {
+                        setEditingId(null);
+                      }}
+                      onEditConfigChange={(key, value) => {
+                        setEditConfig((c) => ({ ...c, [key]: value }));
+                      }}
+                      onToggleEnabled={(value) => {
+                        setEditEnabled(value);
+                      }}
+                      onSaveEdit={() => {
+                        onSaveEdit(channel);
+                      }}
+                      onTest={() => {
+                        onTest(channel.id);
+                      }}
+                      onAskDelete={() => {
+                        setConfirmDeleteId(channel.id);
+                      }}
+                      onCancelDelete={() => {
+                        setConfirmDeleteId(null);
+                      }}
+                      onConfirmDelete={() => {
+                        void remove(channel.id).then(() => {
+                          setConfirmDeleteId(null);
+                        });
+                      }}
+                    />
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -106,6 +209,7 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
                   onClick={() => {
                     setChannelType(type);
                     setConfig({});
+                    setAddErrors({});
                   }}
                 >
                   <Icon name={CHANNEL_ICON[type]} size={15} />
@@ -115,24 +219,15 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
             </div>
           </div>
 
-          {CONFIG_FIELDS[channelType].map((fieldDef) => {
-            const id = `ch-cfg-${fieldDef.key}`;
-            return (
-              <div key={fieldDef.key} className="bd-frow">
-                <label className="l" htmlFor={id}>
-                  {t(`channel.config.${fieldDef.key}` as MessageKey)}
-                </label>
-                <input
-                  id={id}
-                  type={fieldDef.inputType}
-                  value={config[fieldDef.key] ?? ''}
-                  onChange={(e) => {
-                    setConfig((c) => ({ ...c, [fieldDef.key]: e.target.value }));
-                  }}
-                />
-              </div>
-            );
-          })}
+          <ChannelConfigFields
+            channelType={channelType}
+            config={config}
+            errors={addErrors}
+            idPrefix="ch-add"
+            onChange={(key, value) => {
+              setConfig((c) => ({ ...c, [key]: value }));
+            }}
+          />
 
           {createError !== null ? (
             <div className="au-note" role="alert">
@@ -147,5 +242,155 @@ export function ManageChannels({ contactFormId }: { contactFormId: number }): Re
         </div>
       </div>
     </div>
+  );
+}
+
+interface RowProps {
+  channel: NotificationChannel;
+  isEditing: boolean;
+  editConfig: Record<string, string>;
+  editEnabled: boolean;
+  editErrors: Record<string, string>;
+  isUpdating: boolean;
+  updateError: unknown;
+  isRemoving: boolean;
+  isTesting: boolean;
+  testResult: NotificationChannelTestResult | undefined;
+  confirmDelete: boolean;
+  onStartEdit: () => void;
+  onCancelEdit: () => void;
+  onEditConfigChange: (key: string, value: string) => void;
+  onToggleEnabled: (value: boolean) => void;
+  onSaveEdit: () => void;
+  onTest: () => void;
+  onAskDelete: () => void;
+  onCancelDelete: () => void;
+  onConfirmDelete: () => void;
+}
+
+function ChannelRow(props: RowProps): ReactNode {
+  const { t } = useI18n();
+  const { channel } = props;
+
+  return (
+    <>
+      <tr>
+        <td>
+          <span className="ch-type">
+            <Icon name={CHANNEL_ICON[channel.channelType]} size={16} />
+            {t(`channel.type.${channel.channelType}`)}
+          </span>
+        </td>
+        <td>
+          {channel.isEnabled ? (
+            <span className="ex-badge done">
+              <span className="dot" />
+              {t('channels.on')}
+            </span>
+          ) : (
+            <span className="fm-st ended">
+              <span className="d" />
+              {t('channels.off')}
+            </span>
+          )}
+        </td>
+        <td className="act">
+          <div className="ch-actions">
+            <button
+              type="button"
+              className="ex-btn ghost"
+              disabled={props.isTesting}
+              onClick={props.onTest}
+            >
+              <Icon name="send" size={13} />
+              {props.isTesting ? t('channels.testing') : t('channels.test')}
+            </button>
+            <button type="button" className="ex-btn ghost" onClick={props.onStartEdit}>
+              <Icon name="edit" size={13} />
+              {t('channels.edit')}
+            </button>
+            {props.confirmDelete ? (
+              <>
+                <button
+                  type="button"
+                  className="ex-btn danger"
+                  disabled={props.isRemoving}
+                  onClick={props.onConfirmDelete}
+                >
+                  <Icon name="trash" size={13} />
+                  {props.isRemoving ? t('channels.deleting') : t('channels.delete.confirmYes')}
+                </button>
+                <button type="button" className="ex-btn ghost" onClick={props.onCancelDelete}>
+                  {t('channels.cancel')}
+                </button>
+              </>
+            ) : (
+              <button type="button" className="ex-btn danger" onClick={props.onAskDelete}>
+                <Icon name="trash" size={13} />
+                {t('channels.delete')}
+              </button>
+            )}
+          </div>
+          {props.testResult !== undefined ? (
+            props.testResult.ok ? (
+              <span className="ch-testok" role="status">
+                <Icon name="check" size={13} />
+                {t('channels.test.ok')}
+              </span>
+            ) : (
+              <span className="ch-fielderr" role="alert">
+                {t('channels.test.fail')}
+                {props.testResult.error !== null ? ` (${props.testResult.error})` : ''}
+              </span>
+            )
+          ) : null}
+        </td>
+      </tr>
+
+      {props.isEditing ? (
+        <tr className="ch-editrow">
+          <td colSpan={3}>
+            <p className="ch-edithint">{t('channels.edit.hint')}</p>
+            <ChannelConfigFields
+              channelType={channel.channelType}
+              config={props.editConfig}
+              errors={props.editErrors}
+              idPrefix={`ch-edit-${String(channel.id)}`}
+              editing
+              onChange={props.onEditConfigChange}
+            />
+            <label className="ch-enabled">
+              <input
+                type="checkbox"
+                checked={props.editEnabled}
+                onChange={(e) => {
+                  props.onToggleEnabled(e.target.checked);
+                }}
+              />
+              {t('channels.enabled')}
+            </label>
+            {props.updateError !== null && props.updateError !== undefined ? (
+              <div className="au-note" role="alert">
+                {t('channels.saveError')}
+              </div>
+            ) : null}
+            <div className="ch-actions">
+              <button
+                type="button"
+                className="ex-btn"
+                disabled={props.isUpdating}
+                onClick={props.onSaveEdit}
+              >
+                <Icon name="check" size={13} />
+                {props.isUpdating ? t('channels.saving') : t('channels.save')}
+              </button>
+              <button type="button" className="ex-btn ghost" onClick={props.onCancelEdit}>
+                {t('channels.cancel')}
+              </button>
+            </div>
+          </td>
+        </tr>
+      ) : null}
+    </>
   );
 }
