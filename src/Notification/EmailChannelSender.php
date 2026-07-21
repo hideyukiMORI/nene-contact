@@ -38,8 +38,8 @@ final readonly class EmailChannelSender implements ChannelSenderInterface
             (new Email())
                 ->from($settings->from)
                 ->to($recipient)
-                ->subject('New submission: ' . $form->name)
-                ->text($settings->applyTo(SubmissionSummary::text($form, $submission))),
+                ->subject(AdminNotificationTemplate::subject($form, $submission))
+                ->text($settings->applyTo(AdminNotificationTemplate::body($form, $submission))),
         );
     }
 }

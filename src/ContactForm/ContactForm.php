@@ -34,6 +34,8 @@ final readonly class ContactForm
         public ?array $successMessage = null,
         public ?string $redirectUrl = null,
         public ?AutoReply $autoReply = null,
+        public ?string $adminNotificationSubject = null,
+        public ?string $adminNotificationBody = null,
         public ?int $id = null,
         public ?string $createdAt = null,
         public ?string $updatedAt = null,

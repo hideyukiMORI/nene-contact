@@ -52,6 +52,8 @@ const initialDraft: ContactFormDraft = {
   postSubmit: 'message',
   successMessage: null,
   redirectUrl: null,
+  adminNotificationSubject: null,
+  adminNotificationBody: null,
   fields: [],
 };
 
@@ -73,6 +75,8 @@ export interface FormBuilder {
   setPostSubmit: (action: PostSubmitAction) => void;
   setSuccessMessage: (locale: string, value: string) => void;
   setRedirectUrl: (url: string) => void;
+  setAdminNotificationSubject: (value: string) => void;
+  setAdminNotificationBody: (value: string) => void;
   addField: (fieldType: string) => string;
   duplicateField: (id: string) => string | null;
   removeField: (id: string) => void;
@@ -159,6 +163,12 @@ export function useFormBuilder(seed?: ContactFormDraft, formId?: number): FormBu
     },
     setRedirectUrl: (url) => {
       setDraft((d) => ({ ...d, redirectUrl: url }));
+    },
+    setAdminNotificationSubject: (value) => {
+      setDraft((d) => ({ ...d, adminNotificationSubject: value === '' ? null : value }));
+    },
+    setAdminNotificationBody: (value) => {
+      setDraft((d) => ({ ...d, adminNotificationBody: value === '' ? null : value }));
     },
     addField: (fieldType) => {
       const field = newField(fieldType);

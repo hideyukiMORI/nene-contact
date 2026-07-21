@@ -46,6 +46,8 @@ final readonly class ContactFormBodyPatch
         'success_message',
         'redirect_url',
         'autoreply',
+        'admin_notification_subject',
+        'admin_notification_body',
         'fields',
     ];
 

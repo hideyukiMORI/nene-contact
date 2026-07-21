@@ -53,6 +53,8 @@ final readonly class CreateContactFormUseCase implements CreateContactFormUseCas
             successMessage: $input->successMessage,
             redirectUrl: $input->redirectUrl,
             autoReply: $input->autoReply,
+            adminNotificationSubject: $input->adminNotificationSubject,
+            adminNotificationBody: $input->adminNotificationBody,
         );
 
         $id = $this->forms->save($form);

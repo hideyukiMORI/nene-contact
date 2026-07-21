@@ -118,6 +118,17 @@ final readonly class ContactFormBodyValidator
             $errors[] = new ValidationError('autoreply', "A subject and body for the default locale ({$defaultLocale}) are required when the auto-reply is enabled.", 'required');
         }
 
+        // Admin-notification template (email-wording wave c): optional per-form subject/body with
+        // {variables}. Null resolves to the default at send time.
+        $adminSubject = self::optionalCappedString($body['admin_notification_subject'] ?? null);
+        if ($adminSubject !== null && mb_strlen($adminSubject) > 255) {
+            $errors[] = new ValidationError('admin_notification_subject', 'admin_notification_subject must be at most 255 characters.', 'too_long');
+        }
+        $adminBody = self::optionalCappedString($body['admin_notification_body'] ?? null);
+        if ($adminBody !== null && mb_strlen($adminBody) > 5000) {
+            $errors[] = new ValidationError('admin_notification_body', 'admin_notification_body must be at most 5000 characters.', 'too_long');
+        }
+
         $postSubmit = is_string($body['post_submit'] ?? null) ? (string) $body['post_submit'] : 'message';
         if (!in_array($postSubmit, ['message', 'redirect'], true)) {
             $errors[] = new ValidationError('post_submit', 'Post-submit action must be "message" or "redirect".', 'invalid');
@@ -237,7 +248,21 @@ final readonly class ContactFormBodyValidator
             successMessage: $successMessage === [] ? null : $successMessage,
             redirectUrl: $redirectUrl,
             autoReply: $autoReply,
+            adminNotificationSubject: $adminSubject,
+            adminNotificationBody: $adminBody,
         );
+    }
+
+    /** Trim a value to a nullable string; blank becomes null. */
+    private static function optionalCappedString(mixed $value): ?string
+    {
+        if (!is_string($value)) {
+            return null;
+        }
+
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
     }
 
     /**

@@ -183,6 +183,7 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 | `post_submit` | `contact_form` | after-submit behaviour: `message` (default) or `redirect` (submit experience) |
 | `success_message` | `contact_form` | optional per-locale completion message shown when `post_submit=message` (submit experience) |
 | `redirect_url` | `contact_form` | absolute `http(s)` URL; required when `post_submit=redirect` (submit experience) |
+| `admin_notification_subject` / `admin_notification_body` | `contact_form` | per-form admin-notification email template; null = Japanese default. Variables (admin only): `{form_name}` `{submitted_at}` `{email}` `{name}` `{message}` (email-wording wave c, #446) |
 | `consent_given_at` | `submission` | immutable consent timestamp (charter §3) |
 | `source` | `submission` | origin: `form` (public/embed) or service ingest `concierge` / `import` / `api` / `first_party` (M6; `first_party` = records native embed relay via a service token, #388) |
 | `source_url` | `submission` | embed host page the form was submitted from (referer); non-PII reception meta shown by default (ADR 0018); null for service ingest |

@@ -31,6 +31,8 @@ final readonly class ContactFormResponse
             'success_message' => $form->successMessage,
             'redirect_url' => $form->redirectUrl,
             'autoreply' => ($form->autoReply ?? AutoReply::disabled())->toArray(),
+            'admin_notification_subject' => $form->adminNotificationSubject,
+            'admin_notification_body' => $form->adminNotificationBody,
             'fields' => array_map(
                 static fn (FormField $f): array => [
                     'id' => $f->id,

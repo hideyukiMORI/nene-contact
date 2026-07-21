@@ -309,6 +309,46 @@ export function FormSettingsPage({
           >
             {t('settingsTab.soon')}
           </p>
+
+          <div className="srow">
+            <label className="l" htmlFor="st-admin-subject">
+              {t('settingsTab.adminSubject')}
+            </label>
+            <div style={{ flex: 1 }}>
+              <input
+                id="st-admin-subject"
+                className="sinput"
+                type="text"
+                maxLength={255}
+                value={draft.adminNotificationSubject ?? ''}
+                placeholder={t('settingsTab.adminSubjectPh')}
+                onChange={(e) => {
+                  builder.setAdminNotificationSubject(e.target.value);
+                }}
+              />
+            </div>
+          </div>
+          <div className="srow">
+            <label className="l" htmlFor="st-admin-body">
+              {t('settingsTab.adminBody')}
+            </label>
+            <textarea
+              id="st-admin-body"
+              className="sinput area"
+              maxLength={5000}
+              value={draft.adminNotificationBody ?? ''}
+              placeholder={t('settingsTab.adminBodyPh')}
+              onChange={(e) => {
+                builder.setAdminNotificationBody(e.target.value);
+              }}
+            />
+          </div>
+          <p
+            className="td"
+            style={{ fontSize: '11.5px', color: 'var(--ex-faint)', margin: '2px 0 0' }}
+          >
+            {t('settingsTab.adminVars')}
+          </p>
         </div>
       </div>
     </div>

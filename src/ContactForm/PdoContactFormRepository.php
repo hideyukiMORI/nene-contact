@@ -15,7 +15,7 @@ use Nene2\Http\RequestScopedHolder;
  */
 final readonly class PdoContactFormRepository implements ContactFormRepositoryInterface
 {
-    private const FORM_COLUMNS = 'id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, appearance_json, autoreply_json, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at';
+    private const FORM_COLUMNS = 'id, organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, appearance_json, autoreply_json, admin_notification_subject, admin_notification_body, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at';
     private const FIELD_COLUMNS = 'id, contact_form_id, field_type, name, placeholder, description, label_json, required, options_json, config_json, sort_order';
 
     /**
@@ -35,8 +35,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
 
         return $this->tx->transactional(static function (DatabaseQueryExecutorInterface $q) use ($form, $organizationId, $now): int {
             $q->execute(
-                'INSERT INTO contact_forms (organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, appearance_json, autoreply_json, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO contact_forms (organization_id, name, description, public_form_key, default_locale, locales_json, allowed_origins_json, status, consent_required, consent_label_json, retention_days, appearance_json, autoreply_json, admin_notification_subject, admin_notification_body, submit_label_json, post_submit, success_message_json, redirect_url, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     $organizationId,
                     $form->name,
@@ -51,6 +51,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
                     $form->retentionDays,
                     $form->appearance !== null ? self::encode($form->appearance->toArray()) : null,
                     $form->autoReply !== null ? self::encode($form->autoReply->toArray()) : null,
+                    $form->adminNotificationSubject,
+                    $form->adminNotificationBody,
                     $form->submitLabel !== null ? self::encode($form->submitLabel) : null,
                     $form->postSubmit,
                     $form->successMessage !== null ? self::encode($form->successMessage) : null,
@@ -98,7 +100,7 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
             // are preserved. Org-scoped so a cross-tenant id updates nothing.
             $q->execute(
                 'UPDATE contact_forms
-                 SET name = ?, description = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, appearance_json = ?, autoreply_json = ?, submit_label_json = ?, post_submit = ?, success_message_json = ?, redirect_url = ?, updated_at = ?
+                 SET name = ?, description = ?, default_locale = ?, locales_json = ?, allowed_origins_json = ?, consent_required = ?, consent_label_json = ?, retention_days = ?, appearance_json = ?, autoreply_json = ?, admin_notification_subject = ?, admin_notification_body = ?, submit_label_json = ?, post_submit = ?, success_message_json = ?, redirect_url = ?, updated_at = ?
                  WHERE id = ? AND organization_id = ?',
                 [
                     $form->name,
@@ -111,6 +113,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
                     $form->retentionDays,
                     $form->appearance !== null ? self::encode($form->appearance->toArray()) : null,
                     $form->autoReply !== null ? self::encode($form->autoReply->toArray()) : null,
+                    $form->adminNotificationSubject,
+                    $form->adminNotificationBody,
                     $form->submitLabel !== null ? self::encode($form->submitLabel) : null,
                     $form->postSubmit,
                     $form->successMessage !== null ? self::encode($form->successMessage) : null,
@@ -292,6 +296,8 @@ final readonly class PdoContactFormRepository implements ContactFormRepositoryIn
             successMessage: $successMessage,
             redirectUrl: isset($row['redirect_url']) ? (string) $row['redirect_url'] : null,
             autoReply: AutoReply::fromStored($autoReply),
+            adminNotificationSubject: isset($row['admin_notification_subject']) && $row['admin_notification_subject'] !== '' ? (string) $row['admin_notification_subject'] : null,
+            adminNotificationBody: isset($row['admin_notification_body']) && $row['admin_notification_body'] !== '' ? (string) $row['admin_notification_body'] : null,
             id: (int) $row['id'],
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],

@@ -404,6 +404,8 @@ export function toContactFormDraft(dto: ContactFormDto): ContactFormDraft {
     postSubmit: dto.post_submit ?? 'message',
     successMessage: dto.success_message ?? null,
     redirectUrl: dto.redirect_url ?? null,
+    adminNotificationSubject: dto.admin_notification_subject ?? null,
+    adminNotificationBody: dto.admin_notification_body ?? null,
     fields,
   };
 }
@@ -435,6 +437,12 @@ export function toCreateContactFormDto(draft: ContactFormDraft): CreateContactFo
     ...(draft.successMessage !== null ? { success_message: draft.successMessage } : {}),
     ...(draft.redirectUrl !== null && draft.redirectUrl.trim() !== ''
       ? { redirect_url: draft.redirectUrl }
+      : {}),
+    ...(draft.adminNotificationSubject !== null && draft.adminNotificationSubject.trim() !== ''
+      ? { admin_notification_subject: draft.adminNotificationSubject }
+      : {}),
+    ...(draft.adminNotificationBody !== null && draft.adminNotificationBody.trim() !== ''
+      ? { admin_notification_body: draft.adminNotificationBody }
       : {}),
     fields: draft.fields.map((field) => ({
       field_type: field.fieldType as CreateContactFormDto['fields'][number]['field_type'],

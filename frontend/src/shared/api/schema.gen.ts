@@ -945,6 +945,10 @@ export interface components {
             success_message?: components["schemas"]["LocaleMap"] | null;
             redirect_url?: string | null;
             autoreply?: components["schemas"]["AutoReply"];
+            /** @description Admin-notification email subject template; null uses the default. */
+            admin_notification_subject?: string | null;
+            /** @description Admin-notification email body template; null uses the default. Variables: {form_name} {submitted_at} {email} {name} {message}. */
+            admin_notification_body?: string | null;
             fields: components["schemas"]["FormField"][];
         };
         /** @description Per-form sender auto-reply (#360). When enabled, a successful public submit sends one acknowledgement email to the address entered in the form's `email` field. Subject/body are operator-authored, per-locale (ja/en), and never interpolated with submission values (fixed template — backscatter mitigation). Best-effort with a per-recipient cooldown. Mirrors NeneContact\ContactForm\AutoReply. */
@@ -1086,6 +1090,10 @@ export interface components {
             redirect_url?: string;
             /** @description Optional sender auto-reply config (#360); when enabled, subject+body for the default locale are required. */
             autoreply?: components["schemas"]["AutoReply"];
+            /** @description Admin-notification subject template; null/blank uses the default. */
+            admin_notification_subject?: string | null;
+            /** @description Admin-notification body template; null/blank uses the default. Variables: {form_name} {submitted_at} {email} {name} {message}. */
+            admin_notification_body?: string | null;
             fields: {
                 /** @enum {string} */
                 field_type: "text" | "email" | "phone" | "textarea" | "select" | "checkbox" | "date" | "file" | "honeypot";
