@@ -30,6 +30,7 @@ use NeneContact\Handoff\HandoffServiceProvider;
 use NeneContact\Media\MediaNotFoundExceptionHandler;
 use NeneContact\Media\MediaRouteRegistrar;
 use NeneContact\Media\MediaServiceProvider;
+use NeneContact\Notification\NotificationChannelNotFoundExceptionHandler;
 use NeneContact\Notification\NotificationChannelRouteRegistrar;
 use NeneContact\Notification\NotificationChannelServiceProvider;
 use NeneContact\Organization\OrganizationNotFoundExceptionHandler;
@@ -185,8 +186,9 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                     $attachmentNotFound = $container->get(AttachmentNotFoundExceptionHandler::class);
                     $mediaNotFound = $container->get(MediaNotFoundExceptionHandler::class);
                     $serviceTokenNotFound = $container->get(ServiceTokenNotFoundExceptionHandler::class);
+                    $notificationChannelNotFound = $container->get(NotificationChannelNotFoundExceptionHandler::class);
 
-                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound, $mediaNotFound, $serviceTokenNotFound] as $handler) {
+                    foreach ([$invalidCredentials, $userNotFound, $emailConflict, $organizationNotFound, $organizationSlugConflict, $contactFormNotFound, $submissionNotFound, $attachmentNotFound, $mediaNotFound, $serviceTokenNotFound, $notificationChannelNotFound] as $handler) {
                         if (!$handler instanceof DomainExceptionHandlerInterface) {
                             throw new LogicException('Exception handler service is invalid.');
                         }
@@ -203,6 +205,7 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
                         $attachmentNotFound,
                         $mediaNotFound,
                         $serviceTokenNotFound,
+                        $notificationChannelNotFound,
                     ];
                 },
             );

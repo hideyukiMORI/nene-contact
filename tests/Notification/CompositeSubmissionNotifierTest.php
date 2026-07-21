@@ -30,6 +30,19 @@ final class CompositeSubmissionNotifierTest extends TestCase
                 return 1;
             }
 
+            public function findById(int $id): ?NotificationChannel
+            {
+                return $this->enabled[0] ?? null;
+            }
+
+            public function update(NotificationChannel $channel): void
+            {
+            }
+
+            public function softDelete(int $id): void
+            {
+            }
+
             /** @return list<NotificationChannel> */
             public function listByContactForm(int $contactFormId): array
             {

@@ -339,6 +339,54 @@ paths:
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
 
+  /admin/notification-channels/{id}:
+    parameters:
+      - name: id
+        in: path
+        required: true
+        schema: { type: integer }
+    get:
+      tags: [NotificationChannel]
+      operationId: getNotificationChannel
+      summary: Get a notification channel (config secrets redacted)
+      responses:
+        '200':
+          description: Channel detail
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationChannelResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+    patch:
+      tags: [NotificationChannel]
+      operationId: updateNotificationChannel
+      summary: Update a notification channel's config and/or enabled flag
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateNotificationChannelRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/NotificationChannelResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+    delete:
+      tags: [NotificationChannel]
+      operationId: deleteNotificationChannel
+      summary: Soft-delete a notification channel (ADR 0016 — never a physical row deletion)
+      responses:
+        '204': { description: Soft-deleted; the channel drops out of every read and dispatch }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /admin/media:
     get:
       tags: [Media]
@@ -1846,11 +1894,16 @@ components:
 
     NotificationChannelResponse:
       type: object
+      description: >
+        The config (webhook URLs / API tokens) is never returned — only type, form, enabled
+        flag, and timestamps are exposed (charter §6/§10).
       properties:
         id: { type: integer }
         contact_form_id: { type: integer }
         channel_type: { type: string, enum: [email, slack, chatwork, webhook] }
         is_enabled: { type: boolean }
+        created_at: { type: string, nullable: true }
+        updated_at: { type: string, nullable: true }
       required: [id, contact_form_id, channel_type]
 
     NotificationChannelListResponse:
@@ -1873,3 +1926,19 @@ components:
             chatwork: api_token, room_id; webhook: url, secret (HMAC-SHA256 signing).
         is_enabled: { type: boolean }
       required: [contact_form_id, channel_type, config]
+
+    UpdateNotificationChannelRequest:
+      type: object
+      description: >
+        Partial update. Provide is_enabled and/or config. In config, provided non-empty values
+        overwrite the stored value; omitted or blank keys keep it (so a secret token need not be
+        re-entered to toggle the channel or fix another field). channel_type and contact_form_id
+        are immutable. chatwork room_id is normalized (a pasted `rid` prefix is stripped) and must
+        be digits only; slack webhook_url must start with https://hooks.slack.com/.
+      properties:
+        is_enabled: { type: boolean }
+        config:
+          type: object
+          additionalProperties: true
+          description: Channel-specific keys to merge over the stored config (encrypted at rest).
+      minProperties: 1

@@ -219,7 +219,9 @@ Examples: `submission.viewed`, `submission.exported`,
 `submission.deleted` (soft-delete),
 `submission.corrected` (data-subject correction, §4), `submission.expired` (retention
 soft-delete, §5), `submission.purged` (PII erased in place, ADR 0016), `user.created`,
-`contact_form.updated`, `notification_channel.created`, `handoff.created` (first sibling
+`contact_form.updated`, `notification_channel.created` / `notification_channel.updated`
+(config or enabled-flag edit) / `notification_channel.deleted` (soft-delete, ADR 0016),
+`handoff.created` (first sibling
 handoff attempt), `handoff.retried` (subsequent attempts; entity type `handoff`),
 `user.password_changed` — one event for two paths, told apart by the actor: a **self-service
 change** carries the changer's own `actor_user_id`; an **admin reset** (bootstrap

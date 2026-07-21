@@ -11,16 +11,25 @@ final readonly class NotificationChannelRouteRegistrar
 {
     public function __construct(
         private ListNotificationChannelsHandler $listHandler,
+        private GetNotificationChannelHandler $getHandler,
         private CreateNotificationChannelHandler $createHandler,
+        private UpdateNotificationChannelHandler $updateHandler,
+        private DeleteNotificationChannelHandler $deleteHandler,
     ) {
     }
 
     public function __invoke(Router $router): void
     {
         $list = $this->listHandler;
+        $get = $this->getHandler;
         $create = $this->createHandler;
+        $update = $this->updateHandler;
+        $delete = $this->deleteHandler;
 
         $router->get('/admin/notification-channels', static fn (ServerRequestInterface $r) => $list->handle($r));
+        $router->get('/admin/notification-channels/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
         $router->post('/admin/notification-channels', static fn (ServerRequestInterface $r) => $create->handle($r));
+        $router->patch('/admin/notification-channels/{id}', static fn (ServerRequestInterface $r) => $update->handle($r));
+        $router->delete('/admin/notification-channels/{id}', static fn (ServerRequestInterface $r) => $delete->handle($r));
     }
 }

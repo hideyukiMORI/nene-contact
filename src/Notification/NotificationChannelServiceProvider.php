@@ -8,6 +8,8 @@ use LogicException;
 use Nene2\Database\DatabaseQueryExecutorInterface;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
+use Nene2\Error\ProblemDetailsResponseFactory;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use Nene2\Middleware\RateLimitStorageInterface;
@@ -39,6 +41,7 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                     $query = $c->get(DatabaseQueryExecutorInterface::class);
                     $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
                     $cipher = $c->get(ConfigCipherInterface::class);
+                    $clock = $c->get(ClockInterface::class);
 
                     if (!$query instanceof DatabaseQueryExecutorInterface) {
                         throw new LogicException('Database query executor service is invalid.');
@@ -52,8 +55,12 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                         throw new LogicException('Config cipher service is invalid.');
                     }
 
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
                     /** @var RequestScopedHolder<int> $orgId */
-                    return new PdoNotificationChannelRepository($query, $orgId, $cipher);
+                    return new PdoNotificationChannelRepository($query, $orgId, $cipher, $clock);
                 },
             )
             ->set(
@@ -161,6 +168,52 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 },
             )
             ->set(
+                GetNotificationChannelUseCaseInterface::class,
+                static function (ContainerInterface $c): GetNotificationChannelUseCaseInterface {
+                    $channels = $c->get(NotificationChannelRepositoryInterface::class);
+
+                    if (!$channels instanceof NotificationChannelRepositoryInterface) {
+                        throw new LogicException('Notification channel repository service is invalid.');
+                    }
+
+                    return new GetNotificationChannelUseCase($channels);
+                },
+            )
+            ->set(
+                UpdateNotificationChannelUseCaseInterface::class,
+                static function (ContainerInterface $c): UpdateNotificationChannelUseCaseInterface {
+                    $channels = $c->get(NotificationChannelRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$channels instanceof NotificationChannelRepositoryInterface) {
+                        throw new LogicException('Notification channel repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new UpdateNotificationChannelUseCase($channels, $audit);
+                },
+            )
+            ->set(
+                DeleteNotificationChannelUseCaseInterface::class,
+                static function (ContainerInterface $c): DeleteNotificationChannelUseCaseInterface {
+                    $channels = $c->get(NotificationChannelRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+
+                    if (!$channels instanceof NotificationChannelRepositoryInterface) {
+                        throw new LogicException('Notification channel repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    return new DeleteNotificationChannelUseCase($channels, $audit);
+                },
+            )
+            ->set(
                 CreateNotificationChannelHandler::class,
                 static function (ContainerInterface $c): CreateNotificationChannelHandler {
                     $uc = $c->get(CreateNotificationChannelUseCaseInterface::class);
@@ -195,20 +248,98 @@ final readonly class NotificationChannelServiceProvider implements ServiceProvid
                 },
             )
             ->set(
+                GetNotificationChannelHandler::class,
+                static function (ContainerInterface $c): GetNotificationChannelHandler {
+                    $uc = $c->get(GetNotificationChannelUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof GetNotificationChannelUseCaseInterface) {
+                        throw new LogicException('GetNotificationChannel use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new GetNotificationChannelHandler($uc, $json);
+                },
+            )
+            ->set(
+                UpdateNotificationChannelHandler::class,
+                static function (ContainerInterface $c): UpdateNotificationChannelHandler {
+                    $uc = $c->get(UpdateNotificationChannelUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof UpdateNotificationChannelUseCaseInterface) {
+                        throw new LogicException('UpdateNotificationChannel use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new UpdateNotificationChannelHandler($uc, $json);
+                },
+            )
+            ->set(
+                DeleteNotificationChannelHandler::class,
+                static function (ContainerInterface $c): DeleteNotificationChannelHandler {
+                    $uc = $c->get(DeleteNotificationChannelUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof DeleteNotificationChannelUseCaseInterface) {
+                        throw new LogicException('DeleteNotificationChannel use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new DeleteNotificationChannelHandler($uc, $json);
+                },
+            )
+            ->set(
+                NotificationChannelNotFoundExceptionHandler::class,
+                static function (ContainerInterface $c): NotificationChannelNotFoundExceptionHandler {
+                    $problemDetails = $c->get(ProblemDetailsResponseFactory::class);
+
+                    if (!$problemDetails instanceof ProblemDetailsResponseFactory) {
+                        throw new LogicException('Problem details response factory service is invalid.');
+                    }
+
+                    return new NotificationChannelNotFoundExceptionHandler($problemDetails);
+                },
+            )
+            ->set(
                 NotificationChannelRouteRegistrar::class,
                 static function (ContainerInterface $c): NotificationChannelRouteRegistrar {
                     $list = $c->get(ListNotificationChannelsHandler::class);
+                    $get = $c->get(GetNotificationChannelHandler::class);
                     $create = $c->get(CreateNotificationChannelHandler::class);
+                    $update = $c->get(UpdateNotificationChannelHandler::class);
+                    $delete = $c->get(DeleteNotificationChannelHandler::class);
 
                     if (!$list instanceof ListNotificationChannelsHandler) {
                         throw new LogicException('ListNotificationChannels handler service is invalid.');
+                    }
+
+                    if (!$get instanceof GetNotificationChannelHandler) {
+                        throw new LogicException('GetNotificationChannel handler service is invalid.');
                     }
 
                     if (!$create instanceof CreateNotificationChannelHandler) {
                         throw new LogicException('CreateNotificationChannel handler service is invalid.');
                     }
 
-                    return new NotificationChannelRouteRegistrar($list, $create);
+                    if (!$update instanceof UpdateNotificationChannelHandler) {
+                        throw new LogicException('UpdateNotificationChannel handler service is invalid.');
+                    }
+
+                    if (!$delete instanceof DeleteNotificationChannelHandler) {
+                        throw new LogicException('DeleteNotificationChannel handler service is invalid.');
+                    }
+
+                    return new NotificationChannelRouteRegistrar($list, $get, $create, $update, $delete);
                 },
             );
     }
