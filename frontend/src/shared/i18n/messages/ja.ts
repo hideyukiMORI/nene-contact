@@ -936,8 +936,10 @@ export const ja = {
   'settingsTab.adminSubjectPh': '空欄で既定（新しいお問い合わせ: フォーム名）',
   'settingsTab.adminBody': '管理宛メールの本文',
   'settingsTab.adminBodyPh': '空欄で既定。差し込み変数が使えます。',
-  'settingsTab.adminVars':
-    '使える変数: {form_name}（フォーム名）/ {name}（お名前）/ {email}（メール）/ {message}（内容）/ {submitted_at}（受信日時）',
+  'settingsTab.adminVarsLabel': '使える変数:',
+  'settingsTab.varFormName': 'フォーム名',
+  'settingsTab.varSubmittedAt': '受信日時',
+  'settingsTab.varMessage': '内容の一覧',
   'settingsTab.soon': '通知先・自動返信の詳細設定は近日対応。',
   'settingsTab.submit': '送信ボタン・送信後',
   'settingsTab.submitLabel': '送信ボタンの文言',

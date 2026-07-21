@@ -66,9 +66,10 @@ final class AdminNotificationTemplateTest extends TestCase
         self::assertSame('AYANE お問い合わせ / 2026-07-21 10:00:00 / 山田太郎', AdminNotificationTemplate::body($form, $submission));
     }
 
-    public function test_name_falls_back_to_first_text_field_when_no_name_field(): void
+    public function test_each_field_is_usable_by_its_name(): void
     {
-        // A form whose first text field is not literally "name" (case A fallback).
+        // A custom field name resolves; a variable with no matching field is left literal
+        // (no {name} heuristic anymore).
         $form = new ContactForm(
             organizationId: 7,
             name: 'F',
@@ -76,14 +77,33 @@ final class AdminNotificationTemplateTest extends TestCase
             defaultLocale: 'ja',
             locales: ['ja'],
             allowedOrigins: [],
-            fields: [new FormField(fieldType: 'text', name: 'full_name', label: ['ja' => '氏名'], required: false, sortOrder: 0)],
+            fields: [new FormField(fieldType: 'text', name: 'company', label: ['ja' => '会社名'], required: false, sortOrder: 0)],
             status: 'active',
-            adminNotificationSubject: '{name}',
+            adminNotificationSubject: '{company} / {name}',
             id: 3,
         );
-        $submission = new Submission(organizationId: 7, contactFormId: 3, fieldValues: ['full_name' => '花子'], id: 9);
+        $submission = new Submission(organizationId: 7, contactFormId: 3, fieldValues: ['company' => 'AYANE'], id: 9);
 
-        self::assertSame('花子', AdminNotificationTemplate::subject($form, $submission));
+        self::assertSame('AYANE / {name}', AdminNotificationTemplate::subject($form, $submission));
+    }
+
+    public function test_honeypot_field_is_not_a_variable(): void
+    {
+        $form = new ContactForm(
+            organizationId: 7,
+            name: 'F',
+            publicFormKey: 'k',
+            defaultLocale: 'ja',
+            locales: ['ja'],
+            allowedOrigins: [],
+            fields: [new FormField(fieldType: 'honeypot', name: 'website', label: ['ja' => ''], required: false, sortOrder: 0)],
+            status: 'active',
+            adminNotificationSubject: '[{website}]',
+            id: 3,
+        );
+        $submission = new Submission(organizationId: 7, contactFormId: 3, fieldValues: ['website' => 'spam'], id: 9);
+
+        self::assertSame('[{website}]', AdminNotificationTemplate::subject($form, $submission));
     }
 
     public function test_message_variable_has_no_english_header(): void

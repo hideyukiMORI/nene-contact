@@ -1482,7 +1482,7 @@ components:
         redirect_url: { type: [string, 'null'] }
         autoreply: { $ref: '#/components/schemas/AutoReply' }
         admin_notification_subject: { type: [string, 'null'], description: 'Admin-notification email subject template; null uses the default.' }
-        admin_notification_body: { type: [string, 'null'], description: 'Admin-notification email body template; null uses the default. Variables: {form_name} {submitted_at} {email} {name} {message}.' }
+        admin_notification_body: { type: [string, 'null'], description: 'Admin-notification email body template; null uses the default. Variables: {form_name} {submitted_at} {message} + each non-honeypot field by its name.' }
         fields:
           type: array
           items: { $ref: '#/components/schemas/FormField' }
@@ -1626,7 +1626,7 @@ components:
           allOf: [{ $ref: '#/components/schemas/AutoReply' }]
           description: 'Optional sender auto-reply config (#360); when enabled, subject+body for the default locale are required.'
         admin_notification_subject: { type: [string, 'null'], maxLength: 255, description: 'Admin-notification subject template; null/blank uses the default.' }
-        admin_notification_body: { type: [string, 'null'], maxLength: 5000, description: 'Admin-notification body template; null/blank uses the default. Variables: {form_name} {submitted_at} {email} {name} {message}.' }
+        admin_notification_body: { type: [string, 'null'], maxLength: 5000, description: 'Admin-notification body template; null/blank uses the default. Variables: {form_name} {submitted_at} {message} + each non-honeypot field by its name.' }
         fields:
           type: array
           items:

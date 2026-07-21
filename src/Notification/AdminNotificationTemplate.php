@@ -14,9 +14,10 @@ use NeneContact\Submission\Submission;
  * stays non-interpolated for backscatter safety. A form may override the subject/body; when unset,
  * the Japanese defaults are used (replacing the old English "New submission: …" — board #108).
  *
- * Variables: {form_name} {submitted_at} {email} {name} {message}. An unknown {token} is left
- * literal; missing data resolves to an empty string. Honeypot fields never appear ({message}
- * excludes them via {@see SubmissionSummary}).
+ * Variables are dynamic: every non-honeypot field is usable by its `name` (e.g. a `company` field
+ * → `{company}`), plus the reserved `{form_name}` `{submitted_at}` `{message}` (the field summary).
+ * Reserved names win over a same-named field. An unknown `{token}` is left literal; missing data
+ * resolves to an empty string.
  */
 final class AdminNotificationTemplate
 {
@@ -39,7 +40,7 @@ final class AdminNotificationTemplate
         $variables = self::variables($form, $submission);
 
         return preg_replace_callback(
-            '/\{([a-z_]+)\}/',
+            '/\{([A-Za-z0-9_]+)\}/',
             static fn (array $m): string => array_key_exists($m[1], $variables) ? $variables[$m[1]] : $m[0],
             $template,
         ) ?? $template;
@@ -48,42 +49,30 @@ final class AdminNotificationTemplate
     /** @return array<string, string> */
     private static function variables(ContactForm $form, Submission $submission): array
     {
-        return [
-            'form_name' => $form->name,
-            'submitted_at' => $submission->submittedAt ?? '',
-            'email' => self::firstOfType($form, $submission, FieldType::Email->value),
-            'name' => self::name($form, $submission),
-            'message' => SubmissionSummary::fields($form, $submission),
-        ];
-    }
+        $variables = [];
 
-    /** The value of the first field named `name`, else the first text field — case A. */
-    private static function name(ContactForm $form, Submission $submission): string
-    {
+        // Each non-honeypot field is usable by its name.
         foreach ($form->fields as $field) {
-            if ($field->name === 'name') {
-                $value = $submission->fieldValues['name'] ?? null;
-
-                return is_string($value) ? trim($value) : '';
-            }
-        }
-
-        return self::firstOfType($form, $submission, FieldType::Text->value);
-    }
-
-    private static function firstOfType(ContactForm $form, Submission $submission, string $type): string
-    {
-        foreach ($form->fields as $field) {
-            if ($field->fieldType !== $type) {
+            if ($field->fieldType === FieldType::Honeypot->value) {
                 continue;
             }
-
-            $value = $submission->fieldValues[$field->name] ?? null;
-            if (is_string($value) && trim($value) !== '') {
-                return trim($value);
-            }
+            $variables[$field->name] = self::stringify($submission->fieldValues[$field->name] ?? null);
         }
 
-        return '';
+        // Reserved variables win over any field with the same name.
+        $variables['form_name'] = $form->name;
+        $variables['submitted_at'] = $submission->submittedAt ?? '';
+        $variables['message'] = SubmissionSummary::fields($form, $submission);
+
+        return $variables;
+    }
+
+    private static function stringify(mixed $value): string
+    {
+        if ($value === null) {
+            return '';
+        }
+
+        return is_scalar($value) ? (string) $value : json_encode($value, JSON_UNESCAPED_UNICODE | JSON_THROW_ON_ERROR);
     }
 }
