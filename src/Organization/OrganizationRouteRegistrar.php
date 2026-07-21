@@ -13,6 +13,8 @@ final readonly class OrganizationRouteRegistrar
         private ListOrganizationsHandler $listHandler,
         private GetOrganizationByIdHandler $getHandler,
         private CreateOrganizationHandler $createHandler,
+        private GetOrganizationSettingsHandler $settingsGetHandler,
+        private UpdateOrganizationHandler $updateHandler,
     ) {
     }
 
@@ -21,9 +23,16 @@ final readonly class OrganizationRouteRegistrar
         $list = $this->listHandler;
         $get = $this->getHandler;
         $create = $this->createHandler;
+        $settingsGet = $this->settingsGetHandler;
+        $update = $this->updateHandler;
 
+        // Superadmin org management (cross-tenant).
         $router->get('/admin/organizations', static fn (ServerRequestInterface $r) => $list->handle($r));
         $router->get('/admin/organizations/{id}', static fn (ServerRequestInterface $r) => $get->handle($r));
         $router->post('/admin/organizations', static fn (ServerRequestInterface $r) => $create->handle($r));
+
+        // Self-scoped org settings (ManageSettings) — always the caller's own organization.
+        $router->get('/admin/settings/organization', static fn (ServerRequestInterface $r) => $settingsGet->handle($r));
+        $router->patch('/admin/settings/organization', static fn (ServerRequestInterface $r) => $update->handle($r));
     }
 }

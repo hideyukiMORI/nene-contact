@@ -195,6 +195,8 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 | `description` | `form_field` | optional per-field description shown under the label in the embed (field-config UI) |
 | `config_json` | `form_field` | per-field declarative config: choice display config (select) or type-specific config (FieldTypeConfig); null for checkbox/honeypot |
 | `config_json` | `notification_channel` | encrypted at rest |
+| `deleted_at` | `notification_channel` | soft-delete marker (ADR 0016); excluded from admin reads + dispatch (#429) |
+| `sender_display_name` | `organization` | email From display name; null falls back to the organization `name` (email-wording wave a, #442) |
 | `target` | `submission_link` | handoff target: `deal` / `vault` / `invoice` (one row per submission per target) |
 | `attachment_id` | `submission_link` | per-attachment targets (Vault) set this; submission-level targets (Deal) leave it null |
 | `handoff_status` | `submission_link` | `pending` / `succeeded` / `failed` |
@@ -372,8 +374,10 @@ Pattern: **`{verb}Contact{Resource}`** — e.g. `listContactSubmissions`,
 
 camelCase `{verb}{Resource}`, stable (never renamed after release). Registered:
 `getHealth`, `login`, `listOrganizations`, `createOrganization`, `getOrganizationById`,
-`listContactForms`, `createContactForm`, `getContactFormById`, `listNotificationChannels`,
-`createNotificationChannel`, `listSubmissions`, `exportSubmissions`, `getSubmissionById`,
+`getOrganizationSettings`, `updateOrganizationSettings`, `listContactForms`, `createContactForm`, `getContactFormById`,
+`listNotificationChannels`, `createNotificationChannel`, `getNotificationChannel`,
+`updateNotificationChannel`, `deleteNotificationChannel`, `testNotificationChannel`,
+`listSubmissions`, `exportSubmissions`, `getSubmissionById`,
 `updateSubmissionStatus`, `getSubmissionTechnicalMeta`, `listSubmissionNotes`,
 `addSubmissionNote`, `getPublicFormSchema`, `submitPublicForm`. Validated by `composer openapi`.
 

@@ -27,6 +27,7 @@ final readonly class GetOrganizationByIdUseCase implements GetOrganizationByIdUs
             isActive: $org->isActive,
             externalId: $org->externalId,
             customDomain: $org->customDomain,
+            senderDisplayName: $org->senderDisplayName,
             createdAt: $org->createdAt,
             updatedAt: $org->updatedAt,
         );

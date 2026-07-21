@@ -129,6 +129,30 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/settings/organization": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Get the caller's own organization settings
+         * @description The caller's own organization (from the token org_id claim); ManageSettings.
+         */
+        get: operations["getOrganizationSettings"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Update the caller's own organization settings
+         * @description Updates the caller's own organization (token org_id claim; ManageSettings). sender_display_name is the email From display name; blank clears it (From then falls back to the organization name).
+         */
+        patch: operations["updateOrganizationSettings"];
+        trace?: never;
+    };
     "/admin/contact-forms": {
         parameters: {
             query?: never;
@@ -801,6 +825,8 @@ export interface components {
             slug: string;
             external_id?: string | null;
             custom_domain?: string | null;
+            /** @description Email From display name; null falls back to name. */
+            sender_display_name?: string | null;
             plan?: string;
             is_active?: boolean;
         };
@@ -817,6 +843,16 @@ export interface components {
             plan?: "free" | "starter" | "pro" | "enterprise";
             external_id?: string;
             custom_domain?: string;
+        };
+        /** @description Settings update for the caller's own organization. sender_display_name is the email From display name; an empty string clears it (From falls back to the organization name). Max 100 chars, no control characters. */
+        UpdateOrganizationRequest: {
+            sender_display_name: string | null;
+        };
+        /** @description The caller's own organization settings surface (name + email-wording fields). */
+        OrganizationSettingsResponse: {
+            id: number;
+            name: string;
+            sender_display_name?: string | null;
         };
         FormField: {
             id?: number;
@@ -1653,6 +1689,57 @@ export interface operations {
             401: components["responses"]["Problem"];
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
+        };
+    };
+    getOrganizationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Organization settings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationSettingsResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    updateOrganizationSettings: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateOrganizationRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated organization settings */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["OrganizationSettingsResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
         };
     };
     listContactForms: {

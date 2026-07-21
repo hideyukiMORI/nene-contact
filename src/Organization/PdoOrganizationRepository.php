@@ -9,7 +9,7 @@ use PDOException;
 
 final readonly class PdoOrganizationRepository implements OrganizationRepositoryInterface
 {
-    private const COLUMNS = 'id, name, slug, external_id, custom_domain, plan, is_active, created_at, updated_at';
+    private const COLUMNS = 'id, name, slug, external_id, custom_domain, sender_display_name, plan, is_active, created_at, updated_at';
 
     public function __construct(
         private DatabaseQueryExecutorInterface $query,
@@ -61,13 +61,14 @@ final readonly class PdoOrganizationRepository implements OrganizationRepository
 
         try {
             $this->query->execute(
-                'INSERT INTO organizations (name, slug, external_id, custom_domain, plan, is_active, created_at, updated_at)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+                'INSERT INTO organizations (name, slug, external_id, custom_domain, sender_display_name, plan, is_active, created_at, updated_at)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [
                     $organization->name,
                     $organization->slug,
                     $organization->externalId,
                     $organization->customDomain,
+                    $organization->senderDisplayName,
                     $organization->plan,
                     $organization->isActive ? 1 : 0,
                     $now,
@@ -92,12 +93,13 @@ final readonly class PdoOrganizationRepository implements OrganizationRepository
         }
 
         $this->query->execute(
-            'UPDATE organizations SET name = ?, slug = ?, external_id = ?, custom_domain = ?, plan = ?, is_active = ?, updated_at = ? WHERE id = ?',
+            'UPDATE organizations SET name = ?, slug = ?, external_id = ?, custom_domain = ?, sender_display_name = ?, plan = ?, is_active = ?, updated_at = ? WHERE id = ?',
             [
                 $organization->name,
                 $organization->slug,
                 $organization->externalId,
                 $organization->customDomain,
+                $organization->senderDisplayName,
                 $organization->plan,
                 $organization->isActive ? 1 : 0,
                 date('Y-m-d H:i:s'),
@@ -117,6 +119,7 @@ final readonly class PdoOrganizationRepository implements OrganizationRepository
             id: (int) $row['id'],
             externalId: isset($row['external_id']) && $row['external_id'] !== '' ? (string) $row['external_id'] : null,
             customDomain: isset($row['custom_domain']) && $row['custom_domain'] !== '' ? (string) $row['custom_domain'] : null,
+            senderDisplayName: isset($row['sender_display_name']) && $row['sender_display_name'] !== '' ? (string) $row['sender_display_name'] : null,
             createdAt: (string) $row['created_at'],
             updatedAt: (string) $row['updated_at'],
         );

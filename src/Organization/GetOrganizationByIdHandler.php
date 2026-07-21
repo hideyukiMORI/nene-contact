@@ -31,6 +31,7 @@ final readonly class GetOrganizationByIdHandler implements RequestHandlerInterfa
             'slug' => $output->slug,
             'external_id' => $output->externalId,
             'custom_domain' => $output->customDomain,
+            'sender_display_name' => $output->senderDisplayName,
             'plan' => $output->plan,
             'is_active' => $output->isActive,
             'created_at' => $output->createdAt,
