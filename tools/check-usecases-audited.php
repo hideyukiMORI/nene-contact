@@ -34,6 +34,7 @@ const READ_ONLY_USE_CASES = [
     'ContactForm/ListContactFormsUseCase.php' => 'lists forms (read)',
     'Handoff/ListSubmissionHandoffsUseCase.php' => 'lists handoffs for a submission (read)',
     'Media/ListMediaUseCase.php' => 'lists media assets for the org (read)',
+    'Notification/GetNotificationChannelUseCase.php' => 'fetches one channel (read; config redacted)',
     'Notification/ListNotificationChannelsUseCase.php' => 'lists channels (read)',
     'Organization/GetOrganizationByIdUseCase.php' => 'fetches one organization (read)',
     'Organization/ListOrganizationsUseCase.php' => 'lists organizations (read)',

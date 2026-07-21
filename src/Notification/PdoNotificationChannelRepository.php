@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace NeneContact\Notification;
 
 use Nene2\Database\DatabaseQueryExecutorInterface;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\RequestScopedHolder;
 
 final readonly class PdoNotificationChannelRepository implements NotificationChannelRepositoryInterface
@@ -18,12 +19,13 @@ final readonly class PdoNotificationChannelRepository implements NotificationCha
         private DatabaseQueryExecutorInterface $query,
         private RequestScopedHolder $orgId,
         private ConfigCipherInterface $cipher,
+        private ClockInterface $clock,
     ) {
     }
 
     public function create(NotificationChannel $channel): int
     {
-        $now = date('Y-m-d H:i:s');
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
         $this->query->execute(
             'INSERT INTO notification_channels (organization_id, contact_form_id, channel_type, config_json, is_enabled, created_at, updated_at)
              VALUES (?, ?, ?, ?, ?, ?, ?)',
@@ -41,11 +43,46 @@ final readonly class PdoNotificationChannelRepository implements NotificationCha
         return $this->query->lastInsertId();
     }
 
+    public function findById(int $id): ?NotificationChannel
+    {
+        $row = $this->query->fetchOne(
+            'SELECT ' . self::COLUMNS . ' FROM notification_channels WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
+            [$id, $this->orgId->get()],
+        );
+
+        return $row === null ? null : $this->mapRow($row);
+    }
+
+    public function update(NotificationChannel $channel): void
+    {
+        $this->query->execute(
+            'UPDATE notification_channels SET config_json = ?, is_enabled = ?, updated_at = ?
+             WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
+            [
+                $this->cipher->encrypt(json_encode($channel->config, JSON_THROW_ON_ERROR | JSON_UNESCAPED_UNICODE)),
+                $channel->isEnabled ? 1 : 0,
+                $this->clock->now()->format('Y-m-d H:i:s'),
+                $channel->id,
+                $this->orgId->get(),
+            ],
+        );
+    }
+
+    public function softDelete(int $id): void
+    {
+        $now = $this->clock->now()->format('Y-m-d H:i:s');
+        $this->query->execute(
+            'UPDATE notification_channels SET deleted_at = ?, updated_at = ?
+             WHERE id = ? AND organization_id = ? AND deleted_at IS NULL',
+            [$now, $now, $id, $this->orgId->get()],
+        );
+    }
+
     /** @return list<NotificationChannel> */
     public function listByContactForm(int $contactFormId): array
     {
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::COLUMNS . ' FROM notification_channels WHERE contact_form_id = ? AND organization_id = ? ORDER BY id ASC',
+            'SELECT ' . self::COLUMNS . ' FROM notification_channels WHERE contact_form_id = ? AND organization_id = ? AND deleted_at IS NULL ORDER BY id ASC',
             [$contactFormId, $this->orgId->get()],
         );
 
@@ -56,7 +93,7 @@ final readonly class PdoNotificationChannelRepository implements NotificationCha
     public function findEnabledByContactForm(int $contactFormId, int $organizationId): array
     {
         $rows = $this->query->fetchAll(
-            'SELECT ' . self::COLUMNS . ' FROM notification_channels WHERE contact_form_id = ? AND organization_id = ? AND is_enabled = 1 ORDER BY id ASC',
+            'SELECT ' . self::COLUMNS . ' FROM notification_channels WHERE contact_form_id = ? AND organization_id = ? AND is_enabled = 1 AND deleted_at IS NULL ORDER BY id ASC',
             [$contactFormId, $organizationId],
         );
 
