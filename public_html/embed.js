@@ -289,12 +289,18 @@
       '.pv-btn:active{transform:translateY(1px)}',
       '.pv-btn:disabled{opacity:.6;cursor:default}',
       '.pv-btn svg{width:16px;height:16px;flex:none}',
+      '.pv-btn__lbl{display:inline-flex;align-items:center;gap:8px}',
+      '.pv-btn__load{display:none;align-items:center;gap:8px}',
+      '.pv-btn.pv-is-load .pv-btn__lbl{display:none}',
+      '.pv-btn.pv-is-load .pv-btn__load{display:inline-flex}',
+      '.pv-spin{width:15px;height:15px;border:2px solid color-mix(in srgb,currentColor 30%,transparent);border-top-color:currentColor;border-radius:50%;animation:pv-spin .7s linear infinite}',
       '.pv-btn--solid{background:var(--pv-accent);color:var(--pv-btn-text);border:var(--pv-bw) solid transparent}',
       '.pv-btn--outline{background:transparent;color:var(--pv-accent);border:1.5px solid var(--pv-accent)}',
       '.pv-btn--soft{background:color-mix(in srgb,var(--pv-accent) 15%,var(--pv-surface));color:var(--pv-accent);border:0}',
       '.pv-foot{text-align:center;font-size:11.5px;color:var(--pv-muted);margin-top:16px}',
       '.pv-err{color:var(--pv-error);font-size:11.5px;margin-top:4px}',
-      '.pv-msg{font-size:13px;padding:9px 11px;border-radius:var(--pv-r-input);margin-top:4px}',
+      '.pv-msg{font-size:13px;padding:9px 11px;border-radius:var(--pv-r-input);margin-top:4px;display:flex;align-items:center;gap:7px;animation:pv-fade .25s ease}',
+      '.pv-msg svg{width:16px;height:16px;flex:none}',
       '.pv-msg.ok{background:color-mix(in srgb,var(--pv-ok) 12%,var(--pv-surface));color:var(--pv-ok)}',
       '.pv-msg.err{background:color-mix(in srgb,var(--pv-error) 12%,var(--pv-surface));color:var(--pv-error)}',
       '.pv-hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}',
@@ -343,6 +349,9 @@
       '.pv-typing i{width:6px;height:6px;border-radius:50%;background:var(--pv-muted);animation:pv-blink 1.2s infinite}',
       '.pv-typing i:nth-child(2){animation-delay:.2s}.pv-typing i:nth-child(3){animation-delay:.4s}',
       '@keyframes pv-blink{0%,60%,100%{opacity:.3}30%{opacity:1}}',
+      '@keyframes pv-spin{to{transform:rotate(360deg)}}',
+      '@keyframes pv-fade{from{opacity:0;transform:translateY(-3px)}to{opacity:1;transform:none}}',
+      '@media (prefers-reduced-motion:reduce){.pv-spin{animation-duration:1.6s}.pv-msg{animation:none}}',
       '.pv-chat__ft{padding:12px 14px;border-top:var(--pv-bw) var(--pv-bstyle) var(--pv-bcolor);display:flex;gap:9px;align-items:center;flex-wrap:wrap}',
       '.pv-chat__in{flex:1;min-width:0;padding:10px 12px;border:var(--pv-bw) var(--pv-bstyle) var(--pv-bcolor);border-radius:var(--pv-r-input);font-size:12.5px;font-family:inherit;color:var(--pv-text);background:var(--pv-input-bg);outline:none}',
       '.pv-chat__in:focus{border-color:var(--pv-focus)}',
@@ -770,7 +779,9 @@
     svg.setAttribute('stroke-linejoin', 'round');
     var d = name === 'send'
       ? 'M22 2 11 13M22 2l-7 20-4-9-9-4 20-7z'
-      : 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z';
+      : name === 'check'
+        ? 'M20 6 9 17l-5-5'
+        : 'M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z';
     var p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
     p.setAttribute('d', d);
     svg.appendChild(p);
@@ -863,8 +874,14 @@
     }
 
     var submitText = localized(schema.submit_label, locale) || (locale === 'en' ? 'Send' : '送信する');
-    var submit = el('button', { type: 'submit', 'class': 'pv-btn pv-btn--' + a.button.style }, submitText);
-    submit.appendChild(icon('send'));
+    var submit = el('button', { type: 'submit', 'class': 'pv-btn pv-btn--' + a.button.style });
+    var submitLbl = el('span', { 'class': 'pv-btn__lbl' }, submitText);
+    submitLbl.appendChild(icon('send'));
+    var submitLoad = el('span', { 'class': 'pv-btn__load' });
+    submitLoad.appendChild(el('span', { 'class': 'pv-spin' }));
+    submitLoad.appendChild(el('span', null, locale === 'en' ? 'Sending…' : '送信中…'));
+    submit.appendChild(submitLbl);
+    submit.appendChild(submitLoad);
     wrap.appendChild(submit);
 
     var msg = el('div');
@@ -907,7 +924,12 @@
 
   function showMessage(msg, kind, text) {
     msg.textContent = '';
-    msg.appendChild(el('div', { 'class': 'pv-msg ' + kind }, text));
+    var box = el('div', { 'class': 'pv-msg ' + kind });
+    if (kind === 'ok') {
+      box.appendChild(icon('check'));
+    }
+    box.appendChild(el('span', null, text));
+    msg.appendChild(box);
   }
 
   function clearErrors(controls) {
@@ -928,6 +950,8 @@
     }
 
     submit.disabled = true;
+    submit.classList.add('pv-is-load');
+    form.setAttribute('aria-busy', 'true');
 
     uploadFiles(controls)
       .then(function (attachmentIds) {
@@ -980,6 +1004,8 @@
       })
       .then(function () {
         submit.disabled = false;
+        submit.classList.remove('pv-is-load');
+        form.removeAttribute('aria-busy');
       });
   }
 
