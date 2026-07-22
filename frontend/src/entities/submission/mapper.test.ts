@@ -10,6 +10,7 @@ describe('submission mappers', () => {
         status: 'open',
         field_values: { email: 'x@example.com' },
         submitted_at: '2026-06-04 00:00:00',
+        tags: [{ id: 2, label: '見積', color: 'amber' }],
       }),
     ).toEqual({
       id: 9,
@@ -17,6 +18,7 @@ describe('submission mappers', () => {
       status: 'open',
       submittedAt: '2026-06-04 00:00:00',
       fieldValues: { email: 'x@example.com' },
+      tags: [{ id: 2, label: '見積', color: 'amber' }],
     });
   });
 

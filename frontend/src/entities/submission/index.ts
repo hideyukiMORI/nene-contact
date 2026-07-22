@@ -3,7 +3,11 @@ export {
   useSubmissionQuery,
   useSubmissionTechnicalMetaQuery,
 } from '@/entities/submission/queries';
-export { useUpdateSubmissionStatusMutation } from '@/entities/submission/mutations';
+export {
+  useUpdateSubmissionStatusMutation,
+  useAddSubmissionTagMutation,
+  useRemoveSubmissionTagMutation,
+} from '@/entities/submission/mutations';
 export {
   toSubmission,
   toSubmissionDetail,
@@ -15,6 +19,7 @@ export {
   SUBMISSION_STATUSES,
   SUBMISSION_SORTS,
   type Submission,
+  type SubmissionTagView,
   type SubmissionDetail,
   type SubmissionTechnicalMeta,
   type SubmissionList,

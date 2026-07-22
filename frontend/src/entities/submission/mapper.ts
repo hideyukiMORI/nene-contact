@@ -17,6 +17,7 @@ export function toSubmission(dto: SubmissionDto): Submission {
     status: dto.status,
     submittedAt: dto.submitted_at ?? null,
     fieldValues: dto.field_values ?? {},
+    tags: (dto.tags ?? []).map((tag) => ({ id: tag.id, label: tag.label, color: tag.color })),
   };
 }
 

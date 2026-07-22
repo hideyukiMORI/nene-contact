@@ -21,3 +21,37 @@ export function useUpdateSubmissionStatusMutation(
     },
   });
 }
+
+/** POST /admin/submissions/{id}/tags — applies a tag to the submission (idempotent). */
+export function useAddSubmissionTagMutation(
+  submissionId: number,
+): UseMutationResult<number, AppError, number> {
+  const queryClient = useQueryClient();
+  return useMutation<number, AppError, number>({
+    mutationFn: async (tagId) => {
+      await apiClient.post(`/admin/submissions/${String(submissionId)}/tags`, { tag_id: tagId });
+      return tagId;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.detail(submissionId) });
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.all });
+    },
+  });
+}
+
+/** DELETE /admin/submissions/{id}/tags/{tagId} — removes a tag (idempotent). */
+export function useRemoveSubmissionTagMutation(
+  submissionId: number,
+): UseMutationResult<number, AppError, number> {
+  const queryClient = useQueryClient();
+  return useMutation<number, AppError, number>({
+    mutationFn: async (tagId) => {
+      await apiClient.delete(`/admin/submissions/${String(submissionId)}/tags/${String(tagId)}`);
+      return tagId;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.detail(submissionId) });
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.all });
+    },
+  });
+}
