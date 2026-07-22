@@ -31,6 +31,8 @@ function buildQuery(params: SubmissionListParams): string {
   if (params.to !== undefined && params.to !== '') search.set('to', params.to);
   if (params.q !== undefined && params.q !== '') search.set('q', params.q);
   if (params.sort !== undefined) search.set('sort', params.sort);
+  if (params.tagIds !== undefined && params.tagIds.length > 0)
+    search.set('tag_id', params.tagIds.join(','));
   return search.toString();
 }
 

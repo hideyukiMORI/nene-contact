@@ -1,10 +1,17 @@
 export type SubmissionStatus = 'open' | 'in_progress' | 'resolved' | 'spam';
 
+export interface SubmissionTagView {
+  id: number;
+  label: string;
+  color: string;
+}
+
 export interface Submission {
   id: number;
   contactFormId: number;
   status: SubmissionStatus;
   submittedAt: string | null;
+  tags: SubmissionTagView[];
   // The admin list endpoint returns field values for every row, so the inbox can search
   // content / show the sender without per-row detail fetches.
   fieldValues: Record<string, unknown>;
@@ -32,6 +39,7 @@ export interface SubmissionListParams {
   to?: string;
   q?: string;
   sort?: SubmissionSort;
+  tagIds?: number[];
 }
 
 export interface SubmissionDetail extends Submission {
