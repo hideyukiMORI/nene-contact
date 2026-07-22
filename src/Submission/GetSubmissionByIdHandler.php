@@ -23,6 +23,8 @@ final readonly class GetSubmissionByIdHandler implements RequestHandlerInterface
         $parameters = (array) $request->getAttribute(Router::PARAMETERS_ATTRIBUTE, []);
         $id = (int) ($parameters['id'] ?? 0);
 
-        return $this->response->create(SubmissionResponse::toArray($this->useCase->execute($id)));
+        $result = $this->useCase->execute($id);
+
+        return $this->response->create(SubmissionResponse::toArray($result->submission, $result->tags));
     }
 }

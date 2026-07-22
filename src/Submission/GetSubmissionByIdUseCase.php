@@ -8,10 +8,11 @@ final readonly class GetSubmissionByIdUseCase implements GetSubmissionByIdUseCas
 {
     public function __construct(
         private SubmissionRepositoryInterface $submissions,
+        private SubmissionTagRepositoryInterface $tags,
     ) {
     }
 
-    public function execute(int $id): Submission
+    public function execute(int $id): SubmissionWithTags
     {
         $submission = $this->submissions->findById($id);
 
@@ -19,6 +20,6 @@ final readonly class GetSubmissionByIdUseCase implements GetSubmissionByIdUseCas
             throw new SubmissionNotFoundException($id);
         }
 
-        return $submission;
+        return new SubmissionWithTags($submission, $this->tags->findTagViewsForSubmission($id));
     }
 }

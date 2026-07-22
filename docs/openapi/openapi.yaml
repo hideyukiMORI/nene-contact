@@ -749,6 +749,43 @@ paths:
         '404': { $ref: '#/components/responses/Problem' }
         '422': { $ref: '#/components/responses/ValidationProblem' }
 
+  /admin/submissions/{id}/tags:
+    post:
+      tags: [Submission]
+      operationId: addSubmissionTag
+      summary: Apply an org tag to a submission (idempotent)
+      description: >
+        Applies a tag (ADR 0019). The submission and tag are both org-scoped — a foreign
+        submission or tag is a 404. Idempotent → 204. Requires ManageSubmissions.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/AddSubmissionTagRequest' }
+      responses:
+        '204': { description: Tagged }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+  /admin/submissions/{id}/tags/{tagId}:
+    delete:
+      tags: [Submission]
+      operationId: removeSubmissionTag
+      summary: Remove a tag from a submission (idempotent)
+      description: >
+        Soft-removes the assignment (ADR 0016). Idempotent → 204. Requires ManageSubmissions.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+        - { name: tagId, in: path, required: true, schema: { type: integer } }
+      responses:
+        '204': { description: Untagged }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /admin/submissions/{id}/attachments:
     get:
       tags: [Attachment]
@@ -1757,10 +1794,28 @@ components:
         source_url: { type: [string, 'null'], description: "embed host page the form was submitted from (referer); safe reception meta (ADR 0018)" }
         locale: { type: [string, 'null'], description: "locale the visitor submitted in (one of the form's locales); safe reception meta" }
         field_values: { type: object, additionalProperties: true }
+        tags:
+          type: array
+          description: "active tag assignments (ADR 0019)"
+          items: { $ref: '#/components/schemas/SubmissionTagView' }
         consent_label: { oneOf: [{ $ref: '#/components/schemas/LocaleMap' }, { type: 'null' }] }
         consent_given_at: { type: [string, 'null'], format: date-time }
         submitted_at: { type: [string, 'null'] }
       required: [id, contact_form_id, status]
+
+    SubmissionTagView:
+      type: object
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        color: { type: string, enum: [slate, wisteria, teal, green, amber, rose, orange] }
+      required: [id, label, color]
+
+    AddSubmissionTagRequest:
+      type: object
+      properties:
+        tag_id: { type: integer, description: "an org tag id (ADR 0019)" }
+      required: [tag_id]
 
     SubmissionTechnicalMetaResponse:
       type: object

@@ -45,7 +45,10 @@ final readonly class ListSubmissionsHandler implements RequestHandlerInterface
         // Items are masked (charter §11) — the bulk list never discloses raw PII.
         $body = (new PaginationResponse(
             items: array_map(
-                static fn (Submission $s): array => SubmissionResponse::toListItem($s),
+                static fn (Submission $s): array => SubmissionResponse::toListItem(
+                    $s,
+                    $s->id !== null ? ($result->tagsBySubmission[$s->id] ?? []) : [],
+                ),
                 $result->items,
             ),
             limit: $result->limit,

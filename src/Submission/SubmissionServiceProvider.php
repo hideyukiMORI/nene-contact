@@ -21,6 +21,7 @@ use NeneContact\ContactForm\ContactFormRepositoryInterface;
 use NeneContact\Http\RuntimeServiceProvider;
 use NeneContact\Notification\SenderAutoReplyInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
+use NeneContact\Tag\TagRepositoryInterface;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 
@@ -45,6 +46,24 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
 
                     /** @var RequestScopedHolder<int> $orgId */
                     return new PdoSubmissionRepository($query, $orgId);
+                },
+            )
+            ->set(
+                SubmissionTagRepositoryInterface::class,
+                static function (ContainerInterface $c): SubmissionTagRepositoryInterface {
+                    $query = $c->get(DatabaseQueryExecutorInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$query instanceof DatabaseQueryExecutorInterface) {
+                        throw new LogicException('Database query executor service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new PdoSubmissionTagRepository($query, $orgId);
                 },
             )
             ->set(
@@ -134,24 +153,127 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 ListSubmissionsUseCaseInterface::class,
                 static function (ContainerInterface $c): ListSubmissionsUseCaseInterface {
                     $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $tags = $c->get(SubmissionTagRepositoryInterface::class);
 
                     if (!$repo instanceof SubmissionSearchRepositoryInterface) {
                         throw new LogicException('Submission repository service is invalid.');
                     }
 
-                    return new ListSubmissionsUseCase($repo);
+                    if (!$tags instanceof SubmissionTagRepositoryInterface) {
+                        throw new LogicException('Submission tag repository service is invalid.');
+                    }
+
+                    return new ListSubmissionsUseCase($repo, $tags);
                 },
             )
             ->set(
                 GetSubmissionByIdUseCaseInterface::class,
                 static function (ContainerInterface $c): GetSubmissionByIdUseCaseInterface {
                     $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $tags = $c->get(SubmissionTagRepositoryInterface::class);
 
                     if (!$repo instanceof SubmissionRepositoryInterface) {
                         throw new LogicException('Submission repository service is invalid.');
                     }
 
-                    return new GetSubmissionByIdUseCase($repo);
+                    if (!$tags instanceof SubmissionTagRepositoryInterface) {
+                        throw new LogicException('Submission tag repository service is invalid.');
+                    }
+
+                    return new GetSubmissionByIdUseCase($repo, $tags);
+                },
+            )
+            ->set(
+                AddSubmissionTagUseCaseInterface::class,
+                static function (ContainerInterface $c): AddSubmissionTagUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $tags = $c->get(TagRepositoryInterface::class);
+                    $assignments = $c->get(SubmissionTagRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+                    $clock = $c->get(ClockInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$tags instanceof TagRepositoryInterface) {
+                        throw new LogicException('Tag repository service is invalid.');
+                    }
+
+                    if (!$assignments instanceof SubmissionTagRepositoryInterface) {
+                        throw new LogicException('Submission tag repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new AddSubmissionTagUseCase($repo, $tags, $assignments, $audit, $clock);
+                },
+            )
+            ->set(
+                RemoveSubmissionTagUseCaseInterface::class,
+                static function (ContainerInterface $c): RemoveSubmissionTagUseCaseInterface {
+                    $repo = $c->get(SubmissionRepositoryInterface::class);
+                    $assignments = $c->get(SubmissionTagRepositoryInterface::class);
+                    $audit = $c->get(AuditRecorderInterface::class);
+                    $clock = $c->get(ClockInterface::class);
+
+                    if (!$repo instanceof SubmissionRepositoryInterface) {
+                        throw new LogicException('Submission repository service is invalid.');
+                    }
+
+                    if (!$assignments instanceof SubmissionTagRepositoryInterface) {
+                        throw new LogicException('Submission tag repository service is invalid.');
+                    }
+
+                    if (!$audit instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new RemoveSubmissionTagUseCase($repo, $assignments, $audit, $clock);
+                },
+            )
+            ->set(
+                AddSubmissionTagHandler::class,
+                static function (ContainerInterface $c): AddSubmissionTagHandler {
+                    $uc = $c->get(AddSubmissionTagUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof AddSubmissionTagUseCaseInterface) {
+                        throw new LogicException('AddSubmissionTag use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new AddSubmissionTagHandler($uc, $json);
+                },
+            )
+            ->set(
+                RemoveSubmissionTagHandler::class,
+                static function (ContainerInterface $c): RemoveSubmissionTagHandler {
+                    $uc = $c->get(RemoveSubmissionTagUseCaseInterface::class);
+                    $json = $c->get(JsonResponseFactory::class);
+
+                    if (!$uc instanceof RemoveSubmissionTagUseCaseInterface) {
+                        throw new LogicException('RemoveSubmissionTag use case service is invalid.');
+                    }
+
+                    if (!$json instanceof JsonResponseFactory) {
+                        throw new LogicException('JSON response factory service is invalid.');
+                    }
+
+                    return new RemoveSubmissionTagHandler($uc, $json);
                 },
             )
             ->set(
@@ -568,6 +690,8 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                     $listNotes = $c->get(ListSubmissionNotesHandler::class);
                     $export = $c->get(ExportSubmissionsHandler::class);
                     $page = $c->get(PublicFormPageHandler::class);
+                    $addTag = $c->get(AddSubmissionTagHandler::class);
+                    $removeTag = $c->get(RemoveSubmissionTagHandler::class);
 
                     if (!$schema instanceof GetPublicFormSchemaHandler) {
                         throw new LogicException('Schema handler service is invalid.');
@@ -617,7 +741,15 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('Public form page handler service is invalid.');
                     }
 
-                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $technicalMeta, $updateStatus, $delete, $correct, $addNote, $listNotes, $export, $page);
+                    if (!$addTag instanceof AddSubmissionTagHandler) {
+                        throw new LogicException('Add submission tag handler service is invalid.');
+                    }
+
+                    if (!$removeTag instanceof RemoveSubmissionTagHandler) {
+                        throw new LogicException('Remove submission tag handler service is invalid.');
+                    }
+
+                    return new SubmissionRouteRegistrar($schema, $submit, $list, $get, $technicalMeta, $updateStatus, $delete, $correct, $addNote, $listNotes, $export, $page, $addTag, $removeTag);
                 },
             );
     }

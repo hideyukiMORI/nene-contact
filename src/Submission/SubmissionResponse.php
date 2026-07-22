@@ -16,9 +16,10 @@ final readonly class SubmissionResponse
      * bulk list never discloses raw PII — full content is only on the single detail view.
      * Consent copy is omitted from the list; it belongs to the detail/disclosure path.
      *
+     * @param list<array{id: int, label: string, color: string}> $tags active tag views (ADR 0019)
      * @return array<string, mixed>
      */
-    public static function toListItem(Submission $submission): array
+    public static function toListItem(Submission $submission, array $tags = []): array
     {
         return [
             'id' => $submission->id,
@@ -26,12 +27,16 @@ final readonly class SubmissionResponse
             'status' => $submission->status,
             'source' => $submission->source,
             'field_values' => PiiMasker::maskValues($submission->fieldValues),
+            'tags' => $tags,
             'submitted_at' => $submission->submittedAt,
         ];
     }
 
-    /** @return array<string, mixed> */
-    public static function toArray(Submission $submission): array
+    /**
+     * @param list<array{id: int, label: string, color: string}> $tags active tag views (ADR 0019)
+     * @return array<string, mixed>
+     */
+    public static function toArray(Submission $submission, array $tags = []): array
     {
         return [
             'id' => $submission->id,
@@ -42,6 +47,7 @@ final readonly class SubmissionResponse
             'source_url' => $submission->sourceUrl,
             'locale' => $submission->locale,
             'field_values' => $submission->fieldValues,
+            'tags' => $tags,
             // Consent evidence for the disclosure right (charter §3/§4); immutable once stored.
             'consent_label' => $submission->consentLabel,
             'consent_given_at' => $submission->consentGivenAt,

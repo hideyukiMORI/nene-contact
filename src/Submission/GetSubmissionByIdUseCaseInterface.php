@@ -6,5 +6,5 @@ namespace NeneContact\Submission;
 
 interface GetSubmissionByIdUseCaseInterface
 {
-    public function execute(int $id): Submission;
+    public function execute(int $id): SubmissionWithTags;
 }
