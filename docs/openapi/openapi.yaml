@@ -25,6 +25,7 @@ tags:
   - name: Media
   - name: Records
   - name: ServiceToken
+  - name: Tag
   - name: Agent
   - name: Public
 
@@ -1005,6 +1006,82 @@ paths:
         '403': { $ref: '#/components/responses/Problem' }
         '404': { $ref: '#/components/responses/Problem' }
 
+  /admin/tags:
+    get:
+      tags: [Tag]
+      operationId: listTags
+      summary: List the organization's tag vocabulary (non-deleted)
+      responses:
+        '200':
+          description: Tag list
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagListResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+    post:
+      tags: [Tag]
+      operationId: createTag
+      summary: Create a tag in the organization's vocabulary
+      description: >
+        Creates an org-managed tag (ADR 0019). Duplicate label (among non-deleted tags) → 409.
+        Requires the ManageSettings capability.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/CreateTagRequest' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+  /admin/tags/{id}:
+    patch:
+      tags: [Tag]
+      operationId: updateTag
+      summary: Edit a tag (label / colour / order)
+      description: >
+        PATCH semantics — omitted fields keep their stored value. A rename colliding with another
+        non-deleted label → 409. Requires ManageSettings.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UpdateTagRequest' }
+      responses:
+        '200':
+          description: Updated
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TagResponse' }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+        '409': { $ref: '#/components/responses/Problem' }
+        '422': { $ref: '#/components/responses/ValidationProblem' }
+    delete:
+      tags: [Tag]
+      operationId: deleteTag
+      summary: Soft-delete a tag (idempotent)
+      description: >
+        Retires a tag (ADR 0016 soft-delete): it leaves pickers/filters while past assignments and
+        the audit trail survive. Idempotent. Requires ManageSettings.
+      parameters:
+        - { $ref: '#/components/parameters/IdPath' }
+      responses:
+        '204': { description: Deleted }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+        '404': { $ref: '#/components/responses/Problem' }
+
   /api/submissions:
     get:
       tags: [Agent]
@@ -1778,6 +1855,42 @@ components:
         status: { type: string }
         source: { type: string }
       required: [id, status, source]
+
+    TagResponse:
+      type: object
+      properties:
+        id: { type: integer }
+        label: { type: string }
+        color: { type: string, enum: [slate, wisteria, teal, green, amber, rose, orange] }
+        sort_order: { type: integer }
+        created_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+      required: [id, label, color, sort_order]
+
+    TagListResponse:
+      type: object
+      properties:
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/TagResponse' }
+        limit: { type: integer }
+        offset: { type: integer }
+        total: { type: integer }
+
+    CreateTagRequest:
+      type: object
+      properties:
+        label: { type: string, maxLength: 60 }
+        color: { type: string, enum: [slate, wisteria, teal, green, amber, rose, orange], description: 'defaults to slate' }
+      required: [label]
+
+    UpdateTagRequest:
+      type: object
+      description: 'PATCH — omitted fields keep their stored value'
+      properties:
+        label: { type: string, maxLength: 60 }
+        color: { type: string, enum: [slate, wisteria, teal, green, amber, rose, orange] }
+        sort_order: { type: integer, minimum: 0 }
 
     IssueServiceTokenRequest:
       type: object
