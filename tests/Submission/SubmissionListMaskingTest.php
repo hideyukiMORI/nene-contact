@@ -10,6 +10,7 @@ use NeneContact\Submission\Submission;
 use NeneContact\Submission\SubmissionFilter;
 use NeneContact\Submission\SubmissionResponse;
 use NeneContact\Submission\SubmissionSearchRepositoryInterface;
+use NeneContact\Tests\Support\InMemorySubmissionTagRepository;
 use PHPUnit\Framework\TestCase;
 
 final class SubmissionListMaskingTest extends TestCase
@@ -90,7 +91,7 @@ final class SubmissionListMaskingTest extends TestCase
             }
         };
 
-        $useCase = new ListSubmissionsUseCase($repo);
+        $useCase = new ListSubmissionsUseCase($repo, new InMemorySubmissionTagRepository());
         $filter = new SubmissionFilter(status: 'open', q: 'hello');
         $result = $useCase->execute($filter, 20, 0);
 

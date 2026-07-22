@@ -22,6 +22,8 @@ final readonly class SubmissionRouteRegistrar
         private ListSubmissionNotesHandler $listNotesHandler,
         private ExportSubmissionsHandler $exportHandler,
         private PublicFormPageHandler $pageHandler,
+        private AddSubmissionTagHandler $addTagHandler,
+        private RemoveSubmissionTagHandler $removeTagHandler,
     ) {
     }
 
@@ -57,5 +59,10 @@ final readonly class SubmissionRouteRegistrar
         $router->patch('/admin/submissions/{id}/field-values', static fn (ServerRequestInterface $r) => $correct->handle($r));
         $router->get('/admin/submissions/{id}/notes', static fn (ServerRequestInterface $r) => $listNotes->handle($r));
         $router->post('/admin/submissions/{id}/notes', static fn (ServerRequestInterface $r) => $addNote->handle($r));
+        // Tag assignment (ADR 0019); gated by ManageSubmissions.
+        $addTag = $this->addTagHandler;
+        $removeTag = $this->removeTagHandler;
+        $router->post('/admin/submissions/{id}/tags', static fn (ServerRequestInterface $r) => $addTag->handle($r));
+        $router->delete('/admin/submissions/{id}/tags/{tagId}', static fn (ServerRequestInterface $r) => $removeTag->handle($r));
     }
 }
