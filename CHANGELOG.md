@@ -7,11 +7,14 @@ at PR granularity. References are `(#issue → #PR)`.
 
 ## Unreleased — post-launch wave (2026-07-19 → 07-22, not yet in production)
 
-Production deploys are frozen pending the records-embed 案1 unfreeze (hub gate); everything
-below is on `main` only.
+Production deploys are frozen pending the records-embed rollout gate; everything below is on
+`main` only.
 
 ### Added
 
+- Canonical **`Pagination`** control (previous/next + range readout) adopted in the submissions
+  inbox — visible for any non-empty list, replacing the numbered pager that hid at ≤1 page
+  (#458 → PR1).
 - Notification-channel admin CRUD completed — detail / edit / soft-delete + Chatwork/Slack
   config validation (#429 → #432).
 - Operator test-send endpoint to surface silent dispatch failures (#430 → #436) and the
