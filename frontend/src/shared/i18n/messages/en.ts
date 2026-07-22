@@ -11,6 +11,7 @@ export const en: Partial<MessageCatalog> = {
   'common.comingSoon': 'Coming soon',
   'common.prev': 'Previous',
   'common.next': 'Next',
+  'common.pagination.showing': 'Showing {from}–{to} of {total}',
   'common.error.generic': 'Something went wrong. Please try again later.',
   'login.welcome': 'Welcome back',
   'login.title': 'Sign in',

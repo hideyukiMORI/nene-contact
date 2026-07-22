@@ -6304,6 +6304,62 @@ a.t:hover {
 }
 
 /* numbered pager + page-jump (shared with the inbox) */
+/* Fleet-canonical pagination (prev/next + range readout), shared by the inbox and, from
+   PR2, the audit log. Range on the left, controls on the right; stacks on narrow panes. */
+.nc-pagination {
+  border-top: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  padding: 11px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex: none;
+  font-size: 12px;
+  color: var(--ex-muted);
+}
+.nc-pg-range {
+  font-variant-numeric: tabular-nums;
+}
+.nc-pg-nav {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.nc-pg-btn {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  border-radius: var(--ex-radius);
+  font-size: 12.5px;
+  font-weight: 650;
+  color: var(--ex-muted);
+  cursor: pointer;
+  font-family: inherit;
+}
+.nc-pg-btn:hover:not(:disabled) {
+  background: var(--ex-surface2);
+  color: var(--ex-text);
+}
+.nc-pg-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+@media (max-width: 640px) {
+  .nc-pagination {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+  .nc-pg-nav {
+    justify-content: center;
+  }
+  .nc-pg-btn {
+    flex: 1;
+  }
+}
+
 .al-pager {
   border-top: 1px solid var(--ex-border);
   background: var(--ex-surface);

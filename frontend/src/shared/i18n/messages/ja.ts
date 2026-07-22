@@ -9,6 +9,7 @@ export const ja = {
   'common.comingSoon': '近日対応',
   'common.prev': '前へ',
   'common.next': '次へ',
+  'common.pagination.showing': '{from}〜{to}件を表示（全{total}件）',
   'common.error.generic': 'エラーが発生しました。時間をおいて再度お試しください。',
   'login.welcome': 'おかえりなさい',
   'login.title': 'ログイン',
