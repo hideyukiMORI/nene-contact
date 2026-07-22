@@ -72,6 +72,7 @@ export const en: Partial<MessageCatalog> = {
   'home.newForm': 'New form',
   'home.thisWeek': 'This week',
   'home.trend': 'Receipts (7 days)',
+  'home.trend.dayTooltip': '{date}: {count} received',
   'home.recent.title': 'Recent',
   'home.recent.viewAll': 'View all',
   'home.recent.empty': 'No recent submissions yet',
