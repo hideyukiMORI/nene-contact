@@ -4,6 +4,7 @@ import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Pagination } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
+import { useTagsQuery } from '@/entities/tag';
 import { SUBMISSION_STATUSES, SUBMISSION_SORTS } from '@/entities/submission';
 import type {
   Submission,
@@ -67,11 +68,21 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
   const formsQuery = useContactFormsQuery();
   const forms = formsQuery.data?.items ?? [];
 
+  const orgTags = useTagsQuery().data ?? [];
+
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<SubmissionSort>('date_desc');
   const [page, setPage] = useState(0);
   const [qInput, setQInput] = useState('');
   const [q, setQ] = useState('');
+  const [tagIds, setTagIds] = useState<number[]>([]);
+
+  const toggleTag = (id: number): void => {
+    setTagIds((current) =>
+      current.includes(id) ? current.filter((t) => t !== id) : [...current, id],
+    );
+    setPage(0);
+  };
 
   // Debounce the search box; a new query resets to the first page.
   useEffect(() => {
@@ -90,6 +101,7 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
     sort,
     ...(status !== 'all' ? { status } : {}),
     ...(q !== '' ? { q } : {}),
+    ...(tagIds.length > 0 ? { tagIds } : {}),
   };
 
   const { submissions, total, statusCounts, isLoading, error, refetch } = useSubmissions(params);
@@ -171,6 +183,27 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
             </select>
           </label>
         </div>
+
+        {orgTags.length > 0 ? (
+          <div className="ib-tagfilter" role="group" aria-label={t('inbox.ctl.tags')}>
+            {orgTags.map((tag) => {
+              const on = tagIds.includes(tag.id);
+              return (
+                <button
+                  key={tag.id}
+                  type="button"
+                  aria-pressed={on}
+                  className={`nc-tag nc-tag--${tag.color} nc-tag-toggle${on ? ' on' : ''}`}
+                  onClick={() => {
+                    toggleTag(tag.id);
+                  }}
+                >
+                  {tag.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
       </div>
 
       <div className="ib-rows">
@@ -215,6 +248,11 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
                     <span className="dot" />
                     {t(`submission.status.${s.status}`)}
                   </span>
+                  {s.tags.map((tag) => (
+                    <span key={tag.id} className={`nc-tag nc-tag--${tag.color}`}>
+                      {tag.label}
+                    </span>
+                  ))}
                 </div>
                 <div className="snip">{snippetOf(s, sender)}</div>
               </button>

@@ -21,6 +21,7 @@ import { Icon, type IconName } from '@/shared/ui';
 import { useSubmission } from '@/features/view-submission/model/use-submission';
 import { useSubmissionNotes } from '@/features/view-submission/model/use-submission-notes';
 import { HandoffPanel } from '@/features/view-submission/ui/HandoffPanel';
+import { SubmissionTagEditor } from '@/features/assign-submission-tags';
 
 function display(value: unknown): string {
   if (value === null || value === undefined) {
@@ -204,6 +205,10 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
             ))}
           </select>
         </div>
+      </div>
+
+      <div className="ib-tagbar">
+        <SubmissionTagEditor submissionId={submission.id} tags={submission.tags} />
       </div>
 
       <div className="ib-body">
