@@ -6,3 +6,6 @@ coverage/
 storybook-static/
 playwright-report/
 test-results/
+
+# Playwright evidence screenshots (local only)
+e2e-artifacts/

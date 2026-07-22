@@ -12,10 +12,10 @@ wins (ADR 0012).
 ## Where we are (2026-07-22)
 
 **In production since 2026-07-18** 🚀 — the operator console runs at `contact.ayane.co.jp`
-and the embedded form is live on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). Production
-deploys are currently frozen pending the records-embed rollout gate; work merged after the
-launch (notification-channel CRUD completion + test-send, email-wording waves a–c, embed
-submit spinner, reset-password CLI) is on `main` only. See [`CHANGELOG.md`](../CHANGELOG.md).
+and the embedded form is live on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). The
+post-launch waves (notification-channel CRUD completion + test-send, email-wording waves a–c,
+embed submit spinner, reset-password CLI, and the inbox/audit-log `Pagination`) were **deployed
+2026-07-21 / 07-22**; the earlier deploy freeze is lifted. See [`CHANGELOG.md`](../CHANGELOG.md).
 
 - **Phase 0 — Governance** ✅ complete (2026-06-03).
 - **Phase 1 — Runtime foundation** ✅ complete: org, tenant resolution, JWT/RBAC, audit,

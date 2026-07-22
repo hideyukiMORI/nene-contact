@@ -5,16 +5,19 @@ there are no semver release tags yet, so entries are keyed by date (newest first
 deploys are the de-facto releases. June 2026 is backfilled at milestone granularity; July 2026
 at PR granularity. References are `(#issue → #PR)`.
 
-## Unreleased — post-launch wave (2026-07-19 → 07-22, not yet in production)
+## 2026-07-21 / 07-22 — post-launch waves (deployed to production)
 
-Production deploys are frozen pending the records-embed rollout gate; everything below is on
-`main` only.
+Deployed to `contact.ayane.co.jp` in two steps as the deploy freeze lifted: the backend +
+console waves on **2026-07-21**, then the inbox/audit-log `Pagination` console rebuild on
+**2026-07-22**. Backend `src/`, `tools/`, and migrations were verified byte-identical to `main`;
+the console now serves the pagination build. References are `(#issue → #PR)`.
 
 ### Added
 
-- Canonical **`Pagination`** control (previous/next + range readout) adopted in the submissions
-  inbox — visible for any non-empty list, replacing the numbered pager that hid at ≤1 page
-  (#458 → PR1).
+- Canonical **`Pagination`** control (previous/next + range readout) adopted across the
+  submissions inbox (#458 → #459) and the audit log (#460 → #461) — visible for any non-empty
+  list, replacing the numbered pager that hid at ≤1 page (which is why it was invisible on the
+  production inbox at ≤20 rows); the legacy `Pager` was removed. Deployed 2026-07-22.
 - Notification-channel admin CRUD completed — detail / edit / soft-delete + Chatwork/Slack
   config validation (#429 → #432).
 - Operator test-send endpoint to surface silent dispatch failures (#430 → #436) and the
