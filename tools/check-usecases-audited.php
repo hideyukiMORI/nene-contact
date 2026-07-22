@@ -43,6 +43,7 @@ const READ_ONLY_USE_CASES = [
     'Submission/GetSubmissionByIdUseCase.php' => 'admin submission detail read (masking/audit handled at the agent surface)',
     'Submission/ListSubmissionNotesUseCase.php' => 'lists internal notes (read)',
     'Submission/ListSubmissionsUseCase.php' => 'admin submission list read (masked)',
+    'Tag/ListTagsUseCase.php' => 'lists the org tag vocabulary (read)',
 ];
 
 $missing = [];   // mutating-by-default use cases with neither audit nor allowlist entry
