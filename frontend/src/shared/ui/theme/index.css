@@ -13043,3 +13043,121 @@ a.t:hover {
   border-color: var(--ex-text);
   box-shadow: 0 0 0 2px var(--ex-surface) inset;
 }
+
+/* Tag chips in the inbox: row-level display + the toggle-chip filter. */
+.ib-tagfilter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.nc-tag-toggle {
+  cursor: pointer;
+  border: 1px solid transparent;
+  opacity: 0.55;
+}
+.nc-tag-toggle.on {
+  opacity: 1;
+  border-color: color-mix(in srgb, var(--nc-tag-h) 55%, transparent);
+}
+.r2 .nc-tag {
+  font-size: 11px;
+  padding: 1px 7px;
+}
+
+/* Per-submission tag editor (detail). */
+.ib-tagbar {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+}
+.nc-subtags__chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+.nc-tag__x {
+  display: inline-grid;
+  place-items: center;
+  margin-left: 3px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: inherit;
+  cursor: pointer;
+  opacity: 0.7;
+}
+.nc-tag__x:hover {
+  opacity: 1;
+}
+.nc-subtags__addwrap {
+  position: relative;
+}
+.nc-subtags__add {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 10px;
+  border: 1px dashed var(--ex-border-strong);
+  border-radius: 100px;
+  background: none;
+  color: var(--ex-muted);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.nc-subtags__add:hover {
+  color: var(--ex-text);
+  border-color: var(--ex-muted);
+}
+.nc-subtags__menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 20;
+  min-width: 220px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 8px;
+  border: 1px solid var(--ex-border);
+  border-radius: var(--ex-radius);
+  background: var(--ex-surface);
+  box-shadow: var(--ex-card-shadow);
+}
+.nc-subtags__menu ul {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.nc-subtags__menu li button {
+  width: 100%;
+  text-align: left;
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  border-radius: var(--ex-radius);
+  cursor: pointer;
+}
+.nc-subtags__menu li button:hover {
+  background: var(--ex-surface2);
+}
+.nc-subtags__none {
+  margin: 0 0 6px;
+  padding: 4px 6px;
+  color: var(--ex-faint);
+  font-size: 12px;
+}
+.nc-subtags__create {
+  display: flex;
+  gap: 6px;
+  border-top: 1px solid var(--ex-border);
+  padding-top: 8px;
+}
+.nc-subtags__create .nc-input {
+  flex: 1;
+  min-width: 0;
+}
