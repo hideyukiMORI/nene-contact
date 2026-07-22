@@ -52,6 +52,8 @@ comment overrides it.
 | File attachment | `submission_attachment` / `submission_attachments` | `Attachment` (bytes off-DB; D12) |
 | Notification config | `notification_channel` / `notification_channels` | `NotificationChannel` |
 | Handoff record | `submission_link` / `submission_links` | `SubmissionLink` |
+| Submission tag (vocabulary) | `tag` / `tags` | `Tag` — org-managed tag vocabulary (ADR 0019); **not** `label`, `category` |
+| Tag assignment | `submission_tag` / `submission_tags` | `SubmissionTag` (join; append-only + soft-remove, ADR 0016) |
 | Audit record | `audit_event` / `audit_events` | `AuditEvent` (ADR 0013) |
 
 ---
@@ -209,6 +211,10 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 | `deal_opportunity_id` | `submission_link` | sibling pointer (Deal) |
 | `invoice_client_id` | `submission_link` | sibling pointer (Invoice) |
 | `vault_document_id` | `submission_link` | sibling pointer (Vault) |
+| `label` | `tag` | operator-internal display text; single string, not per-locale (ADR 0019) |
+| `color` | `tag` | one of the fixed tag colour tokens (`slate` `wisteria` `teal` `green` `amber` `rose` `orange`); not free hex |
+| `sort_order` | `tag` | manual ordering in pickers/settings |
+| `tag_id` | `submission_tag` / query param | assignment target; also the repeatable inbox filter `?tag_id=` (ADR 0019) |
 
 ---
 
@@ -216,7 +222,7 @@ the frontend `FIELD_TYPE_DEFAULTS`. `checkbox` / `honeypot` carry no config (nul
 
 Action pattern: **`{entity}.{verb}`** (snake_case). Registered verbs: `created`, `updated`,
 `deleted`, `corrected`, `expired`, `purged`, `viewed`, `exported`, `retried`, `sent`,
-`suppressed`, `failed`, `issued`, `revoked`, `tested`.
+`suppressed`, `failed`, `issued`, `revoked`, `tested`, `tagged`, `untagged`.
 
 Examples: `submission.viewed`, `submission.exported`,
 `submission_technical_meta.viewed` (audited IP/UA disclosure, entity type `submission`; ADR 0018),
@@ -235,7 +241,10 @@ authenticated operator (#410),
 `autoreply.sent` / `autoreply.suppressed` (per-recipient cooldown) / `autoreply.failed`
 (sender auto-reply outcome, entity type `autoreply`, entity id = the submission; #360),
 `service_token.issued` / `service_token.revoked` (machine credential lifecycle, entity type
-`service_token`; embed 案1, #388 — snapshot carries non-secret metadata only, never the token or jti).
+`service_token`; embed 案1, #388 — snapshot carries non-secret metadata only, never the token or jti),
+`tag.created` / `tag.updated` / `tag.deleted` (org tag vocabulary, entity type `tag`; soft-delete, ADR 0019),
+`submission.tagged` / `submission.untagged` (tag applied/removed on a submission, entity type
+`submission`; snapshot carries `{tag_id, label}`, no submission field values; ADR 0019).
 
 | Term | Spelling | Notes |
 | --- | --- | --- |
