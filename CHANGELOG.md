@@ -7,10 +7,10 @@ at PR granularity. References are `(#issue → #PR)`.
 
 ## 2026-07-21 / 07-22 — post-launch waves (deployed to production)
 
-Deployed to `contact.ayane.co.jp` in two steps as the deploy freeze lifted: the backend +
-console waves on **2026-07-21**, then the inbox/audit-log `Pagination` console rebuild on
-**2026-07-22**. Backend `src/`, `tools/`, and migrations were verified byte-identical to `main`;
-the console now serves the pagination build. References are `(#issue → #PR)`.
+Deployed to `contact.ayane.co.jp` as the deploy freeze lifted: the backend + email/console
+waves on **2026-07-21** (deployed by the maintainer), then two console rebuilds on **2026-07-22**
+— the inbox/audit-log `Pagination` and the dashboard 7-day trend. Backend `src/`, `tools/`, and
+migrations were verified byte-identical to `main`. References are `(#issue → #PR)`.
 
 ### Added
 
@@ -18,6 +18,10 @@ the console now serves the pagination build. References are `(#issue → #PR)`.
   submissions inbox (#458 → #459) and the audit log (#460 → #461) — visible for any non-empty
   list, replacing the numbered pager that hid at ≤1 page (which is why it was invisible on the
   production inbox at ≤20 rows); the legacy `Pager` was removed. Deployed 2026-07-22.
+- Dashboard **real 7-day receipts trend** — the "受信の推移（7日）" card now aggregates the
+  recent list client-side (`from=`, bucketed per day) into real bars: empty days render flat,
+  today is emphasized, hovering a bar shows its count, and the headline is the 7-day sum. Drops
+  the previous illustrative hardcoded sparkline (#464 → #465). Deployed 2026-07-22.
 - Notification-channel admin CRUD completed — detail / edit / soft-delete + Chatwork/Slack
   config validation (#429 → #432).
 - Operator test-send endpoint to surface silent dispatch failures (#430 → #436) and the
