@@ -280,6 +280,11 @@ only the API boundary. Every new feature ships ≥1 feature-hook test; bug fixes
 regression test. The embed widget ships submit-path tests (schema render, honeypot,
 validation error display).
 
+**Time-dependent UI:** keep the date/clock logic in a pure helper that takes `now` as an
+argument (e.g. `pages/home/trend.ts`) so it unit-tests deterministically; in component tests
+fake only `Date` (`vi.useFakeTimers({ toFake: ['Date'] })`) so MSW/react-query keep real
+timers, and in a Playwright spec freeze `Date` via `addInitScript` for a deterministic run.
+
 ---
 
 ## J. Commands
