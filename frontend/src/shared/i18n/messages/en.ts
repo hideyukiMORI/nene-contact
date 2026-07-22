@@ -512,7 +512,6 @@ export const en: Partial<MessageCatalog> = {
   'audit.period.7d': '7d',
   'audit.period.30d': '30d',
   'audit.period.custom': 'Custom',
-  'pager.jump': 'Page',
   'studio.replay': 'Replay animation',
   'studio.panelTitle': 'Appearance',
   'studio.panelSub': 'Applies to the whole public form',

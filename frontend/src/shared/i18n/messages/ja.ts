@@ -488,7 +488,6 @@ export const ja = {
   'audit.period.7d': '7日間',
   'audit.period.30d': '30日間',
   'audit.period.custom': '期間指定',
-  'pager.jump': 'ページ',
 
   // --- Choice-field management UI (builder spec v2.0) ---
   'choice.fieldType': '選択肢',
