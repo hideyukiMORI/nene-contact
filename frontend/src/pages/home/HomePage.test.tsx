@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, within } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { renderWithProviders } from '../../../tests/render/renderWithProviders';
 import { server } from '../../../tests/msw/server';
@@ -157,6 +157,11 @@ describe('HomePage', () => {
     expect(await screen.findByTitle('2026-07-22：2件受信')).toBeInTheDocument();
     expect(screen.getByTitle('2026-07-21：0件受信')).toBeInTheDocument();
     expect(screen.getByTitle('2026-07-20：1件受信')).toBeInTheDocument();
+
+    // The card headline is the 7-day sum (2 + 1), not the all-time total.
+    const trendCard = document.querySelector('.ex-sparkcard');
+    expect(trendCard).not.toBeNull();
+    expect(within(trendCard as HTMLElement).getByText('3')).toBeInTheDocument();
   });
 
   it('renders the empty state when there are no submissions', async () => {

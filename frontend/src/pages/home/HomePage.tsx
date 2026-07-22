@@ -11,7 +11,7 @@ import type { SubmissionStatus } from '@/entities/submission';
 import { bucketSevenDays, sevenDayFrom } from '@/pages/home/trend';
 
 // The dashboard summary fetches the most recent page; open/resolved tallies are over
-// this window (the list API has no status filter), while the total comes from the API.
+// this window (the list API has no status filter).
 const RECENT_WINDOW = 100;
 const RECENT_SHOWN = 6;
 // The 7-day trend aggregates the recent list client-side (limit 100). If a single 7-day
@@ -51,11 +51,13 @@ export function HomePage(): ReactNode {
   const submissions = submissionsQuery.data?.items ?? [];
   const trendDays = bucketSevenDays(trendQuery.data?.items ?? [], now);
   const trendMax = Math.max(...trendDays.map((d) => d.count), 1);
+  // The card is headed "受信の推移（7日）", so its headline is the 7-day sum — not the
+  // all-time total, which would repeat the label/reality gap this card otherwise fixes.
+  const trendTotal = trendDays.reduce((sum, d) => sum + d.count, 0);
 
   const liveForms = forms.filter((f) => f.status === 'active').length;
   const openCount = submissions.filter((s) => s.status === 'open').length;
   const resolvedCount = submissions.filter((s) => s.status === 'resolved').length;
-  const totalReceived = submissionsQuery.data?.total ?? submissions.length;
   const recent = submissions.slice(0, RECENT_SHOWN);
 
   const formName = (id: number): string => {
@@ -125,7 +127,7 @@ export function HomePage(): ReactNode {
               <Icon name="bell" size={13} />
               {t('home.trend')}
             </div>
-            <div className="val">{totalReceived}</div>
+            <div className="val">{trendTotal}</div>
           </div>
           <div className="ex-spark">
             {trendDays.map((d) => (
