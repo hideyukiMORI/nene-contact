@@ -435,6 +435,46 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/admin/submissions/{id}/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Apply an org tag to a submission (idempotent)
+         * @description Applies a tag (ADR 0019). The submission and tag are both org-scoped — a foreign submission or tag is a 404. Idempotent → 204. Requires ManageSubmissions.
+         */
+        post: operations["addSubmissionTag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/submissions/{id}/tags/{tagId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Remove a tag from a submission (idempotent)
+         * @description Soft-removes the assignment (ADR 0016). Idempotent → 204. Requires ManageSubmissions.
+         */
+        delete: operations["removeSubmissionTag"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/admin/submissions/{id}/attachments": {
         parameters: {
             query?: never;
@@ -645,6 +685,51 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/admin/tags": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List the organization's tag vocabulary (non-deleted) */
+        get: operations["listTags"];
+        put?: never;
+        /**
+         * Create a tag in the organization's vocabulary
+         * @description Creates an org-managed tag (ADR 0019). Duplicate label (among non-deleted tags) → 409. Requires the ManageSettings capability.
+         */
+        post: operations["createTag"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/admin/tags/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Soft-delete a tag (idempotent)
+         * @description Retires a tag (ADR 0016 soft-delete): it leaves pickers/filters while past assignments and the audit trail survive. Idempotent. Requires ManageSettings.
+         */
+        delete: operations["deleteTag"];
+        options?: never;
+        head?: never;
+        /**
+         * Edit a tag (label / colour / order)
+         * @description PATCH semantics — omitted fields keep their stored value. A rename colliding with another non-deleted label → 409. Requires ManageSettings.
+         */
+        patch: operations["updateTag"];
         trace?: never;
     };
     "/api/submissions": {
@@ -947,7 +1032,7 @@ export interface components {
             autoreply?: components["schemas"]["AutoReply"];
             /** @description Admin-notification email subject template; null uses the default. */
             admin_notification_subject?: string | null;
-            /** @description Admin-notification email body template; null uses the default. Variables: {form_name} {submitted_at} {email} {name} {message}. */
+            /** @description Admin-notification email body template; null uses the default. Variables: {form_name} {submitted_at} {message} + each non-honeypot field by its name. */
             admin_notification_body?: string | null;
             fields: components["schemas"]["FormField"][];
         };
@@ -1092,7 +1177,7 @@ export interface components {
             autoreply?: components["schemas"]["AutoReply"];
             /** @description Admin-notification subject template; null/blank uses the default. */
             admin_notification_subject?: string | null;
-            /** @description Admin-notification body template; null/blank uses the default. Variables: {form_name} {submitted_at} {email} {name} {message}. */
+            /** @description Admin-notification body template; null/blank uses the default. Variables: {form_name} {submitted_at} {message} + each non-honeypot field by its name. */
             admin_notification_body?: string | null;
             fields: {
                 /** @enum {string} */
@@ -1147,10 +1232,22 @@ export interface components {
             field_values?: {
                 [key: string]: unknown;
             };
+            /** @description active tag assignments (ADR 0019) */
+            tags?: components["schemas"]["SubmissionTagView"][];
             consent_label?: components["schemas"]["LocaleMap"] | null;
             /** Format: date-time */
             consent_given_at?: string | null;
             submitted_at?: string | null;
+        };
+        SubmissionTagView: {
+            id: number;
+            label: string;
+            /** @enum {string} */
+            color: "slate" | "wisteria" | "teal" | "green" | "amber" | "rose" | "orange";
+        };
+        AddSubmissionTagRequest: {
+            /** @description an org tag id (ADR 0019) */
+            tag_id: number;
         };
         /** @description Technical reception metadata disclosed only by the audited disclosure endpoint (ADR 0018); never present in any default payload (charter §2/§11). */
         SubmissionTechnicalMetaResponse: {
@@ -1223,6 +1320,38 @@ export interface components {
             id: number;
             status: string;
             source: string;
+        };
+        TagResponse: {
+            id: number;
+            label: string;
+            /** @enum {string} */
+            color: "slate" | "wisteria" | "teal" | "green" | "amber" | "rose" | "orange";
+            sort_order: number;
+            /** Format: date-time */
+            created_at?: string;
+            /** Format: date-time */
+            updated_at?: string;
+        };
+        TagListResponse: {
+            items?: components["schemas"]["TagResponse"][];
+            limit?: number;
+            offset?: number;
+            total?: number;
+        };
+        CreateTagRequest: {
+            label: string;
+            /**
+             * @description defaults to slate
+             * @enum {string}
+             */
+            color?: "slate" | "wisteria" | "teal" | "green" | "amber" | "rose" | "orange";
+        };
+        /** @description PATCH — omitted fields keep their stored value */
+        UpdateTagRequest: {
+            label?: string;
+            /** @enum {string} */
+            color?: "slate" | "wisteria" | "teal" | "green" | "amber" | "rose" | "orange";
+            sort_order?: number;
         };
         IssueServiceTokenRequest: {
             label: string;
@@ -2159,6 +2288,8 @@ export interface operations {
                 q?: string;
                 /** @description Row order. Defaults to newest first. */
                 sort?: "date_desc" | "date_asc" | "status" | "form";
+                /** @description Filter by tag (ADR 0019). Repeatable (`tag_id[]=1&tag_id[]=2`) or comma-separated; AND semantics — a submission must carry all listed tags. */
+                tag_id?: number[];
             };
             header?: never;
             path?: never;
@@ -2387,6 +2518,58 @@ export interface operations {
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
             422: components["responses"]["ValidationProblem"];
+        };
+    };
+    addSubmissionTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["AddSubmissionTagRequest"];
+            };
+        };
+        responses: {
+            /** @description Tagged */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    removeSubmissionTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+                tagId: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Untagged */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
         };
     };
     listSubmissionAttachments: {
@@ -2694,6 +2877,110 @@ export interface operations {
             401: components["responses"]["Problem"];
             403: components["responses"]["Problem"];
             404: components["responses"]["Problem"];
+        };
+    };
+    listTags: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Tag list */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagListResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+        };
+    };
+    createTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTagRequest"];
+            };
+        };
+        responses: {
+            /** @description Created */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
+        };
+    };
+    deleteTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+        };
+    };
+    updateTag: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: components["parameters"]["IdPath"];
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTagRequest"];
+            };
+        };
+        responses: {
+            /** @description Updated */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TagResponse"];
+                };
+            };
+            401: components["responses"]["Problem"];
+            403: components["responses"]["Problem"];
+            404: components["responses"]["Problem"];
+            409: components["responses"]["Problem"];
+            422: components["responses"]["ValidationProblem"];
         };
     };
     agentListSubmissions: {

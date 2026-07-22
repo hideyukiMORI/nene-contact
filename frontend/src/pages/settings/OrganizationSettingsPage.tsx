@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { OrganizationSettingsForm } from '@/features/edit-organization-settings';
+import { ManageTags } from '@/features/manage-tags';
 
 // Self-service organization settings (ManageSettings). Distinct from superadmin org management.
 export function OrganizationSettingsPage(): ReactNode {
@@ -18,6 +19,10 @@ export function OrganizationSettingsPage(): ReactNode {
           <h3>{t('orgSettings.email.heading')}</h3>
         </div>
         <OrganizationSettingsForm />
+      </div>
+
+      <div className="fm-card ex-card-pad">
+        <ManageTags />
       </div>
     </div>
   );
