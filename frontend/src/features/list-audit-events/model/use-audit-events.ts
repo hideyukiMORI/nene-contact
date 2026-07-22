@@ -3,7 +3,7 @@ import { useAuditEventsQuery } from '@/entities/audit-event';
 import type { AuditEvent } from '@/entities/audit-event';
 import type { AppError } from '@/shared/api/errors';
 
-const PAGE_SIZE = 20;
+export const PAGE_SIZE = 20;
 
 export type AuditPeriod = 'all' | '24h' | '7d' | '30d' | 'custom';
 
