@@ -69,6 +69,7 @@ export const ja = {
   'home.newForm': '新規フォーム',
   'home.thisWeek': '今週',
   'home.trend': '受信の推移（7日）',
+  'home.trend.dayTooltip': '{date}：{count}件受信',
   'home.recent.title': '最近の受信',
   'home.recent.viewAll': 'すべて見る',
   'home.recent.empty': '最近の受信はありません',

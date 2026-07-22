@@ -8,14 +8,16 @@ import type { IconName } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { useSubmissionsQuery } from '@/entities/submission';
 import type { SubmissionStatus } from '@/entities/submission';
+import { bucketSevenDays, sevenDayFrom } from '@/pages/home/trend';
 
 // The dashboard summary fetches the most recent page; open/resolved tallies are over
 // this window (the list API has no status filter), while the total comes from the API.
 const RECENT_WINDOW = 100;
 const RECENT_SHOWN = 6;
-
-// Illustrative 7-day sparkline (no per-day API yet); the index-5 bar is highlighted.
-const SPARK = ['spk-3', 'spk-5', 'spk-2', 'spk-6', 'spk-4', 'spk-7', 'spk-5'];
+// The 7-day trend aggregates the recent list client-side (limit 100). If a single 7-day
+// window ever exceeds 100 submissions this undercounts the busiest days — promote to a
+// dedicated per-day aggregation endpoint then (future Issue).
+const TREND_WINDOW = 100;
 
 const BADGE_CLASS: Record<SubmissionStatus, string> = {
   open: 'open',
@@ -36,11 +38,19 @@ export function HomePage(): ReactNode {
   const { t } = useI18n();
   const { session } = useOutletContext<{ session: Session }>();
 
+  const now = new Date();
   const formsQuery = useContactFormsQuery();
   const submissionsQuery = useSubmissionsQuery({ limit: RECENT_WINDOW, offset: 0 });
+  const trendQuery = useSubmissionsQuery({
+    from: sevenDayFrom(now),
+    limit: TREND_WINDOW,
+    offset: 0,
+  });
 
   const forms = formsQuery.data?.items ?? [];
   const submissions = submissionsQuery.data?.items ?? [];
+  const trendDays = bucketSevenDays(trendQuery.data?.items ?? [], now);
+  const trendMax = Math.max(...trendDays.map((d) => d.count), 1);
 
   const liveForms = forms.filter((f) => f.status === 'active').length;
   const openCount = submissions.filter((s) => s.status === 'open').length;
@@ -118,13 +128,21 @@ export function HomePage(): ReactNode {
             <div className="val">{totalReceived}</div>
           </div>
           <div className="ex-spark">
-            {SPARK.map((h, i) => (
-              <i key={i} className={h + (i === 5 ? ' hi' : '')} />
+            {trendDays.map((d) => (
+              <i
+                key={d.key}
+                className={d.isToday ? 'hi' : undefined}
+                style={{
+                  height: `${String((d.count / trendMax) * 100)}%`,
+                  minHeight: d.count === 0 ? 0 : undefined,
+                }}
+                title={t('home.trend.dayTooltip', { date: d.key, count: String(d.count) })}
+              />
             ))}
           </div>
           <div className="ex-sparkx">
-            {weekdays.map((d, i) => (
-              <span key={i}>{d}</span>
+            {trendDays.map((d) => (
+              <span key={d.key}>{weekdays[d.weekdayIndex]}</span>
             ))}
           </div>
         </div>

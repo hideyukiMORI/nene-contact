@@ -1,6 +1,6 @@
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter, Outlet, Route, Routes } from 'react-router-dom';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { screen } from '@testing-library/react';
 import type { ReactNode } from 'react';
 import { renderWithProviders } from '../../../tests/render/renderWithProviders';
@@ -35,6 +35,10 @@ function renderDashboard(): void {
 }
 
 describe('HomePage', () => {
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it('renders data-backed stats and recent submissions', async () => {
     server.use(
       http.get(FORMS_URL, () =>
@@ -106,6 +110,53 @@ describe('HomePage', () => {
     expect(screen.getByText('未対応の送信')).toBeInTheDocument();
     // the 7-day trend card shows the API total
     expect(screen.getByText('受信の推移（7日）')).toBeInTheDocument();
+  });
+
+  it('renders the 7-day trend from real per-day counts, emphasizing today', async () => {
+    // Fake only Date so the 7-day window is deterministic; MSW/react-query keep real timers.
+    vi.useFakeTimers({ toFake: ['Date'] });
+    vi.setSystemTime(new Date(2026, 6, 22, 10, 0, 0)); // 2026-07-22
+
+    server.use(
+      http.get(FORMS_URL, () => HttpResponse.json({ items: [], total: 0 })),
+      http.get(SUBMISSIONS_URL, () =>
+        HttpResponse.json({
+          items: [
+            {
+              id: 1,
+              contact_form_id: 3,
+              status: 'open',
+              field_values: {},
+              submitted_at: '2026-07-22 09:00:00',
+            },
+            {
+              id: 2,
+              contact_form_id: 3,
+              status: 'open',
+              field_values: {},
+              submitted_at: '2026-07-22 18:00:00',
+            },
+            {
+              id: 3,
+              contact_form_id: 3,
+              status: 'open',
+              field_values: {},
+              submitted_at: '2026-07-20 12:00:00',
+            },
+          ],
+          total: 3,
+          limit: 100,
+          offset: 0,
+        }),
+      ),
+    );
+
+    renderDashboard();
+
+    // Today's bar carries the real count; an empty day is 0; an earlier day its own count.
+    expect(await screen.findByTitle('2026-07-22：2件受信')).toBeInTheDocument();
+    expect(screen.getByTitle('2026-07-21：0件受信')).toBeInTheDocument();
+    expect(screen.getByTitle('2026-07-20：1件受信')).toBeInTheDocument();
   });
 
   it('renders the empty state when there are no submissions', async () => {
