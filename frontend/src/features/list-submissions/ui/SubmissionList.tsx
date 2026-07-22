@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
-import { Icon, Pager } from '@/shared/ui';
+import { Icon, Pagination } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { SUBMISSION_STATUSES, SUBMISSION_SORTS } from '@/entities/submission';
 import type {
@@ -105,6 +105,8 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
   const allCount = Object.values(statusCounts).reduce((sum, n) => sum + n, 0);
   const pageCount = Math.max(1, Math.ceil(total / PAGE));
   const currentPage = page < pageCount ? page : pageCount - 1;
+  const rangeFrom = total === 0 ? 0 : currentPage * PAGE + 1;
+  const rangeTo = Math.min((currentPage + 1) * PAGE, total);
 
   const statusLabel = (key: StatusFilter): string =>
     key === 'all' ? t('inbox.tab.all') : t(`submission.status.${key}`);
@@ -222,12 +224,23 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
       </div>
 
       {!isLoading && error === null ? (
-        <Pager
-          page={currentPage}
-          pages={pageCount}
-          onPage={(p) => {
-            setPage(p);
+        <Pagination
+          total={total}
+          canPrev={currentPage > 0}
+          canNext={(currentPage + 1) * PAGE < total}
+          onPrev={() => {
+            setPage(currentPage - 1);
           }}
+          onNext={() => {
+            setPage(currentPage + 1);
+          }}
+          showingLabel={t('common.pagination.showing', {
+            from: String(rangeFrom),
+            to: String(rangeTo),
+            total: String(total),
+          })}
+          previousLabel={t('common.prev')}
+          nextLabel={t('common.next')}
         />
       ) : null}
     </div>

@@ -2,6 +2,7 @@ import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
 import { screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
 import { SubmissionList } from '@/features/list-submissions';
@@ -35,6 +36,36 @@ function renderList(): void {
     <MemoryRouter initialEntries={['/submissions']}>
       <SubmissionList selectedId={null} />
     </MemoryRouter>,
+  );
+}
+
+function submissionItem(id: number): Record<string, unknown> {
+  return {
+    id,
+    contact_form_id: 3,
+    status: 'open',
+    field_values: { name: `Sender ${String(id)}` },
+    submitted_at: '2026-06-04 00:00:00',
+  };
+}
+
+// Serves a list of `total` submissions honoring limit/offset, like the real API.
+function mockSubmissions(total: number): void {
+  server.use(
+    http.get(URL, ({ request }) => {
+      // NB: the module-scoped URL constant shadows the global URL constructor here.
+      const search = new URLSearchParams(request.url.split('?')[1] ?? '');
+      const limit = Number(search.get('limit') ?? '20');
+      const offset = Number(search.get('offset') ?? '0');
+      const count = Math.max(0, Math.min(limit, total - offset));
+      return HttpResponse.json({
+        items: Array.from({ length: count }, (_, i) => submissionItem(offset + i + 1)),
+        total,
+        limit,
+        offset,
+        status_counts: { open: total },
+      });
+    }),
   );
 }
 
@@ -95,5 +126,51 @@ describe('SubmissionList', () => {
 
     expect(await screen.findByRole('alert')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '再試行' })).toBeInTheDocument();
+  });
+
+  // Canonical Pagination (prev/next + range) shows for any non-empty list — including a
+  // single page — and only vanishes when the list is empty (total === 0). Next is enabled
+  // only while more pages remain.
+  it('shows the pager with next enabled when more than one page (21 items)', async () => {
+    mockForms();
+    mockSubmissions(21);
+
+    renderList();
+
+    expect(await screen.findByText('Sender 1')).toBeInTheDocument();
+    expect(screen.getByText('1〜20件を表示（全21件）')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '前へ' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '次へ' })).not.toBeDisabled();
+    // No numbered page buttons or page-jump input in the canonical control.
+    expect(screen.queryByRole('spinbutton', { name: 'ページ' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: '2' })).not.toBeInTheDocument();
+  });
+
+  it('shows the pager with both controls disabled at exactly one page (20 items)', async () => {
+    mockForms();
+    mockSubmissions(20);
+
+    renderList();
+
+    expect(await screen.findByText('Sender 1')).toBeInTheDocument();
+    expect(screen.getByText('1〜20件を表示（全20件）')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '前へ' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: '次へ' })).toBeDisabled();
+  });
+
+  it('advances to the next page and updates the range when next is clicked', async () => {
+    mockForms();
+    mockSubmissions(21);
+
+    renderList();
+
+    expect(await screen.findByText('Sender 1')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: '次へ' }));
+
+    // Page 2 loads the 21st row (offset 20) and the range readout follows.
+    expect(await screen.findByText('Sender 21')).toBeInTheDocument();
+    expect(screen.getByText('21〜21件を表示（全21件）')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: '前へ' })).not.toBeDisabled();
+    expect(screen.getByRole('button', { name: '次へ' })).toBeDisabled();
   });
 });
