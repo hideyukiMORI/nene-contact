@@ -9,7 +9,13 @@ milestone is delivered within the binding
 charter (APPI / Japan law only); where any goal conflicts with the charter, compliance
 wins (ADR 0012).
 
-## Where we are (2026-06-25)
+## Where we are (2026-07-22)
+
+**In production since 2026-07-18** 🚀 — the operator console runs at `contact.ayane.co.jp`
+and the embedded form is live on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). Production
+deploys are currently frozen pending the records-embed rollout gate; work merged after the
+launch (notification-channel CRUD completion + test-send, email-wording waves a–c, embed
+submit spinner, reset-password CLI) is on `main` only. See [`CHANGELOG.md`](../CHANGELOG.md).
 
 - **Phase 0 — Governance** ✅ complete (2026-06-03).
 - **Phase 1 — Runtime foundation** ✅ complete: org, tenant resolution, JWT/RBAC, audit,
@@ -24,16 +30,24 @@ wins (ADR 0012).
   (React/TS/Vite → `public_html/console/`, served at `/console/`) with login, form builder
   (dnd-kit, rebuilt to spec v1), inbox two-pane (status + notes + audited metadata reveal),
   channels, users, audit-log viewer ✅. **Appearance Studio v2** (per-form theming, 3 modes,
-  HERO, media library) landed beyond the MVP bar. See [`todo/current.md`](./todo/current.md).
+  HERO, media library) landed beyond the MVP bar. See the private
+  `nene-origin/internal-docs/contact/todo/current.md` (operational logs moved there in P3).
 - **M5 Sibling handoff** ✅: Contact → Deal opportunity handoff + Contact → Vault attachment
-  archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited).
+  archive (`src/Upstream/`, `submission_links`, idempotent, retry, non-destructive, audited);
+  submission-detail handoff buttons (Deal / Invoice / Vault + retry) landed 2026-06-25.
 - **M6 AI/MCP** ✅: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
   (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, the
   Contact → Invoice draft-client handoff, and Contact → Records read-only select options.
 - **M7 GA / acceptance** 🚧: A1–A8 verified with code evidence
   ([`review/acceptance-A1-A8.md`](./review/acceptance-A1-A8.md), verdict PASS) + operator guide
-  ([`operations/operator-guide.md`](./operations/operator-guide.md)); production `embed.js` build
-  + final reviews remain.
+  ([`operations/operator-guide.md`](./operations/operator-guide.md)); production `embed.js`
+  build ✅ (minified, content-hashed, SRI manifest + stable `/embed/embed.js` alias); final
+  compliance/governance/backend/frontend release reviews remain.
+- **Post-MVP production waves (2026-07)**: sender auto-reply; server-side form CLIs; hosted
+  single-form page `GET /form/{public_form_key}`; the **records-embed contract** (service-token
+  registry + unified `/api` auth dispatcher + admin SPA, 案1 PR ①–④); AYANE brand skin +
+  `button` trigger mode; notification-channel admin CRUD + operator test-send; email-wording
+  waves a–c (`sender_display_name`, org signature, admin-notification templates + variables).
 
 Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./milestones/).
 
@@ -80,6 +94,7 @@ close-out   hardening   embed MVP +webhooks handoff  +siblings  (A1–A8)
 - [`explanation/product-vision.md`](./explanation/product-vision.md) (North Star, MVP success)
 - [`explanation/requirements.md`](./explanation/requirements.md)
 - [`explanation/data-protection-compliance.md`](./explanation/data-protection-compliance.md) (binding)
-- [`todo/current.md`](./todo/current.md)
+- Private `nene-origin/internal-docs/contact/todo/current.md` (live work status, P3)
+- [`../CHANGELOG.md`](../CHANGELOG.md)
 
-Last updated: 2026-06-04
+Last updated: 2026-07-22
