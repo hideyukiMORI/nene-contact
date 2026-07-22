@@ -25,25 +25,12 @@ final readonly class PdoSubmissionTagRepository implements SubmissionTagReposito
 
     public function add(int $submissionId, int $tagId, string $createdAt): void
     {
-        $active = $this->query->fetchOne(
-            'SELECT id FROM submission_tags WHERE submission_id = ? AND tag_id = ? AND deleted_at IS NULL',
-            [$submissionId, $tagId],
-        );
-        if ($active !== null) {
-            return; // idempotent: already applied
-        }
-
-        $reactivated = $this->query->execute(
-            'UPDATE submission_tags SET deleted_at = NULL, created_at = ?
-             WHERE submission_id = ? AND tag_id = ? AND deleted_at IS NOT NULL',
-            [$createdAt, $submissionId, $tagId],
-        );
-        if ($reactivated > 0) {
-            return;
-        }
-
+        // Upsert against the unique (submission_id, tag_id) index: a fresh pair inserts; an
+        // existing one (active or soft-removed) reactivates. Idempotent and race-safe against a
+        // concurrent double-apply — the invariant of one row per pair is enforced by the index.
         $this->query->execute(
-            'INSERT INTO submission_tags (submission_id, tag_id, created_at, deleted_at) VALUES (?, ?, ?, NULL)',
+            'INSERT INTO submission_tags (submission_id, tag_id, created_at, deleted_at) VALUES (?, ?, ?, NULL)
+             ON DUPLICATE KEY UPDATE deleted_at = NULL',
             [$submissionId, $tagId, $createdAt],
         );
     }

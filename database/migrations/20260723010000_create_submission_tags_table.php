@@ -18,7 +18,9 @@ final class CreateSubmissionTagsTable extends AbstractMigration
             ->addColumn('tag_id', 'integer', ['null' => false])
             ->addColumn('created_at', 'datetime', ['null' => false])
             ->addColumn('deleted_at', 'datetime', ['null' => true, 'default' => null])
-            ->addIndex(['submission_id'])
+            // One row per pair — the invariant "one active assignment per (submission, tag)"
+            // holds even under concurrent double-apply (re-tag reactivates the row via upsert).
+            ->addIndex(['submission_id', 'tag_id'], ['unique' => true, 'name' => 'uniq_submission_tags_pair'])
             ->addIndex(['tag_id'])
             ->create();
     }
