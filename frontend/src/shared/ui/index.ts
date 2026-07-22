@@ -6,3 +6,4 @@ export { TextField } from '@/shared/ui/primitives/TextField';
 export { Alert } from '@/shared/ui/primitives/Alert';
 export { Modal } from '@/shared/ui/primitives/Modal';
 export { Pager } from '@/shared/ui/Pager';
+export { Pagination } from '@/shared/ui/Pagination';
