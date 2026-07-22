@@ -1,10 +1,11 @@
 import type { ReactNode } from 'react';
 import type { AuditEvent } from '@/entities/audit-event';
 import { useI18n } from '@/shared/i18n';
-import { Icon, Pager } from '@/shared/ui';
+import { Icon, Pagination } from '@/shared/ui';
 import { actionLabel, actorLabel } from '@/features/list-audit-events/lib/labels';
 import {
   AUDIT_PERIODS,
+  PAGE_SIZE,
   type AuditPeriod,
 } from '@/features/list-audit-events/model/use-audit-events';
 
@@ -56,6 +57,10 @@ export function AuditLogList(props: AuditLogListProps): ReactNode {
     to,
     selectedId,
   } = props;
+
+  // The pager runs over the matched (filtered) set; range and controls come from it.
+  const rangeFrom = matched === 0 ? 0 : page * PAGE_SIZE + 1;
+  const rangeTo = Math.min((page + 1) * PAGE_SIZE, matched);
 
   return (
     <div className="ib-list">
@@ -160,7 +165,26 @@ export function AuditLogList(props: AuditLogListProps): ReactNode {
         )}
       </div>
 
-      {!isLoading && !error ? <Pager page={page} pages={pageCount} onPage={props.onPage} /> : null}
+      {!isLoading && !error ? (
+        <Pagination
+          total={matched}
+          canPrev={page > 0}
+          canNext={page < pageCount - 1}
+          onPrev={() => {
+            props.onPage(page - 1);
+          }}
+          onNext={() => {
+            props.onPage(page + 1);
+          }}
+          showingLabel={t('common.pagination.showing', {
+            from: String(rangeFrom),
+            to: String(rangeTo),
+            total: String(matched),
+          })}
+          previousLabel={t('common.prev')}
+          nextLabel={t('common.next')}
+        />
+      ) : null}
     </div>
   );
 }
