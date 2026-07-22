@@ -585,6 +585,13 @@ paths:
           required: false
           description: Row order. Defaults to newest first.
           schema: { type: string, enum: [date_desc, date_asc, status, form] }
+        - name: tag_id
+          in: query
+          required: false
+          description: >
+            Filter by tag (ADR 0019). Repeatable (`tag_id[]=1&tag_id[]=2`) or comma-separated;
+            AND semantics — a submission must carry all listed tags.
+          schema: { type: array, items: { type: integer } }
       responses:
         '200':
           description: Submission list

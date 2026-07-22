@@ -205,6 +205,20 @@ final readonly class PdoSubmissionRepository implements
             $params[] = $this->orgId->get();
             $params[] = $like;
         }
+        if ($filter->tagIds !== []) {
+            // AND semantics (ADR 0019): the submission must carry *all* listed tags. The
+            // subquery counts distinct matching active assignments and requires the full set;
+            // a foreign tag id simply matches nothing (submission_tags rows belong to this
+            // org's org-scoped submissions).
+            $placeholders = implode(', ', array_fill(0, count($filter->tagIds), '?'));
+            $clauses[] = 'id IN (SELECT submission_id FROM submission_tags'
+                . ' WHERE tag_id IN (' . $placeholders . ') AND deleted_at IS NULL'
+                . ' GROUP BY submission_id HAVING COUNT(DISTINCT tag_id) = ?)';
+            foreach ($filter->tagIds as $tagId) {
+                $params[] = $tagId;
+            }
+            $params[] = count($filter->tagIds);
+        }
 
         return [implode(' AND ', $clauses), $params];
     }
