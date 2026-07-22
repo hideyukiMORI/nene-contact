@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { screen } from '@testing-library/react';
+import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
@@ -164,10 +164,16 @@ describe('SubmissionList', () => {
 
     renderList();
 
+    const user = userEvent.setup();
     expect(await screen.findByText('Sender 1')).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: '次へ' }));
+    await user.click(screen.getByRole('button', { name: '次へ' }));
 
-    // Page 2 loads the 21st row (offset 20) and the range readout follows.
+    // Await the transition explicitly (not a longer timeout): poll until page 1's row has
+    // left (robust whether or not it is still present when this runs), then the 21st row
+    // (offset 20) + its range readout render.
+    await waitFor(() => {
+      expect(screen.queryByText('Sender 1')).not.toBeInTheDocument();
+    });
     expect(await screen.findByText('Sender 21')).toBeInTheDocument();
     expect(screen.getByText('21〜21件を表示（全21件）')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '前へ' })).not.toBeDisabled();
