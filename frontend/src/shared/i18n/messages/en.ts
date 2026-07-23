@@ -840,18 +840,15 @@ export const en: Partial<MessageCatalog> = {
   'guide.done': 'Done',
   'guide.skip': 'Skip',
   'guide.welcome.title': 'Welcome',
-  'guide.welcome.body': "A one-minute tour of the NeNe Contact console's main screens.",
-  'guide.forms.title': 'Build a form',
+  'guide.welcome.body':
+    'A one-minute walkthrough: ① build a form → ② embed it on your site → ③ read what comes in.',
+  'guide.forms.title': '① Build a form',
   'guide.forms.body':
-    'Start here to create a contact form, then place its embed snippet on your site.',
-  'guide.inbox.title': 'Review submissions',
+    'Create a contact form here, then just paste the generated embed snippet onto your own site to go live.',
+  'guide.inbox.title': '② Read what comes in',
   'guide.inbox.body':
-    'Incoming submissions land here. Update status, add notes, apply tags, and export to CSV.',
-  'guide.manage.title': 'Manage the organization',
-  'guide.manage.body':
-    'Members, organization settings, service tokens, and the audit log are managed from this group.',
-  'guide.help.title': 'Help, any time',
-  'guide.help.body': 'Stuck? Open the usage guide from this icon whenever you need it.',
-  'guide.finish.title': "You're set",
-  'guide.finish.body': "That's the essentials. Full details live on the help page.",
+    'Submissions land here, and a notification also goes to email, Slack, and more so nothing is missed. Update status, add notes, tags, and export to CSV from here too.',
+  'guide.help.title': '③ Help, any time',
+  'guide.help.body':
+    "That's the essentials. Open the full usage guide any time from this icon in the top-right.",
 };
