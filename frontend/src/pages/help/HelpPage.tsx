@@ -81,12 +81,6 @@ export function HelpPage(): ReactNode {
         <p className="hlp-text">{t('help.quickstart.note')}</p>
       </section>
 
-      <h2 className="hlp-group">{t('help.group.basic')}</h2>
-      <SectionGrid sections={BASIC} />
-
-      <h2 className="hlp-group">{t('help.group.advanced')}</h2>
-      <SectionGrid sections={ADVANCED} />
-
       <section className="fm-card ex-card-pad hlp-card">
         <div className="ex-cardhead">
           <Icon name="external" size={17} />
@@ -116,6 +110,12 @@ export function HelpPage(): ReactNode {
           </tbody>
         </table>
       </section>
+
+      <h2 className="hlp-group">{t('help.group.basic')}</h2>
+      <SectionGrid sections={BASIC} />
+
+      <h2 className="hlp-group">{t('help.group.advanced')}</h2>
+      <SectionGrid sections={ADVANCED} />
 
       <section className="fm-card ex-card-pad hlp-card">
         <div className="ex-cardhead">
