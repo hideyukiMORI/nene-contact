@@ -811,4 +811,26 @@ export const en: Partial<MessageCatalog> = {
   'serviceTokens.column.actions': 'Actions',
   'serviceTokens.status.active': 'Active',
   'serviceTokens.status.revoked': 'Revoked',
+  'help.title': 'Help & user guide',
+  'help.lead':
+    'What you can do on each screen of the NeNe Contact console — a first place to look when you get stuck.',
+  'help.dashboard.body':
+    'The first screen after signing in. See your active form count, unhandled submissions, and the last-7-day receipts trend at a glance. Use the left menu to move between screens.',
+  'help.forms.body':
+    'Create, edit, and delete contact forms. Assemble fields in the full-screen builder, style the design, and generate the embed snippet (embed.js) for your site. Notification channels (email, Slack, Chatwork, webhook) are configured per form.',
+  'help.inbox.body':
+    'Review incoming submissions in a list and detail view. Update the handling status (open / in progress / resolved), add notes, apply tags, filter by sender, date, or tag, and export to CSV. Personal data is erased in place, never physically deleted (ADR 0016).',
+  'help.users.body':
+    "Manage this organization's members. Invite them (email, password, role), change roles, and deactivate. Access is governed by roles such as admin and editor.",
+  'help.org.body':
+    'Edit organization settings. Set the sender display name, email signature, and the admin-notification subject/body templates — the wording of the mail you send and receive.',
+  'help.tokens.body':
+    'Issue and revoke service tokens that let external services deliver submissions. A token is shown once, at creation. Revoking one immediately rejects any delivery using it.',
+  'help.audit.body':
+    'Browse the audit log of who changed what, and when. Every mutation and every view/export of personal data is recorded append-only, so it can be traced afterwards.',
+  'help.compliance.title': 'How your data is handled',
+  'help.compliance.body':
+    "The service is built to Japan's Act on the Protection of Personal Information (APPI). Fields that must not be collected — My Number, credit-card numbers — are structurally impossible to add. Personal data is erased in place, never physically deleted.",
+  'help.contact.title': "If this doesn't help",
+  'help.contact.body': "If you can't resolve it here, contact your organization's administrator.",
 };

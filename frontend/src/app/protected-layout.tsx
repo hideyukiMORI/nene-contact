@@ -1,5 +1,5 @@
 import { Fragment, useState } from 'react';
-import { Link, NavLink, Navigate, Outlet, useLocation } from 'react-router-dom';
+import { Link, NavLink, Navigate, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useAuth } from '@/app/auth-context';
 import { useI18n } from '@/shared/i18n';
@@ -91,6 +91,9 @@ function usePageCrumbs(): Crumb[] {
   if (segments[0] === 'account') {
     return [{ label: t('account.title') }];
   }
+  if (segments[0] === 'help') {
+    return [{ label: t('help.title') }];
+  }
   return [{ label: t('nav.dashboard') }];
 }
 
@@ -98,6 +101,7 @@ export function ProtectedLayout(): ReactNode {
   const { session, signOut } = useAuth();
   const { t, locale, setLocale } = useI18n();
   const { theme, toggleTheme } = useTheme();
+  const navigate = useNavigate();
   const pageCrumbs = usePageCrumbs();
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -205,7 +209,14 @@ export function ProtectedLayout(): ReactNode {
               <Icon name={isDark ? 'sun' : 'moon'} size={15} />
             </button>
 
-            <button type="button" className="ex-ipill" aria-label={t('common.help')}>
+            <button
+              type="button"
+              className="ex-ipill"
+              aria-label={t('common.help')}
+              onClick={() => {
+                void navigate('/help');
+              }}
+            >
               <Icon name="help" size={15} />
             </button>
 

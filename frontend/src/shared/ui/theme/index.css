@@ -2761,6 +2761,24 @@ h3 {
   line-height: 1.6;
   color: var(--ex-muted);
 }
+
+/* ── Help / usage guide (/help) ── */
+.hlp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 18px;
+}
+.hlp-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.hlp-text {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.7;
+  color: var(--ex-muted);
+}
 .nc-form {
   max-width: 420px;
 }
