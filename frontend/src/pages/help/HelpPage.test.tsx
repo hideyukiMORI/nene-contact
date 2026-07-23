@@ -28,4 +28,19 @@ describe('HelpPage', () => {
     // the compliance note is present
     expect(screen.getByRole('heading', { level: 3, name: 'データの取り扱い' })).toBeInTheDocument();
   });
+
+  it('leads with a quickstart and a migration cheat-sheet', () => {
+    renderHelp();
+
+    // quickstart: the three install steps, including the paste location
+    expect(
+      screen.getByRole('heading', { level: 3, name: '最短でサイトに設置する' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText(/<\/body> の直前に貼り付けて保存/)).toBeInTheDocument();
+    // migration cheat-sheet maps a familiar tool onto this product
+    expect(
+      screen.getByRole('heading', { level: 3, name: '他のツールから乗り換える方へ' }),
+    ).toBeInTheDocument();
+    expect(screen.getByText('Contact Form 7 の送信先メール')).toBeInTheDocument();
+  });
 });

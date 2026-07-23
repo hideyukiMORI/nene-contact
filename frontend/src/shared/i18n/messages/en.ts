@@ -830,6 +830,24 @@ export const en: Partial<MessageCatalog> = {
     'Browse the record of who changed what, and when. Every change, and every view or export of personal data, is logged in a way that cannot be edited, so it can be traced afterwards.',
   'help.group.basic': 'The basics',
   'help.group.advanced': 'For power users',
+  'help.quickstart.title': 'Put a form on your site, fast',
+  'help.quickstart.step1':
+    'Create a form (Forms → New form; picking a template is the quickest start).',
+  'help.quickstart.step2': "On the form's Embed / Publish tab, copy the embed snippet.",
+  'help.quickstart.step3':
+    "Paste it right before </body> in your site's HTML and save (in WordPress etc., use the theme editor or an HTML block).",
+  'help.quickstart.note':
+    'If a web agency built your site, just send them the copied snippet and they can place it for you. Once installed, a test submission from the form arrives in your Inbox so you can confirm it works.',
+  'help.migrate.title': 'Coming from another tool?',
+  'help.migrate.intro': 'How common tools map over.',
+  'help.migrate.from': 'Previously',
+  'help.migrate.to': 'In NeNe Contact',
+  'help.migrate.r1a': "Contact Form 7's recipient email",
+  'help.migrate.r1b': "Each form's Notification channels (email / Slack / Chatwork / webhook)",
+  'help.migrate.r2a': "Google Forms' spreadsheet",
+  'help.migrate.r2b': 'The Inbox — list, detail, and CSV export',
+  'help.migrate.r3a': 'Shortcode / paste-in tag',
+  'help.migrate.r3b': 'The embed snippet on the Embed / Publish tab',
   'help.compliance.title': 'How your data is handled',
   'help.compliance.body':
     "The service is built to Japan's Act on the Protection of Personal Information (APPI). Fields that must never be collected — My Number, credit-card numbers — cannot be added at all. Personal data you hold is, on deletion, wiped in place so it cannot be recovered.",

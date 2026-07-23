@@ -68,11 +68,54 @@ export function HelpPage(): ReactNode {
       </div>
       <p className="ac-lead">{t('help.lead')}</p>
 
+      <section className="fm-card ex-card-pad hlp-card hlp-quickstart">
+        <div className="ex-cardhead">
+          <Icon name="rocket" size={17} />
+          <h3>{t('help.quickstart.title')}</h3>
+        </div>
+        <ol className="hlp-steps">
+          <li>{t('help.quickstart.step1')}</li>
+          <li>{t('help.quickstart.step2')}</li>
+          <li>{t('help.quickstart.step3')}</li>
+        </ol>
+        <p className="hlp-text">{t('help.quickstart.note')}</p>
+      </section>
+
       <h2 className="hlp-group">{t('help.group.basic')}</h2>
       <SectionGrid sections={BASIC} />
 
       <h2 className="hlp-group">{t('help.group.advanced')}</h2>
       <SectionGrid sections={ADVANCED} />
+
+      <section className="fm-card ex-card-pad hlp-card">
+        <div className="ex-cardhead">
+          <Icon name="external" size={17} />
+          <h3>{t('help.migrate.title')}</h3>
+        </div>
+        <p className="hlp-text">{t('help.migrate.intro')}</p>
+        <table className="hlp-migrate">
+          <thead>
+            <tr>
+              <th>{t('help.migrate.from')}</th>
+              <th>{t('help.migrate.to')}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{t('help.migrate.r1a')}</td>
+              <td>{t('help.migrate.r1b')}</td>
+            </tr>
+            <tr>
+              <td>{t('help.migrate.r2a')}</td>
+              <td>{t('help.migrate.r2b')}</td>
+            </tr>
+            <tr>
+              <td>{t('help.migrate.r3a')}</td>
+              <td>{t('help.migrate.r3b')}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
       <section className="fm-card ex-card-pad hlp-card">
         <div className="ex-cardhead">

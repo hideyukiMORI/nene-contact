@@ -2792,6 +2792,52 @@ h3 {
   text-transform: uppercase;
   color: var(--ex-faint);
 }
+.hlp-quickstart {
+  background: color-mix(in srgb, var(--ex-brand) 8%, var(--ex-surface));
+  border-color: color-mix(in srgb, var(--ex-brand) 26%, var(--ex-border));
+}
+.hlp-steps {
+  margin: 4px 0 0;
+  padding-left: 22px;
+  list-style: decimal;
+}
+.hlp-steps li {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ex-text);
+  margin-bottom: 8px;
+}
+.hlp-steps li::marker {
+  color: var(--ex-brand);
+  font-weight: 700;
+}
+.hlp-steps li:last-child {
+  margin-bottom: 0;
+}
+.hlp-migrate {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.hlp-migrate th,
+.hlp-migrate td {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--ex-border);
+  vertical-align: top;
+}
+.hlp-migrate th {
+  color: var(--ex-faint);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+}
+.hlp-migrate td {
+  color: var(--ex-muted);
+}
+.hlp-migrate td:last-child {
+  color: var(--ex-text);
+}
 
 /* ── First-run onboarding banner (dashboard) ── */
 .ob-banner {
