@@ -8,6 +8,8 @@ import { useGuideTour } from '@/features/guide-tour';
 // Static usage guide reachable from the topbar help button. Sections mirror the sidebar
 // navigation so an operator can map "what is this screen" to "what can I do here". Strings
 // live in the message catalog (ADR 0011); headings reuse the nav labels to stay in sync.
+// Split into "basics" (everyone) and "power users" so first-timers aren't buried in the
+// org/token/audit screens they rarely touch (usability testing, 3 personas).
 interface HelpSection {
   key: string;
   icon: IconName;
@@ -15,7 +17,7 @@ interface HelpSection {
   bodyKey: MessageKey;
 }
 
-const SECTIONS: HelpSection[] = [
+const BASIC: HelpSection[] = [
   {
     key: 'dashboard',
     icon: 'dashboard',
@@ -24,11 +26,31 @@ const SECTIONS: HelpSection[] = [
   },
   { key: 'forms', icon: 'forms', titleKey: 'nav.forms', bodyKey: 'help.forms.body' },
   { key: 'inbox', icon: 'inbox', titleKey: 'nav.inbox', bodyKey: 'help.inbox.body' },
+];
+
+const ADVANCED: HelpSection[] = [
   { key: 'users', icon: 'users', titleKey: 'nav.users', bodyKey: 'help.users.body' },
   { key: 'org', icon: 'settings', titleKey: 'nav.orgSettings', bodyKey: 'help.org.body' },
   { key: 'tokens', icon: 'link', titleKey: 'nav.serviceTokens', bodyKey: 'help.tokens.body' },
   { key: 'audit', icon: 'shield', titleKey: 'nav.auditLog', bodyKey: 'help.audit.body' },
 ];
+
+function SectionGrid({ sections }: { sections: HelpSection[] }): ReactNode {
+  const { t } = useI18n();
+  return (
+    <div className="hlp-grid">
+      {sections.map((section) => (
+        <section key={section.key} className="fm-card ex-card-pad hlp-card">
+          <div className="ex-cardhead">
+            <Icon name={section.icon} size={17} />
+            <h3>{t(section.titleKey)}</h3>
+          </div>
+          <p className="hlp-text">{t(section.bodyKey)}</p>
+        </section>
+      ))}
+    </div>
+  );
+}
 
 export function HelpPage(): ReactNode {
   const { t } = useI18n();
@@ -46,17 +68,11 @@ export function HelpPage(): ReactNode {
       </div>
       <p className="ac-lead">{t('help.lead')}</p>
 
-      <div className="hlp-grid">
-        {SECTIONS.map((section) => (
-          <section key={section.key} className="fm-card ex-card-pad hlp-card">
-            <div className="ex-cardhead">
-              <Icon name={section.icon} size={17} />
-              <h3>{t(section.titleKey)}</h3>
-            </div>
-            <p className="hlp-text">{t(section.bodyKey)}</p>
-          </section>
-        ))}
-      </div>
+      <h2 className="hlp-group">{t('help.group.basic')}</h2>
+      <SectionGrid sections={BASIC} />
+
+      <h2 className="hlp-group">{t('help.group.advanced')}</h2>
+      <SectionGrid sections={ADVANCED} />
 
       <section className="fm-card ex-card-pad hlp-card">
         <div className="ex-cardhead">

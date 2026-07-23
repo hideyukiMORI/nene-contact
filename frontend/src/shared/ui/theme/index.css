@@ -2783,6 +2783,15 @@ h3 {
   line-height: 1.7;
   color: var(--ex-muted);
 }
+.hlp-group {
+  flex-shrink: 0;
+  margin: 8px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--ex-faint);
+}
 
 /* ── First-run onboarding banner (dashboard) ── */
 .ob-banner {
