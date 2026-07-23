@@ -42,7 +42,7 @@ const NAV_GROUPS: { labelKey: MessageKey; items: NavLinkItem[] }[] = [
   {
     labelKey: 'nav.group.manage',
     items: [
-      { to: '/users', labelKey: 'nav.users', icon: 'users', tour: 'manage' },
+      { to: '/users', labelKey: 'nav.users', icon: 'users' },
       { to: '/settings/organization', labelKey: 'nav.orgSettings', icon: 'settings' },
       { to: '/service-tokens', labelKey: 'nav.serviceTokens', icon: 'link' },
       { to: '/audit-log', labelKey: 'nav.auditLog', icon: 'shield' },

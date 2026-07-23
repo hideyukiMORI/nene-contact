@@ -2,8 +2,10 @@ import { createContext, useCallback, useContext, useMemo, useState } from 'react
 import type { ReactNode } from 'react';
 import { GuideTour, type GuideStep } from '@/features/guide-tour/ui/GuideTour';
 
-// The tour walks the primary console areas. Selectors match the `data-tour` markers placed on
-// the sidebar nav items and the topbar help button; welcome/finish are centered, target-less.
+// A tight value flow rather than a screen-by-screen map: ① build → ② read incoming → ③ help.
+// Selectors match the `data-tour` markers on the sidebar nav items and the topbar help button;
+// the welcome step is centered and target-less. The org-management screens stay discoverable in
+// the nav but are left out of the first-run tour (they overwhelmed first-time users in testing).
 const STEPS: GuideStep[] = [
   { titleKey: 'guide.welcome.title', bodyKey: 'guide.welcome.body', placement: 'center' },
   {
@@ -19,18 +21,11 @@ const STEPS: GuideStep[] = [
     placement: 'right',
   },
   {
-    selector: '[data-tour="manage"]',
-    titleKey: 'guide.manage.title',
-    bodyKey: 'guide.manage.body',
-    placement: 'right',
-  },
-  {
     selector: '[data-tour="help"]',
     titleKey: 'guide.help.title',
     bodyKey: 'guide.help.body',
     placement: 'bottom',
   },
-  { titleKey: 'guide.finish.title', bodyKey: 'guide.finish.body', placement: 'center' },
 ];
 
 interface GuideTourValue {

@@ -1079,20 +1079,16 @@ export const ja = {
   'guide.done': '完了',
   'guide.skip': 'スキップ',
   'guide.welcome.title': 'ようこそ',
-  'guide.welcome.body': 'NeNe Contact コンソールの主要な画面を1分でご案内します。',
-  'guide.forms.title': 'フォームを作る',
+  'guide.welcome.body':
+    '「①フォームを作る → ②サイトに貼る → ③届いた問い合わせを見る」の流れを1分でご案内します。',
+  'guide.forms.title': '① フォームを作る',
   'guide.forms.body':
-    'まずはここで問い合わせフォームを作成し、発行した埋め込みコードをサイトに設置します。',
-  'guide.inbox.title': '受信を確認する',
+    'まずはここで問い合わせフォームを作成し、発行された埋め込みコードを自分のサイトに貼るだけで公開できます。',
+  'guide.inbox.title': '② 届いた問い合わせを見る',
   'guide.inbox.body':
-    '届いた送信はここに集まります。対応状況の更新・メモ・タグ付け・CSV書き出しができます。',
-  'guide.manage.title': '組織を管理する',
-  'guide.manage.body':
-    'メンバー・組織設定・連携キー・監査ログは、このグループからまとめて管理します。',
-  'guide.help.title': 'いつでもヘルプ',
-  'guide.help.body': '迷ったら、このアイコンから使い方ガイドをいつでも開けます。',
-  'guide.finish.title': '準備完了',
-  'guide.finish.body': 'これで基本はOKです。詳しい説明はヘルプページにまとめてあります。',
+    '送信された内容はここに集まります。届くとメール・Slack などにも通知が飛ぶので、見逃しません。対応状況の更新・メモ・タグ付け・CSV書き出しもここから。',
+  'guide.help.title': '③ 困ったら、いつでもここ',
+  'guide.help.body': 'これで基本はOKです。詳しい使い方は、右上のこのマークからいつでも開けます。',
 } as const;
 
 export type MessageKey = keyof typeof ja;

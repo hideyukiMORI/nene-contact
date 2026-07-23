@@ -25,19 +25,19 @@ describe('GuideTour', () => {
 
     const dialog = screen.getByRole('dialog');
     expect(dialog).toBeInTheDocument();
-    expect(screen.getByText('1 / 6')).toBeInTheDocument();
+    expect(screen.getByText('1 / 4')).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ようこそ' })).toBeInTheDocument();
     // No Back button on the first step.
     expect(screen.queryByRole('button', { name: '戻る' })).not.toBeInTheDocument();
 
     // Advance to the next step.
     await user.click(screen.getByRole('button', { name: '次へ' }));
-    expect(screen.getByText('2 / 6')).toBeInTheDocument();
+    expect(screen.getByText('2 / 4')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '戻る' })).toBeInTheDocument();
 
     // Go back to the start.
     await user.click(screen.getByRole('button', { name: '戻る' }));
-    expect(screen.getByText('1 / 6')).toBeInTheDocument();
+    expect(screen.getByText('1 / 4')).toBeInTheDocument();
   });
 
   it('closes when skipped', async () => {
