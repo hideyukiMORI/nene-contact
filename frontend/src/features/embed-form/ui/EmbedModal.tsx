@@ -138,6 +138,13 @@ export function EmbedModal({
         <div>{t('embed.intro')}</div>
       </div>
 
+      {form.status !== 'active' ? (
+        <div className="md-note warn">
+          <Icon name="warn" size={18} className="n-ico" />
+          <div>{t('embed.stoppedWarn')}</div>
+        </div>
+      ) : null}
+
       <div className="embed-grid">
         <div>
           <div className="md-field">
@@ -289,6 +296,7 @@ export function EmbedModal({
               <code className="pill-key">{form.publicFormKey}</code>
               <CopyButton text={form.publicFormKey} className="btn btn-sm" iconOnly />
             </div>
+            <p className="ek-hint">{t('embed.publicKeyHint')}</p>
           </div>
         </div>
       </div>

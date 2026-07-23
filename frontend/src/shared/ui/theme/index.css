@@ -7026,6 +7026,20 @@ a.t:hover {
 .md-note-link:hover {
   text-decoration: underline;
 }
+.md-note.warn {
+  background: color-mix(in srgb, #a85a66 12%, var(--ex-surface));
+  border: 1px solid color-mix(in srgb, #a85a66 34%, var(--ex-border));
+  color: var(--ex-text);
+}
+.md-note.warn svg {
+  color: #a85a66;
+}
+.ek-hint {
+  margin: 8px 0 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--ex-muted);
+}
 .md-code {
   background: #12151c;
   border-radius: 11px;

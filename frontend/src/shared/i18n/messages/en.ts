@@ -318,6 +318,10 @@ export const en: Partial<MessageCatalog> = {
   'embed.httpsNote':
     "Two quick checks before you go live: ① your site is served over https://, and ② your site's address is registered as an allowed origin (otherwise submissions are blocked). Ask your administrator if you're unsure.",
   'embed.openSettings': 'Set allowed sites →',
+  'embed.stoppedWarn':
+    'This form is currently stopped. Even after you paste the code, submissions will not arrive until you publish the form.',
+  'embed.publicKeyHint':
+    "This key is already inside the code above — you don't need to paste it anywhere else.",
   'embed.previewContact': 'Contact',
   'embed.previewTitle': 'Contact us',
   'embed.previewSend': 'Send',

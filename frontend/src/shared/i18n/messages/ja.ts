@@ -314,6 +314,10 @@ export const ja = {
   'embed.httpsNote':
     '公開の前に2つだけ確認してください。① サイトのアドレスが https:// で始まっていること。② 貼り付け先サイトのアドレスを「許可オリジン」に登録しておくこと（未設定だと送信がブロックされます）。分からない場合は管理者にご相談ください。',
   'embed.openSettings': '許可オリジンを設定する →',
+  'embed.stoppedWarn':
+    'このフォームは現在「停止」中です。貼り付けても、フォームを公開中にするまで送信は届きません。',
+  'embed.publicKeyHint':
+    'このキーは上のコードにすでに含まれています。別の場所に貼る必要はありません。',
   'embed.previewContact': 'お問い合わせ',
   'embed.previewTitle': 'お問い合わせ',
   'embed.previewSend': '送信',
