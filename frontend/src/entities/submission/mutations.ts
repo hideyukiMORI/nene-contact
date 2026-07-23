@@ -57,6 +57,23 @@ export function useRemoveSubmissionTagMutation(
 }
 
 /**
+ * DELETE /admin/submissions/{id} — soft-deletes the submission (data-subject deletion right,
+ * charter §4; personal data is erased in place per ADR 0016, audited server-side). Irreversible.
+ */
+export function useDeleteSubmissionMutation(id: number): UseMutationResult<number, AppError, void> {
+  const queryClient = useQueryClient();
+  return useMutation<number, AppError>({
+    mutationFn: async () => {
+      await apiClient.delete(`/admin/submissions/${String(id)}`);
+      return id;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: submissionKeys.all });
+    },
+  });
+}
+
+/**
  * GET /admin/submissions/export — downloads every submission as CSV (bulk PII access,
  * audited server-side as `submission.exported`). The endpoint exports the full set and
  * does not honor the inbox filters, so this is deliberately an "export everything" action.

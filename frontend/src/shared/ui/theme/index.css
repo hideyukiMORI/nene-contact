@@ -5922,6 +5922,17 @@ a.t:hover {
   width: 16px;
   height: 16px;
 }
+.ib-iconbtn.danger {
+  color: #a85a66;
+}
+.ib-iconbtn.danger:hover {
+  background: color-mix(in srgb, #a85a66 12%, var(--ex-surface));
+  border-color: color-mix(in srgb, #a85a66 40%, var(--ex-border));
+}
+.ib-iconbtn:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
 .ib-dbody {
   padding: 22px 24px;
   flex: 1;
