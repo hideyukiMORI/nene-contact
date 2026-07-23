@@ -143,7 +143,12 @@ export function EmbedModal({
           <Icon name="warn" size={18} className="n-ico" />
           <div>{t('embed.stoppedWarn')}</div>
         </div>
-      ) : null}
+      ) : (
+        <div className="md-note ok">
+          <Icon name="check" size={18} className="n-ico" />
+          <div>{t('embed.liveOk')}</div>
+        </div>
+      )}
 
       <div className="embed-grid">
         <div>
@@ -298,6 +303,11 @@ export function EmbedModal({
             </div>
             <p className="ek-hint">{t('embed.publicKeyHint')}</p>
           </div>
+
+          <Link className="embed-inbox-link" to="/submissions" onClick={onClose}>
+            <Icon name="inbox" size={14} />
+            {t('embed.checkInbox')}
+          </Link>
         </div>
       </div>
     </Modal>

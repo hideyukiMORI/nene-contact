@@ -324,6 +324,9 @@ export const en: Partial<MessageCatalog> = {
     'This form is currently stopped. Even after you paste the code, submissions will not arrive until you publish the form.',
   'embed.publicKeyHint':
     "This key is already inside the code above — you don't need to paste it anywhere else.",
+  'embed.liveOk':
+    'This form is live — once the code is on your site, it starts accepting submissions right away.',
+  'embed.checkInbox': 'After a test submission, check your inbox to confirm it arrived →',
   'embed.previewContact': 'Contact',
   'embed.previewTitle': 'Contact us',
   'embed.previewSend': 'Send',
