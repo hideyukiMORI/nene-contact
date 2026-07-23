@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useEffect, type ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { useFormBuilder } from '@/features/build-contact-form/model/use-form-builder';
@@ -44,12 +44,28 @@ function SoonBadge(): ReactNode {
 export function FormSettingsPage({
   builder,
   readOnlyKey,
+  focusField,
 }: {
   builder: Builder;
   readOnlyKey: boolean;
+  focusField?: string | undefined;
 }): ReactNode {
   const { t } = useI18n();
   const { draft } = builder;
+
+  // Deep link `?focus=origins` (from the embed panel's "set allowed sites" link, resolved in the
+  // page) lands on this tab; bring the allowed-origins field into view and focus it so the
+  // operator isn't dropped at the top of the settings page hunting for it.
+  useEffect(() => {
+    if (focusField !== 'origins') {
+      return;
+    }
+    const field = document.getElementById('st-origins');
+    if (field !== null) {
+      field.scrollIntoView({ block: 'center' });
+      (field as HTMLTextAreaElement).focus();
+    }
+  }, [focusField]);
 
   const enLocale = draft.locales.includes('en');
 

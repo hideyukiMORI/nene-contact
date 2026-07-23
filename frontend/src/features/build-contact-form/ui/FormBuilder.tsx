@@ -100,12 +100,14 @@ export function FormBuilder({
   initialDraft,
   formId,
   initialTab,
+  focusField,
 }: {
   onCreated: () => void;
   onBack?: () => void;
   initialDraft?: ContactFormDraft;
   formId?: number;
   initialTab?: BuilderTab | undefined;
+  focusField?: string | undefined;
 }): ReactNode {
   const { t } = useI18n();
   const builder = useFormBuilder(initialDraft, formId);
@@ -492,7 +494,9 @@ export function FormBuilder({
         </div>
       ) : null}
 
-      {tab === 'settings' ? <FormSettingsPage builder={builder} readOnlyKey={isEditing} /> : null}
+      {tab === 'settings' ? (
+        <FormSettingsPage builder={builder} readOnlyKey={isEditing} focusField={focusField} />
+      ) : null}
       {tab === 'design' ? (
         <AppearanceStudio value={draft.appearance} onChange={builder.setAppearance} />
       ) : null}
