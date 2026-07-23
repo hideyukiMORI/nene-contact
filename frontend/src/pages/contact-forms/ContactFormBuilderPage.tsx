@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useState, type ReactNode } from 'react';
 import type { ContactFormDraft } from '@/entities/contact-form';
 import { useContactFormQuery } from '@/entities/contact-form';
@@ -19,6 +19,13 @@ export function ContactFormBuilderPage(): ReactNode {
 function EditForm({ id }: { id: number }): ReactNode {
   const { t } = useI18n();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const tabParam = searchParams.get('tab');
+  // Deep-link a specific builder tab (e.g. the embed panel's "set allowed sites" link).
+  const initialTab =
+    tabParam === 'settings' || tabParam === 'design' || tabParam === 'publish'
+      ? tabParam
+      : undefined;
   const query = useContactFormQuery(id);
 
   if (query.isPending) {
@@ -40,6 +47,7 @@ function EditForm({ id }: { id: number }): ReactNode {
     <FormBuilder
       initialDraft={query.data}
       formId={id}
+      initialTab={initialTab}
       onBack={() => {
         void navigate('/contact-forms');
       }}

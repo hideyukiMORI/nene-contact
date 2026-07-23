@@ -7017,6 +7017,15 @@ a.t:hover {
   font-family: var(--ex-font-mono);
   color: var(--ex-text);
 }
+.md-note-link {
+  color: var(--ex-brand);
+  font-weight: 600;
+  white-space: nowrap;
+  text-decoration: none;
+}
+.md-note-link:hover {
+  text-decoration: underline;
+}
 .md-code {
   background: #12151c;
   border-radius: 11px;

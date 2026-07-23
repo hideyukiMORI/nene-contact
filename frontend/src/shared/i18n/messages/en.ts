@@ -316,7 +316,8 @@ export const en: Partial<MessageCatalog> = {
   'embed.pasteNote':
     "Paste the copied code right before </body> in your site's HTML and save. If a web agency built your site, just send them this snippet and they can install it for you.",
   'embed.httpsNote':
-    "Two quick checks before you go live: ① your site is served over https://, and ② your site's address is added to this form's allowed sites (otherwise submissions are blocked). Ask your administrator if you're unsure.",
+    "Two quick checks before you go live: ① your site is served over https://, and ② your site's address is registered as an allowed origin (otherwise submissions are blocked). Ask your administrator if you're unsure.",
+  'embed.openSettings': 'Set allowed sites →',
   'embed.previewContact': 'Contact',
   'embed.previewTitle': 'Contact us',
   'embed.previewSend': 'Send',
@@ -725,6 +726,9 @@ export const en: Partial<MessageCatalog> = {
   'settingsTab.recaptchaDesc': 'Block automated bot submissions',
   'settingsTab.dedupe': 'Prevent duplicate submissions',
   'settingsTab.dedupeDesc': 'Throttle repeated sends from one device',
+  'settingsTab.allowedOriginsPh': 'https://example.com',
+  'settingsTab.allowedOriginsHelp':
+    'Enter the address of each site where you embed this form, one per line (e.g. https://example.com). Only submissions from these sites are accepted. Leave empty to accept from anywhere.',
   'settingsTab.language': 'Display language',
   'settingsTab.ja': 'Japanese',
   'settingsTab.en': 'English',
