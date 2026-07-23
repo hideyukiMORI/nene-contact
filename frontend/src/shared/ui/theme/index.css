@@ -3244,6 +3244,32 @@ h3 {
   color: var(--ex-faint);
   padding: 13px 9px 5px;
 }
+.ex-navgroup-btn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  border: 0;
+  background: none;
+  font: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--ex-faint);
+  padding: 13px 9px 5px;
+  cursor: pointer;
+}
+.ex-navgroup-btn svg {
+  color: var(--ex-faint);
+  transition: transform 0.15s ease;
+}
+.ex-navgroup-btn svg.rot {
+  transform: rotate(-90deg);
+}
+.ex-navgroup-btn:hover {
+  color: var(--ex-nav-fg);
+}
 .ex-navitem {
   display: flex;
   align-items: center;
@@ -3327,6 +3353,7 @@ h3 {
   }
   .ex-brand-text,
   .ex-navgroup,
+  .ex-navgroup-btn,
   .ex-navfoot,
   .ex-navlabel {
     display: none;
@@ -3370,6 +3397,7 @@ h3 {
   }
   .ex-brand-text,
   .ex-navgroup,
+  .ex-navgroup-btn,
   .ex-navfoot,
   .ex-navlabel {
     display: revert;
