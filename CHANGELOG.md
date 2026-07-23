@@ -5,6 +5,40 @@ there are no semver release tags yet, so entries are keyed by date (newest first
 deploys are the de-facto releases. June 2026 is backfilled at milestone granularity; July 2026
 at PR granularity. References are `(#issue → #PR)`.
 
+## 2026-07-24 — guided tour + help + inbox/embed UX + submission tags (deployed to production)
+
+Console-only deploy to `contact.ayane.co.jp` (hub GO; the deploy freeze had lifted 2026-07-22).
+Frontend/i18n/CSS only — no backend, migration, `.env`, or embed changes. Prod console went from
+`index-CPveXqjn.js` to **`index-C6dmgI38.js`** / **`index-6howia9n.css`** via the console-only
+scp-changed-assets path (backup-first; old hashes kept for rollback). References are `(#issue → #PR)`.
+
+### Added
+
+- **Guided tour** — a self-contained spotlight tour (no new dependency) walking a 4-step value
+  flow (build → read incoming → help), launched from the sidebar and a first-run **onboarding
+  banner** on the dashboard (#486 → #487, #490 → #496, #491 → #497).
+- **`/help` usage guide** — quickstart with paste-location, a tool-migration cheat-sheet
+  (Contact Form 7 / Google Forms), and a basics / power-users split (#484 → #485, #493 → #499,
+  #507 → #510).
+- **Inbox CSV export** button (#494 → #500) and **submission delete/erase** with an audited,
+  irreversible confirm dialog (#502 → #504, #514 → #516).
+- **Allowed-origins editor** in the builder settings + a deep link from the embed panel that
+  scrolls to and focuses the field (#503 → #505, #512 → #517).
+- **Submission tags** — org-managed vocabulary, apply/remove, inbox filter and chips
+  (#472–#476 → #477–#483).
+
+### Changed
+
+- **Embed panel** made plain-language — paste-location guidance, stopped/live status, and
+  public-key clarity (#495 → #501, #506 → #509, #513 → #519).
+- **Help copy** de-jargoned (internal identifiers removed) and the sidebar **manage group** is
+  now collapsible (#492 → #498, #515 → #518). Theme refinements (#468 → #469).
+
+### Verified on production
+
+All four canonical URLs 200; the served bundle carries the new UX strings and boots with zero JS
+errors; deployed asset byte-sizes match the local build; `/embed/embed.js` integrity unchanged.
+
 ## 2026-07-21 / 07-22 — post-launch waves (deployed to production)
 
 Deployed to `contact.ayane.co.jp` as the deploy freeze lifted: the backend + email/console
