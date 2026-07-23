@@ -1089,6 +1089,8 @@ export const ja = {
     '送信された内容はここに集まります。届くとメール・Slack などにも通知が飛ぶので、見逃しません。対応状況の更新・メモ・タグ付け・CSV書き出しもここから。',
   'guide.help.title': '③ 困ったら、いつでもここ',
   'guide.help.body': 'これで基本はOKです。詳しい使い方は、右上のこのマークからいつでも開けます。',
+  'onboarding.title': 'はじめての方へ',
+  'onboarding.body': '「作る → 貼る → 届く」の流れを、3ステップ・約1分でご案内します。',
 } as const;
 
 export type MessageKey = keyof typeof ja;

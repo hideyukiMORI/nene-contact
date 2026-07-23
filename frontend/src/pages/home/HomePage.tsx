@@ -5,6 +5,7 @@ import { useI18n } from '@/shared/i18n';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
 import { Icon } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
+import { OnboardingBanner } from '@/features/guide-tour';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { useSubmissionsQuery } from '@/entities/submission';
 import type { SubmissionStatus } from '@/entities/submission';
@@ -87,6 +88,7 @@ export function HomePage(): ReactNode {
 
   return (
     <div className="ex-body">
+      <OnboardingBanner />
       <div className="ex-row">
         <div className="grow">
           <div className="ex-eyebrow">
