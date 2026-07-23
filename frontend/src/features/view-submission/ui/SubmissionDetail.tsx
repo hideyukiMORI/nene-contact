@@ -427,6 +427,9 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
           }
         >
           <p>{t('submission.delete.warning')}</p>
+          <p style={{ fontSize: '12px', color: 'var(--ex-faint)', margin: '8px 0 0' }}>
+            {t('submission.delete.auditNote')}
+          </p>
           {deleteSubmission.error !== null ? (
             <div className="au-note" role="alert">
               {t('submission.delete.error')}

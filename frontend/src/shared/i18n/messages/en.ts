@@ -192,6 +192,8 @@ export const en: Partial<MessageCatalog> = {
   'submission.delete.warning':
     'The submitted content and personal data will be erased in place, beyond recovery. This cannot be undone.',
   'submission.delete.confirm': 'Delete',
+  'submission.delete.auditNote':
+    'This action is recorded in the audit log (kept as evidence of handling the deletion request).',
   'submission.delete.error': 'Could not delete it. Please try again in a moment.',
   'submission.status': 'Status',
   'submission.status.open': 'Open',
