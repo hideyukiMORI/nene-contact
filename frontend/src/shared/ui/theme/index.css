@@ -7034,6 +7034,27 @@ a.t:hover {
 .md-note.warn svg {
   color: #a85a66;
 }
+.md-note.ok {
+  background: color-mix(in srgb, var(--ex-brand) 10%, var(--ex-surface));
+  border: 1px solid color-mix(in srgb, var(--ex-brand) 28%, var(--ex-border));
+  color: var(--ex-text);
+}
+.md-note.ok svg {
+  color: var(--ex-brand);
+}
+.embed-inbox-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  font-size: 12.5px;
+  font-weight: 600;
+  color: var(--ex-brand);
+  text-decoration: none;
+}
+.embed-inbox-link:hover {
+  text-decoration: underline;
+}
 .ek-hint {
   margin: 8px 0 0;
   font-size: 11px;

@@ -320,6 +320,8 @@ export const ja = {
     'このフォームは現在「停止」中です。貼り付けても、フォームを公開中にするまで送信は届きません。',
   'embed.publicKeyHint':
     'このキーは上のコードにすでに含まれています。別の場所に貼る必要はありません。',
+  'embed.liveOk': 'このフォームは公開中です。コードを貼れば、すぐに送信を受け付けます。',
+  'embed.checkInbox': '送信テストのあとは、受信箱で届いたか確認できます →',
   'embed.previewContact': 'お問い合わせ',
   'embed.previewTitle': 'お問い合わせ',
   'embed.previewSend': '送信',
