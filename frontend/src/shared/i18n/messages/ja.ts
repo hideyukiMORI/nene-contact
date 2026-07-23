@@ -188,6 +188,8 @@ export const ja = {
   'submission.delete.warning':
     '送信された内容と個人情報を、復元できないようその場で消去します。この操作は取り消せません。',
   'submission.delete.confirm': '削除する',
+  'submission.delete.auditNote':
+    'この操作は監査ログに記録されます（削除依頼への対応記録として残ります）。',
   'submission.delete.error': '削除できませんでした。時間をおいて再度お試しください。',
   'submission.status': '状態',
   'submission.status.open': '未対応',
