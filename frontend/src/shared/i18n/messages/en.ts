@@ -817,20 +817,22 @@ export const en: Partial<MessageCatalog> = {
   'help.dashboard.body':
     'The first screen after signing in. See your active form count, unhandled submissions, and the last-7-day receipts trend at a glance. Use the left menu to move between screens.',
   'help.forms.body':
-    'Create, edit, and delete contact forms. Assemble fields in the full-screen builder, style the design, and generate the embed snippet (embed.js) for your site. Notification channels (email, Slack, Chatwork, webhook) are configured per form.',
+    'Create, edit, and delete contact forms. Assemble fields in the full-screen builder, style the design, and paste the generated embed snippet onto your site to publish. Notification channels (email, Slack, Chatwork, webhook) are configured per form.',
   'help.inbox.body':
-    'Review incoming submissions in a list and detail view. Update the handling status (open / in progress / resolved), add notes, apply tags, filter by sender, date, or tag, and export to CSV. Personal data is erased in place, never physically deleted (ADR 0016).',
+    'Review incoming submissions in a list and detail view. Update the handling status (open / in progress / resolved), add notes, apply tags, filter by sender, date, or tag, and export to CSV. When personal data is deleted it is wiped in place so it cannot be recovered.',
   'help.users.body':
     "Manage this organization's members. Invite them (email, password, role), change roles, and deactivate. Access is governed by roles such as admin and editor.",
   'help.org.body':
     'Edit organization settings. Set the sender display name, email signature, and the admin-notification subject/body templates — the wording of the mail you send and receive.',
   'help.tokens.body':
-    'Issue and revoke service tokens that let external services deliver submissions. A token is shown once, at creation. Revoking one immediately rejects any delivery using it.',
+    "This is a developer feature. You don't need it just to put a form on your site (do that from each form's Embed). Issue and revoke keys for external systems that deliver submissions to you. A key is shown once, at creation, and revoking one immediately rejects any delivery using it.",
   'help.audit.body':
-    'Browse the audit log of who changed what, and when. Every mutation and every view/export of personal data is recorded append-only, so it can be traced afterwards.',
+    'Browse the record of who changed what, and when. Every change, and every view or export of personal data, is logged in a way that cannot be edited, so it can be traced afterwards.',
+  'help.group.basic': 'The basics',
+  'help.group.advanced': 'For power users',
   'help.compliance.title': 'How your data is handled',
   'help.compliance.body':
-    "The service is built to Japan's Act on the Protection of Personal Information (APPI). Fields that must not be collected — My Number, credit-card numbers — are structurally impossible to add. Personal data is erased in place, never physically deleted.",
+    "The service is built to Japan's Act on the Protection of Personal Information (APPI). Fields that must never be collected — My Number, credit-card numbers — cannot be added at all. Personal data you hold is, on deletion, wiped in place so it cannot be recovered.",
   'help.contact.title': "If this doesn't help",
   'help.contact.body': "If you can't resolve it here, contact your organization's administrator.",
   'guide.start': 'Take the tour',
