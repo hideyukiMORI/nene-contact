@@ -108,6 +108,18 @@ export function ProtectedLayout(): ReactNode {
   const { pathname } = useLocation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // The "manage" group (users / org / tokens / audit) is collapsible so first-timers aren't
+  // faced with admin screens they rarely touch; the choice is remembered. Default expanded.
+  const [manageOpen, setManageOpen] = useState(
+    () => globalThis.localStorage.getItem('nene-nav-manage-open') !== '0',
+  );
+  const toggleManage = (): void => {
+    setManageOpen((open) => {
+      const next = !open;
+      globalThis.localStorage.setItem('nene-nav-manage-open', next ? '1' : '0');
+      return next;
+    });
+  };
 
   // The inbox badge counts the unhandled submissions on the most recent page.
   const submissionsQuery = useSubmissionsQuery({ limit: 100, offset: 0 });
@@ -148,29 +160,47 @@ export function ProtectedLayout(): ReactNode {
             </span>
           </div>
 
-          {NAV_GROUPS.map((group) => (
-            <Fragment key={group.labelKey}>
-              <div className="ex-navgroup">{t(group.labelKey)}</div>
-              {group.items.map((item) => (
-                <NavLink
-                  key={item.to}
-                  to={item.to}
-                  end={item.end ?? false}
-                  data-tour={item.tour}
-                  className={({ isActive }) => 'ex-navitem' + (isActive ? ' on' : '')}
-                  onClick={() => {
-                    setDrawerOpen(false);
-                  }}
-                >
-                  <Icon name={item.icon} size={17} />
-                  <span className="ex-navlabel">{t(item.labelKey)}</span>
-                  {item.badge === true && openCount > 0 ? (
-                    <span className="ex-navbadge">{openCount}</span>
-                  ) : null}
-                </NavLink>
-              ))}
-            </Fragment>
-          ))}
+          {NAV_GROUPS.map((group) => {
+            const collapsible = group.labelKey === 'nav.group.manage';
+            const shown = !collapsible || manageOpen;
+            return (
+              <Fragment key={group.labelKey}>
+                {collapsible ? (
+                  <button
+                    type="button"
+                    className="ex-navgroup ex-navgroup-btn"
+                    aria-expanded={manageOpen}
+                    onClick={toggleManage}
+                  >
+                    <span>{t(group.labelKey)}</span>
+                    <Icon name="chevDown" size={13} className={manageOpen ? '' : 'rot'} />
+                  </button>
+                ) : (
+                  <div className="ex-navgroup">{t(group.labelKey)}</div>
+                )}
+                {shown
+                  ? group.items.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        end={item.end ?? false}
+                        data-tour={item.tour}
+                        className={({ isActive }) => 'ex-navitem' + (isActive ? ' on' : '')}
+                        onClick={() => {
+                          setDrawerOpen(false);
+                        }}
+                      >
+                        <Icon name={item.icon} size={17} />
+                        <span className="ex-navlabel">{t(item.labelKey)}</span>
+                        {item.badge === true && openCount > 0 ? (
+                          <span className="ex-navbadge">{openCount}</span>
+                        ) : null}
+                      </NavLink>
+                    ))
+                  : null}
+              </Fragment>
+            );
+          })}
 
           <span className="ex-navspacer" />
           <GuideTourLink />
