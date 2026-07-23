@@ -1,7 +1,7 @@
 import { http, HttpResponse } from 'msw';
 import { MemoryRouter } from 'react-router-dom';
 import { describe, expect, it } from 'vitest';
-import { screen, waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithProviders } from '../../../../tests/render/renderWithProviders';
 import { server } from '../../../../tests/msw/server';
@@ -9,6 +9,13 @@ import { SubmissionList } from '@/features/list-submissions';
 
 const URL = 'http://localhost/admin/submissions';
 const FORMS_URL = 'http://localhost/admin/contact-forms';
+const TAGS_URL = 'http://localhost/admin/tags';
+
+// The list also queries the org's tag vocabulary; stub it so it never hits an unmatched
+// handler (whose failure can perturb query timing during a page transition).
+function mockTags(): void {
+  server.use(http.get(TAGS_URL, () => HttpResponse.json({ items: [] })));
+}
 
 function mockForms(): void {
   server.use(
@@ -160,6 +167,7 @@ describe('SubmissionList', () => {
 
   it('advances to the next page and updates the range when next is clicked', async () => {
     mockForms();
+    mockTags();
     mockSubmissions(21);
 
     renderList();
@@ -168,13 +176,11 @@ describe('SubmissionList', () => {
     expect(await screen.findByText('Sender 1')).toBeInTheDocument();
     await user.click(screen.getByRole('button', { name: '次へ' }));
 
-    // Await the transition explicitly (not a longer timeout): poll until page 1's row has
-    // left (robust whether or not it is still present when this runs), then the 21st row
-    // (offset 20) + its range readout render.
-    await waitFor(() => {
-      expect(screen.queryByText('Sender 1')).not.toBeInTheDocument();
-    });
-    expect(await screen.findByText('Sender 21')).toBeInTheDocument();
+    // keepPreviousData holds page 1 on screen until page 2 resolves, so wait on the positive
+    // signal — the 21st row (offset 20) — with a generous timeout for slow CI. By the time it
+    // renders, page 1 has been replaced in the same commit, so the negatives are synchronous.
+    expect(await screen.findByText('Sender 21', undefined, { timeout: 4000 })).toBeInTheDocument();
+    expect(screen.queryByText('Sender 1')).not.toBeInTheDocument();
     expect(screen.getByText('21〜21件を表示（全21件）')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: '前へ' })).not.toBeDisabled();
     expect(screen.getByRole('button', { name: '次へ' })).toBeDisabled();
