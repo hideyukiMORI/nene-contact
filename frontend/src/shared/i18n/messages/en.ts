@@ -833,4 +833,25 @@ export const en: Partial<MessageCatalog> = {
     "The service is built to Japan's Act on the Protection of Personal Information (APPI). Fields that must not be collected — My Number, credit-card numbers — are structurally impossible to add. Personal data is erased in place, never physically deleted.",
   'help.contact.title': "If this doesn't help",
   'help.contact.body': "If you can't resolve it here, contact your organization's administrator.",
+  'guide.start': 'Take the tour',
+  'guide.step': '{current} / {total}',
+  'guide.next': 'Next',
+  'guide.back': 'Back',
+  'guide.done': 'Done',
+  'guide.skip': 'Skip',
+  'guide.welcome.title': 'Welcome',
+  'guide.welcome.body': "A one-minute tour of the NeNe Contact console's main screens.",
+  'guide.forms.title': 'Build a form',
+  'guide.forms.body':
+    'Start here to create a contact form, then place its embed snippet on your site.',
+  'guide.inbox.title': 'Review submissions',
+  'guide.inbox.body':
+    'Incoming submissions land here. Update status, add notes, apply tags, and export to CSV.',
+  'guide.manage.title': 'Manage the organization',
+  'guide.manage.body':
+    'Members, organization settings, service tokens, and the audit log are managed from this group.',
+  'guide.help.title': 'Help, any time',
+  'guide.help.body': 'Stuck? Open the usage guide from this icon whenever you need it.',
+  'guide.finish.title': "You're set",
+  'guide.finish.body': "That's the essentials. Full details live on the help page.",
 };

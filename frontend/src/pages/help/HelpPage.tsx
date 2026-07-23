@@ -3,6 +3,7 @@ import { useI18n } from '@/shared/i18n';
 import { Icon } from '@/shared/ui';
 import type { IconName } from '@/shared/ui';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
+import { useGuideTour } from '@/features/guide-tour';
 
 // Static usage guide reachable from the topbar help button. Sections mirror the sidebar
 // navigation so an operator can map "what is this screen" to "what can I do here". Strings
@@ -31,11 +32,17 @@ const SECTIONS: HelpSection[] = [
 
 export function HelpPage(): ReactNode {
   const { t } = useI18n();
+  const { startTour } = useGuideTour();
 
   return (
     <div className="fm-body">
       <div className="fm-head">
         <h1>{t('help.title')}</h1>
+        <span className="sp" />
+        <button type="button" className="gt-btn" onClick={startTour}>
+          <Icon name="play" size={14} />
+          {t('guide.start')}
+        </button>
       </div>
       <p className="ac-lead">{t('help.lead')}</p>
 
