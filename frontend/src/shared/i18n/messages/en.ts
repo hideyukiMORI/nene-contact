@@ -187,6 +187,12 @@ export const en: Partial<MessageCatalog> = {
   'submission.title': 'Submission #{id}',
   'submission.back': 'Back to inbox',
   'submission.error': 'Could not load the submission.',
+  'submission.delete': 'Delete',
+  'submission.delete.title': 'Delete this submission?',
+  'submission.delete.warning':
+    'The submitted content and personal data will be erased in place, beyond recovery. This cannot be undone.',
+  'submission.delete.confirm': 'Delete',
+  'submission.delete.error': 'Could not delete it. Please try again in a moment.',
   'submission.status': 'Status',
   'submission.status.open': 'Open',
   'submission.status.in_progress': 'In progress',

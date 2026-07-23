@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   SUBMISSION_STATUSES,
   useSubmissionTechnicalMetaQuery,
+  useDeleteSubmissionMutation,
   type SubmissionDetail as SubmissionDetailModel,
   type SubmissionStatus,
 } from '@/entities/submission';
@@ -17,7 +18,7 @@ import {
 } from '@/entities/submission-attachment';
 import { useI18n } from '@/shared/i18n';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
-import { Icon, type IconName } from '@/shared/ui';
+import { Icon, Modal, type IconName } from '@/shared/ui';
 import { useSubmission } from '@/features/view-submission/model/use-submission';
 import { useSubmissionNotes } from '@/features/view-submission/model/use-submission-notes';
 import { HandoffPanel } from '@/features/view-submission/ui/HandoffPanel';
@@ -133,6 +134,8 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
   const { submission, isLoading, error, refetch, updateStatus, isUpdating } =
     useSubmission(submissionId);
   const notes = useSubmissionNotes(submissionId);
+  const deleteSubmission = useDeleteSubmissionMutation(submissionId);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const [noteBody, setNoteBody] = useState('');
   // IP/UA are fetched only after the operator opens the technical section; audited server-side.
   const [revealTech, setRevealTech] = useState(false);
@@ -204,6 +207,18 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            className="ib-iconbtn danger"
+            aria-label={t('submission.delete')}
+            title={t('submission.delete')}
+            disabled={deleteSubmission.isPending}
+            onClick={() => {
+              setConfirmDelete(true);
+            }}
+          >
+            <Icon name="trash" size={16} />
+          </button>
         </div>
       </div>
 
@@ -372,6 +387,53 @@ export function SubmissionDetail({ submissionId }: { submissionId: number }): Re
           </div>
         </div>
       </div>
+
+      {confirmDelete ? (
+        <Modal
+          title={t('submission.delete.title')}
+          subtitle={dispName}
+          icon={<Icon name="trash" size={19} />}
+          onClose={() => {
+            setConfirmDelete(false);
+          }}
+          foot={
+            <>
+              <button
+                type="button"
+                className="ex-btn ghost"
+                onClick={() => {
+                  setConfirmDelete(false);
+                }}
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                className="ex-btn danger"
+                disabled={deleteSubmission.isPending}
+                onClick={() => {
+                  deleteSubmission.mutate(undefined, {
+                    onSuccess: () => {
+                      setConfirmDelete(false);
+                      void navigate('/submissions');
+                    },
+                  });
+                }}
+              >
+                <Icon name="trash" size={14} />
+                {t('submission.delete.confirm')}
+              </button>
+            </>
+          }
+        >
+          <p>{t('submission.delete.warning')}</p>
+          {deleteSubmission.error !== null ? (
+            <div className="au-note" role="alert">
+              {t('submission.delete.error')}
+            </div>
+          ) : null}
+        </Modal>
+      ) : null}
     </div>
   );
 }

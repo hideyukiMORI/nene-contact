@@ -183,6 +183,12 @@ export const ja = {
   'submission.title': '受信 #{id}',
   'submission.back': '受信箱に戻る',
   'submission.error': '受信データを読み込めませんでした。',
+  'submission.delete': '削除',
+  'submission.delete.title': 'この送信を削除しますか？',
+  'submission.delete.warning':
+    '送信された内容と個人情報を、復元できないようその場で消去します。この操作は取り消せません。',
+  'submission.delete.confirm': '削除する',
+  'submission.delete.error': '削除できませんでした。時間をおいて再度お試しください。',
   'submission.status': '状態',
   'submission.status.open': '未対応',
   'submission.status.in_progress': '対応中',
