@@ -851,4 +851,6 @@ export const en: Partial<MessageCatalog> = {
   'guide.help.title': '③ Help, any time',
   'guide.help.body':
     "That's the essentials. Open the full usage guide any time from this icon in the top-right.",
+  'onboarding.title': 'New here?',
+  'onboarding.body': 'A one-minute, three-step tour of the flow: build → embed → receive.',
 };

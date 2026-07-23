@@ -2784,6 +2784,55 @@ h3 {
   color: var(--ex-muted);
 }
 
+/* ── First-run onboarding banner (dashboard) ── */
+.ob-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  margin-bottom: 18px;
+  border-radius: var(--ex-radius-lg);
+  background: color-mix(in srgb, var(--ex-brand) 12%, var(--ex-surface));
+  border: 1px solid color-mix(in srgb, var(--ex-brand) 30%, var(--ex-border));
+}
+.ob-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: var(--ex-brand);
+  color: var(--ex-brand-ink);
+  flex-shrink: 0;
+}
+.ob-text {
+  flex: 1;
+  min-width: 0;
+}
+.ob-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+.ob-body {
+  font-size: 12.5px;
+  color: var(--ex-muted);
+  margin-top: 2px;
+}
+.ob-x {
+  display: grid;
+  place-items: center;
+  border: 0;
+  background: none;
+  padding: 6px;
+  border-radius: 8px;
+  color: var(--ex-faint);
+  cursor: pointer;
+}
+.ob-x:hover {
+  background: var(--ex-surface2);
+  color: var(--ex-text);
+}
+
 /* ── Guided tour (spotlight overlay) ── */
 .gt-root {
   position: fixed;
