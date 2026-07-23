@@ -240,7 +240,7 @@ export function EmbedModal({
               {t('embed.httpsNote')}{' '}
               <Link
                 className="md-note-link"
-                to={`/contact-forms/${String(form.id)}/edit?tab=settings`}
+                to={`/contact-forms/${String(form.id)}/edit?tab=settings&focus=origins`}
                 onClick={onClose}
               >
                 {t('embed.openSettings')}

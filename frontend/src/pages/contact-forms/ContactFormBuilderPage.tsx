@@ -21,11 +21,13 @@ function EditForm({ id }: { id: number }): ReactNode {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const tabParam = searchParams.get('tab');
-  // Deep-link a specific builder tab (e.g. the embed panel's "set allowed sites" link).
+  // Deep-link a specific builder tab (e.g. the embed panel's "set allowed sites" link), and
+  // optionally focus a field within it (?focus=origins).
   const initialTab =
     tabParam === 'settings' || tabParam === 'design' || tabParam === 'publish'
       ? tabParam
       : undefined;
+  const focusField = searchParams.get('focus') ?? undefined;
   const query = useContactFormQuery(id);
 
   if (query.isPending) {
@@ -48,6 +50,7 @@ function EditForm({ id }: { id: number }): ReactNode {
       initialDraft={query.data}
       formId={id}
       initialTab={initialTab}
+      focusField={focusField}
       onBack={() => {
         void navigate('/contact-forms');
       }}
