@@ -304,10 +304,13 @@ export const en: Partial<MessageCatalog> = {
   'embed.shownAs': 'Shown as “{name}”.',
   'embed.copyCode': 'Copy code',
   'embed.copied': 'Copied',
+  'embed.copyHint': "Just copy it — you don't need to change anything inside the code.",
   'embed.tryDemo': 'Try the demo page',
   'embed.publicKeyUsed': 'Public key used',
+  'embed.pasteNote':
+    "Paste the copied code right before </body> in your site's HTML and save. If a web agency built your site, just send them this snippet and they can install it for you.",
   'embed.httpsNote':
-    "HTTPS is required in production. Add the destination site to the form's allowed origins.",
+    "Two quick checks before you go live: ① your site is served over https://, and ② your site's address is added to this form's allowed sites (otherwise submissions are blocked). Ask your administrator if you're unsure.",
   'embed.previewContact': 'Contact',
   'embed.previewTitle': 'Contact us',
   'embed.previewSend': 'Send',
