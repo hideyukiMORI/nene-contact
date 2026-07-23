@@ -218,6 +218,12 @@ export function EmbedModal({
               <span className="tok-attr">async</span>
               <span className="tok-tag">&gt;&lt;/script&gt;</span>
             </div>
+            <p className="embed-hint">{t('embed.copyHint')}</p>
+          </div>
+
+          <div className="md-note embed-row">
+            <Icon name="info" size={18} className="n-ico" />
+            <div>{t('embed.pasteNote')}</div>
           </div>
 
           <div className="md-note embed-row">

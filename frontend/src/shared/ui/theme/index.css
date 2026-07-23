@@ -2163,6 +2163,11 @@ td.col-right {
   overflow-x: auto;
   white-space: pre;
 }
+.embed-hint {
+  margin: 6px 2px 0;
+  font-size: 11.5px;
+  color: var(--ex-muted);
+}
 .code-block .tok-tag {
   color: #9ecbb0;
 }

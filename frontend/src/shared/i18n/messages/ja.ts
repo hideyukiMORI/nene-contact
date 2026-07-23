@@ -300,10 +300,13 @@ export const ja = {
   'embed.shownAs': '「{name}」で表示されます。',
   'embed.copyCode': 'コードをコピー',
   'embed.copied': 'コピーしました',
+  'embed.copyHint': 'コピーするだけでOK。コードの中身を書き換える必要はありません。',
   'embed.tryDemo': '動作確認ページで試す',
   'embed.publicKeyUsed': '使う公開キー',
+  'embed.pasteNote':
+    'コピーしたコードを、あなたのサイトのHTMLの </body> の直前に貼り付けて保存します。サイトを制作会社に作ってもらった場合は、このコードをそのまま担当者に送れば設置してもらえます。',
   'embed.httpsNote':
-    '本番は HTTPS 必須です。貼り付け先のサイトを、フォームの許可オリジンに追加してください。',
+    '公開の前に2つだけ確認してください。① サイトのアドレスが https:// で始まっていること。② フォームの設定で、貼り付け先サイトのアドレスを「許可」しておくこと（未設定だと送信がブロックされます）。分からない場合は管理者にご相談ください。',
   'embed.previewContact': 'お問い合わせ',
   'embed.previewTitle': 'お問い合わせ',
   'embed.previewSend': '送信',
