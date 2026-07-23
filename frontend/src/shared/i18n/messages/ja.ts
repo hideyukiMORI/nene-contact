@@ -312,7 +312,8 @@ export const ja = {
   'embed.pasteNote':
     'コピーしたコードを、あなたのサイトのHTMLの </body> の直前に貼り付けて保存します。サイトを制作会社に作ってもらった場合は、このコードをそのまま担当者に送れば設置してもらえます。',
   'embed.httpsNote':
-    '公開の前に2つだけ確認してください。① サイトのアドレスが https:// で始まっていること。② フォームの設定で、貼り付け先サイトのアドレスを「許可」しておくこと（未設定だと送信がブロックされます）。分からない場合は管理者にご相談ください。',
+    '公開の前に2つだけ確認してください。① サイトのアドレスが https:// で始まっていること。② 貼り付け先サイトのアドレスを「許可オリジン」に登録しておくこと（未設定だと送信がブロックされます）。分からない場合は管理者にご相談ください。',
+  'embed.openSettings': '許可オリジンを設定する →',
   'embed.previewContact': 'お問い合わせ',
   'embed.previewTitle': 'お問い合わせ',
   'embed.previewSend': '送信',
@@ -964,6 +965,9 @@ export const ja = {
   'settingsTab.recaptchaDesc': 'ボットによる自動送信を防止',
   'settingsTab.dedupe': '重複送信を防止',
   'settingsTab.dedupeDesc': '同一端末からの連続送信を抑制',
+  'settingsTab.allowedOriginsPh': 'https://example.com',
+  'settingsTab.allowedOriginsHelp':
+    'このフォームを貼り付けるサイトのアドレスを、1行に1つ入力します（例: https://example.com）。ここに登録したサイトからの送信だけを受け付けます。空欄の場合はどこからでも受け付けます。',
   'settingsTab.language': '表示言語',
   'settingsTab.ja': '日本語',
   'settingsTab.en': 'English',

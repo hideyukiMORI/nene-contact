@@ -99,11 +99,13 @@ export function FormBuilder({
   onBack,
   initialDraft,
   formId,
+  initialTab,
 }: {
   onCreated: () => void;
   onBack?: () => void;
   initialDraft?: ContactFormDraft;
   formId?: number;
+  initialTab?: BuilderTab | undefined;
 }): ReactNode {
   const { t } = useI18n();
   const builder = useFormBuilder(initialDraft, formId);
@@ -135,7 +137,9 @@ export function FormBuilder({
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [confirmPublish, setConfirmPublish] = useState(false);
-  const [tab, setTab] = useState<BuilderTab>('fields');
+  // Deep-link support: the page resolves `?tab=settings` (e.g. from the embed panel's
+  // "set allowed sites" link) and passes it here; falls back to the field canvas.
+  const [tab, setTab] = useState<BuilderTab>(initialTab ?? 'fields');
   const [savedAt, setSavedAt] = useState<string | null>(null);
 
   // Honest dirty-state: nothing is auto-saved, so the toolbar reflects the draft vs. the last

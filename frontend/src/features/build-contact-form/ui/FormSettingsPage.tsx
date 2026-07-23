@@ -279,6 +279,31 @@ export function FormSettingsPage({
             </div>
           </div>
           <div className="srow">
+            <label className="l" htmlFor="st-origins">
+              {t('builder.allowedOrigins')}
+            </label>
+            <textarea
+              id="st-origins"
+              className="sinput area"
+              value={draft.allowedOrigins.join('\n')}
+              placeholder={t('settingsTab.allowedOriginsPh')}
+              onChange={(e) => {
+                builder.setAllowedOrigins(
+                  e.target.value
+                    .split('\n')
+                    .map((s) => s.trim())
+                    .filter((s) => s !== ''),
+                );
+              }}
+            />
+            <p
+              className="td"
+              style={{ fontSize: '11.5px', color: 'var(--ex-faint)', margin: '2px 0 0' }}
+            >
+              {t('settingsTab.allowedOriginsHelp')}
+            </p>
+          </div>
+          <div className="srow">
             <span className="l">{t('settingsTab.language')}</span>
             <div className="bx-seg">
               <button type="button" className="on" disabled>

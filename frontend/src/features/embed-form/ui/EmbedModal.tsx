@@ -1,4 +1,5 @@
 import { Fragment, useState } from 'react';
+import { Link } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
 import { Icon, Modal } from '@/shared/ui';
@@ -228,7 +229,16 @@ export function EmbedModal({
 
           <div className="md-note embed-row">
             <Icon name="shield" size={18} className="n-ico" />
-            <div>{t('embed.httpsNote')}</div>
+            <div>
+              {t('embed.httpsNote')}{' '}
+              <Link
+                className="md-note-link"
+                to={`/contact-forms/${String(form.id)}/edit?tab=settings`}
+                onClick={onClose}
+              >
+                {t('embed.openSettings')}
+              </Link>
+            </div>
           </div>
         </div>
 
