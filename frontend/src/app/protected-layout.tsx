@@ -6,6 +6,7 @@ import { useI18n } from '@/shared/i18n';
 import { useTheme } from '@/shared/theme';
 import { useSubmissionsQuery } from '@/entities/submission';
 import { BrandMark, Icon } from '@/shared/ui';
+import { GuideTourProvider, GuideTourLink } from '@/features/guide-tour';
 import type { IconName } from '@/shared/ui';
 import type { Session } from '@/entities/auth';
 import type { MessageKey } from '@/shared/i18n/messages/ja';
@@ -21,6 +22,7 @@ interface NavLinkItem {
   labelKey: MessageKey;
   icon: IconName;
   badge?: boolean;
+  tour?: string;
 }
 
 interface Crumb {
@@ -33,14 +35,14 @@ const NAV_GROUPS: { labelKey: MessageKey; items: NavLinkItem[] }[] = [
     labelKey: 'nav.group.main',
     items: [
       { to: '/', end: true, labelKey: 'nav.dashboard', icon: 'dashboard' },
-      { to: '/contact-forms', labelKey: 'nav.forms', icon: 'forms' },
-      { to: '/submissions', labelKey: 'nav.inbox', icon: 'inbox', badge: true },
+      { to: '/contact-forms', labelKey: 'nav.forms', icon: 'forms', tour: 'forms' },
+      { to: '/submissions', labelKey: 'nav.inbox', icon: 'inbox', badge: true, tour: 'inbox' },
     ],
   },
   {
     labelKey: 'nav.group.manage',
     items: [
-      { to: '/users', labelKey: 'nav.users', icon: 'users' },
+      { to: '/users', labelKey: 'nav.users', icon: 'users', tour: 'manage' },
       { to: '/settings/organization', labelKey: 'nav.orgSettings', icon: 'settings' },
       { to: '/service-tokens', labelKey: 'nav.serviceTokens', icon: 'link' },
       { to: '/audit-log', labelKey: 'nav.auditLog', icon: 'shield' },
@@ -133,189 +135,193 @@ export function ProtectedLayout(): ReactNode {
   }
 
   return (
-    <div className="ex-frame" data-drawer={drawerOpen ? 'open' : 'closed'}>
-      <nav className="ex-nav">
-        <div className="ex-brand">
-          <span className="ex-brand-mark">
-            <BrandMark size={34} />
-          </span>
-          <span className="ex-brand-text">
-            <span className="ex-brand-name">NeNe Contact</span>
-            <span className="ex-brand-sub">{t('common.console')}</span>
-          </span>
-        </div>
+    <GuideTourProvider>
+      <div className="ex-frame" data-drawer={drawerOpen ? 'open' : 'closed'}>
+        <nav className="ex-nav">
+          <div className="ex-brand">
+            <span className="ex-brand-mark">
+              <BrandMark size={34} />
+            </span>
+            <span className="ex-brand-text">
+              <span className="ex-brand-name">NeNe Contact</span>
+              <span className="ex-brand-sub">{t('common.console')}</span>
+            </span>
+          </div>
 
-        {NAV_GROUPS.map((group) => (
-          <Fragment key={group.labelKey}>
-            <div className="ex-navgroup">{t(group.labelKey)}</div>
-            {group.items.map((item) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                end={item.end ?? false}
-                className={({ isActive }) => 'ex-navitem' + (isActive ? ' on' : '')}
-                onClick={() => {
-                  setDrawerOpen(false);
-                }}
-              >
-                <Icon name={item.icon} size={17} />
-                <span className="ex-navlabel">{t(item.labelKey)}</span>
-                {item.badge === true && openCount > 0 ? (
-                  <span className="ex-navbadge">{openCount}</span>
-                ) : null}
-              </NavLink>
-            ))}
-          </Fragment>
-        ))}
+          {NAV_GROUPS.map((group) => (
+            <Fragment key={group.labelKey}>
+              <div className="ex-navgroup">{t(group.labelKey)}</div>
+              {group.items.map((item) => (
+                <NavLink
+                  key={item.to}
+                  to={item.to}
+                  end={item.end ?? false}
+                  data-tour={item.tour}
+                  className={({ isActive }) => 'ex-navitem' + (isActive ? ' on' : '')}
+                  onClick={() => {
+                    setDrawerOpen(false);
+                  }}
+                >
+                  <Icon name={item.icon} size={17} />
+                  <span className="ex-navlabel">{t(item.labelKey)}</span>
+                  {item.badge === true && openCount > 0 ? (
+                    <span className="ex-navbadge">{openCount}</span>
+                  ) : null}
+                </NavLink>
+              ))}
+            </Fragment>
+          ))}
 
-        <span className="ex-navspacer" />
-        <div className="ex-navfoot">{t('nav.guideTour')}</div>
-      </nav>
+          <span className="ex-navspacer" />
+          <GuideTourLink />
+        </nav>
 
-      <div className="ex-main">
-        <header className="ex-topbar">
-          <button
-            type="button"
-            className="ex-hamburger"
-            aria-label={t('common.menu')}
-            onClick={() => {
-              setDrawerOpen(true);
-            }}
-          >
-            <Icon name="more" size={18} />
-          </button>
-          <nav className="ex-crumb">
-            {crumbs.map((crumb, i) => (
-              <Fragment key={`${crumb.label}-${String(i)}`}>
-                {i > 0 ? <span className="sep">›</span> : null}
-                {crumb.to !== undefined && i < crumbs.length - 1 ? (
-                  <Link to={crumb.to}>{crumb.label}</Link>
-                ) : (
-                  <span className={i === crumbs.length - 1 ? 'cur' : ''}>{crumb.label}</span>
-                )}
-              </Fragment>
-            ))}
-          </nav>
-
-          <span className="ex-tspacer" />
-
-          <div className="ex-chiprow">
+        <div className="ex-main">
+          <header className="ex-topbar">
             <button
               type="button"
-              className="ex-ipill"
-              onClick={toggleTheme}
-              aria-label={isDark ? t('theme.toLight') : t('theme.toDark')}
-            >
-              <Icon name={isDark ? 'sun' : 'moon'} size={15} />
-            </button>
-
-            <button
-              type="button"
-              className="ex-ipill"
-              aria-label={t('common.help')}
+              className="ex-hamburger"
+              aria-label={t('common.menu')}
               onClick={() => {
-                void navigate('/help');
+                setDrawerOpen(true);
               }}
             >
-              <Icon name="help" size={15} />
+              <Icon name="more" size={18} />
             </button>
+            <nav className="ex-crumb">
+              {crumbs.map((crumb, i) => (
+                <Fragment key={`${crumb.label}-${String(i)}`}>
+                  {i > 0 ? <span className="sep">›</span> : null}
+                  {crumb.to !== undefined && i < crumbs.length - 1 ? (
+                    <Link to={crumb.to}>{crumb.label}</Link>
+                  ) : (
+                    <span className={i === crumbs.length - 1 ? 'cur' : ''}>{crumb.label}</span>
+                  )}
+                </Fragment>
+              ))}
+            </nav>
 
-            <div className="ex-lang">
-              <button
-                type="button"
-                className={locale === 'ja' ? 'on' : ''}
-                onClick={() => {
-                  setLocale('ja');
-                }}
-              >
-                日本語
-              </button>
-              <button
-                type="button"
-                className={locale === 'en' ? 'on' : ''}
-                onClick={() => {
-                  setLocale('en');
-                }}
-              >
-                EN
-              </button>
-            </div>
+            <span className="ex-tspacer" />
 
-            <div className="ex-acct-wrap">
+            <div className="ex-chiprow">
               <button
                 type="button"
-                className="ex-avatar"
-                aria-haspopup="menu"
-                aria-expanded={menuOpen}
+                className="ex-ipill"
+                onClick={toggleTheme}
+                aria-label={isDark ? t('theme.toLight') : t('theme.toDark')}
+              >
+                <Icon name={isDark ? 'sun' : 'moon'} size={15} />
+              </button>
+
+              <button
+                type="button"
+                className="ex-ipill"
+                aria-label={t('common.help')}
+                data-tour="help"
                 onClick={() => {
-                  setMenuOpen((open) => !open);
+                  void navigate('/help');
                 }}
               >
-                {initial}
+                <Icon name="help" size={15} />
               </button>
-              {menuOpen ? (
-                <>
-                  <button
-                    type="button"
-                    className="ex-menu-backdrop"
-                    aria-hidden="true"
-                    tabIndex={-1}
-                    onClick={() => {
-                      setMenuOpen(false);
-                    }}
-                  />
-                  <div className="mn-pop mn-acct" role="menu">
-                    <div className="mn-ahead">
-                      <span className="mn-av">{initial}</span>
-                      <div>
-                        <div className="nm">{session.email}</div>
-                        <div className="em">{t('home.role', { role: session.role })}</div>
+
+              <div className="ex-lang">
+                <button
+                  type="button"
+                  className={locale === 'ja' ? 'on' : ''}
+                  onClick={() => {
+                    setLocale('ja');
+                  }}
+                >
+                  日本語
+                </button>
+                <button
+                  type="button"
+                  className={locale === 'en' ? 'on' : ''}
+                  onClick={() => {
+                    setLocale('en');
+                  }}
+                >
+                  EN
+                </button>
+              </div>
+
+              <div className="ex-acct-wrap">
+                <button
+                  type="button"
+                  className="ex-avatar"
+                  aria-haspopup="menu"
+                  aria-expanded={menuOpen}
+                  onClick={() => {
+                    setMenuOpen((open) => !open);
+                  }}
+                >
+                  {initial}
+                </button>
+                {menuOpen ? (
+                  <>
+                    <button
+                      type="button"
+                      className="ex-menu-backdrop"
+                      aria-hidden="true"
+                      tabIndex={-1}
+                      onClick={() => {
+                        setMenuOpen(false);
+                      }}
+                    />
+                    <div className="mn-pop mn-acct" role="menu">
+                      <div className="mn-ahead">
+                        <span className="mn-av">{initial}</span>
+                        <div>
+                          <div className="nm">{session.email}</div>
+                          <div className="em">{t('home.role', { role: session.role })}</div>
+                        </div>
+                      </div>
+                      <div className="mn-list">
+                        <Link
+                          to="/account"
+                          className="mn-item"
+                          role="menuitem"
+                          onClick={() => {
+                            setMenuOpen(false);
+                          }}
+                        >
+                          <Icon name="user" size={16} />
+                          {t('account.title')}
+                        </Link>
+                        <div className="mn-sep" />
+                        <button
+                          type="button"
+                          className="mn-item danger"
+                          role="menuitem"
+                          onClick={signOut}
+                        >
+                          <Icon name="logout" size={16} />
+                          {t('common.signOut')}
+                        </button>
                       </div>
                     </div>
-                    <div className="mn-list">
-                      <Link
-                        to="/account"
-                        className="mn-item"
-                        role="menuitem"
-                        onClick={() => {
-                          setMenuOpen(false);
-                        }}
-                      >
-                        <Icon name="user" size={16} />
-                        {t('account.title')}
-                      </Link>
-                      <div className="mn-sep" />
-                      <button
-                        type="button"
-                        className="mn-item danger"
-                        role="menuitem"
-                        onClick={signOut}
-                      >
-                        <Icon name="logout" size={16} />
-                        {t('common.signOut')}
-                      </button>
-                    </div>
-                  </div>
-                </>
-              ) : null}
+                  </>
+                ) : null}
+              </div>
             </div>
-          </div>
-        </header>
+          </header>
 
-        <main className="ex-content">
-          <Outlet context={context} />
-        </main>
+          <main className="ex-content">
+            <Outlet context={context} />
+          </main>
+        </div>
+
+        <button
+          type="button"
+          className="ex-scrim"
+          aria-hidden="true"
+          tabIndex={-1}
+          onClick={() => {
+            setDrawerOpen(false);
+          }}
+        />
       </div>
-
-      <button
-        type="button"
-        className="ex-scrim"
-        aria-hidden="true"
-        tabIndex={-1}
-        onClick={() => {
-          setDrawerOpen(false);
-        }}
-      />
-    </div>
+    </GuideTourProvider>
   );
 }

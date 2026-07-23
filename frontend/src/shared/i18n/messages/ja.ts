@@ -1072,6 +1072,27 @@ export const ja = {
     '本サービスは日本の個人情報保護法（APPI）に沿って設計されています。マイナンバー・クレジットカード番号など取り扱わない項目は構造的に登録できません。個人情報は物理削除せず、その場で消去（erase-in-place）します。',
   'help.contact.title': '解決しないときは',
   'help.contact.body': 'ここで解決しない場合は、組織の管理者にお問い合わせください。',
+  'guide.start': 'ガイドツアーを始める',
+  'guide.step': '{current} / {total}',
+  'guide.next': '次へ',
+  'guide.back': '戻る',
+  'guide.done': '完了',
+  'guide.skip': 'スキップ',
+  'guide.welcome.title': 'ようこそ',
+  'guide.welcome.body': 'NeNe Contact コンソールの主要な画面を1分でご案内します。',
+  'guide.forms.title': 'フォームを作る',
+  'guide.forms.body':
+    'まずはここで問い合わせフォームを作成し、発行した埋め込みコードをサイトに設置します。',
+  'guide.inbox.title': '受信を確認する',
+  'guide.inbox.body':
+    '届いた送信はここに集まります。対応状況の更新・メモ・タグ付け・CSV書き出しができます。',
+  'guide.manage.title': '組織を管理する',
+  'guide.manage.body':
+    'メンバー・組織設定・連携キー・監査ログは、このグループからまとめて管理します。',
+  'guide.help.title': 'いつでもヘルプ',
+  'guide.help.body': '迷ったら、このアイコンから使い方ガイドをいつでも開けます。',
+  'guide.finish.title': '準備完了',
+  'guide.finish.body': 'これで基本はOKです。詳しい説明はヘルプページにまとめてあります。',
 } as const;
 
 export type MessageKey = keyof typeof ja;
