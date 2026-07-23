@@ -1069,6 +1069,24 @@ export const ja = {
     'いつ・誰が・何を変更したかの記録（変更履歴）を閲覧します。すべての変更操作と個人情報の閲覧・書き出しが、あとから消せない形で記録され、追跡できます。',
   'help.group.basic': '基本の使い方',
   'help.group.advanced': 'もっと使う人向け',
+  'help.quickstart.title': '最短でサイトに設置する',
+  'help.quickstart.step1':
+    'フォームを作る（「フォーム」→「新規フォーム」。テンプレートを選ぶとすぐできます）',
+  'help.quickstart.step2': '「連携・公開」タブで、埋め込みコードをコピーする',
+  'help.quickstart.step3':
+    '自分のサイトのHTMLの </body> の直前に貼り付けて保存する（WordPress などはテーマ編集やHTMLブロックに貼ります）',
+  'help.quickstart.note':
+    'サイトを制作会社に作ってもらった場合は、コピーしたコードをそのまま担当者に送れば設置してもらえます。設置したら、フォームからテスト送信すると「受信箱」に届いて確認できます。',
+  'help.migrate.title': '他のツールから乗り換える方へ',
+  'help.migrate.intro': 'よく使われるツールとの対応です。',
+  'help.migrate.from': 'これまで',
+  'help.migrate.to': 'NeNe Contact では',
+  'help.migrate.r1a': 'Contact Form 7 の送信先メール',
+  'help.migrate.r1b': '各フォームの「通知先」（メール／Slack／Chatwork／Webhook）',
+  'help.migrate.r2a': 'Google フォームのスプレッドシート',
+  'help.migrate.r2b': '「受信箱」で一覧・詳細＋CSV書き出し',
+  'help.migrate.r3a': 'ショートコード／貼り付けタグ',
+  'help.migrate.r3b': '「連携・公開」の埋め込みコード',
   'help.compliance.title': 'データの取り扱い',
   'help.compliance.body':
     '本サービスは日本の個人情報保護法（APPI）に沿って設計されています。マイナンバー・クレジットカード番号など、扱ってはいけない項目は最初から登録できないようになっています。お預かりした個人情報は、削除の際に復元できないよう、その場で確実に消去します。',
