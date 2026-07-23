@@ -163,6 +163,8 @@ export const ja = {
   'inbox.chip.search': '検索: {q}',
   'inbox.count.total': '{total} 件',
   'inbox.count.filtered': '{filtered} 件 / 全 {total} 件',
+  'inbox.export': 'CSV書き出し',
+  'inbox.export.hint': 'すべての送信をCSVファイルで書き出します',
   'inbox.dp.allTime': 'すべての期間',
   'inbox.dp.today': '今日',
   'inbox.dp.last7': '過去7日',

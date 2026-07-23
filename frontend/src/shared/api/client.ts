@@ -97,4 +97,7 @@ export const apiClient = {
   put: <T>(path: string, body?: unknown): Promise<T> => unwrap(transport.put<T>(path, body)),
   patch: <T>(path: string, body?: unknown): Promise<T> => unwrap(transport.patch<T>(path, body)),
   delete: <T>(path: string): Promise<T> => unwrap(transport.delete<T>(path)),
+  // Binary download (e.g. CSV export); `filename` is parsed from Content-Disposition.
+  getBlob: (path: string): Promise<{ blob: Blob; filename: string | null }> =>
+    unwrap(transport.getBlob(path)),
 };

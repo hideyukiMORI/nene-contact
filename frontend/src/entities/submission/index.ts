@@ -7,6 +7,7 @@ export {
   useUpdateSubmissionStatusMutation,
   useAddSubmissionTagMutation,
   useRemoveSubmissionTagMutation,
+  useExportSubmissionsMutation,
 } from '@/entities/submission/mutations';
 export {
   toSubmission,
