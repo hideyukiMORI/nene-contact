@@ -2763,15 +2763,19 @@ h3 {
 }
 
 /* ── Help / usage guide (/help) ── */
+/* .fm-body is a flex column that scrolls; its direct children must not shrink, or
+   .fm-card (overflow:hidden) clips its own text instead of the page scrolling. */
 .hlp-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 18px;
+  flex-shrink: 0;
 }
 .hlp-card {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex-shrink: 0;
 }
 .hlp-text {
   margin: 0;
