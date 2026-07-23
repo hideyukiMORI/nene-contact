@@ -167,6 +167,8 @@ export const en: Partial<MessageCatalog> = {
   'inbox.chip.search': 'Search: {q}',
   'inbox.count.total': '{total} total',
   'inbox.count.filtered': '{filtered} of {total}',
+  'inbox.export': 'Export CSV',
+  'inbox.export.hint': 'Export all submissions as a CSV file',
   'inbox.dp.allTime': 'All time',
   'inbox.dp.today': 'Today',
   'inbox.dp.last7': 'Last 7 days',

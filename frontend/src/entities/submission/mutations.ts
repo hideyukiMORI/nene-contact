@@ -55,3 +55,27 @@ export function useRemoveSubmissionTagMutation(
     },
   });
 }
+
+/**
+ * GET /admin/submissions/export — downloads every submission as CSV (bulk PII access,
+ * audited server-side as `submission.exported`). The endpoint exports the full set and
+ * does not honor the inbox filters, so this is deliberately an "export everything" action.
+ * Triggers a browser download from the returned blob.
+ */
+export function useExportSubmissionsMutation(): UseMutationResult<string, AppError, void> {
+  return useMutation<string, AppError>({
+    mutationFn: async (): Promise<string> => {
+      const { blob, filename } = await apiClient.getBlob('/admin/submissions/export');
+      const name = filename ?? 'submissions.csv';
+      const url = URL.createObjectURL(blob);
+      const anchor = document.createElement('a');
+      anchor.href = url;
+      anchor.download = name;
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(url);
+      return name;
+    },
+  });
+}

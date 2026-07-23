@@ -5624,6 +5624,29 @@ a.t:hover {
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
+.ib-export {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--ex-border);
+  background: var(--ex-surface);
+  color: var(--ex-text);
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: inherit;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.ib-export:hover {
+  background: var(--ex-surface2);
+}
+.ib-export:disabled {
+  opacity: 0.6;
+  cursor: default;
+}
 .ib-search {
   display: flex;
   align-items: center;

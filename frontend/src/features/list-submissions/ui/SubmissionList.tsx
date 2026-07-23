@@ -6,6 +6,7 @@ import { Icon, Pagination } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { useTagsQuery } from '@/entities/tag';
 import { SUBMISSION_STATUSES, SUBMISSION_SORTS } from '@/entities/submission';
+import { useExportSubmissionsMutation } from '@/entities/submission';
 import type {
   Submission,
   SubmissionListParams,
@@ -69,6 +70,7 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
   const forms = formsQuery.data?.items ?? [];
 
   const orgTags = useTagsQuery().data ?? [];
+  const exportCsv = useExportSubmissionsMutation();
 
   const [status, setStatus] = useState<StatusFilter>('all');
   const [sort, setSort] = useState<SubmissionSort>('date_desc');
@@ -133,6 +135,18 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
               ? t('inbox.count.filtered', { filtered: String(total), total: String(grandTotal) })
               : t('inbox.count.total', { total: String(total) })}
           </span>
+          <button
+            type="button"
+            className="ib-export"
+            onClick={() => {
+              exportCsv.mutate();
+            }}
+            disabled={exportCsv.isPending}
+            title={t('inbox.export.hint')}
+          >
+            <Icon name="file" size={14} />
+            {t('inbox.export')}
+          </button>
         </div>
         <div className="ib-search">
           <Icon name="search" size={15} />
