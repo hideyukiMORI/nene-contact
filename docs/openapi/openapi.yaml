@@ -552,9 +552,11 @@ paths:
       summary: Export the organization's audit trail as CSV
       description: >-
         Same rows as `listAuditEvents` (organization-scoped, ViewAuditLog), honoring the
-        same q / from / to filter, rendered as CSV. The export is itself a bulk read of the
-        trail, so it is recorded as `audit_event.exported` with the row count and the applied
-        filter — never the exported snapshots (ADR 0013).
+        same q / from / to filter, rendered as CSV. Capped at 10,000 rows. The export is
+        itself a bulk read of the trail, so it is recorded as `audit_event.exported` with
+        `count`, `total_matched` (rows matched before the cap — `count < total_matched`
+        means the file was partial) and the applied filter — never the exported snapshots
+        (ADR 0013).
       parameters:
         - name: q
           in: query
@@ -641,6 +643,10 @@ paths:
       tags: [Submission]
       operationId: exportSubmissions
       summary: Export submissions as CSV
+      description: >-
+        Exports every submission in the organization (the inbox filters are not applied).
+        Capped at 10,000 rows; the audited `submission.exported` event carries `count` and
+        `total_matched`, so a partial export is visible in the trail (#531).
       responses:
         '200':
           description: CSV export

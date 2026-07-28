@@ -65,11 +65,50 @@ final class ExportAuditEventsUseCaseTest extends TestCase
         self::assertSame(7, $events[0]->organizationId);
         self::assertNull($events[0]->before);
         self::assertSame(
-            ['count' => 2, 'filter' => ['q' => 'contact_form', 'from' => '2026-07-01', 'to' => null]],
+            [
+                'count' => 2,
+                'total_matched' => 2,
+                'filter' => ['q' => 'contact_form', 'from' => '2026-07-01', 'to' => null],
+            ],
             $events[0]->after,
         );
         // The record of a bulk read must not copy what was read.
         self::assertStringNotContainsString('"name"', json_encode($events[0]->after, JSON_THROW_ON_ERROR));
+    }
+
+    public function test_a_capped_export_is_visible_in_the_trail_as_count_below_total_matched(): void
+    {
+        // The repository matches far more rows than the export returns — what a real
+        // truncation looks like. The trail must show both numbers so an auditor can tell
+        // a complete file from a partial one (#531).
+        $search = new class () implements AuditEventSearchRepositoryInterface {
+            public ?int $receivedLimit = null;
+
+            /** @return list<AuditEvent> */
+            public function search(AuditEventFilter $filter, int $limit, int $offset): array
+            {
+                $this->receivedLimit = $limit;
+
+                return ExportAuditEventsUseCaseTest::events();
+            }
+
+            public function countMatching(AuditEventFilter $filter): int
+            {
+                return 40;
+            }
+        };
+        $auditRepo = new InMemoryAuditEventRepository();
+
+        (new ExportAuditEventsUseCase($search, new AuditRecorder($auditRepo), self::orgHolder()))
+            ->execute(new AuditEventFilter(), 5);
+
+        // The cap is what bounds the read, so it is the limit handed to the repository.
+        self::assertSame(ExportAuditEventsUseCase::MAX_ROWS, $search->receivedLimit);
+
+        $after = $auditRepo->events[0]->after;
+        self::assertIsArray($after);
+        self::assertSame(2, $after['count']);
+        self::assertSame(40, $after['total_matched']);
     }
 
     public function test_an_actorless_export_is_still_recorded(): void

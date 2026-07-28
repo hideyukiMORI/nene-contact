@@ -246,8 +246,9 @@ authenticated operator (#410),
 `submission.tagged` / `submission.untagged` (tag applied/removed on a submission, entity type
 `submission`; snapshot carries `{tag_id, label}`, no submission field values; ADR 0019),
 `audit_event.exported` (operator downloaded the trail as CSV, entity type `audit_event`;
-snapshot carries `{count, filter}` — the row count and the applied q/from/to — never the
-exported snapshots; #522).
+snapshot carries `{count, total_matched, filter}` — rows written, rows the filter matched
+before the 10,000-row cap, and the applied q/from/to — never the exported snapshots;
+#522, #531).
 
 | Term | Spelling | Notes |
 | --- | --- | --- |
@@ -259,6 +260,7 @@ exported snapshots; #522).
 | Recorder | `AuditRecorder` / `AuditRecorderInterface` | called in the UseCase |
 | Repository | `PdoAuditEventRepository` | `append`, `findAll`, `count` |
 | Read route | `/admin/audit-events` | admin (own org) / superadmin |
+| Export cap key | `total_matched` | in `*.exported` snapshots: rows matched before the 10,000-row cap; `count < total_matched` means the file was partial (#531) |
 | Export route | `/admin/audit-events/export` | CSV of the same filtered rows; the export is itself audited (#522) |
 
 ---

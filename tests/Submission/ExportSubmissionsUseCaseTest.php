@@ -52,7 +52,8 @@ final class ExportSubmissionsUseCaseTest extends TestCase
 
             public function count(): int
             {
-                return 2;
+                // More rows exist than the export returns: a real truncation.
+                return 40;
             }
         };
 
@@ -94,7 +95,8 @@ final class ExportSubmissionsUseCaseTest extends TestCase
         $event = $auditRepo->events[0];
         self::assertSame('submission.exported', $event->action);
         self::assertSame(5, $event->actorUserId);
-        self::assertSame(['count' => 2], $event->after);
+        // count < total_matched is how the trail shows the operator got a partial file (#531).
+        self::assertSame(['count' => 2, 'total_matched' => 40], $event->after);
         // The export audit must not copy the exported PII.
         self::assertStringNotContainsString('a@example.com', json_encode($event->after, JSON_THROW_ON_ERROR));
     }

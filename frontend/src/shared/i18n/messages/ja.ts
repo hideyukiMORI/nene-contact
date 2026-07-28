@@ -482,6 +482,8 @@ export const ja = {
   'audit.lead': 'いつ誰が何をどう変えたかの記録です。行を選ぶと変更内容を表示します。',
   'audit.count': '{n} 件',
   'audit.countOf': '{n} 件 / 全 {total} 件',
+  'export.truncated':
+    '書き出しは最大 {max} 件までです。いまの条件に一致するのは {matched} 件なので、ファイルには一部だけが入ります。期間や検索で絞り込んでから書き出してください。',
   'audit.export': 'CSV書き出し',
   'audit.export.hint':
     '表示中の絞り込みのまま、監査ログをCSVファイルで書き出します（書き出したことも記録されます）',

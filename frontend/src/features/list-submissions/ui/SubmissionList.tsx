@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ReactNode } from 'react';
 import { useI18n } from '@/shared/i18n';
+import { EXPORT_MAX_ROWS } from '@/shared/config/export';
 import { Icon, Pagination } from '@/shared/ui';
 import { useContactFormsQuery } from '@/entities/contact-form';
 import { useTagsQuery } from '@/entities/tag';
@@ -154,6 +155,16 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
             {t('inbox.export')}
           </button>
         </div>
+        {grandTotal > EXPORT_MAX_ROWS ? (
+          // The inbox export always covers every submission (it ignores the filters), so the
+          // cap bites on the grand total. Say so before the download (#531).
+          <p className="au-note" role="status">
+            {t('export.truncated', {
+              max: String(EXPORT_MAX_ROWS),
+              matched: String(grandTotal),
+            })}
+          </p>
+        ) : null}
         <div className="ib-search">
           <Icon name="search" size={15} />
           <input

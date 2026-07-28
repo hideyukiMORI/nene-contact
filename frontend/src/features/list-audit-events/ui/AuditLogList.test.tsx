@@ -87,4 +87,17 @@ describe('AuditLogList CSV export', () => {
     renderWithProviders(<AuditLogList {...baseProps({ isExporting: true })} />);
     expect(screen.getByRole('button', { name: 'CSV書き出し' })).toBeDisabled();
   });
+
+  // #531: the server caps the file at EXPORT_MAX_ROWS. Warn before the download so nobody
+  // hands an auditor a partial export believing it is complete.
+  it('warns that the file will be partial when more rows match than the cap', () => {
+    renderWithProviders(<AuditLogList {...baseProps({ matched: 10001, total: 10001 })} />);
+    expect(screen.getByRole('status')).toHaveTextContent('最大 10000 件');
+    expect(screen.getByRole('status')).toHaveTextContent('10001 件');
+  });
+
+  it('does not warn at the cap itself', () => {
+    renderWithProviders(<AuditLogList {...baseProps({ matched: 10000, total: 10000 })} />);
+    expect(screen.queryByRole('status')).not.toBeInTheDocument();
+  });
 });
