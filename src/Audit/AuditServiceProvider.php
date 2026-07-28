@@ -8,10 +8,10 @@ use LogicException;
 use Nene2\Database\DatabaseQueryExecutorInterface;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
-use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
+use NeneContact\Http\ExportFilename;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 
@@ -125,7 +125,7 @@ final readonly class AuditServiceProvider implements ServiceProviderInterface
                 static function (ContainerInterface $c): ExportAuditEventsHandler {
                     $useCase = $c->get(ExportAuditEventsUseCaseInterface::class);
                     $psr17 = $c->get(Psr17Factory::class);
-                    $clock = $c->get(ClockInterface::class);
+                    $filename = $c->get(ExportFilename::class);
 
                     if (!$useCase instanceof ExportAuditEventsUseCaseInterface) {
                         throw new LogicException('Export audit events use case service is invalid.');
@@ -135,11 +135,11 @@ final readonly class AuditServiceProvider implements ServiceProviderInterface
                         throw new LogicException('PSR-17 factory service is invalid.');
                     }
 
-                    if (!$clock instanceof ClockInterface) {
-                        throw new LogicException('Clock service is invalid.');
+                    if (!$filename instanceof ExportFilename) {
+                        throw new LogicException('Export filename service is invalid.');
                     }
 
-                    return new ExportAuditEventsHandler($useCase, $psr17, $clock);
+                    return new ExportAuditEventsHandler($useCase, $psr17, $filename);
                 },
             )
             ->set(

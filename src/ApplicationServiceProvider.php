@@ -8,6 +8,7 @@ use LogicException;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
 use Nene2\Error\DomainExceptionHandlerInterface;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\Api\ApiRouteRegistrar;
 use NeneContact\Api\ApiServiceProvider;
@@ -27,6 +28,7 @@ use NeneContact\ContactForm\ContactFormRouteRegistrar;
 use NeneContact\ContactForm\ContactFormServiceProvider;
 use NeneContact\Handoff\HandoffRouteRegistrar;
 use NeneContact\Handoff\HandoffServiceProvider;
+use NeneContact\Http\ExportFilename;
 use NeneContact\Media\MediaNotFoundExceptionHandler;
 use NeneContact\Media\MediaRouteRegistrar;
 use NeneContact\Media\MediaServiceProvider;
@@ -73,6 +75,21 @@ final readonly class ApplicationServiceProvider implements ServiceProviderInterf
             static function (): RequestScopedHolder {
                 /** @var RequestScopedHolder<int> */
                 return new RequestScopedHolder();
+            },
+        );
+
+        // Operator-facing CSV filenames: one place turns the UTC clock into the display date
+        // (#534). Shared by the submissions and audit-trail exports.
+        $builder->set(
+            ExportFilename::class,
+            static function (ContainerInterface $c): ExportFilename {
+                $clock = $c->get(ClockInterface::class);
+
+                if (!$clock instanceof ClockInterface) {
+                    throw new LogicException('Clock service is invalid.');
+                }
+
+                return new ExportFilename($clock);
             },
         );
 

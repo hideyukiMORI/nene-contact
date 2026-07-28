@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NeneContact\Audit;
 
-use Nene2\Http\ClockInterface;
+use NeneContact\Http\ExportFilename;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -20,7 +20,7 @@ final readonly class ExportAuditEventsHandler implements RequestHandlerInterface
     public function __construct(
         private ExportAuditEventsUseCaseInterface $useCase,
         private Psr17Factory $psr17,
-        private ClockInterface $clock,
+        private ExportFilename $filename,
     ) {
     }
 
@@ -30,7 +30,7 @@ final readonly class ExportAuditEventsHandler implements RequestHandlerInterface
         $actorUserId = is_array($claims) && isset($claims['uid']) && is_int($claims['uid']) ? $claims['uid'] : null;
 
         $csv = $this->useCase->execute(AuditEventFilter::fromQueryParams($request->getQueryParams()), $actorUserId);
-        $filename = 'audit-events-' . $this->clock->now()->format('Y-m-d') . '.csv';
+        $filename = $this->filename->forPrefix('audit-events');
 
         return $this->psr17->createResponse(200)
             ->withHeader('Content-Type', 'text/csv; charset=UTF-8')

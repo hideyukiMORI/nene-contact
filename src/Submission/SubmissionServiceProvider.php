@@ -18,6 +18,7 @@ use NeneContact\Attachment\AttachmentRepositoryInterface;
 use NeneContact\Attachment\AttachmentStorageInterface;
 use NeneContact\Audit\AuditRecorderInterface;
 use NeneContact\ContactForm\ContactFormRepositoryInterface;
+use NeneContact\Http\ExportFilename;
 use NeneContact\Http\RuntimeServiceProvider;
 use NeneContact\Notification\SenderAutoReplyInterface;
 use NeneContact\Notification\SubmissionNotifierInterface;
@@ -651,6 +652,7 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                 static function (ContainerInterface $c): ExportSubmissionsHandler {
                     $uc = $c->get(ExportSubmissionsUseCaseInterface::class);
                     $psr17 = $c->get(Psr17Factory::class);
+                    $filename = $c->get(ExportFilename::class);
 
                     if (!$uc instanceof ExportSubmissionsUseCaseInterface) {
                         throw new LogicException('ExportSubmissions use case service is invalid.');
@@ -660,7 +662,11 @@ final readonly class SubmissionServiceProvider implements ServiceProviderInterfa
                         throw new LogicException('PSR-17 factory service is invalid.');
                     }
 
-                    return new ExportSubmissionsHandler($uc, $psr17);
+                    if (!$filename instanceof ExportFilename) {
+                        throw new LogicException('Export filename service is invalid.');
+                    }
+
+                    return new ExportSubmissionsHandler($uc, $psr17, $filename);
                 },
             )
             ->set(
