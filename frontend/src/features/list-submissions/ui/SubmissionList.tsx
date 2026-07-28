@@ -86,8 +86,14 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
     setPage(0);
   };
 
-  // Debounce the search box; a new query resets to the first page.
+  // Debounce the search box; a new query resets to the first page. Only arm the timer when the
+  // box actually differs from the committed query — otherwise mounting scheduled a timer that
+  // fired 300ms later and reset the page, silently undoing anything the operator did in that
+  // window (clicking "next" bounced back to page 1; #528).
   useEffect(() => {
+    if (qInput === q) {
+      return;
+    }
     const id = window.setTimeout(() => {
       setQ(qInput);
       setPage(0);
@@ -95,7 +101,7 @@ export function SubmissionList({ selectedId }: { selectedId: number | null }): R
     return () => {
       window.clearTimeout(id);
     };
-  }, [qInput]);
+  }, [qInput, q]);
 
   const params: SubmissionListParams = {
     limit: PAGE,
