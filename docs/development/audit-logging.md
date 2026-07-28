@@ -26,6 +26,14 @@ Read with: [`backend-standards.md`](./backend-standards.md),
 | **Delete** (soft or hard) | ✓ | `before =` last snapshot, `after = null`; trail **survives** the deletion |
 | **PII access** (submission view / export) | ✓ | `submission.viewed` / `submission.exported` (charter §4, §11) |
 | **Audit-trail export** | ✓ | `audit_event.exported` — the trail records who bulk-read it (`{count, filter}`, no snapshots; #522) |
+
+> **Adding an action? Three places, one PR (review gate).** A new `{entity}.{verb}` must be
+> (1) registered in [terminology §9](../explanation/terminology.md), (2) added to the console's
+> label dictionaries (`features/list-audit-events/lib/labels.ts` + the `audit.entity.*` /
+> `audit.verb.*` keys in `ja.ts` / `en.ts`), and (3) covered by `labels.test.ts`. The label
+> lookup **falls back to the raw action string**, so a missed entry does not fail anything — it
+> just ships `submission.tagged` to the operator's screen and looks intentional. Three features
+> shipped that way before the coverage test existed (#533).
 | **Handoff retry / state** | ✓ | `handoff.retried` with before/after `handoff_status` |
 | Ordinary list views / non-PII reads | ✗ | not audited (write volume) |
 

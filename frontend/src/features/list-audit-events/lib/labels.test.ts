@@ -23,4 +23,49 @@ describe('actionLabel', () => {
     expect(actionLabel('submission.teleported', t)).toBe('submission.teleported');
     expect(actionLabel('no-dot', t)).toBe('no-dot');
   });
+
+  // #533: three features (tags, service tokens, the audit export) shipped an action the
+  // dictionaries did not know, and the raw-string fallback made the omission look deliberate
+  // on screen. Every action registered in terminology §9 must humanize.
+  const REGISTERED_ACTIONS = [
+    'submission.created',
+    'submission.updated',
+    'submission.deleted',
+    'submission.corrected',
+    'submission.expired',
+    'submission.purged',
+    'submission.viewed',
+    'submission.exported',
+    'submission.tagged',
+    'submission.untagged',
+    'submission_note.created',
+    'submission_technical_meta.viewed',
+    'contact_form.created',
+    'contact_form.updated',
+    'contact_form.deleted',
+    'notification_channel.created',
+    'notification_channel.updated',
+    'notification_channel.deleted',
+    'notification_channel.tested',
+    'attachment.purged',
+    'handoff.created',
+    'handoff.retried',
+    'autoreply.sent',
+    'autoreply.suppressed',
+    'autoreply.failed',
+    'user.created',
+    'user.updated',
+    'user.password_changed',
+    'organization.created',
+    'service_token.issued',
+    'service_token.revoked',
+    'tag.created',
+    'tag.updated',
+    'tag.deleted',
+    'audit_event.exported',
+  ];
+
+  it.each(REGISTERED_ACTIONS)('humanizes %s instead of showing the raw identifier', (action) => {
+    expect(actionLabel(action, t)).not.toBe(action);
+  });
 });
