@@ -23,12 +23,7 @@ final readonly class ListAuditEventsHandler implements RequestHandlerInterface
     {
         $pagination = PaginationQueryParser::parse($request);
 
-        $params = $request->getQueryParams();
-        $filter = new AuditEventFilter(
-            q: $this->stringParam($params, 'q'),
-            from: $this->stringParam($params, 'from'),
-            to: $this->stringParam($params, 'to'),
-        );
+        $filter = AuditEventFilter::fromQueryParams($request->getQueryParams());
 
         $result = $this->useCase->execute($filter, $pagination->limit, $pagination->offset);
 
@@ -41,19 +36,5 @@ final readonly class ListAuditEventsHandler implements RequestHandlerInterface
             offset: $result->offset,
             total: $result->total,
         ))->toArray());
-    }
-
-    /**
-     * @param array<string, mixed> $params
-     */
-    private function stringParam(array $params, string $key): ?string
-    {
-        $value = $params[$key] ?? null;
-        if (!is_string($value)) {
-            return null;
-        }
-        $trimmed = trim($value);
-
-        return $trimmed === '' ? null : $trimmed;
     }
 }

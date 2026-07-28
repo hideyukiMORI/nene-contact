@@ -545,6 +545,41 @@ paths:
         '401': { $ref: '#/components/responses/Problem' }
         '403': { $ref: '#/components/responses/Problem' }
 
+  /admin/audit-events/export:
+    get:
+      tags: [Audit]
+      operationId: exportAuditEvents
+      summary: Export the organization's audit trail as CSV
+      description: >-
+        Same rows as `listAuditEvents` (organization-scoped, ViewAuditLog), honoring the
+        same q / from / to filter, rendered as CSV. The export is itself a bulk read of the
+        trail, so it is recorded as `audit_event.exported` with the row count and the applied
+        filter — never the exported snapshots (ADR 0013).
+      parameters:
+        - name: q
+          in: query
+          required: false
+          description: Free-text match over action / entity type / "entity_type #id".
+          schema: { type: string }
+        - name: from
+          in: query
+          required: false
+          description: Inclusive lower bound on created_at (YYYY-MM-DD).
+          schema: { type: string, format: date }
+        - name: to
+          in: query
+          required: false
+          description: Inclusive upper bound on created_at (YYYY-MM-DD).
+          schema: { type: string, format: date }
+      responses:
+        '200':
+          description: CSV export
+          content:
+            text/csv:
+              schema: { type: string }
+        '401': { $ref: '#/components/responses/Problem' }
+        '403': { $ref: '#/components/responses/Problem' }
+
   /admin/submissions:
     get:
       tags: [Submission]

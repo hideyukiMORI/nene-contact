@@ -482,6 +482,9 @@ export const ja = {
   'audit.lead': 'いつ誰が何をどう変えたかの記録です。行を選ぶと変更内容を表示します。',
   'audit.count': '{n} 件',
   'audit.countOf': '{n} 件 / 全 {total} 件',
+  'audit.export': 'CSV書き出し',
+  'audit.export.hint':
+    '表示中の絞り込みのまま、監査ログをCSVファイルで書き出します（書き出したことも記録されます）',
   'audit.search': '操作・操作者・対象で検索',
   'audit.error': '監査ログを読み込めませんでした。',
   'audit.empty': '該当するイベントはありません。',

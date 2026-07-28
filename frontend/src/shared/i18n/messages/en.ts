@@ -508,6 +508,9 @@ export const en: Partial<MessageCatalog> = {
   'audit.lead': 'A record of who changed what, and when. Select a row to see the change.',
   'audit.count': '{n}',
   'audit.countOf': '{n} / {total}',
+  'audit.export': 'Export CSV',
+  'audit.export.hint':
+    'Export the audit log as a CSV file, keeping the current filter (the export itself is recorded)',
   'audit.search': 'Search action, actor, target',
   'audit.error': 'Could not load the audit log.',
   'audit.empty': 'No matching events.',

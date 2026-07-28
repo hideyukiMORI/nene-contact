@@ -17,4 +17,33 @@ final readonly class AuditEventFilter
         public ?string $to = null,
     ) {
     }
+
+    /**
+     * Reads the filter off the query string. Shared by the list and the CSV export so the
+     * export always covers exactly what the viewer is looking at.
+     *
+     * @param array<string, mixed> $params
+     */
+    public static function fromQueryParams(array $params): self
+    {
+        return new self(
+            q: self::stringParam($params, 'q'),
+            from: self::stringParam($params, 'from'),
+            to: self::stringParam($params, 'to'),
+        );
+    }
+
+    /**
+     * @param array<string, mixed> $params
+     */
+    private static function stringParam(array $params, string $key): ?string
+    {
+        $value = $params[$key] ?? null;
+        if (!is_string($value)) {
+            return null;
+        }
+        $trimmed = trim($value);
+
+        return $trimmed === '' ? null : $trimmed;
+    }
 }

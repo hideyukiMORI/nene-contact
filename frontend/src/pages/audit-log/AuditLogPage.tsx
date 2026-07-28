@@ -28,6 +28,8 @@ export function AuditLogPage(): ReactNode {
         from={audit.from}
         to={audit.to}
         selectedId={selectedId}
+        isExporting={audit.isExporting}
+        onExport={audit.exportCsv}
         onSelect={setSelectedId}
         onSearch={audit.setQ}
         onPeriod={audit.setPeriod}

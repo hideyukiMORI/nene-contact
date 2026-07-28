@@ -25,6 +25,7 @@ Read with: [`backend-standards.md`](./backend-standards.md),
 | **Update** | ✓ | `before` and `after` snapshots — the diff is *what changed and how* |
 | **Delete** (soft or hard) | ✓ | `before =` last snapshot, `after = null`; trail **survives** the deletion |
 | **PII access** (submission view / export) | ✓ | `submission.viewed` / `submission.exported` (charter §4, §11) |
+| **Audit-trail export** | ✓ | `audit_event.exported` — the trail records who bulk-read it (`{count, filter}`, no snapshots; #522) |
 | **Handoff retry / state** | ✓ | `handoff.retried` with before/after `handoff_status` |
 | Ordinary list views / non-PII reads | ✗ | not audited (write volume) |
 

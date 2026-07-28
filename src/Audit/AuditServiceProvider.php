@@ -8,9 +8,11 @@ use LogicException;
 use Nene2\Database\DatabaseQueryExecutorInterface;
 use Nene2\DependencyInjection\ContainerBuilder;
 use Nene2\DependencyInjection\ServiceProviderInterface;
+use Nene2\Http\ClockInterface;
 use Nene2\Http\JsonResponseFactory;
 use Nene2\Http\RequestScopedHolder;
 use NeneContact\ApplicationServiceProvider;
+use Nyholm\Psr7\Factory\Psr17Factory;
 use Psr\Container\ContainerInterface;
 
 final readonly class AuditServiceProvider implements ServiceProviderInterface
@@ -96,15 +98,65 @@ final readonly class AuditServiceProvider implements ServiceProviderInterface
                 },
             )
             ->set(
+                ExportAuditEventsUseCaseInterface::class,
+                static function (ContainerInterface $c): ExportAuditEventsUseCaseInterface {
+                    $repo = $c->get(AuditEventSearchRepositoryInterface::class);
+                    $recorder = $c->get(AuditRecorderInterface::class);
+                    $orgId = $c->get(ApplicationServiceProvider::ORG_ID_HOLDER);
+
+                    if (!$repo instanceof AuditEventSearchRepositoryInterface) {
+                        throw new LogicException('Audit event search repository service is invalid.');
+                    }
+
+                    if (!$recorder instanceof AuditRecorderInterface) {
+                        throw new LogicException('Audit recorder service is invalid.');
+                    }
+
+                    if (!$orgId instanceof RequestScopedHolder) {
+                        throw new LogicException('Org id holder service is invalid.');
+                    }
+
+                    /** @var RequestScopedHolder<int> $orgId */
+                    return new ExportAuditEventsUseCase($repo, $recorder, $orgId);
+                },
+            )
+            ->set(
+                ExportAuditEventsHandler::class,
+                static function (ContainerInterface $c): ExportAuditEventsHandler {
+                    $useCase = $c->get(ExportAuditEventsUseCaseInterface::class);
+                    $psr17 = $c->get(Psr17Factory::class);
+                    $clock = $c->get(ClockInterface::class);
+
+                    if (!$useCase instanceof ExportAuditEventsUseCaseInterface) {
+                        throw new LogicException('Export audit events use case service is invalid.');
+                    }
+
+                    if (!$psr17 instanceof Psr17Factory) {
+                        throw new LogicException('PSR-17 factory service is invalid.');
+                    }
+
+                    if (!$clock instanceof ClockInterface) {
+                        throw new LogicException('Clock service is invalid.');
+                    }
+
+                    return new ExportAuditEventsHandler($useCase, $psr17, $clock);
+                },
+            )
+            ->set(
                 AuditRouteRegistrar::class,
                 static function (ContainerInterface $c): AuditRouteRegistrar {
                     $list = $c->get(ListAuditEventsHandler::class);
+                    $export = $c->get(ExportAuditEventsHandler::class);
 
                     if (!$list instanceof ListAuditEventsHandler) {
                         throw new LogicException('List audit events handler service is invalid.');
                     }
 
-                    return new AuditRouteRegistrar($list);
+                    if (!$export instanceof ExportAuditEventsHandler) {
+                        throw new LogicException('Export audit events handler service is invalid.');
+                    }
+
+                    return new AuditRouteRegistrar($list, $export);
                 },
             );
     }
