@@ -30,10 +30,30 @@ blind the gate to *everything*, not just the advisory in question.
 4. **Prefer the fix.** If a patched version exists in a range we can take, take it. An
    exception is only for "no fix exists that we can adopt".
 
+## Overrides break things quietly
+
+Pinning a version to dodge an advisory silences the scanner; it does **not** promise the pinned
+version still speaks the API its dependents expect. This repo learned it the expensive way
+(#530 → #538): collapsing the per-major `brace-expansion` pins into a flat `^5.0.8` forced v5
+onto `minimatch@3`, a v1-era CJS consumer, which then threw
+`TypeError: expand is not a function`. **Lint stayed green** the whole time, because minimatch@3
+only reaches brace-expansion for patterns containing `{...}` — a path our config never hit.
+
+Rules:
+
+- **Scope an override per major** (`pkg@1` / `pkg@5`) unless every major is API-compatible and
+  you have checked. Flat overrides cross major boundaries silently.
+- **Add a probe** to `frontend/scripts/check-overrides.mjs` for any override that crosses a
+  major. It runs as part of `npm run audit`, so the gate that hides the advisory also proves the
+  fix did not break a dependent. Verified both ways: the probe exits 1 with the flat override
+  and 0 with the scoped one.
+- A green build is not evidence that an override is safe. Only the probe is.
+
 ## Current exceptions
 
 | Advisory | Package | Why it does not apply here | Expires |
 | --- | --- | --- | --- |
+| [GHSA-mh99-v99m-4gvg](https://github.com/advisories/GHSA-mh99-v99m-4gvg) | `brace-expansion` (<=5.0.7) | The range covers the whole v1/v2 lines, which have **no fixed release** (v1 ends at 1.1.16, v2 at 2.1.3); the v5 line is fixed and we take it (`brace-expansion@5: ^5.0.8`). The residue is **dev-only**: v1/v2 arrive via eslint-plugin-import / eslint-plugin-jsx-a11y (minimatch@3) and @redocly/openapi-core (minimatch@5). Measured 2026-07-29: `npm ls brace-expansion --omit=dev` is empty and the built console bundle contains **zero** occurrences, so no version reaches a browser. The DoS needs attacker-controlled glob patterns; ours are static repo config expanded on our own CI. | **2026-08-31** |
 | [GHSA-qwww-vcr4-c8h2](https://github.com/advisories/GHSA-qwww-vcr4-c8h2) | `react-router` (7.12.0–8.2.0) | The admin console is a **static SPA built by Vite** and served from `public_html/console/`. It uses `createBrowserRouter` with element-only routes — **no RSC mode, no server components, no server-side route `action`/`loader`, no `@react-router/dev` runtime**. The advisory's attack path (a server executing a route action before returning 400) has no counterpart in a client-only bundle. Measured 2026-07-29: `src/app/router.tsx` contains no `action:` / `loader:` keys, and the tree contains no RSC / static-handler / `@react-router/dev` import. | **2026-08-31** |
 
 There is **no fix available in the 7.x line**: `react-router-dom` ends at 7.18.1, and the fix
