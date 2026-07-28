@@ -78,11 +78,18 @@ Full list: [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contr
 | M2 | Compliance hardening — consent, prohibited-field registry, retention + purge, data-subject delete/correct, channel-secret encryption; no physical row deletion, PII erased in place ([ADR 0016](./docs/adr/0016-no-physical-deletion-pii-erase-in-place.md)) | ✅ |
 | M3 | Forms + embed MVP — form builder, `public_html/embed.js`, admin console (`frontend/`) | ✅ MVP |
 | M4 | Channels + webhooks + attachments — email / Slack / Chatwork dispatch, signed outbound webhooks | ✅ |
-| M5 | Sibling handoff — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP, idempotent/retry/audited ([ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)) | ✅ (submission-detail UI buttons still pending) |
+| M5 | Sibling handoff — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP, idempotent/retry/audited ([ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)); submission-detail handoff buttons | ✅ |
 | M6 | AI / MCP — agent read surface `/api/*`, local MCP stdio server, Concierge ingest, MCP write tools with confirmation token, Contact → Invoice draft handoff, Contact → Records read-only options | ✅ |
 | M7 | GA / acceptance — A1–A8 audit, operator guide | 🚧 In progress |
 
-Remaining for M7: production `embed.js` build (hashed, CSP-friendly), final compliance/governance/backend/frontend reviews. Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and the private `nene-origin/internal-docs/contact/todo/current.md` (operational logs moved there in P3).
+**In production since 2026-07-18** — the admin console runs at `contact.ayane.co.jp` and the
+widget is embedded on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). The production
+`embed.js` build (minified, content-hashed, SRI, stable `/embed/embed.js` alias) shipped with
+it. Deploy history: [`CHANGELOG.md`](./CHANGELOG.md).
+
+Remaining for M7: the final compliance / governance / backend-api / frontend release reviews.
+Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and the private
+`nene-origin/internal-docs/contact/todo/current.md` (operational logs moved there in P3).
 
 ## Quick Start
 
