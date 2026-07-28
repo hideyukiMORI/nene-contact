@@ -13,6 +13,11 @@ export function actorLabel(event: AuditEvent, t: Translate): string {
 // Audit actions are `{entity}.{verb}` (terminology §9). We humanize them by composing two
 // small dictionaries rather than enumerating every action; an unregistered entity or verb
 // falls back to the raw string so a new action never renders blank.
+//
+// 🔴 These two dictionaries must cover every entity/verb registered in terminology §9. Three
+// separate features shipped an action without adding it here (tags, service tokens, the audit
+// export), and the fallback made the omission look like a design choice on screen instead of a
+// bug. `labels.test.ts` now asserts the coverage — extend the lists there when §9 grows.
 const ENTITY_LABEL_KEYS: Record<string, MessageKey> = {
   submission: 'audit.entity.submission',
   submission_note: 'audit.entity.submission_note',
@@ -24,6 +29,9 @@ const ENTITY_LABEL_KEYS: Record<string, MessageKey> = {
   autoreply: 'audit.entity.autoreply',
   user: 'audit.entity.user',
   organization: 'audit.entity.organization',
+  service_token: 'audit.entity.service_token',
+  tag: 'audit.entity.tag',
+  audit_event: 'audit.entity.audit_event',
 };
 
 const VERB_LABEL_KEYS: Record<string, MessageKey> = {
@@ -39,6 +47,12 @@ const VERB_LABEL_KEYS: Record<string, MessageKey> = {
   sent: 'audit.verb.sent',
   suppressed: 'audit.verb.suppressed',
   failed: 'audit.verb.failed',
+  issued: 'audit.verb.issued',
+  revoked: 'audit.verb.revoked',
+  tested: 'audit.verb.tested',
+  tagged: 'audit.verb.tagged',
+  untagged: 'audit.verb.untagged',
+  password_changed: 'audit.verb.password_changed',
 };
 
 /**
