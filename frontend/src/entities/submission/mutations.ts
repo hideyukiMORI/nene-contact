@@ -5,6 +5,7 @@ import type { SubmissionDto } from '@/entities/submission/api-types';
 import { toSubmissionDetail } from '@/entities/submission/mapper';
 import type { SubmissionDetail, SubmissionStatus } from '@/entities/submission/model';
 import { submissionKeys } from '@/entities/submission/query-keys';
+import { auditEventKeys } from '@/entities/audit-event/query-keys';
 
 export function useUpdateSubmissionStatusMutation(
   id: number,
@@ -78,8 +79,12 @@ export function useDeleteSubmissionMutation(id: number): UseMutationResult<numbe
  * audited server-side as `submission.exported`). The endpoint exports the full set and
  * does not honor the inbox filters, so this is deliberately an "export everything" action.
  * Triggers a browser download from the returned blob.
+ *
+ * The download leaves a new row in the audit trail, so drop that cache too — otherwise the
+ * audit log shows a stale list the next time it is opened (#535).
  */
 export function useExportSubmissionsMutation(): UseMutationResult<string, AppError, void> {
+  const queryClient = useQueryClient();
   return useMutation<string, AppError>({
     mutationFn: async (): Promise<string> => {
       const { blob, filename } = await apiClient.getBlob('/admin/submissions/export');
@@ -93,6 +98,9 @@ export function useExportSubmissionsMutation(): UseMutationResult<string, AppErr
       anchor.remove();
       URL.revokeObjectURL(url);
       return name;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: auditEventKeys.all });
     },
   });
 }
