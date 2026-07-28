@@ -25,6 +25,7 @@
     "knip": "knip",
     "check:fast": "npm run type-check && npm run lint && npm run format && npm run test",
     "check": "npm run type-check && npm run lint && npm run format && npm run test && npm run knip && npm run build-storybook",
+    "audit": "audit-ci --config audit-ci.jsonc",
     "prepare": "husky"
   },
   "dependencies": {
@@ -60,6 +61,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
+    "audit-ci": "^7.1.0",
     "esbuild": "^0.28.1",
     "eslint": "^10.3.0",
     "eslint-config-prettier": "^10.1.8",
@@ -86,9 +88,7 @@
   "overrides": {
     "esbuild": "^0.28.1",
     "js-yaml": "^4.3.0",
-    "brace-expansion@1": "1.1.16",
-    "brace-expansion@2": "2.1.2",
-    "brace-expansion@5": "5.0.7"
+    "brace-expansion": "^5.0.8"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
