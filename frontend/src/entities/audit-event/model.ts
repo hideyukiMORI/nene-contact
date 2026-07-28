@@ -17,10 +17,14 @@ export interface AuditEventList {
   offset: number;
 }
 
-export interface AuditEventListParams {
-  limit: number;
-  offset: number;
+/** Server-side filter shared by the audit list and its CSV export. */
+export interface AuditEventFilterParams {
   q?: string;
   from?: string;
   to?: string;
+}
+
+export interface AuditEventListParams extends AuditEventFilterParams {
+  limit: number;
+  offset: number;
 }

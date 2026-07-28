@@ -32,6 +32,8 @@ export interface AuditLogListProps {
   from: string;
   to: string;
   selectedId: number | null;
+  isExporting: boolean;
+  onExport: () => void;
   onSelect: (id: number) => void;
   onSearch: (q: string) => void;
   onPeriod: (p: AuditPeriod) => void;
@@ -56,6 +58,7 @@ export function AuditLogList(props: AuditLogListProps): ReactNode {
     from,
     to,
     selectedId,
+    isExporting,
   } = props;
 
   // The pager runs over the matched (filtered) set; range and controls come from it.
@@ -72,6 +75,16 @@ export function AuditLogList(props: AuditLogListProps): ReactNode {
               ? t('audit.countOf', { n: String(matched), total: String(total) })
               : t('audit.count', { n: String(total) })}
           </span>
+          <button
+            type="button"
+            className="ib-export"
+            onClick={props.onExport}
+            disabled={isExporting}
+            title={t('audit.export.hint')}
+          >
+            <Icon name="file" size={14} />
+            {t('audit.export')}
+          </button>
         </div>
         <p className="al-lead">{t('audit.lead')}</p>
         <div className="ib-search">

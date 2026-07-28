@@ -244,7 +244,10 @@ authenticated operator (#410),
 `service_token`; embed 案1, #388 — snapshot carries non-secret metadata only, never the token or jti),
 `tag.created` / `tag.updated` / `tag.deleted` (org tag vocabulary, entity type `tag`; soft-delete, ADR 0019),
 `submission.tagged` / `submission.untagged` (tag applied/removed on a submission, entity type
-`submission`; snapshot carries `{tag_id, label}`, no submission field values; ADR 0019).
+`submission`; snapshot carries `{tag_id, label}`, no submission field values; ADR 0019),
+`audit_event.exported` (operator downloaded the trail as CSV, entity type `audit_event`;
+snapshot carries `{count, filter}` — the row count and the applied q/from/to — never the
+exported snapshots; #522).
 
 | Term | Spelling | Notes |
 | --- | --- | --- |
@@ -256,6 +259,7 @@ authenticated operator (#410),
 | Recorder | `AuditRecorder` / `AuditRecorderInterface` | called in the UseCase |
 | Repository | `PdoAuditEventRepository` | `append`, `findAll`, `count` |
 | Read route | `/admin/audit-events` | admin (own org) / superadmin |
+| Export route | `/admin/audit-events/export` | CSV of the same filtered rows; the export is itself audited (#522) |
 
 ---
 

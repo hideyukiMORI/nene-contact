@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { useAuditEventsQuery } from '@/entities/audit-event';
+import { useAuditEventsQuery, useExportAuditEventsMutation } from '@/entities/audit-event';
 import type { AuditEvent } from '@/entities/audit-event';
 import type { AppError } from '@/shared/api/errors';
 
@@ -49,6 +49,9 @@ export interface UseAuditEvents {
   isLoading: boolean;
   error: AppError | null;
   refetch: () => void;
+  /** Downloads the currently filtered trail as CSV (audited server-side). */
+  exportCsv: () => void;
+  isExporting: boolean;
 }
 
 export function useAuditEvents(): UseAuditEvents {
@@ -68,6 +71,7 @@ export function useAuditEvents(): UseAuditEvents {
   });
   // Unfiltered grand total (cached) so the header can show "matched / of total".
   const grand = useAuditEventsQuery({ limit: 1, offset: 0 });
+  const exportCsv = useExportAuditEventsMutation();
 
   const matched = query.data?.total ?? 0;
   const total = grand.data?.total ?? matched;
@@ -110,5 +114,10 @@ export function useAuditEvents(): UseAuditEvents {
     refetch: () => {
       void query.refetch();
     },
+    // The download mirrors the on-screen filter, so it exports what the operator is looking at.
+    exportCsv: () => {
+      exportCsv.mutate({ q, from: range.from, to: range.to });
+    },
+    isExporting: exportCsv.isPending,
   };
 }

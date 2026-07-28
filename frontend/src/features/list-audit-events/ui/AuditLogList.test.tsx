@@ -33,6 +33,8 @@ function baseProps(overrides: Partial<AuditLogListProps> = {}): AuditLogListProp
     from: '',
     to: '',
     selectedId: null,
+    isExporting: false,
+    onExport: vi.fn(),
     onSelect: vi.fn(),
     onSearch: vi.fn(),
     onPeriod: vi.fn(),
@@ -70,5 +72,19 @@ describe('AuditLogList pagination', () => {
     renderWithProviders(<AuditLogList {...baseProps({ events: [], matched: 0, pageCount: 1 })} />);
     expect(screen.queryByRole('button', { name: '前へ' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: '次へ' })).not.toBeInTheDocument();
+  });
+});
+
+describe('AuditLogList CSV export', () => {
+  it('calls onExport when the export button is clicked', async () => {
+    const onExport = vi.fn();
+    renderWithProviders(<AuditLogList {...baseProps({ onExport })} />);
+    await userEvent.click(screen.getByRole('button', { name: 'CSV書き出し' }));
+    expect(onExport).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables the export button while a download is in flight', () => {
+    renderWithProviders(<AuditLogList {...baseProps({ isExporting: true })} />);
+    expect(screen.getByRole('button', { name: 'CSV書き出し' })).toBeDisabled();
   });
 });
