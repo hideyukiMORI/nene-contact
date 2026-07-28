@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react';
 import type { AuditEvent } from '@/entities/audit-event';
 import { useI18n } from '@/shared/i18n';
+import { EXPORT_MAX_ROWS } from '@/shared/config/export';
 import { Icon, Pagination } from '@/shared/ui';
 import { actionLabel, actorLabel } from '@/features/list-audit-events/lib/labels';
 import {
@@ -86,6 +87,16 @@ export function AuditLogList(props: AuditLogListProps): ReactNode {
             {t('audit.export')}
           </button>
         </div>
+        {matched > EXPORT_MAX_ROWS ? (
+          // The server caps the file, so say so before the download rather than let an
+          // auditor receive a silently partial export (#531).
+          <p className="au-note" role="status">
+            {t('export.truncated', {
+              max: String(EXPORT_MAX_ROWS),
+              matched: String(matched),
+            })}
+          </p>
+        ) : null}
         <p className="al-lead">{t('audit.lead')}</p>
         <div className="ib-search">
           <Icon name="search" size={15} />

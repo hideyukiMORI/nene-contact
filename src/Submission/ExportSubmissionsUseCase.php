@@ -9,7 +9,8 @@ use NeneContact\Audit\AuditRecorderInterface;
 
 final readonly class ExportSubmissionsUseCase implements ExportSubmissionsUseCaseInterface
 {
-    private const MAX_ROWS = 10000;
+    /** Mirrored by EXPORT_MAX_ROWS in frontend/src/shared/config/export.ts — keep in step. */
+    public const MAX_ROWS = 10000;
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -53,6 +54,8 @@ final readonly class ExportSubmissionsUseCase implements ExportSubmissionsUseCas
         fclose($handle);
 
         // Bulk PII access — recorded without copying the exported values (charter §10).
+        // `total_matched` exposes a capped export in the trail: count < total_matched means
+        // the operator walked away with a partial file (#531).
         $this->audit->record(
             $actorUserId,
             $this->orgId->get(),
@@ -60,7 +63,10 @@ final readonly class ExportSubmissionsUseCase implements ExportSubmissionsUseCas
             'submission',
             null,
             null,
-            ['count' => count($rows)],
+            [
+                'count' => count($rows),
+                'total_matched' => $this->submissions->count(),
+            ],
         );
 
         return $csv;

@@ -12,10 +12,16 @@ use Nene2\Http\RequestScopedHolder;
  * a bulk read of who/what/how records, so it records an `audit_event.exported` event —
  * carrying the row count and the filter that produced it, never the exported rows
  * (charter §10, ADR 0013).
+ *
+ * The export is capped at MAX_ROWS, so the record also carries `total_matched`: when it
+ * exceeds `count`, the trail itself shows that the file an auditor received was **partial**
+ * (#531). Without it, "exactly 10,000 rows" and "10,000 of 40,000" are indistinguishable
+ * after the fact.
  */
 final readonly class ExportAuditEventsUseCase implements ExportAuditEventsUseCaseInterface
 {
-    private const MAX_ROWS = 10000;
+    /** Mirrored by EXPORT_MAX_ROWS in frontend/src/shared/config/export.ts — keep in step. */
+    public const MAX_ROWS = 10000;
 
     /**
      * @param RequestScopedHolder<int> $orgId
@@ -62,6 +68,8 @@ final readonly class ExportAuditEventsUseCase implements ExportAuditEventsUseCas
         fclose($handle);
 
         // Bulk access to the trail — recorded without copying the exported snapshots.
+        // `total_matched` is what the filter matched before the cap, so a truncated export
+        // is visible in the trail (count < total_matched).
         $this->audit->record(
             $actorUserId,
             $this->orgId->get(),
@@ -71,6 +79,7 @@ final readonly class ExportAuditEventsUseCase implements ExportAuditEventsUseCas
             null,
             [
                 'count' => count($rows),
+                'total_matched' => $this->events->countMatching($filter),
                 'filter' => [
                     'q' => $filter->q,
                     'from' => $filter->from,
