@@ -38,11 +38,15 @@ embed submit spinner, reset-password CLI, and the inbox/audit-log `Pagination`) 
 - **M6 AI/MCP** ✅: agent read surface `/api/*`, local MCP stdio server, Concierge ingest
   (`source=concierge`, one inbox), MCP write tools behind a two-step confirmation token, the
   Contact → Invoice draft-client handoff, and Contact → Records read-only select options.
-- **M7 GA / acceptance** 🚧: A1–A8 verified with code evidence
+- **M7 GA / acceptance** ✅ (closed 2026-07-29): A1–A8 verified with code evidence
   ([`review/acceptance-A1-A8.md`](./review/acceptance-A1-A8.md), verdict PASS) + operator guide
   ([`operations/operator-guide.md`](./operations/operator-guide.md)); production `embed.js`
-  build ✅ (minified, content-hashed, SRI manifest + stable `/embed/embed.js` alias); final
-  compliance/governance/backend/frontend release reviews remain.
+  build ✅ (minified, content-hashed, SRI manifest + stable `/embed/embed.js` alias); the four
+  release reviews ([compliance](./review/compliance.md), [governance](./review/governance.md),
+  [backend-api](./review/backend-api.md), [frontend](./review/frontend.md)) were re-run against
+  the release and all reached **PASS**, each recording its open items instead of hiding them
+  (no reCAPTCHA, no duplicate-submission guard; one latent repository-scope risk and one
+  tag-removal asymmetry). **Declaring GA is a separate maintainer decision**, not part of M7.
 - **Post-MVP production waves (2026-07)**: sender auto-reply; server-side form CLIs; hosted
   single-form page `GET /form/{public_form_key}`; the **records-embed contract** (service-token
   registry + unified `/api` auth dispatcher + admin SPA, 案1 PR ①–④); AYANE brand skin +
@@ -62,7 +66,7 @@ Implementation tracking: GitHub Issues. Per-milestone detail: [`milestones/`](./
 | [M3](./milestones/m3-forms-embed-mvp.md) | Forms + embed MVP (embed.js + admin console) | 2 | ✅ done |
 | [M5](./milestones/m5-sibling-handoff.md) | Sibling handoff | 3 | ✅ done |
 | [M6](./milestones/m6-ai-mcp-siblings.md) | AI/MCP + deeper siblings | 4 | ✅ done |
-| [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | 🚧 A1–A8 verified |
+| [M7](./milestones/m7-ga-acceptance.md) | GA / acceptance | 4 | ✅ done |
 
 ```
 M1 ──> M2 ──> M3 ──> M4 ──> M5 ──> M6 ──> M7 (GOAL)
