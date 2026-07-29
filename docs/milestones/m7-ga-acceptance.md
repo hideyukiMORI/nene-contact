@@ -1,8 +1,10 @@
 # Milestone M7: GA / acceptance
 
 **Phase 4** · the GOAL. NeNe Contact is "done right" at the bar a privacy/legal
-professional (士業) would accept. 🚧 **A1–A8 acceptance verified (#130) + operator guide
-(#132)**; production `embed.js` build + final reviews remain.
+professional (士業) would accept. ✅ **Closed 2026-07-29**: A1–A8 acceptance verified (#130),
+operator guide (#132), production `embed.js` build (#330/#334, stable alias #405), and the four
+release reviews re-run against the release — all **PASS** (#541→#542, #543→#546, #547→#549,
+#548→#550). Declaring GA is a separate maintainer decision and is not part of this milestone.
 
 ## Goal
 
@@ -33,10 +35,15 @@ produce a production `embed.js` build. After M7 the product meets its GOAL.
 - [x] **Operator documentation**: TLS-required checklist; cross-border / non-Japan visitor
       responsibility (charter §9); privacy-notice surface guidance (operator is the data
       controller). → [`../operations/operator-guide.md`](../operations/operator-guide.md) (#132)
-- [ ] **Production `embed.js` build**: hashed long-cache filename, CSP-friendly (no `eval`,
-      no inline script from API responses).
-- [ ] Compliance self-review (`docs/review/compliance.md`) and governance/backend/frontend
-      reviews all pass on the release.
+- [x] **Production `embed.js` build**: hashed long-cache filename, CSP-friendly (no `eval`,
+      no inline script from API responses). → minified + content-hashed build with an SRI
+      manifest (#330 → #331), SRI in the install snippet (#334 → #335), stable
+      `/embed/embed.js` alias (#404 → #405). The frontend review re-measured `eval(` = 0 and
+      the deployed `integrity` against an independent rebuild.
+- [x] Compliance self-review (`docs/review/compliance.md`) and governance/backend/frontend
+      reviews all pass on the release. → re-run against `main@8b4729e` and merged 2026-07-29
+      (#541 → #542, #543 → #546, #547 → #549, #548 → #550); every verdict **PASS**, each with
+      its open items recorded rather than closed silently.
 
 ## Out of scope
 
@@ -50,8 +57,12 @@ produce a production `embed.js` build. After M7 the product meets its GOAL.
 - [`../review/compliance.md`](../review/compliance.md), [`../review/governance.md`](../review/governance.md), [`../review/backend-api.md`](../review/backend-api.md), [`../review/frontend.md`](../review/frontend.md)
 - ADR 0010, ADR 0011, ADR 0012
 
-> Status note (2026-06-25): the operator console, form builder (spec v1) and Appearance Studio
-> have since landed (M3 sprint, #110–#304). The two GA items below — the production `embed.js`
-> build and the four release review docs — are still the only remaining work for this milestone.
+> Status note (2026-07-29): the two remaining GA items — the production `embed.js` build and the
+> four release review docs — are both done, so this milestone is closed. What the reviews left
+> open is deliberately visible: reCAPTCHA and a duplicate-submission guard are **not**
+> implemented (compliance), `PdoUserRepository` carries its tenant scope in the use cases rather
+> than in SQL (#544, latent — no cross-tenant path exists today), and tag removal validates the
+> submission's organization but not the tag's (#545, asymmetric — not exploitable). None is a
+> charter deviation; all three are recorded, not hidden.
 
-Last updated: 2026-06-25
+Last updated: 2026-07-29

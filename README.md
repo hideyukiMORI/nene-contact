@@ -80,14 +80,19 @@ Full list: [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contr
 | M4 | Channels + webhooks + attachments — email / Slack / Chatwork dispatch, signed outbound webhooks | ✅ |
 | M5 | Sibling handoff — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP, idempotent/retry/audited ([ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)); submission-detail handoff buttons | ✅ |
 | M6 | AI / MCP — agent read surface `/api/*`, local MCP stdio server, Concierge ingest, MCP write tools with confirmation token, Contact → Invoice draft handoff, Contact → Records read-only options | ✅ |
-| M7 | GA / acceptance — A1–A8 audit, operator guide | 🚧 In progress |
+| M7 | GA / acceptance — A1–A8 audit, operator guide, production `embed.js` build, four release reviews | ✅ |
 
 **In production since 2026-07-18** — the admin console runs at `contact.ayane.co.jp` and the
 widget is embedded on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). The production
 `embed.js` build (minified, content-hashed, SRI, stable `/embed/embed.js` alias) shipped with
 it. Deploy history: [`CHANGELOG.md`](./CHANGELOG.md).
 
-Remaining for M7: the final compliance / governance / backend-api / frontend release reviews.
+**M7 closed 2026-07-29** — the four release reviews
+([compliance](./docs/review/compliance.md), [governance](./docs/review/governance.md),
+[backend-api](./docs/review/backend-api.md), [frontend](./docs/review/frontend.md)) were re-run
+against the release and all reached **PASS**, which was the last open M7 item. The reviews record
+two open gaps rather than hiding them: reCAPTCHA and a duplicate-submission guard are not
+implemented. **Declaring GA is a separate, maintainer-owned decision** and is not made here.
 Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and the private
 `nene-origin/internal-docs/contact/todo/current.md` (operational logs moved there in P3).
 
