@@ -5,6 +5,52 @@ there are no semver release tags yet, so entries are keyed by date (newest first
 deploys are the de-facto releases. June 2026 is backfilled at milestone granularity; July 2026
 at PR granularity. References are `(#issue → #PR)`.
 
+## 2026-07-29 — audit-log CSV export + audit gate + inbox paging fix (deployed to production)
+
+Backend **and** console deploy to `contact.ayane.co.jp` from `main@ef931ab` (maintainer
+confirmation obtained before the run; hub independent double-check passed). The first backend
+deploy since 2026-07-21. `phinx status` showed **no pending migrations**, and `composer.lock`,
+`tools/`, and `index.php` were unchanged, so neither the database nor `vendor/` was touched —
+the backend diff was the seven files of #523. The console was published in the order
+**new assets first → byte-compare → swap `index.html`**, so `index.html` never pointed at an
+asset that was not yet on the server. Prod console went to **`index-PrKVxQqt.js`** (CSS
+unchanged at `index-6howia9n.css`). Rollback backups on the server:
+`~/contact-src-bak-20260729-034049.tgz` / `~/contact-console-bak-20260729-034049.tgz`.
+References are `(#issue → #PR)`.
+
+### Added
+
+- **Audit-log CSV export** — `GET /admin/audit-events/export`, organization-scoped and behind
+  `ViewAuditLog`, honoring the on-screen `q` / `from` / `to` filter through the same
+  `AuditEventFilter::fromQueryParams()` the list handler uses, so the file and the screen cannot
+  drift apart. The export **is itself audited** as `audit_event.exported` carrying only
+  `{count, filter}` — never the exported content (ADR 0013, charter §10) (#522 → #523).
+
+### Changed
+
+- **npm audit gate** replaced with `audit-ci` + a per-advisory allowlist, so an advisory with no
+  fixed release can be excepted **by ID, with a measured reason and an expiry (2026-08-31)**,
+  instead of blunting the gate for everything. `high` / `critical` stay failing for anything not
+  listed. Adds `scripts/check-overrides.mjs`, which probes every copy of a pinned package on disk
+  — a hoisted copy being correct does not prove a nested one is (#524 → #530).
+- README status table brought up to what had actually shipped (#526 → #527).
+
+### Fixed
+
+- **Inbox paging silently reset** — the search debounce armed its 300 ms timer on mount as well
+  as on input, so `setPage(0)` fired shortly after the screen opened and quietly cancelled
+  whatever the operator did first (pressing "next" landed back on page 1). The timer now runs
+  only on an actual query change (#528 → #529).
+
+### Verified on production
+
+All four canonical URLs 200; unauthenticated `GET /admin/audit-events/export` → **401**; the
+served console assets are the real bundle (not the 557-byte fallback); `/embed/embed.js`
+unchanged at sha384 `6pU29afi…`, identical to the repository build; zero JS errors in a real
+browser. The authenticated path was exercised by the maintainer: the export downloaded
+(72,568 bytes / 117 rows) and the resulting `audit_event.exported` row appeared at the top of
+the audit list with its actor recorded.
+
 ## 2026-07-24 — guided tour + help + inbox/embed UX + submission tags (deployed to production)
 
 Console-only deploy to `contact.ayane.co.jp` (hub GO; the deploy freeze had lifted 2026-07-22).
