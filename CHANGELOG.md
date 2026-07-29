@@ -5,6 +5,78 @@ there are no semver release tags yet, so entries are keyed by date (newest first
 deploys are the de-facto releases. June 2026 is backfilled at milestone granularity; July 2026
 at PR granularity. References are `(#issue → #PR)`.
 
+## 2026-07-30 — export honesty + audit labels + M7 close-out (deployed to production)
+
+Backend **and** console deploy to `contact.ayane.co.jp` from `main@8548c9c`. `phinx status`
+reported **no pending migrations**, and `composer.lock`, `tools/`, `database/` and `index.php`
+were unchanged, so the database and `vendor/` were untouched; the backend diff was eight files
+under `src/`. Before the run, production `src/` was verified **byte-identical to the previously
+deployed commit** (`ef931ab`) — the same aggregate checksum over all 391 files — so the deploy
+started from the state the record claimed.
+
+The console was **rebuilt including #539**, which changes `frontend/package.json` overrides and
+is therefore a build input: the resulting bundle is *not* byte-identical to the one deployed on
+07-29, and the byte-comparison check was re-based on the fresh local build instead. Publishing
+order was again **new asset first → byte-compare → swap `index.html`**. Prod console went to
+**`index-DhWnl8My.js`** (811,948 B; CSS unchanged at `index-6howia9n.css`). Rollback backups:
+`~/contact-src-bak-20260730-005948.tgz` / `~/contact-console-bak-20260730-005948.tgz`.
+References are `(#issue → #PR)`.
+
+### Added
+
+- **Truncated exports say so.** Both CSV exports stop at 10,000 rows, and until now nothing told
+  anyone. `audit_event.exported` and `submission.exported` now also record **`total_matched`**,
+  so `count < total_matched` marks a partial file — an auditor can no longer mistake "exactly
+  10,000" for "10,000 of 40,000" after the fact — and the operator is warned **before** the
+  download, while narrowing the filter is still possible (#531 → #532).
+
+### Changed
+
+- **Audit-action labels cover every registered action.** `actionLabel()` falls back to the raw
+  identifier for unknown entity/verb pairs, so a missing dictionary entry breaks nothing and
+  looks like the spec — three features had slipped through that way. The ja/en dictionaries were
+  reconciled against terminology §9 rather than patching the two visible cases, and a test now
+  pins that none of the 35 actions renders raw (#533 → #536).
+- The `brace-expansion` override is **scoped per major** again (`@1`, `@2`, `@5`) instead of a
+  single flat `^5.0.8`, which had put v5 under `minimatch@3` and broken it. `npm run audit` now
+  runs `scripts/check-overrides.mjs` across **every copy on disk**, since a healthy hoisted copy
+  says nothing about a nested one (#538 → #539).
+
+### Fixed
+
+- The audit list **refetches after an export**, so the operator's own `audit_event.exported`
+  row appears without a manual reload (#535 → #537).
+- CSV downloads are **named after the operator's date**, not UTC — `ExportFilename` centralises
+  it for both exports, and the fix let one `date()` suppression be **removed** from the
+  conformance baseline rather than added (#534 → #540).
+
+### Docs
+
+- **M7 closed.** The four release reviews were re-run against the release and all reached PASS,
+  each recording what it left open — no reCAPTCHA, no duplicate-submission guard, one latent
+  repository-scope risk (#544), one tag-removal asymmetry (#545) (#541 → #542, #543 → #546,
+  #547 → #549, #548 → #550). Declaring GA remains a separate maintainer decision.
+- Status surfaces, this changelog, and the branch-hygiene rules brought back in line with what
+  had actually happened (#551 → #555, #552 → #556, #553 → #557).
+
+### Verified on production
+
+`src/` re-verified **byte-identical to `main@8548c9c`** after the sync (aggregate checksum over
+392 files); the uploaded console bundle matched the local build by size and MD5 **before**
+`index.html` was swapped, and again when fetched over HTTPS. All five canonical URLs 200
+(`/health`, `/console/`, `/embed/embed.js`, plus `ayane.co.jp/contact/` and `/inquiry/`);
+`/admin/audit-events/export`, `/admin/submissions/export` and `/admin/submissions` all **401**
+unauthenticated; served JS/CSS are the real bundle, not the 557-byte shell; `/embed/embed.js`
+unchanged at sha384 `6pU29afi…`, identical to the repository build. A real browser loads the
+console, renders the login screen and reports **no failed requests and no page errors** — the
+single console message is the expected 401 from the unauthenticated bootstrap call that
+redirects to `/console/login`. Ten repeat `/health` calls and a delayed re-probe were all 200,
+and no PHP error log was created.
+
+**Not verified here:** every authenticated path — the export filename, the truncation notice and
+the label dictionary can only be seen while logged in, and this deploy was checked from outside
+the session boundary. Those await an operator's own run.
+
 ## 2026-07-29 — audit-log CSV export + audit gate + inbox paging fix (deployed to production)
 
 Backend **and** console deploy to `contact.ayane.co.jp` from `main@ef931ab` (maintainer
