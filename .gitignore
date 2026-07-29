@@ -22,3 +22,4 @@ public_html/media/
 
 # ClaudeDesign hand-off packages (audit briefs, screenshots, zips) — local artifacts, not source
 /handoff/
+/frontend/.smoke-focus/
