@@ -1197,7 +1197,8 @@ paths:
         (`X-NENE2-API-Key`, e.g. Concierge, concierge-ingest-contract) or a per-organization
         Bearer service token (`source=first_party`, records native embed, #388). A `Bearer`
         header commits to the service-token path (org from the token) with no fall-through.
-        `contact_form_id` must belong to the resolved organization. Field values are validated
+        The form is addressed by **exactly one** of `contact_form_id` / `public_form_key` and
+        must belong to the resolved organization. Field values are validated
         against the form (required, email, consent) like the public submit; audited
         (`submission.created`) and notified. Throttled per-org (300/min) and per-form (120/min)
         across **both** auth modes (records-embed-contract §Rate limiting).
@@ -1944,12 +1945,22 @@ components:
 
     IngestSubmissionRequest:
       type: object
+      description: >
+        The target form is addressed by **exactly one** of `contact_form_id` or
+        `public_form_key` (#563). Sending both is a 422 rather than a precedence rule, so a
+        mismatched pair can never be filed under whichever identifier the server preferred.
+        Both lookups are organization-scoped, so either way a form outside the resolved
+        organization is simply not found.
       properties:
         source: { type: string, enum: [concierge, import, api, first_party] }
-        contact_form_id: { type: integer }
+        contact_form_id: { type: integer, description: mutually exclusive with public_form_key }
+        public_form_key: { type: string, description: mutually exclusive with contact_form_id; what a first-party relay holds }
         field_values: { type: object, additionalProperties: true }
         consent: { type: boolean, description: required when the form requires consent }
-      required: [source, contact_form_id, field_values]
+      required: [source, field_values]
+      oneOf:
+        - required: [contact_form_id]
+        - required: [public_form_key]
 
     IngestSubmissionResponse:
       type: object

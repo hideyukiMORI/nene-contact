@@ -20,6 +20,7 @@ Concierge stores submission_id in session metadata
 ## Contact obligations
 
 - Validate `contact_form_id` belongs to the same `organization_id` as the token.
+- The `contact_form_id` route is unchanged by #563: the ingest body now accepts **either** `contact_form_id` **or** `public_form_key` (exactly one), so Concierge keeps sending the numeric id exactly as before. Sending both is a 422.
 - Map Concierge-collected fields to form field names (explicit mapping in action config).
 - Apply same spam/rate rules as public API where applicable.
 

@@ -16,7 +16,7 @@ Records SSR renders the first-party form (inline / modal / chat variants)
 Visitor submits → Records backend
     POST {contact}/api/submissions
     Authorization: Bearer {service_token}         # per-org, server-held, never sent to the browser
-    Body: { source: "first_party", contact_form_id, consent?, field_values{...} }
+    Body: { source: "first_party", public_form_key, consent?, field_values{...} }
     ← 201 { id, status, source }
 Contact records the submission, notifies, and sends the sender auto-reply as usual.
 ```
@@ -47,7 +47,8 @@ Because the JWT is a bearer credential, Records MUST store it encrypted at rest,
 
 Reuses the existing service ingest endpoint (also used by Concierge via the machine key). Request/response/errors are in `docs/openapi/openapi.yaml` (`agentIngestSubmission`).
 
-- **Request**: `{ source: "first_party", contact_form_id, consent?, field_values{...} }`. `field_values` are validated against the form (required, email format, consent when the form requires it) exactly like the public submit. Only schema-declared fields are stored (purpose limitation); no honeypot field is expected (see Records obligations).
+- **Request**: `{ source: "first_party", public_form_key, consent?, field_values{...} }`. `field_values` are validated against the form (required, email format, consent when the form requires it) exactly like the public submit. Only schema-declared fields are stored (purpose limitation); no honeypot field is expected (see Records obligations).
+- **Addressing the form** (#563): the body carries **exactly one** of `public_form_key` or `contact_form_id`. Records holds only the public key — the declarative block and the schema fetch are both keyed by it — so it sends `public_form_key` and never needs an internal id. Sending both is a `422` rather than a precedence rule: a mismatched pair is a bug, and letting one silently win would file the submission under whichever identifier Contact happened to prefer. The alternative (exposing `contact_form_id` in the schema response) was rejected because that response is unauthenticated and deliberately carries no internal ids.
 - **Success**: `201 { id, status, source }`.
 - **Errors** (RFC 9457, invoice-aligned): `401 unauthorized` (bad/expired/missing token or missing `jti`), `401 service-token-revoked`, `403 insufficient-scope` (not a service principal, or lacks `ingest:submissions`), `422 validation-failed`, `429 rate-limited`.
 - **Reading the form to render**: Records fetches the form schema server-side via the existing public `GET /public/forms/{public_form_key}/schema` (no PII, no auth needed). No new read endpoint is required.
@@ -67,11 +68,11 @@ Spam/abuse content filtering and per-visitor throttling are Records' responsibil
 - Render the first-party form and run the **first-line defence** (honeypot, per-visitor rate limit, bot mitigation) on the Records side — this MUST ship in the same wave as, or before, the token relay, because Contact's ingest deliberately skips the honeypot for trusted service input.
 - Hold the service token server-side only (never emit to the browser); store encrypted, mask in UI, keep out of logs.
 - Map block/field names to Contact form field names; send `consent: true` when the form requires consent.
-- Treat `contact_form_id` + `public_form_key` as the binding identifiers (from the declarative block).
+- Treat `public_form_key` as the binding identifier (from the declarative block). No internal id is needed anywhere in the Records path (#563).
 
 ## Contact obligations
 
-- Validate `contact_form_id` belongs to the token's org (cross-tenant writes are impossible — the form is looked up within the resolved org).
+- Validate the form belongs to the token's org (cross-tenant writes are impossible — both `findById` and `findByPublicFormKey` filter by the resolved `organization_id` in SQL, so another tenant's form is simply not found and the error cannot distinguish "not yours" from "not there").
 - Never store the token value; enforce revocation at request time; audit issue/revoke.
 - Keep the public submit path (`/public/forms/*`) and the AYANE production form untouched by this lane.
 
