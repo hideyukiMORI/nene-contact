@@ -274,6 +274,7 @@ before the 10,000-row cap, and the applied q/from/to — never the exported snap
 | Public submit path | `/public/forms/{public_form_key}/submissions` |
 | Hosted form page path | `/form/{public_form_key}` (minimal HTML page loading embed.js inline; link target where a host sanitizer strips the embed snippet) |
 | Service ingest path | `/api/submissions` |
+| Ingest form identifier | **exactly one** of `contact_form_id` / `public_form_key` in the body (#563); both at once → 422 `ambiguous`, neither → 422 `required`. A first-party relay (records) holds only the public key |
 | Trigger attribute | `data-trigger` values: `modal`, `chat`, `inline`, `button` (overrides `appearance.mode`) |
 | Locale attribute | `data-lang` values: `ja`, `en` |
 
@@ -330,7 +331,8 @@ Base URI `https://nene-contact.dev/problems/`. Slugs are kebab-case and **stable
 | `internal-server-error` | 500 |
 
 Validation `errors[].field` = snake_case path / JSON pointer; `errors[].code` = snake_case
-(`required`, `invalid_email`).
+(`required`, `invalid_email`, `invalid`, `ambiguous` — the last one marks two mutually
+exclusive body keys sent together, §10 ingest form identifier).
 
 ---
 
