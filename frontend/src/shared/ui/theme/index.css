@@ -2870,7 +2870,7 @@ h3 {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
   flex-shrink: 0;
 }
@@ -2980,7 +2980,7 @@ h3 {
   font-weight: 600;
   font-family: inherit;
   cursor: pointer;
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
 }
 .gt-btn.ghost {
@@ -3140,7 +3140,12 @@ h3 {
      4.5:1 bar for text. Use these two wherever the brand has to carry text (WCAG 1.4.3):
        --ex-brand-fill : background for filled brand controls whose label is #fff  → 4.91:1
        --ex-brand-text : brand-coloured text / underlines drawn on a surface       → 4.91:1 light
-     Both are the same hue and chroma; only lightness moves. Measured, not eyeballed — see #312. */
+     Both are the same hue and chroma; only lightness moves. Measured, not eyeballed — see #312.
+     Every fill that carries --ex-brand-ink uses --ex-brand-fill (#562); so do the hover, active
+     and border states derived from those fills, because a state still mixed from --ex-brand
+     would come out *lighter* than the fill it sits on and invert the darker-on-interaction
+     direction. --ex-brand stays on rings, borders and tints, where 3:1 is the bar.
+     `brand-fill-contract.test.ts` fails if a new brand fill pairs #fff with --ex-brand again. */
   --ex-brand-fill: oklch(0.565 0.172 40);
   --ex-brand-text: oklch(0.565 0.172 40);
 
@@ -3330,7 +3335,7 @@ h3 {
   height: 18px;
   padding: 0 5px;
   border-radius: 999px;
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
   font-size: 10.5px;
   font-weight: 700;
@@ -3516,7 +3521,7 @@ h3 {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
   display: grid;
   place-items: center;
@@ -3584,7 +3589,7 @@ h3 {
   width: 38px;
   height: 38px;
   border-radius: 50%;
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
   display: grid;
   place-items: center;
@@ -3854,12 +3859,12 @@ h3 {
   font-size: 12.5px;
   font-weight: 650;
   font-family: inherit;
-  border: 1px solid color-mix(in srgb, var(--ex-brand) 80%, #000 8%);
-  background: var(--ex-brand);
+  border: 1px solid color-mix(in srgb, var(--ex-brand-fill) 80%, #000 8%);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
   cursor: pointer;
   white-space: nowrap;
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand) 35%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand-fill) 35%, transparent);
   text-decoration: none;
 }
 .ex-btn svg {
@@ -3967,13 +3972,13 @@ h3 {
     opacity 0.16s ease;
 }
 .ex-btn:hover {
-  background: color-mix(in srgb, var(--ex-brand) 90%, #000 10%);
-  box-shadow: 0 4px 14px color-mix(in srgb, var(--ex-brand) 38%, transparent);
+  background: color-mix(in srgb, var(--ex-brand-fill) 90%, #000 10%);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--ex-brand-fill) 38%, transparent);
   transform: translateY(-1px);
 }
 .ex-btn:active {
   transform: translateY(0) scale(0.985);
-  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand) 35%, transparent);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--ex-brand-fill) 35%, transparent);
 }
 .ex-btn.ghost:hover {
   background: var(--ex-surface2);
@@ -4397,7 +4402,7 @@ h3 {
   border: 0;
   border-radius: var(--ex-radius);
   cursor: pointer;
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
   font: 700 14px/1 var(--ex-font-ui);
   display: flex;
@@ -4416,8 +4421,8 @@ h3 {
   transition: transform 0.18s;
 }
 .lpf__btn:hover:not(:disabled) {
-  background: color-mix(in srgb, var(--ex-brand) 92%, #000);
-  box-shadow: 0 6px 16px color-mix(in srgb, var(--ex-brand) 38%, transparent);
+  background: color-mix(in srgb, var(--ex-brand-fill) 92%, #000);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--ex-brand-fill) 38%, transparent);
   transform: translateY(-1px);
 }
 .lpf__btn:hover:not(:disabled) svg {
@@ -4674,7 +4679,7 @@ h3 {
   cursor: pointer;
 }
 .fm-tab.on {
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
 }
 .fm-tab .n {
@@ -6872,7 +6877,7 @@ a.t:hover {
   font-family: var(--ex-font-display);
 }
 .us-av.brand {
-  background: var(--ex-brand);
+  background: var(--ex-brand-fill);
   color: var(--ex-brand-ink);
 }
 .us-av.c1 {
