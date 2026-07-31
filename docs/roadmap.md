@@ -9,13 +9,21 @@ milestone is delivered within the binding
 charter (APPI / Japan law only); where any goal conflicts with the charter, compliance
 wins (ADR 0012).
 
-## Where we are (2026-07-22)
+## Where we are (2026-07-31)
 
-**In production since 2026-07-18** 🚀 — the operator console runs at `contact.ayane.co.jp`
-and the embedded form is live on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). The
-post-launch waves (notification-channel CRUD completion + test-send, email-wording waves a–c,
-embed submit spinner, reset-password CLI, and the inbox/audit-log `Pagination`) were **deployed
-2026-07-21 / 07-22**; the earlier deploy freeze is lifted. See [`CHANGELOG.md`](../CHANGELOG.md).
+**Generally available — GA declared 2026-07-31** 🚀. The operator console runs at
+`contact.ayane.co.jp` and the embedded form is live on the `ayane.co.jp` apex (`/contact/`,
+`/inquiry/`); it has been **in production since 2026-07-18**. GA was held back until the
+accessibility fix could be **measured on the deployed bundle** rather than merely merged — that
+measurement landed 2026-07-31 (the console's focus indicator no longer carries the 1.10–1.34:1
+translucent bands, re-measured on live before and after the deploy). Deploy history:
+[`CHANGELOG.md`](../CHANGELOG.md).
+
+**GA does not close the two gaps the compliance review left open**, and neither is implemented:
+there is **no reCAPTCHA / bot challenge** (public submission is defended by per-IP and per-form
+rate limiting, a honeypot and per-form origin allow-lists) and **no duplicate-submission guard**
+(a resubmitted form creates a second submission; operators deduplicate in the inbox). Both stay
+listed here until they are built, not until GA is announced.
 
 - **Phase 0 — Governance** ✅ complete (2026-06-03).
 - **Phase 1 — Runtime foundation** ✅ complete: org, tenant resolution, JWT/RBAC, audit,
@@ -46,7 +54,9 @@ embed submit spinner, reset-password CLI, and the inbox/audit-log `Pagination`) 
   [backend-api](./review/backend-api.md), [frontend](./review/frontend.md)) were re-run against
   the release and all reached **PASS**, each recording its open items instead of hiding them
   (no reCAPTCHA, no duplicate-submission guard; one latent repository-scope risk and one
-  tag-removal asymmetry). **Declaring GA is a separate maintainer decision**, not part of M7.
+  tag-removal asymmetry). Declaring GA was a separate maintainer decision, taken **2026-07-31**
+  once the a11y precondition had been measured on live — knowing those open items, not despite
+  them.
 - **Post-MVP production waves (2026-07)**: sender auto-reply; server-side form CLIs; hosted
   single-form page `GET /form/{public_form_key}`; the **records-embed contract** (service-token
   registry + unified `/api` auth dispatcher + admin SPA, 案1 PR ①–④); AYANE brand skin +

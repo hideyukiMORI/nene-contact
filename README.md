@@ -81,6 +81,7 @@ Full list: [`docs/explanation/scope-contract.md`](./docs/explanation/scope-contr
 | M5 | Sibling handoff — Contact → Deal opportunity handoff + Contact → Vault attachment archive over HTTP, idempotent/retry/audited ([ADR 0002](./docs/adr/0002-separate-from-sibling-products.md)); submission-detail handoff buttons | ✅ |
 | M6 | AI / MCP — agent read surface `/api/*`, local MCP stdio server, Concierge ingest, MCP write tools with confirmation token, Contact → Invoice draft handoff, Contact → Records read-only options | ✅ |
 | M7 | GA / acceptance — A1–A8 audit, operator guide, production `embed.js` build, four release reviews | ✅ |
+| **GA** | **Generally available — declared 2026-07-31** | 🚀 |
 
 **In production since 2026-07-18** — the admin console runs at `contact.ayane.co.jp` and the
 widget is embedded on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). The production
@@ -90,9 +91,28 @@ it. Deploy history: [`CHANGELOG.md`](./CHANGELOG.md).
 **M7 closed 2026-07-29** — the four release reviews
 ([compliance](./docs/review/compliance.md), [governance](./docs/review/governance.md),
 [backend-api](./docs/review/backend-api.md), [frontend](./docs/review/frontend.md)) were re-run
-against the release and all reached **PASS**, which was the last open M7 item. The reviews record
-two open gaps rather than hiding them: reCAPTCHA and a duplicate-submission guard are not
-implemented. **Declaring GA is a separate, maintainer-owned decision** and is not made here.
+against the release and all reached **PASS**, which was the last open M7 item.
+
+**GA declared 2026-07-31.** The product has been **running in production since 2026-07-18**, and
+the last condition this project set for itself — that the accessibility fix be **measured on the
+live bundle**, not merely merged — was met on 2026-07-31, when the deployed console's focus
+indicator was re-measured and the 1.10–1.34:1 translucent bands were gone. That sentence is here
+on purpose: a status line in this repository should be traceable to something that was measured,
+because a badge that drifts from reality is worse than no badge.
+
+**GA does not close what is still open.** Two gaps the compliance review recorded are **not
+implemented**, and declaring GA does not implement them:
+
+- **No reCAPTCHA / bot challenge.** Public submission is defended by per-IP and per-form rate
+  limiting, a honeypot field and per-form origin allow-lists — not by a challenge.
+- **No duplicate-submission guard.** A resubmitted form creates a second submission; operators
+  deduplicate in the inbox.
+
+Two lower-severity findings are also open and tracked, not hidden: `PdoUserRepository` carries its
+tenant scope in the use cases rather than in SQL (#544, latent — no cross-tenant path exists
+today), and tag removal validates the submission's organization but not the tag's (#545,
+asymmetric — not exploitable).
+
 Details and sequencing: [`docs/roadmap.md`](./docs/roadmap.md) and the private
 `nene-origin/internal-docs/contact/todo/current.md` (operational logs moved there in P3).
 
