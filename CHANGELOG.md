@@ -5,6 +5,88 @@ there are no semver release tags yet, so entries are keyed by date (newest first
 deploys are the de-facto releases. June 2026 is backfilled at milestone granularity; July 2026
 at PR granularity. References are `(#issue → #PR)`.
 
+## 2026-07-31 — focus and brand-fill contrast, ingest by public key (deployed to production)
+
+Backend **and** console deploy to `contact.ayane.co.jp` from `main@37a01b6`. `phinx status`
+reported **no pending migrations**, and `composer.lock`, `database/` and `index.php` were
+unchanged, so the database and `vendor/` were untouched; the backend diff was **one file** under
+`src/`. Before the run, production `src/` was verified **byte-identical to the previously
+deployed commit** (`8548c9c`) — the same aggregate checksum over all 392 files — so the deploy
+started from the state the record claimed.
+
+The console bundle is where this wave differs from every previous one: **the built JS is
+byte-identical to the bundle already in production** (811,948 B, MD5 `7af44355…`, confirmed by
+fetching the live asset and comparing). Everything this wave changes lives in the stylesheet, and
+the JS chunk's content hash moved only because the CSS asset it is associated with changed. That
+turned into an unusually strong acceptance check — after the swap the deployed JS **must still**
+hash to `7af44355…`, and it does. Publishing order was again **new asset first → byte-compare →
+swap `index.html`**. Prod console went to **`index-DJN1LBOZ.js`** (811,948 B) /
+**`index-BSvX2lVA.css`** (240,248 B; the CSS hash moves for the first time since 07-24). Rollback
+backups: `~/contact-src-bak-20260731-150236.tgz` / `~/contact-console-bak-20260731-150236.tgz`,
+with the previous assets left in place on the server. References are `(#issue → #PR)`.
+
+### Added
+
+- **Ingest addresses a form by its public key.** The `/api` ingest body now takes **exactly one**
+  of `contact_form_id` or `public_form_key`; sending both is a 422 `ambiguous` rather than a
+  precedence rule. Callers that only ever hold the public handle — an embedding site, for
+  instance — no longer need an internal id published to them to submit a form (#563 → #564).
+
+### Fixed
+
+- **The focus indicator has a shape that survives.** The translucent ring measured **1.10–1.34:1**
+  against its own backdrop on the live login screen; it was replaced by a two-ring shape whose
+  inner ring is the surface colour, so a focused control keeps an indicator even when the accent
+  sits on an accent-filled button. `focus-contract.test.ts` pins the *shape*, including the
+  `outline-offset` the button's whole indicator depends on (#560, #312 → #561).
+- **White labels sit on a fill they are legible against.** Nine rules across the console filled
+  themselves with `--ex-brand` and wrote their label in white — **3.84:1**, short of the 4.5:1 a
+  label needs, in both themes. The fills moved to `--ex-brand-fill` (**4.91:1**); the AYANE brand
+  hue is unchanged and only the fill's lightness moved. `brand-fill-contract.test.ts` pins the
+  **pairing** rather than the values, because each value is legal on its own and it is the
+  combination that is unreachable (#562 → #566).
+
+### Verified on production
+
+`src/` re-verified **byte-identical to `main@37a01b6`** after the sync (aggregate checksum over
+392 files, and a repeat dry-run that came back empty); the uploaded console assets matched the
+local build by size and MD5 **before** `index.html` was swapped, and again when fetched over
+HTTPS. `/health`, `/console/` and `/embed/embed.js` all 200; `/admin/submissions`,
+`/admin/audit-events` and `/admin/audit-events/export` all **401** unauthenticated; served JS/CSS
+are the real bundle, not the 557-byte shell; `/embed/embed.js` unchanged at sha384
+`6pU29afi27YUkm5d4TYtbzxMSZ0XsedoZU0SxFGO0CZobK3/WBcCMMvYFYFiBP0Q`, compared in full against the
+repository build rather than by prefix.
+
+Because the point of this wave is that **numbers change**, the deployed bundle was measured rather
+than only diffed. The same probe was run against production **before and after** the swap: it
+loads the live console, resolves the theme tokens through the browser (they are `oklch`, so the
+browser has to do the conversion), focuses the field driver-side, waits out the 400 ms transition,
+and reads the composited pixels.
+
+| | before (live) | after (live) |
+| --- | --- | --- |
+| `--focus-ring` | not declared in the bundle | `0 0 0 2px <surface>, 0 0 0 4px <focus>` |
+| focus bands, light | **1.10:1 / 1.19:1** plus 3.84:1 | translucent bands **gone**, 3.84:1 only |
+| focus bands, dark | **1.11:1 / 1.34:1** plus 4.22:1 | translucent bands **gone**, 4.22:1 only |
+| submit fill vs white label | **3.84:1** | **4.91:1** (both themes) |
+
+A real browser loads the console and renders the login screen. The one console error and one
+non-2xx response are the **expected 401** from the unauthenticated bootstrap call that redirects
+to `/console/login` — the same single 401 the 07-29 and 07-30 entries recorded, counted here under
+a stricter definition (this probe also counts HTTP ≥ 400 as a failed request, which Playwright's
+own `requestfailed` event does not). It cannot be a regression of this wave in any case: the
+deployed JS is byte-identical to the bundle that was already serving.
+
+**Not verified here:** every authenticated path, as before — this deploy was checked from outside
+the session boundary. And the **`public_form_key` ingest was not exercised with a real POST**: the
+first such request is NeNe Records' to make, by the deploy-ordering constraint that put this
+deploy ahead of theirs.
+
+One drift surfaced while preparing this deploy and was deliberately **not** folded into it:
+production's `tools/check-usecases-audited.php` is still the 07-21 version. It is a `composer
+check` merge gate, never invoked at runtime, and the wave was kept to its declared scope instead
+of quietly widening (#567).
+
 ## 2026-07-30 — export honesty + audit labels + M7 close-out (deployed to production)
 
 Backend **and** console deploy to `contact.ayane.co.jp` from `main@8548c9c`. `phinx status`
