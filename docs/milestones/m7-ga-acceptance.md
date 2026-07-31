@@ -4,7 +4,8 @@
 professional (士業) would accept. ✅ **Closed 2026-07-29**: A1–A8 acceptance verified (#130),
 operator guide (#132), production `embed.js` build (#330/#334, stable alias #405), and the four
 release reviews re-run against the release — all **PASS** (#541→#542, #543→#546, #547→#549,
-#548→#550). Declaring GA is a separate maintainer decision and is not part of this milestone.
+#548→#550). Declaring GA was a separate maintainer decision and was **not** part of this
+milestone; it was taken on **2026-07-31** (see the status note at the end).
 
 ## Goal
 
@@ -65,4 +66,17 @@ produce a production `embed.js` build. After M7 the product meets its GOAL.
 > submission's organization but not the tag's (#545, asymmetric — not exploitable). None is a
 > charter deviation; all three are recorded, not hidden.
 
-Last updated: 2026-07-29
+> **GA declared 2026-07-31.** Closing this milestone was never the same thing as declaring GA,
+> and the two were kept apart on purpose. The maintainer's condition was that the accessibility
+> defect be **gone from the live bundle and measured there** — not merged, not deployed,
+> *measured*. That happened on 2026-07-31: the deployed console was probed before and after the
+> swap, and the focus indicator's 1.10–1.34:1 translucent bands were gone (the same probe read
+> the brand fill's white labels moving 3.84 → 4.91:1). Combined with production operation since
+> 2026-07-18, that was the whole basis for the call.
+>
+> **The four open items above did not close with it.** GA was declared *knowing* them, which is
+> the only honest way to declare it while reCAPTCHA and a duplicate-submission guard remain
+> unbuilt. If a future reader finds this milestone's ✅ next to a claim that those gaps are
+> handled, the claim is wrong and this note is right.
+
+Last updated: 2026-07-31
