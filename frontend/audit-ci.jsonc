@@ -43,23 +43,32 @@
   // --omit=dev` is empty, and the console bundle rebuilt after the bump is byte-identical
   // (md5 7af44355…), so no version of it has ever shipped to a browser.
   // ───────────────────────────────────────────────────────────────────────────────────────
-  "allowlist": [
-    // GHSA-qwww-vcr4-c8h2 — react-router "RSC Mode CSRF Bypass Allows Action Execution Before
-    // 400 Response" (high). Vulnerable range 7.12.0–8.2.0; there is NO fix in the 7.x line
-    // (react-router-dom stops at 7.18.1; the fix is react-router v8 >= 8.2.1, a different
-    // package and a breaking upgrade).
-    //
-    // Why it does not apply here (measured 2026-07-29): this admin console is a **static SPA
-    // built by Vite** and served from `public_html/console/`. It uses `createBrowserRouter`
-    // with element-only routes — no RSC mode, no server components, no route `action`/`loader`
-    // running on a server, and no `@react-router/dev` server runtime. The advisory's attack
-    // path (a server executing a route action before returning 400) has no counterpart in a
-    // client-only bundle. Verified by grepping the router for `action:` / `loader:` (none) and
-    // by the absence of any react-router server entry in the build.
-    //
-    // Expiry: 2026-08-31. Removed by the react-router v8 migration wave (bundled with the
-    // NENE2 RR8 re-evaluation). If that wave slips past the expiry, the entry must be
-    // re-argued in a PR — not silently extended.
-    "GHSA-qwww-vcr4-c8h2",
-  ],
+  // ── Removed 2026-08-08: GHSA-qwww-vcr4-c8h2 (react-router) ─────────────────────────────
+  // Same shape as the entry above, and the same lesson. This one read "vulnerable range
+  // 7.12.0–8.2.0; there is NO fix in the 7.x line — the fix lands in react-router v8, a
+  // different package and a breaking upgrade", and planned a whole migration wave around it.
+  // The advisory was re-scoped upstream; its data now says:
+  //
+  //   react-router >= 7.12.0, < 7.18.2 → 7.18.2   |   >= 8.0.0, < 8.3.0 → 8.3.0
+  //
+  // The fix was backported into 7.x. `react-router-dom: ^7.9.6` already admits 7.18.2, so a
+  // lockfile update closed it — no package.json edit, and no v8 migration. The exception was
+  // three weeks from an expiry that would have been met by a breaking upgrade nobody needed.
+  //
+  // 🔴 This is the second entry in a row removed because its stated reason had gone stale, not
+  // because the situation changed in our favour by accident. Upstream backports; a reason
+  // written once decays. Re-check by re-running the `gh api` line, never by re-reading prose.
+  //
+  // Worth keeping from the removed entry (the claim is unchanged and still measured): the admin
+  // console is a static SPA built by Vite and served from `public_html/console/`, using
+  // `createBrowserRouter` with element-only routes — no RSC mode, no server components, no
+  // server-side route `action`/`loader`, no `@react-router/dev` runtime. So the advisory never
+  // had a live path here. That is why it was allowlistable at all; it is not why it is gone.
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  //
+  // The allowlist is EMPTY, and that is the target state. `npm audit` reports 0 vulnerabilities.
+  // Every high/critical advisory now fails the build on the day it lands, with no exceptions to
+  // reason about. Keep it that way: reach for the fix first (rule 4), and only allowlist when
+  // the advisory's own data — not a note about it — says no adoptable fix exists.
+  "allowlist": [],
 }

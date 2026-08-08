@@ -51,37 +51,46 @@ Rules:
 
 ## Current exceptions
 
-| Advisory                                                                 | Package                       | Why it does not apply here                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Expires        |
-| ------------------------------------------------------------------------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| [GHSA-qwww-vcr4-c8h2](https://github.com/advisories/GHSA-qwww-vcr4-c8h2) | `react-router` (7.12.0–8.2.0) | The admin console is a **static SPA built by Vite** and served from `public_html/console/`. It uses `createBrowserRouter` with element-only routes — **no RSC mode, no server components, no server-side route `action`/`loader`, no `@react-router/dev` runtime**. The advisory's attack path (a server executing a route action before returning 400) has no counterpart in a client-only bundle. Measured 2026-07-29: `src/app/router.tsx` contains no `action:` / `loader:` keys, and the tree contains no RSC / static-handler / `@react-router/dev` import. | **2026-08-31** |
+**None.** The allowlist is empty and `npm audit` reports 0 vulnerabilities, so every
+high/critical advisory fails the build on the day it lands, with nothing to reason around.
 
-There is **no fix available in the 7.x line**: `react-router-dom` ends at 7.18.1, and the fix
-lands in `react-router` v8 (≥ 8.2.1) — a different package and a breaking upgrade. The exception
-is removed by the **react-router v8 migration wave** (bundled with the NENE2 RR8 re-evaluation).
+That is the target state, not a lucky moment. Getting back to it after an advisory lands means
+rule 4 first — **take the fix** — and an entry here only when the advisory's own data says no
+adoptable fix exists.
 
 ## Removed exceptions
 
 An exception that is removed leaves a record, because the _reason it was wrong_ is the part
 worth keeping.
 
-| Advisory                                                                 | Removed           | Why it went away                                                                                                                                                                                                                                                                                                                                                                  |
-| ------------------------------------------------------------------------ | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [GHSA-mh99-v99m-4gvg](https://github.com/advisories/GHSA-mh99-v99m-4gvg) | 2026-08-08 (#573) | **The premise was false.** The entry said the v1/v2 lines had no fixed release. The advisory's own data says `<1.1.17 → 1.1.17` and `>=2.0.0 <2.1.3 → 2.1.3` — every line had a patch, and the `2.1.3` this repo had pinned _was_ the fixed one. Taking the fix (`@1: ^1.1.18` / `@2: ^2.1.4` / `@5: ^5.0.9`) removed the advisory and the follow-up GHSA-rgw5-rvv9-x895 with it. |
+| Advisory                                                                 | Removed           | Why it went away                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------------------------------ | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| [GHSA-mh99-v99m-4gvg](https://github.com/advisories/GHSA-mh99-v99m-4gvg) | 2026-08-08 (#573) | **The premise was false.** The entry said the v1/v2 lines had no fixed release. The advisory's own data says `<1.1.17 → 1.1.17` and `>=2.0.0 <2.1.3 → 2.1.3` — every line had a patch, and the `2.1.3` this repo had pinned _was_ the fixed one. Taking the fix (`@1: ^1.1.18` / `@2: ^2.1.4` / `@5: ^5.0.9`) removed the advisory and the follow-up GHSA-rgw5-rvv9-x895 with it.                                                                                              |
+| [GHSA-qwww-vcr4-c8h2](https://github.com/advisories/GHSA-qwww-vcr4-c8h2) | 2026-08-08 (#554) | **The premise went stale.** The entry said there was no fix in the 7.x line and that only a breaking v8 migration would close it. The advisory was re-scoped upstream to `>=7.12.0 <7.18.2 → 7.18.2` — the fix was backported. `react-router-dom: ^7.9.6` already admitted it, so a lockfile update closed the entry with no `package.json` edit and no migration. The RSC-unused reasoning was correct throughout; it is why the entry was allowlistable, not why it is gone. |
 
-The lesson generalises: **a written reason is a snapshot, and upstream backports patches into old
-lines afterwards.** Re-check an entry by re-reading the advisory, not the note about it:
+Both entries were removed on the same day, and neither because the situation changed in our
+favour by accident. The lesson generalises: **a written reason is a snapshot, and upstream
+backports patches into old lines afterwards.** The react-router entry had a whole v8 migration
+wave planned around it; the wave was never needed.
+
+So re-check an entry by re-reading the **advisory**, not the note about it:
 
 ```sh
 gh api /advisories/GHSA-xxxx-xxxx-xxxx \
   --jq '.vulnerabilities[]|"\(.package.name) \(.vulnerable_version_range) → \(.first_patched_version)"'
 ```
 
+Run that at expiry — and run it again before writing a _new_ entry, because "no fix exists" is
+the claim most likely to have quietly stopped being true.
+
 ## Fleet note
 
 This setup is the **fleet reference implementation** (contact #524, 施主 GO 2026-07-29). Sibling
-products may copy it — but each must **verify the RSC-unused claim in its own tree before
-copying the allowlist entry**. Copying the exception without re-measuring is exactly the failure
-mode the rules above exist to prevent.
+products may copy the gate and the rules. What they must **not** copy is an allowlist entry:
+every exception has to be measured in its own tree, and — since 2026-08-08 — checked against the
+advisory's live data first. Copying an exception without re-measuring is exactly the failure mode
+the rules above exist to prevent, and it is how a false "no fix exists" would spread across the
+fleet in a single afternoon.
 
 ## Related
 
