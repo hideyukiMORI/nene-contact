@@ -12,45 +12,63 @@
   "moderate": false,
   "high": true,
   "critical": true,
-  "allowlist": [
-    // GHSA-mh99-v99m-4gvg — brace-expansion "DoS via unbounded expansion length" (high).
-    // Vulnerable range <=5.0.7, i.e. it covers the whole v1 and v2 lines, which have NO fixed
-    // release (v1 stops at 1.1.16, v2 at 2.1.3). Only the v5 line has a fix, and we take it:
-    // the override is `brace-expansion@5: ^5.0.8`, scoped per major.
-    //
-    // 🔴 Do NOT "fix" this by collapsing the override to a flat `brace-expansion: ^5.0.8`.
-    // That forces v5 onto `minimatch@3`, which expects the v1 CJS export and dies with
-    // `TypeError: expand is not a function`. It happened here (#530 → #538) and lint stayed
-    // green, because minimatch@3 only reaches brace-expansion for patterns containing `{...}`.
-    // `npm run check:overrides` now probes exactly that.
-    //
-    // Why the residue does not apply here (measured 2026-07-29): brace-expansion v1/v2 reach
-    // us only through **dev tooling** — eslint-plugin-import / eslint-plugin-jsx-a11y
-    // (minimatch@3) and @redocly/openapi-core (minimatch@5). `npm ls brace-expansion
-    // --omit=dev` is empty and the built console bundle contains zero occurrences, so no
-    // version of it is shipped to a browser. The DoS needs attacker-controlled glob patterns;
-    // ours are static config in the repo, expanded on our own CI machines.
-    //
-    // Expiry: 2026-08-31. Removed when the eslint plugins move off minimatch@3 (or publish a
-    // patched v1/v2 line). Re-check at expiry — do not extend by reflex.
-    "GHSA-mh99-v99m-4gvg",
-
-    // GHSA-qwww-vcr4-c8h2 — react-router "RSC Mode CSRF Bypass Allows Action Execution Before
-    // 400 Response" (high). Vulnerable range 7.12.0–8.2.0; there is NO fix in the 7.x line
-    // (react-router-dom stops at 7.18.1; the fix is react-router v8 >= 8.2.1, a different
-    // package and a breaking upgrade).
-    //
-    // Why it does not apply here (measured 2026-07-29): this admin console is a **static SPA
-    // built by Vite** and served from `public_html/console/`. It uses `createBrowserRouter`
-    // with element-only routes — no RSC mode, no server components, no route `action`/`loader`
-    // running on a server, and no `@react-router/dev` server runtime. The advisory's attack
-    // path (a server executing a route action before returning 400) has no counterpart in a
-    // client-only bundle. Verified by grepping the router for `action:` / `loader:` (none) and
-    // by the absence of any react-router server entry in the build.
-    //
-    // Expiry: 2026-08-31. Removed by the react-router v8 migration wave (bundled with the
-    // NENE2 RR8 re-evaluation). If that wave slips past the expiry, the entry must be
-    // re-argued in a PR — not silently extended.
-    "GHSA-qwww-vcr4-c8h2",
-  ],
+  // ── Removed 2026-08-08: GHSA-mh99-v99m-4gvg (brace-expansion) ──────────────────────────
+  // The entry was granted on a premise that was **false**. It read "v1 stops at 1.1.16 and v2
+  // at 2.1.3, so those lines have no fixed release". The advisory's own data says otherwise:
+  //
+  //   gh api /advisories/GHSA-mh99-v99m-4gvg --jq '.vulnerabilities[]|"\(.package.name) \(.vulnerable_version_range) → \(.first_patched_version)"'
+  //   brace-expansion <1.1.17 → 1.1.17 | >=2.0.0 <2.1.3 → 2.1.3 | >=4.0.0 <5.0.8 → 5.0.8
+  //
+  // Every line had a patch. `2.1.3` — the version this repo had pinned — was already the fixed
+  // one; the allowlist had been excusing an advisory the tree no longer had. Rule 4 of
+  // `docs/development/dependency-audit.md` ("prefer the fix") applied all along, and #573 took
+  // it: `brace-expansion@1: ^1.1.18` / `@2: ^2.1.4` / `@5: ^5.0.9`, which also closes the
+  // follow-up GHSA-rgw5-rvv9-x895. audit-ci itself printed "Consider not allowlisting advisory:
+  // GHSA-mh99-v99m-4gvg" once the versions moved.
+  //
+  // 🔴 The lesson that outlives the entry — **read the advisory, not the note about it.** A
+  // reason written once is a snapshot; upstream backports patches into old lines afterwards.
+  // Re-run the `gh api` line above at expiry instead of re-reading the prose.
+  //
+  // 🔴 The override shape survives the removal. Do NOT collapse `brace-expansion@1/@2/@5` into
+  // a flat `brace-expansion: ^5.x`. That forces v5 onto `minimatch@3`, which expects the v1 CJS
+  // export and dies with `TypeError: expand is not a function`. It happened here (#530 → #538)
+  // and **lint stayed green**, because minimatch@3 only reaches brace-expansion for patterns
+  // containing `{...}` — a path our config never hits. `npm run check:overrides` probes exactly
+  // that, on every copy on disk.
+  //
+  // Still true and still worth knowing (re-measured 2026-08-08): brace-expansion reaches us
+  // **only through dev tooling** — eslint / @typescript-eslint / glob (minimatch@10),
+  // @redocly/openapi-core (minimatch@5), and the hoisted minimatch@3. `npm ls brace-expansion
+  // --omit=dev` is empty, and the console bundle rebuilt after the bump is byte-identical
+  // (md5 7af44355…), so no version of it has ever shipped to a browser.
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  // ── Removed 2026-08-08: GHSA-qwww-vcr4-c8h2 (react-router) ─────────────────────────────
+  // Same shape as the entry above, and the same lesson. This one read "vulnerable range
+  // 7.12.0–8.2.0; there is NO fix in the 7.x line — the fix lands in react-router v8, a
+  // different package and a breaking upgrade", and planned a whole migration wave around it.
+  // The advisory was re-scoped upstream; its data now says:
+  //
+  //   react-router >= 7.12.0, < 7.18.2 → 7.18.2   |   >= 8.0.0, < 8.3.0 → 8.3.0
+  //
+  // The fix was backported into 7.x. `react-router-dom: ^7.9.6` already admits 7.18.2, so a
+  // lockfile update closed it — no package.json edit, and no v8 migration. The exception was
+  // three weeks from an expiry that would have been met by a breaking upgrade nobody needed.
+  //
+  // 🔴 This is the second entry in a row removed because its stated reason had gone stale, not
+  // because the situation changed in our favour by accident. Upstream backports; a reason
+  // written once decays. Re-check by re-running the `gh api` line, never by re-reading prose.
+  //
+  // Worth keeping from the removed entry (the claim is unchanged and still measured): the admin
+  // console is a static SPA built by Vite and served from `public_html/console/`, using
+  // `createBrowserRouter` with element-only routes — no RSC mode, no server components, no
+  // server-side route `action`/`loader`, no `@react-router/dev` runtime. So the advisory never
+  // had a live path here. That is why it was allowlistable at all; it is not why it is gone.
+  // ───────────────────────────────────────────────────────────────────────────────────────
+  //
+  // The allowlist is EMPTY, and that is the target state. `npm audit` reports 0 vulnerabilities.
+  // Every high/critical advisory now fails the build on the day it lands, with no exceptions to
+  // reason about. Keep it that way: reach for the fix first (rule 4), and only allowlist when
+  // the advisory's own data — not a note about it — says no adoptable fix exists.
+  "allowlist": [],
 }
