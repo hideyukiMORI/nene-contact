@@ -45,6 +45,12 @@ jobs:
       - name: Install dependencies
         run: composer install --no-interaction --prefer-dist --optimize-autoloader
 
+      # Independent of `composer check` on purpose: a dependency advisory is a
+      # different failure mode (upstream, not this repo's code) from lint/test/
+      # analyse, so it gets its own step and its own signal in the log.
+      - name: composer audit
+        run: composer audit --no-interaction
+
       # HealthCheckTest boots the real DI container; NotificationChannelServiceProvider
       # requires NENE_CONTACT_ENCRYPTION_KEY (charter §6), which .env.example leaves
       # empty on purpose — generate a throwaway key for the test run.
