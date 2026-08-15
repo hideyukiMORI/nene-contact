@@ -5,6 +5,77 @@ there are no semver release tags yet, so entries are keyed by date (newest first
 deploys are the de-facto releases. June 2026 is backfilled at milestone granularity; July 2026
 at PR granularity. References are `(#issue → #PR)`.
 
+## 2026-08-15 — the embed distribution becomes reachable under SRI (deployed to production)
+
+Deploy to `contact.ayane.co.jp` from `main@aa37c27`. **Two files were sent** — `public_html/.htaccess`
+and `public_html/embed/manifest.json` — and nothing else. The widget itself was **not** touched: the
+local build of `public_html/embed.js` came out **byte-identical to what production was already
+serving** (32,644 B, same content hash, so the artifact is still `embed.62b28219870c.js`), which was
+confirmed with `cmp` against the fetched live file before the deploy. Sending a byte-identical JS
+file would have been risk without change, so the runbook's copy step was dropped for this wave and
+kept for the next one where the bytes actually move. Rollback copies on the server:
+`public_html/.htaccess.bak-20260815` (2,591 B) and `public_html/embed.bak-20260815`.
+References are `(#issue → #PR)`.
+
+### Fixed
+
+- **The embed distribution answers with `Access-Control-Allow-Origin`.** A `<script>` carrying
+  `integrity` is fetched by the browser in **CORS mode**, so a widget served without the header
+  cannot execute on *any* origin. Production answered 200 with **no ACAO** on `/embed/embed.js`,
+  `/embed/embed.<hash>.js` and `/embed/manifest.json`, even for `Origin: https://ayane.co.jp`. The
+  external symptom was a sibling product's SRI-pinned embed being impossible; the internal one is
+  larger — **the install snippet this product's own console hands operators pins SRI**, so the
+  recommended way to embed the widget did not run in a browser. The AYANE embed kept working only
+  because its tag is a hand-written one carrying neither `integrity` nor `crossorigin`. Set to `*`
+  (public JS, no credentials, already fetchable no-CORS), deliberately **without**
+  `Access-Control-Allow-Credentials` (which would forbid `*`) and **without** `Vary: Origin` (the
+  value is constant; varying a constant only fragments caches). Reading the script is still separate
+  from submitting: submission remains gated by the form's `allowed_origins` (#584 → #586).
+- **The pinnable URL is now the stable one.** The build deleted *every* previous hashed artifact on
+  each run, so a caller who pinned `/embed/embed.<hash>.js` was 404'd the moment the widget was
+  rebuilt — while `manifest.json` published the surviving URL, the stable alias, as the *un*-pinnable
+  option (its snippet carried neither attribute). The two are the same bytes, so this was a
+  publication problem: `manifest.json` now names both URLs the single `integrity` value covers
+  (`integrityAppliesTo`, stated once rather than copied), `stableSnippet` carries `integrity` +
+  `crossorigin="anonymous"`, and **one** previous hashed generation is retained as a transition
+  window — chosen from the previous manifest rather than from mtimes, so an unchanged rebuild cannot
+  shift it and the output stays reproducible. Still no timestamp anywhere in the manifest. The
+  contract, including what "one generation" does **not** promise, is in
+  [`embed-widget-spec.md`](./docs/explanation/embed-widget-spec.md) §Distribution & SRI (#585 → #587).
+
+### Verified on production
+
+Measured after the deploy, independently of the operator who ran it:
+
+| Check | Result |
+| --- | --- |
+| ACAO on `/embed/embed.js`, `/embed/embed.62b28219870c.js`, `/embed/manifest.json`, `/embed.js` | `access-control-allow-origin: *` on all four |
+| `Access-Control-Allow-Credentials` | **absent** (0 occurrences) |
+| Published `integrity` vs the bytes actually served | sha384 recomputed from the fetched files — **matches** for both the stable alias and the hashed artifact |
+| Stable alias vs hashed artifact, on production | **byte-identical** |
+| `manifest.json` on production vs the file that was sent | sha256 **identical** (`1531aa1e…`) |
+| The JS was not touched | `content-length: 32644` and `last-modified: Tue, 21 Jul 2026 15:43:02 GMT` **unchanged** on both JS URLs |
+| `.htaccess` collateral | `/console/` 200 (557 B), `/health` 200 (46 B), `/public/forms/ayane-contact/schema` 200 (4,387 B) — all identical to the pre-deploy baseline |
+
+The JS check is the deliberate part: because this wave *sent* no JavaScript, "the bytes did not
+move" is a testable claim, and had it failed it would have meant something unintended was uploaded.
+The same shape as the 2026-07-31 wave, where the console JS was byte-identical and that became the
+acceptance condition.
+
+⚠️ **`previous` is `null`, and that is correct here.** Production holds exactly one hashed artifact
+(the generation recorded in a sibling's earlier notes is long gone), so there is nothing to retain
+yet. **The retention rule is therefore not yet demonstrated on production** — it becomes observable
+on the next deploy in which `embed.js` actually changes bytes.
+
+### Still open
+
+**The console still hands operators the hashed URL with SRI**, which contradicts the contract this
+wave established (stable URL is the main path, hashed generations expire). Nothing above fixes that,
+and it should not be read as fixed: what changed is that such a snippet now *loads* instead of being
+blocked outright. The ruling — split the snippet into a default without SRI for ordinary operators,
+and an SRI-pinned one for embedders that refuse arbitrary script execution — is recorded in #588,
+which is open.
+
 ## 2026-07-31 — focus and brand-fill contrast, ingest by public key (deployed to production)
 
 Backend **and** console deploy to `contact.ayane.co.jp` from `main@37a01b6`. `phinx status`
