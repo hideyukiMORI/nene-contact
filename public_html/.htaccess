@@ -48,4 +48,30 @@ RewriteRule ^ index.php [QSA,L]
     <FilesMatch "^embed\.js$">
         Header set Cache-Control "public, max-age=300"
     </FilesMatch>
+
+    # --- CORS on the embed distribution (#584) ------------------------------------------------
+    # A <script> carrying `integrity` is fetched by the browser in CORS mode, so a widget served
+    # without Access-Control-Allow-Origin cannot be executed by *any* origin — including the
+    # install snippet the console hands operators, which pins SRI + crossorigin="anonymous"
+    # (frontend/src/features/build-contact-form/lib/embed-snippet.ts). Without this header the
+    # recommended way to embed the widget does not run at all.
+    #
+    # `*` is the honest value here: the payload is public JavaScript carrying no credentials, and
+    # it is already fetchable by anyone in no-CORS mode. Per-origin output would cost more (and
+    # misconfigure more) than it defends.
+    #   - No Access-Control-Allow-Credentials: it would forbid `*` and change the trust model.
+    #   - No Vary: Origin: the value is constant, so Vary would only fragment caches (a per-origin
+    #     value would need it — that is the case this deliberately avoids).
+    <FilesMatch "^embed\.([0-9a-f]{8,}\.)?js$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
+
+    # The embed build manifest (public_html/embed/manifest.json) publishes the current SRI value,
+    # so an embedding site must be able to read it cross-origin too. FilesMatch keys on the
+    # filename: `manifest.json` is currently unique under public_html, and if a future build ever
+    # emits another one, the effect is the same public build metadata becoming readable by script
+    # instead of only by fetch-and-eyeball — no credentials are involved either way.
+    <FilesMatch "^manifest\.json$">
+        Header set Access-Control-Allow-Origin "*"
+    </FilesMatch>
 </IfModule>

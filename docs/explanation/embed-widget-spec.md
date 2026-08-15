@@ -34,6 +34,13 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 5. Include **honeypot** field name in schema; reject non-empty honeypot silently with `204` or generic success (anti-enumeration — ADR 0010).
 6. Cap body size (e.g. 64 KiB JSON; attachment separate multipart endpoint).
 7. Resolve locale to `ja` or `en` only: use `data-lang` when it is one of the form's `locales`, otherwise fall back to the form's `default_locale` (ADR 0011).
+8. Serve the whole embed distribution — `/embed.js`, `/embed/embed.js`, `/embed/embed.<hash>.js`
+   and `/embed/manifest.json` — with **`Access-Control-Allow-Origin: *`**. A `<script>` carrying
+   `integrity` is fetched in CORS mode, so **without this header an SRI-pinned snippet does not
+   execute on any origin** — including the snippet the console hands operators, which pins SRI.
+   The header is set in `public_html/.htaccess`; it is **not** accompanied by
+   `Access-Control-Allow-Credentials` (which would forbid `*`) or by `Vary: Origin` (the value is
+   constant, so varying would only fragment caches) (#584).
 
 ---
 
@@ -90,6 +97,9 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 
 - CSP-friendly: no `eval`, no inline script from API responses.
 - iframe mode is **out of scope** for MVP (same-origin modal only).
+- The `*` in the CORS obligation above is about **reading a public script file**, not about who may
+  submit: submission is still gated by the form's **`allowed_origins`** (obligation 4). Widening
+  one does not widen the other.
 
 ---
 
