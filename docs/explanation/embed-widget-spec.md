@@ -37,6 +37,36 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 
 ---
 
+## Distribution & SRI (binding — #585)
+
+`npm run build:embed` (`frontend/scripts/build-embed.mjs`) produces the production distribution.
+
+| URL | Role | Cache | SRI |
+| --- | --- | --- | --- |
+| `/embed/embed.js` | **Main install path.** Always the latest bytes | short (`max-age=300`) | **Pinnable** — value published in `manifest.json` |
+| `/embed/embed.<hash>.js` | Same bytes under an immutable name | `max-age=31536000, immutable` | Pinnable, but the URL 404s once it falls out of the retention window |
+| `/embed/manifest.json` | Machine-readable contract: `file`, `stable`, `integrity`, `integrityAppliesTo`, both snippets, `previous` | — | — |
+
+1. **The stable URL is the main path**, not a fallback. The hashed name exists for immutable
+   caching; it is not a second distribution channel.
+2. **One integrity value covers both URLs** — the stable alias and the hashed artifact are the same
+   bytes. The manifest states this in `integrityAppliesTo` rather than repeating the value, because
+   a second copy is a second thing to keep in step.
+3. **Exactly one previous hashed generation is retained**, so a caller who pinned the last hashed
+   URL is not 404'd the moment a new build lands. ⚠️ **"One generation" governs the build output
+   directory only.** Two things outlive it: the hashed URLs carry `immutable` caching, so browsers
+   and any intermediary keep serving what they already hold; and whether the *server* still holds an
+   older file depends on the deploy procedure, not on this build. Do not read the retention rule as
+   a promise that old bytes have stopped being served.
+4. **No timestamps anywhere in the output.** Unchanged source must produce a byte-identical manifest,
+   so a build that reports itself as changed always means something changed.
+5. **Pinning is fail-closed, and the failure is silent to the operator.** A stale `integrity` blocks
+   the script, so the form simply is not there — no error, no submission, and the visitor leaves.
+   A widget deploy and the embedding site's `integrity` update therefore belong to **the same wave**,
+   and the wave is not done until one real submission has been sent and confirmed to arrive.
+
+---
+
 ## Trigger modes
 
 | Mode | Behavior |
@@ -69,4 +99,4 @@ Contract between NeNe Contact server and the **embed.js** snippet operators past
 - ADR 0011 (bilingual ja/en scope)
 - [`scope-contract.md`](./scope-contract.md)
 
-Last updated: 2026-06-04
+Last updated: 2026-08-15

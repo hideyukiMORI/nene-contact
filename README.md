@@ -88,6 +88,16 @@ widget is embedded on the `ayane.co.jp` apex (`/contact/`, `/inquiry/`). The pro
 `embed.js` build (minified, content-hashed, SRI, stable `/embed/embed.js` alias) shipped with
 it. Deploy history: [`CHANGELOG.md`](./CHANGELOG.md).
 
+**How the widget is distributed** (binding detail in
+[`embed-widget-spec.md`](./docs/explanation/embed-widget-spec.md#distribution--sri-binding--585)):
+`/embed/embed.js` is the **main install path** and is SRI-pinnable — the same integrity value covers
+it and the content-hashed twin, because they are the same bytes, and the current value is published
+in `/embed/manifest.json`. **One** previous hashed generation is kept, as a transition window for a
+caller that pinned the old URL — and "one generation" governs the **build output only**: `immutable`
+caching and the deploy procedure both outlive it. Because a pinned `integrity` fails **closed and
+silently** (no form, no error, no submission), a widget deploy and the embedding site's update are
+one wave, closed by sending a real submission and confirming it arrived (#585).
+
 **M7 closed 2026-07-29** — the four release reviews
 ([compliance](./docs/review/compliance.md), [governance](./docs/review/governance.md),
 [backend-api](./docs/review/backend-api.md), [frontend](./docs/review/frontend.md)) were re-run
