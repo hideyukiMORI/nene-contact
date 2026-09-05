@@ -47,11 +47,29 @@ Because the JWT is a bearer credential, Records MUST store it encrypted at rest,
 
 Reuses the existing service ingest endpoint (also used by Concierge via the machine key). Request/response/errors are in `docs/openapi/openapi.yaml` (`agentIngestSubmission`).
 
-- **Request**: `{ source: "first_party", public_form_key, consent?, field_values{...} }`. `field_values` are validated against the form (required, email format, consent when the form requires it) exactly like the public submit. Only schema-declared fields are stored (purpose limitation); no honeypot field is expected (see Records obligations).
+- **Request**: `{ source: "first_party", public_form_key, consent?, field_values{...} }`. `field_values` are validated against the form (required, email format, consent when the form requires it) exactly like the public submit. Only schema-declared fields are stored (purpose limitation). A `honeypot` field is **not** expected and is **silently discarded** if sent — the ingest path skips it by field type, without an error, because a trusted service is not a browser (see *`honeypot` fields are published, and MUST NOT be rendered* below).
 - **Addressing the form** (#563): the body carries **exactly one** of `public_form_key` or `contact_form_id`. Records holds only the public key — the declarative block and the schema fetch are both keyed by it — so it sends `public_form_key` and never needs an internal id. Sending both is a `422` rather than a precedence rule: a mismatched pair is a bug, and letting one silently win would file the submission under whichever identifier Contact happened to prefer. The alternative (exposing `contact_form_id` in the schema response) was rejected because that response is unauthenticated and deliberately carries no internal ids.
 - **Success**: `201 { id, status, source }`.
 - **Errors** (RFC 9457, invoice-aligned): `401 unauthorized` (bad/expired/missing token or missing `jti`), `401 service-token-revoked`, `403 insufficient-scope` (not a service principal, or lacks `ingest:submissions`), `422 validation-failed`, `429 rate-limited`.
 - **Reading the form to render**: Records fetches the form schema server-side via the existing public `GET /public/forms/{public_form_key}/schema` (no PII, no auth needed). No new read endpoint is required.
+
+### `honeypot` fields are published, and MUST NOT be rendered
+
+The schema response lists **every** declared field, `field_type: honeypot` included — it is
+published so a consumer can *recognise* the field, not so it can draw it. A first-party consumer
+**MUST NOT render a `honeypot` field, and MUST NOT include it in `field_values`.**
+
+This is the one field type where the safe default for an unknown type — draw it as a plain text
+input, so an author's field is never silently dropped — produces the wrong result in four ways at
+once: the visitor sees an unlabelled input (a honeypot carries a deliberately empty label, ADR
+0010), an empty-labelled input is an accessibility failure, anything typed into it is **discarded
+by the ingest endpoint without an error** (see the Request bullet above), and a honeypot that is
+visible is not a honeypot. Skip the field by `field_type`; do not key the rule off the field's
+name, which is operator-chosen (`website` on the AYANE form) and carries no meaning.
+
+Contact's own embed widget owns the honeypot on the *public* submit path. A first-party site is a
+separate front door, so it supplies its own first-line defence (see Records obligations below) —
+the schema's honeypot is not the one protecting it.
 
 ### Auth carve-out semantics (hub review, point 2)
 
@@ -65,7 +83,7 @@ Spam/abuse content filtering and per-visitor throttling are Records' responsibil
 
 ## Records obligations
 
-- Render the first-party form and run the **first-line defence** (honeypot, per-visitor rate limit, bot mitigation) on the Records side — this MUST ship in the same wave as, or before, the token relay, because Contact's ingest deliberately skips the honeypot for trusted service input.
+- Render the first-party form — **skipping `field_type: honeypot`** (above) — and run the **first-line defence** (its *own* honeypot, per-visitor rate limit, bot mitigation) on the Records side — this MUST ship in the same wave as, or before, the token relay, because Contact's ingest deliberately skips the honeypot for trusted service input.
 - Hold the service token server-side only (never emit to the browser); store encrypted, mask in UI, keep out of logs.
 - Map block/field names to Contact form field names; send `consent: true` when the form requires consent.
 - Treat `public_form_key` as the binding identifier (from the declarative block). No internal id is needed anywhere in the Records path (#563).
@@ -126,4 +144,4 @@ curl -i -X POST localhost:8900/api/submissions \
 - `docs/explanation/terminology.md` §Service tokens, §10 (Embed / public API)
 - OpenAPI: `docs/openapi/openapi.yaml` (`issueServiceToken`, `revokeServiceToken`, `listServiceTokens`, `agentIngestSubmission`)
 
-Last updated: 2026-07-18
+Last updated: 2026-09-05

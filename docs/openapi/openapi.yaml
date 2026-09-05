@@ -1562,6 +1562,12 @@ components:
             Closed allowlist (single source of truth: NeneContact\ContactForm\FieldType).
             My Number and raw payment card numbers are prohibited as any field type and
             要配慮個人情報 is never a default (APPI charter §8, Definition of Done A4).
+            `honeypot` is published so that a consumer can recognise it, NOT so that it can be
+            drawn: a first-party renderer MUST NOT render it and MUST NOT put it in
+            `field_values` (it is a bot trap with a deliberately empty label, and the ingest
+            endpoint discards it, so a rendered one shows visitors an unlabelled input whose
+            content is silently dropped). Contact's own widget owns the honeypot on the public
+            submit path; a first-party site supplies its own.
         name: { type: string }
         label: { $ref: '#/components/schemas/LocaleMap' }
         placeholder: { type: [string, 'null'], description: 'Optional input hint text shown in the embed.' }
