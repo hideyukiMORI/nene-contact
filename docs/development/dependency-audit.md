@@ -51,10 +51,15 @@ Rules:
 
 ## Current exceptions
 
-**None.** The allowlist is empty and `npm audit` reports 0 vulnerabilities, so every
-high/critical advisory fails the build on the day it lands, with nothing to reason around.
+| Advisory                                                                 | Package            | Why it does not apply here                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Expires        |
+| ------------------------------------------------------------------------ | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------- |
+| [GHSA-vfj7-8cjw-p6xm](https://github.com/advisories/GHSA-vfj7-8cjw-p6xm) | `braces` (≤ 3.0.3) | **No patched version exists** (advisory `first_patched_version: none`; 3.0.3 is the latest on npm, read 2026-10-03), so neither an update nor an override can take a fix. Reached only through dev tooling (`knip>fast-glob>micromatch>braces`); `npm ls braces --omit=dev --all` is empty, so it ships in nothing and is on no request path. The only patterns it expands are globs committed in this repo; no user- or network-supplied string reaches it. Removed by a patched braces release or by micromatch dropping it. Measured 2026-10-03 (#598). | **2026-11-03** |
 
-That is the target state, not a lucky moment. Getting back to it after an advisory lands means
+One entry, added 2026-10-03. Before it the allowlist was empty and `npm audit` reported 0
+vulnerabilities, so every high/critical advisory failed the build on the day it landed, with
+nothing to reason around.
+
+An empty allowlist is the target state, not a lucky moment. Getting back to it after an advisory lands means
 rule 4 first — **take the fix** — and an entry here only when the advisory's own data says no
 adoptable fix exists.
 
